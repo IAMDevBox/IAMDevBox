@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Deep Dive into SAML, OIDC, and OAuth 2.0 Protocols | IAMDevBox</title>
+<meta name="keywords" content="SAML, OIDC, OAuth 2.0, Authentication, Authorization, Identity Management">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/deep-dive-into-saml-oidc-and-oauth-20-protocols/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css" integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF&#43;13Dyqob6ASlTrTye8=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/deep-dive-into-saml-oidc-and-oauth-20-protocols/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+  <link rel="stylesheet" href="/css/custom.css">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/deep-dive-into-saml-oidc-and-oauth-20-protocols/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Deep Dive into SAML, OIDC, and OAuth 2.0 Protocols">
+  <meta property="og:description" content="In the modern digital landscape, secure authentication and authorization are critical for protecting user data and enabling seamless access to applications. Three key protocols—SAML, OpenID Connect (OIDC), and OAuth 2.0—play pivotal roles in identity and access management. While they share some similarities, each serves distinct purposes and operates differently. This post explores these protocols in depth, highlighting their use cases, workflows, and differences.
+What is SAML? Security Assertion Markup Language (SAML) is an XML-based standard for exchanging authentication and authorization data between parties, particularly between an Identity Provider (IdP) and a Service Provider (SP). SAML is widely used in enterprise Single Sign-On (SSO) solutions, allowing users to log in once and access multiple services without re-entering credentials.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-05-14T10:11:58+00:00">
+    <meta property="article:modified_time" content="2025-05-14T10:11:59-04:00">
+    <meta property="article:tag" content="SAML">
+    <meta property="article:tag" content="OIDC">
+    <meta property="article:tag" content="OAuth 2.0">
+    <meta property="article:tag" content="Authentication">
+    <meta property="article:tag" content="Authorization">
+    <meta property="article:tag" content="Identity Management">
+      <meta property="og:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:title" content="Deep Dive into SAML, OIDC, and OAuth 2.0 Protocols">
+<meta name="twitter:description" content="In the modern digital landscape, secure authentication and authorization are critical for protecting user data and enabling seamless access to applications. Three key protocols—SAML, OpenID Connect (OIDC), and OAuth 2.0—play pivotal roles in identity and access management. While they share some similarities, each serves distinct purposes and operates differently. This post explores these protocols in depth, highlighting their use cases, workflows, and differences.
+
+What is SAML?
+Security Assertion Markup Language (SAML) is an XML-based standard for exchanging authentication and authorization data between parties, particularly between an Identity Provider (IdP) and a Service Provider (SP). SAML is widely used in enterprise Single Sign-On (SSO) solutions, allowing users to log in once and access multiple services without re-entering credentials.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Deep Dive into SAML, OIDC, and OAuth 2.0 Protocols",
+      "item": "https://www.iamdevbox.com/posts/deep-dive-into-saml-oidc-and-oauth-20-protocols/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Deep Dive into SAML, OIDC, and OAuth 2.0 Protocols",
+  "name": "Deep Dive into SAML, OIDC, and OAuth 2.0 Protocols",
+  "description": "In the modern digital landscape, secure authentication and authorization are critical for protecting user data and enabling seamless access to applications. Three key protocols—SAML, OpenID Connect (OIDC), and OAuth 2.0—play pivotal roles in identity and access management. While they share some similarities, each serves distinct purposes and operates differently. This post explores these protocols in depth, highlighting their use cases, workflows, and differences.\nWhat is SAML? Security Assertion Markup Language (SAML) is an XML-based standard for exchanging authentication and authorization data between parties, particularly between an Identity Provider (IdP) and a Service Provider (SP). SAML is widely used in enterprise Single Sign-On (SSO) solutions, allowing users to log in once and access multiple services without re-entering credentials.\n",
+  "keywords": [
+    "SAML", "OIDC", "OAuth 2.0", "Authentication", "Authorization", "Identity Management"
+  ],
+  "articleBody": "In the modern digital landscape, secure authentication and authorization are critical for protecting user data and enabling seamless access to applications. Three key protocols—SAML, OpenID Connect (OIDC), and OAuth 2.0—play pivotal roles in identity and access management. While they share some similarities, each serves distinct purposes and operates differently. This post explores these protocols in depth, highlighting their use cases, workflows, and differences.\nWhat is SAML? Security Assertion Markup Language (SAML) is an XML-based standard for exchanging authentication and authorization data between parties, particularly between an Identity Provider (IdP) and a Service Provider (SP). SAML is widely used in enterprise Single Sign-On (SSO) solutions, allowing users to log in once and access multiple services without re-entering credentials.\nA typical SAML flow involves:\nThe user attempts to access a service (SP). The SP redirects the user to the IdP for authentication. The IdP authenticates the user and generates a SAML assertion (containing user attributes and permissions). The assertion is sent back to the SP, which grants access based on the provided data. SAML is highly secure but can be complex due to its reliance on XML and rigid schema.\nWhat is OAuth 2.0? OAuth 2.0 is an authorization framework—not an authentication protocol—that allows third-party applications to obtain limited access to a user’s resources without exposing their credentials. It is commonly used in social logins (e.g., “Sign in with Google”) and API access delegation.\nKey OAuth 2.0 roles include:\nResource Owner: The user who owns the data. Client: The application requesting access. Authorization Server: Issues access tokens after validating permissions. Resource Server: Hosts the protected data. Common OAuth 2.0 flows include:\nAuthorization Code Flow: Best for server-side apps (exchanges a code for a token). Implicit Flow: Less secure, designed for client-side apps (returns tokens directly). Client Credentials Flow: For machine-to-machine communication. OAuth 2.0 is flexible but requires careful implementation to avoid security pitfalls like token leakage.\nWhat is OpenID Connect (OIDC)? OpenID Connect (OIDC) is an identity layer built on top of OAuth 2.0, adding authentication capabilities. While OAuth 2.0 handles authorization, OIDC provides user identity verification through ID tokens (JWT-formatted).\nKey OIDC components:\nID Token: Contains user identity claims (e.g., name, email). UserInfo Endpoint: Retrieves additional user attributes. Standard Scopes: Like openid, profile, and email. OIDC is widely adopted in consumer-facing applications due to its simplicity and JSON-based tokens, making it more developer-friendly than SAML.\nComparing SAML, OAuth 2.0, and OIDC Protocol Primary Use Case Token Format Authentication? Authorization? SAML Enterprise SSO XML Yes Yes OAuth 2.0 API Access Delegation JSON/Bearer No Yes OIDC Consumer Identity JWT Yes Yes (via OAuth) SAML excels in enterprise environments with strict security needs. OAuth 2.0 is ideal for delegated access scenarios. OIDC combines the best of both, offering identity verification with OAuth’s flexibility. Final Thoughts Choosing the right protocol depends on your use case:\nNeed enterprise SSO? SAML is a strong candidate. Building mobile or modern web apps? OIDC is likely the best fit. Require API access control? OAuth 2.0 is the way to go. Questions to Consider:\nHow does your application handle token storage and refresh mechanisms? What are the security trade-offs between implicit and authorization code flows in OAuth 2.0? Could a hybrid approach (e.g., SAML + OIDC) benefit your organization? Understanding these protocols empowers developers and architects to design secure, scalable identity solutions. 🚀\n",
+  "wordCount" : "553",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/static/IAMDevBox.com.png","datePublished": "2025-05-14T10:11:58Z",
+  "dateModified": "2025-05-14T10:11:59-04:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/deep-dive-into-saml-oidc-and-oauth-20-protocols/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script><meta name="description" content="Deep Dive into SAML, OIDC, and OAuth 2.0 Protocols - IAMDevBox"><script>
+    window.addEventListener("DOMContentLoaded", async () => {
+        if (document.querySelector('.mermaid')) {
+        const mermaid = await import('https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs');
+        mermaid.default.initialize({ startOnLoad: true, theme: "default" });
+        }
+    });
+    </script>
+
+
+    
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-B6QCH29975');
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Deep Dive into SAML, OIDC, and OAuth 2.0 Protocols
+    </h1>
+    <div class="post-meta">3 min&nbsp;·&nbsp;553 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#what-is-saml" aria-label="What is SAML?">What is SAML?</a></li>
+                <li>
+                    <a href="#what-is-oauth-20" aria-label="What is OAuth 2.0?">What is OAuth 2.0?</a></li>
+                <li>
+                    <a href="#what-is-openid-connect-oidc" aria-label="What is OpenID Connect (OIDC)?">What is OpenID Connect (OIDC)?</a></li>
+                <li>
+                    <a href="#comparing-saml-oauth-20-and-oidc" aria-label="Comparing SAML, OAuth 2.0, and OIDC">Comparing SAML, OAuth 2.0, and OIDC</a></li>
+                <li>
+                    <a href="#final-thoughts" aria-label="Final Thoughts">Final Thoughts</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>In the modern digital landscape, secure authentication and authorization are critical for protecting user data and enabling seamless access to applications. Three key protocols—SAML, OpenID Connect (OIDC), and OAuth 2.0—play pivotal roles in identity and access management. While they share some similarities, each serves distinct purposes and operates differently. This post explores these protocols in depth, highlighting their use cases, workflows, and differences.</p>
+<hr>
+<h3 id="what-is-saml"><strong>What is SAML?</strong><a hidden class="anchor" aria-hidden="true" href="#what-is-saml">#</a></h3>
+<p>Security Assertion Markup Language (SAML) is an XML-based standard for exchanging authentication and authorization data between parties, particularly between an Identity Provider (IdP) and a Service Provider (SP). SAML is widely used in enterprise Single Sign-On (SSO) solutions, allowing users to log in once and access multiple services without re-entering credentials.</p>
+<p>A typical SAML flow involves:</p>
+<ol>
+<li>The user attempts to access a service (SP).</li>
+<li>The SP redirects the user to the IdP for authentication.</li>
+<li>The IdP authenticates the user and generates a SAML assertion (containing user attributes and permissions).</li>
+<li>The assertion is sent back to the SP, which grants access based on the provided data.</li>
+</ol>
+<p>SAML is highly secure but can be complex due to its reliance on XML and rigid schema.</p>
+<hr>
+<h3 id="what-is-oauth-20"><strong>What is OAuth 2.0?</strong><a hidden class="anchor" aria-hidden="true" href="#what-is-oauth-20">#</a></h3>
+<p>OAuth 2.0 is an authorization framework—not an authentication protocol—that allows third-party applications to obtain limited access to a user’s resources without exposing their credentials. It is commonly used in social logins (e.g., &ldquo;Sign in with Google&rdquo;) and API access delegation.</p>
+<p>Key OAuth 2.0 roles include:</p>
+<ul>
+<li><strong>Resource Owner</strong>: The user who owns the data.</li>
+<li><strong>Client</strong>: The application requesting access.</li>
+<li><strong>Authorization Server</strong>: Issues access tokens after validating permissions.</li>
+<li><strong>Resource Server</strong>: Hosts the protected data.</li>
+</ul>
+<p>Common OAuth 2.0 flows include:</p>
+<ul>
+<li><strong>Authorization Code Flow</strong>: Best for server-side apps (exchanges a code for a token).</li>
+<li><strong>Implicit Flow</strong>: Less secure, designed for client-side apps (returns tokens directly).</li>
+<li><strong>Client Credentials Flow</strong>: For machine-to-machine communication.</li>
+</ul>
+<p>OAuth 2.0 is flexible but requires careful implementation to avoid security pitfalls like token leakage.</p>
+<hr>
+<h3 id="what-is-openid-connect-oidc"><strong>What is OpenID Connect (OIDC)?</strong><a hidden class="anchor" aria-hidden="true" href="#what-is-openid-connect-oidc">#</a></h3>
+<p>OpenID Connect (OIDC) is an identity layer built on top of OAuth 2.0, adding authentication capabilities. While OAuth 2.0 handles authorization, OIDC provides user identity verification through ID tokens (JWT-formatted).</p>
+<p>Key OIDC components:</p>
+<ul>
+<li><strong>ID Token</strong>: Contains user identity claims (e.g., name, email).</li>
+<li><strong>UserInfo Endpoint</strong>: Retrieves additional user attributes.</li>
+<li><strong>Standard Scopes</strong>: Like <code>openid</code>, <code>profile</code>, and <code>email</code>.</li>
+</ul>
+<p>OIDC is widely adopted in consumer-facing applications due to its simplicity and JSON-based tokens, making it more developer-friendly than SAML.</p>
+<hr>
+<h3 id="comparing-saml-oauth-20-and-oidc"><strong>Comparing SAML, OAuth 2.0, and OIDC</strong><a hidden class="anchor" aria-hidden="true" href="#comparing-saml-oauth-20-and-oidc">#</a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>Protocol</th>
+          <th>Primary Use Case</th>
+          <th>Token Format</th>
+          <th>Authentication?</th>
+          <th>Authorization?</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>SAML</strong></td>
+          <td>Enterprise SSO</td>
+          <td>XML</td>
+          <td>Yes</td>
+          <td>Yes</td>
+      </tr>
+      <tr>
+          <td><strong>OAuth 2.0</strong></td>
+          <td>API Access Delegation</td>
+          <td>JSON/Bearer</td>
+          <td>No</td>
+          <td>Yes</td>
+      </tr>
+      <tr>
+          <td><strong>OIDC</strong></td>
+          <td>Consumer Identity</td>
+          <td>JWT</td>
+          <td>Yes</td>
+          <td>Yes (via OAuth)</td>
+      </tr>
+  </tbody>
+</table>
+<ul>
+<li><strong>SAML</strong> excels in enterprise environments with strict security needs.</li>
+<li><strong>OAuth 2.0</strong> is ideal for delegated access scenarios.</li>
+<li><strong>OIDC</strong> combines the best of both, offering identity verification with OAuth’s flexibility.</li>
+</ul>
+<hr>
+<h3 id="final-thoughts"><strong>Final Thoughts</strong><a hidden class="anchor" aria-hidden="true" href="#final-thoughts">#</a></h3>
+<p>Choosing the right protocol depends on your use case:</p>
+<ul>
+<li>Need <strong>enterprise SSO</strong>? SAML is a strong candidate.</li>
+<li>Building <strong>mobile or modern web apps</strong>? OIDC is likely the best fit.</li>
+<li>Require <strong>API access control</strong>? OAuth 2.0 is the way to go.</li>
+</ul>
+<p><strong>Questions to Consider:</strong></p>
+<ul>
+<li>How does your application handle token storage and refresh mechanisms?</li>
+<li>What are the security trade-offs between implicit and authorization code flows in OAuth 2.0?</li>
+<li>Could a hybrid approach (e.g., SAML + OIDC) benefit your organization?</li>
+</ul>
+<p>Understanding these protocols empowers developers and architects to design secure, scalable identity solutions. 🚀</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/saml/">SAML</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/oidc/">OIDC</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/oauth-2.0/">OAuth 2.0</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/authentication/">Authentication</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/authorization/">Authorization</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/identity-management/">Identity Management</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/implementing-and-choosing-the-right-multi-factor-authentication-mfa-solution/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Implementing and Choosing the Right Multi-Factor Authentication (MFA) Solution</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/how-to-configure-saml-idp-and-sp-in-forgerock-am/">
+    <span class="title">Next »</span>
+    <br>
+    <span>How to Configure SAML IDP and SP in ForgeRock AM</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/forgerock-identity-gateway-api-security-best-practices/" class="custom-link">
+              ForgeRock Identity Gateway: API Security Best Practices
+            </a>
+            <small class="custom-date">2025-06-02</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/forgerock-vs-keycloak-choosing-the-right-iam-solution-for-your-organization/" class="custom-link">
+              ForgeRock vs Keycloak: Choosing the Right IAM Solution for Your Organization
+            </a>
+            <small class="custom-date">2025-05-28</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/the-evolution-of-multi-tenant-identity-management-systems-architecture/" class="custom-link">
+              The Evolution of Multi-Tenant Identity Management Systems Architecture
+            </a>
+            <small class="custom-date">2025-05-28</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/setting-up-a-private-self-hosted-oidc-provider-on-aws-for-enhanced-authentication/" class="custom-link">
+              Setting Up a Private Self-Hosted OIDC Provider on AWS for Enhanced Authentication
+            </a>
+            <small class="custom-date">2025-05-27</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/designing-a-distributed-authorization-server-architecture/" class="custom-link">
+              Designing a Distributed Authorization Server Architecture
+            </a>
+            <small class="custom-date">2025-05-26</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/forgerock-identity-gateway-api-security-best-practices/" class="custom-link">
+                ForgeRock Identity Gateway: API Security Best Practices
+              </a>
+              <small class="custom-date">2025-06-02</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/designing-containerized-java-microservice-architecture/" class="custom-link">
+                Designing Containerized Java Microservice Architecture
+              </a>
+              <small class="custom-date">2025-06-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/forgerock-vs-keycloak-choosing-the-right-iam-solution-for-your-organization/" class="custom-link">
+                ForgeRock vs Keycloak: Choosing the Right IAM Solution for Your Organization
+              </a>
+              <small class="custom-date">2025-05-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/setting-up-a-cicd-pipeline-to-kubernetes-with-github-actions/" class="custom-link">
+                Setting Up a CI/CD Pipeline to Kubernetes with GitHub Actions
+              </a>
+              <small class="custom-date">2025-05-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/deploying-highly-available-java-microservices-on-kubernetes-a-step-by-step-guide/" class="custom-link">
+                Deploying Highly Available Java Microservices on Kubernetes: A Step-by-Step Guide
+              </a>
+              <small class="custom-date">2025-05-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

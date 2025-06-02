@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Visualizing Attribute Flows Between LDAP, IDM, and Applications | IAMDevBox</title>
+<meta name="keywords" content="Data Visualization, Identity Mapping, ForgeRock Integration">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/visualizing-attribute-flows-between-ldap-idm-and-applications/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css" integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF&#43;13Dyqob6ASlTrTye8=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/visualizing-attribute-flows-between-ldap-idm-and-applications/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+  <link rel="stylesheet" href="/css/custom.css">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/visualizing-attribute-flows-between-ldap-idm-and-applications/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Visualizing Attribute Flows Between LDAP, IDM, and Applications">
+  <meta property="og:description" content="Understanding how identity attributes flow through different systems is essential for maintaining data integrity, streamlining audits, and fostering collaboration among teams. In this post, we explore how to visualize attribute mappings from LDAP directories to ForgeRock IDM and downstream applications using tools like Graphviz and Mermaid. These visualizations provide clarity and transparency for architects, auditors, and developers alike.
+Why Attribute Mapping Visualization Matters In complex identity environments, user attributes often originate in an LDAP directory, are transformed or enriched within ForgeRock IDM, and are then propagated to downstream applications. When mappings become convoluted or undocumented, teams can struggle with:">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-05-22T10:34:10+00:00">
+    <meta property="article:modified_time" content="2025-05-22T10:34:11-04:00">
+    <meta property="article:tag" content="Data Visualization">
+    <meta property="article:tag" content="Identity Mapping">
+    <meta property="article:tag" content="ForgeRock Integration">
+      <meta property="og:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:title" content="Visualizing Attribute Flows Between LDAP, IDM, and Applications">
+<meta name="twitter:description" content="Understanding how identity attributes flow through different systems is essential for maintaining data integrity, streamlining audits, and fostering collaboration among teams. In this post, we explore how to visualize attribute mappings from LDAP directories to ForgeRock IDM and downstream applications using tools like Graphviz and Mermaid. These visualizations provide clarity and transparency for architects, auditors, and developers alike.
+Why Attribute Mapping Visualization Matters
+In complex identity environments, user attributes often originate in an LDAP directory, are transformed or enriched within ForgeRock IDM, and are then propagated to downstream applications. When mappings become convoluted or undocumented, teams can struggle with:">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Visualizing Attribute Flows Between LDAP, IDM, and Applications",
+      "item": "https://www.iamdevbox.com/posts/visualizing-attribute-flows-between-ldap-idm-and-applications/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Visualizing Attribute Flows Between LDAP, IDM, and Applications",
+  "name": "Visualizing Attribute Flows Between LDAP, IDM, and Applications",
+  "description": "Understanding how identity attributes flow through different systems is essential for maintaining data integrity, streamlining audits, and fostering collaboration among teams. In this post, we explore how to visualize attribute mappings from LDAP directories to ForgeRock IDM and downstream applications using tools like Graphviz and Mermaid. These visualizations provide clarity and transparency for architects, auditors, and developers alike.\nWhy Attribute Mapping Visualization Matters In complex identity environments, user attributes often originate in an LDAP directory, are transformed or enriched within ForgeRock IDM, and are then propagated to downstream applications. When mappings become convoluted or undocumented, teams can struggle with:\n",
+  "keywords": [
+    "Data Visualization", "Identity Mapping", "ForgeRock Integration"
+  ],
+  "articleBody": "Understanding how identity attributes flow through different systems is essential for maintaining data integrity, streamlining audits, and fostering collaboration among teams. In this post, we explore how to visualize attribute mappings from LDAP directories to ForgeRock IDM and downstream applications using tools like Graphviz and Mermaid. These visualizations provide clarity and transparency for architects, auditors, and developers alike.\nWhy Attribute Mapping Visualization Matters In complex identity environments, user attributes often originate in an LDAP directory, are transformed or enriched within ForgeRock IDM, and are then propagated to downstream applications. When mappings become convoluted or undocumented, teams can struggle with:\nDebugging identity synchronization issues Ensuring compliance with data governance policies Onboarding new developers or integrators Explaining identity flows to non-technical stakeholders Visual tools eliminate ambiguity by turning complex XML/JSON configurations into digestible diagrams.\nExample Flow: LDAP → IDM → Application Consider a user object with attributes like uid, mail, and employeeNumber. Here’s a conceptual flow:\ngraph TD A[LDAP: uid, mail, employeeNumber] --\u003e B[IDM Mapping Script] B --\u003e C[IDM User Object: username, email, empId] C --\u003e D[App Database: loginId, contactEmail, employee_id] This shows how attributes are renamed or transformed as they move from LDAP to IDM and then to an application. Such diagrams help teams understand:\nWhich attributes are critical for each system Where transformation logic resides (e.g., IDM scripts or mappings) Which fields are required versus optional Using Graphviz for Fine-Grained Control Graphviz’s DOT language allows detailed, stylized diagrams with greater control. Here’s a basic Graphviz snippet to render the same flow:\ndigraph AttributeFlow { rankdir=LR; LDAP [label=\"LDAP\\nuid, mail, employeeNumber\", shape=box, style=filled, color=lightblue]; IDM [label=\"ForgeRock IDM\\nusername, email, empId\", shape=box, style=filled, color=lightgreen]; App [label=\"Application\\nloginId, contactEmail, employee_id\", shape=box, style=filled, color=orange]; LDAP -\u003e IDM [label=\"mapping via script\"]; IDM -\u003e App [label=\"provisioning connector\"]; } Save it as attribute_flow.dot and run:\ndot -Tpng attribute_flow.dot -o attribute_flow.png Real-World Case: Financial Services Identity Integration A financial institution using ForgeRock Identity Platform needed to onboard a new mobile banking app. The attributes cn (common name) and sn (surname) from LDAP had to be combined into a new field displayName in the mobile app’s user profile.\nVisualization helped:\nHighlight transformation logic using IDM’s transformScript Ensure displayName was populated during provisioning Align mobile devs and IAM architects on schema expectations This minimized bugs in production and helped pass compliance audits.\nStrengthening Audits and Collaboration Attribute diagrams act as living documentation. Teams can embed them in:\nGitHub README files for identity repositories Wiki pages used by InfoSec or DevOps teams Audit reports that explain identity data lineage They also empower conversations:\n“Why is givenName empty in the app?” “Let’s trace it back—was it present in LDAP? Mapped in IDM? Sent via connector?”\nAutomating Diagram Generation Consider scripting the generation of Mermaid or DOT files from your IDM mapping JSON or connector configurations. This way, visualizations always stay in sync with reality.\nExample: extract attribute names from a provisioner.openicf-ldap.json file and generate Mermaid nodes via Python or Bash scripts.\nKey Takeaways Visualizing attribute flows clarifies identity pipelines across systems. Tools like Mermaid and Graphviz bring transparency to LDAP → IDM → App mappings. Use diagrams to bridge gaps between technical and non-technical teams. Automate where possible to keep visuals aligned with evolving configurations. 🔍 How confident are you in the data lineage of your identity systems? Could a new team member understand your mappings at a glance?\nStart drawing your attribute flow today — your future self and team will thank you.\n",
+  "wordCount" : "569",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/static/IAMDevBox.com.png","datePublished": "2025-05-22T10:34:10Z",
+  "dateModified": "2025-05-22T10:34:11-04:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/visualizing-attribute-flows-between-ldap-idm-and-applications/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script><meta name="description" content="Visualizing Attribute Flows Between LDAP, IDM, and Applications - IAMDevBox"><script>
+    window.addEventListener("DOMContentLoaded", async () => {
+        if (document.querySelector('.mermaid')) {
+        const mermaid = await import('https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs');
+        mermaid.default.initialize({ startOnLoad: true, theme: "default" });
+        }
+    });
+    </script>
+
+
+    
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-B6QCH29975');
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Visualizing Attribute Flows Between LDAP, IDM, and Applications
+    </h1>
+    <div class="post-meta">3 min&nbsp;·&nbsp;569 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#why-attribute-mapping-visualization-matters" aria-label="Why Attribute Mapping Visualization Matters">Why Attribute Mapping Visualization Matters</a></li>
+                <li>
+                    <a href="#example-flow-ldap--idm--application" aria-label="Example Flow: LDAP → IDM → Application">Example Flow: LDAP → IDM → Application</a></li>
+                <li>
+                    <a href="#using-graphviz-for-fine-grained-control" aria-label="Using Graphviz for Fine-Grained Control">Using Graphviz for Fine-Grained Control</a></li>
+                <li>
+                    <a href="#real-world-case-financial-services-identity-integration" aria-label="Real-World Case: Financial Services Identity Integration">Real-World Case: Financial Services Identity Integration</a></li>
+                <li>
+                    <a href="#strengthening-audits-and-collaboration" aria-label="Strengthening Audits and Collaboration">Strengthening Audits and Collaboration</a></li>
+                <li>
+                    <a href="#automating-diagram-generation" aria-label="Automating Diagram Generation">Automating Diagram Generation</a></li>
+                <li>
+                    <a href="#key-takeaways" aria-label="Key Takeaways">Key Takeaways</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>Understanding how identity attributes flow through different systems is essential for maintaining data integrity, streamlining audits, and fostering collaboration among teams. In this post, we explore how to visualize attribute mappings from LDAP directories to ForgeRock IDM and downstream applications using tools like Graphviz and Mermaid. These visualizations provide clarity and transparency for architects, auditors, and developers alike.</p>
+<h3 id="why-attribute-mapping-visualization-matters"><strong>Why Attribute Mapping Visualization Matters</strong><a hidden class="anchor" aria-hidden="true" href="#why-attribute-mapping-visualization-matters">#</a></h3>
+<p>In complex identity environments, user attributes often originate in an LDAP directory, are transformed or enriched within ForgeRock IDM, and are then propagated to downstream applications. When mappings become convoluted or undocumented, teams can struggle with:</p>
+<ul>
+<li>Debugging identity synchronization issues</li>
+<li>Ensuring compliance with data governance policies</li>
+<li>Onboarding new developers or integrators</li>
+<li>Explaining identity flows to non-technical stakeholders</li>
+</ul>
+<p>Visual tools eliminate ambiguity by turning complex XML/JSON configurations into digestible diagrams.</p>
+<h3 id="example-flow-ldap--idm--application"><strong>Example Flow: LDAP → IDM → Application</strong><a hidden class="anchor" aria-hidden="true" href="#example-flow-ldap--idm--application">#</a></h3>
+<p>Consider a user object with attributes like <code>uid</code>, <code>mail</code>, and <code>employeeNumber</code>. Here’s a conceptual flow:</p>
+<div class="mermaid">
+
+graph TD
+    A[LDAP: uid, mail, employeeNumber] --> B[IDM Mapping Script]
+    B --> C[IDM User Object: username, email, empId]
+    C --> D[App Database: loginId, contactEmail, employee_id]
+
+</div>
+
+<p>This shows how attributes are renamed or transformed as they move from LDAP to IDM and then to an application. Such diagrams help teams understand:</p>
+<ul>
+<li>Which attributes are critical for each system</li>
+<li>Where transformation logic resides (e.g., IDM scripts or mappings)</li>
+<li>Which fields are required versus optional</li>
+</ul>
+<h3 id="using-graphviz-for-fine-grained-control"><strong>Using Graphviz for Fine-Grained Control</strong><a hidden class="anchor" aria-hidden="true" href="#using-graphviz-for-fine-grained-control">#</a></h3>
+<p>Graphviz’s DOT language allows detailed, stylized diagrams with greater control. Here&rsquo;s a basic Graphviz snippet to render the same flow:</p>
+<pre tabindex="0"><code class="language-dot" data-lang="dot">digraph AttributeFlow {
+    rankdir=LR;
+    LDAP [label=&#34;LDAP\nuid, mail, employeeNumber&#34;, shape=box, style=filled, color=lightblue];
+    IDM [label=&#34;ForgeRock IDM\nusername, email, empId&#34;, shape=box, style=filled, color=lightgreen];
+    App [label=&#34;Application\nloginId, contactEmail, employee_id&#34;, shape=box, style=filled, color=orange];
+
+    LDAP -&gt; IDM [label=&#34;mapping via script&#34;];
+    IDM -&gt; App [label=&#34;provisioning connector&#34;];
+}
+</code></pre><p>Save it as <code>attribute_flow.dot</code> and run:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>dot -Tpng attribute_flow.dot -o attribute_flow.png
+</span></span></code></pre></div><h3 id="real-world-case-financial-services-identity-integration"><strong>Real-World Case: Financial Services Identity Integration</strong><a hidden class="anchor" aria-hidden="true" href="#real-world-case-financial-services-identity-integration">#</a></h3>
+<p>A financial institution using ForgeRock Identity Platform needed to onboard a new mobile banking app. The attributes <code>cn</code> (common name) and <code>sn</code> (surname) from LDAP had to be combined into a new field <code>displayName</code> in the mobile app&rsquo;s user profile.</p>
+<p>Visualization helped:</p>
+<ul>
+<li>Highlight transformation logic using IDM’s <code>transformScript</code></li>
+<li>Ensure <code>displayName</code> was populated during provisioning</li>
+<li>Align mobile devs and IAM architects on schema expectations</li>
+</ul>
+<p>This minimized bugs in production and helped pass compliance audits.</p>
+<h3 id="strengthening-audits-and-collaboration"><strong>Strengthening Audits and Collaboration</strong><a hidden class="anchor" aria-hidden="true" href="#strengthening-audits-and-collaboration">#</a></h3>
+<p>Attribute diagrams act as living documentation. Teams can embed them in:</p>
+<ul>
+<li>GitHub README files for identity repositories</li>
+<li>Wiki pages used by InfoSec or DevOps teams</li>
+<li>Audit reports that explain identity data lineage</li>
+</ul>
+<p>They also empower conversations:</p>
+<blockquote>
+<p>&ldquo;Why is <code>givenName</code> empty in the app?&rdquo;
+&ldquo;Let’s trace it back—was it present in LDAP? Mapped in IDM? Sent via connector?&rdquo;</p></blockquote>
+<h3 id="automating-diagram-generation"><strong>Automating Diagram Generation</strong><a hidden class="anchor" aria-hidden="true" href="#automating-diagram-generation">#</a></h3>
+<p>Consider scripting the generation of Mermaid or DOT files from your IDM mapping JSON or connector configurations. This way, visualizations always stay in sync with reality.</p>
+<p>Example: extract attribute names from a <code>provisioner.openicf-ldap.json</code> file and generate Mermaid nodes via Python or Bash scripts.</p>
+<h3 id="key-takeaways"><strong>Key Takeaways</strong><a hidden class="anchor" aria-hidden="true" href="#key-takeaways">#</a></h3>
+<ul>
+<li>Visualizing attribute flows clarifies identity pipelines across systems.</li>
+<li>Tools like Mermaid and Graphviz bring transparency to LDAP → IDM → App mappings.</li>
+<li>Use diagrams to bridge gaps between technical and non-technical teams.</li>
+<li>Automate where possible to keep visuals aligned with evolving configurations.</li>
+</ul>
+<p>🔍 <em>How confident are you in the data lineage of your identity systems? Could a new team member understand your mappings at a glance?</em></p>
+<p>Start drawing your attribute flow today — your future self and team will thank you.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/data-visualization/">Data Visualization</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/identity-mapping/">Identity Mapping</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/forgerock-integration/">ForgeRock Integration</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/how-to-secure-ldif-parsing-and-mapping-in-production-environments/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>How to Secure LDIF Parsing and Mapping in Production Environments</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/generating-mock-ldif-test-sets-automatically-from-the-registry-for-idm-mapping-validation/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Generating Mock LDIF Test Sets Automatically from the Registry for IDM Mapping Validation</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+      
+
+      
+        <li>No related articles found. Try checking out the latest articles.</li>
+      
+    </ul>
+
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/forgerock-identity-gateway-api-security-best-practices/" class="custom-link">
+                ForgeRock Identity Gateway: API Security Best Practices
+              </a>
+              <small class="custom-date">2025-06-02</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/designing-containerized-java-microservice-architecture/" class="custom-link">
+                Designing Containerized Java Microservice Architecture
+              </a>
+              <small class="custom-date">2025-06-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/forgerock-vs-keycloak-choosing-the-right-iam-solution-for-your-organization/" class="custom-link">
+                ForgeRock vs Keycloak: Choosing the Right IAM Solution for Your Organization
+              </a>
+              <small class="custom-date">2025-05-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/setting-up-a-cicd-pipeline-to-kubernetes-with-github-actions/" class="custom-link">
+                Setting Up a CI/CD Pipeline to Kubernetes with GitHub Actions
+              </a>
+              <small class="custom-date">2025-05-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/deploying-highly-available-java-microservices-on-kubernetes-a-step-by-step-guide/" class="custom-link">
+                Deploying Highly Available Java Microservices on Kubernetes: A Step-by-Step Guide
+              </a>
+              <small class="custom-date">2025-05-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

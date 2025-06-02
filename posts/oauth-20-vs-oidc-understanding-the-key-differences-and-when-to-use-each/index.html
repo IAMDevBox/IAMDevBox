@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>OAuth 2.0 vs. OIDC: Understanding the Key Differences and When to Use Each | IAMDevBox</title>
+<meta name="keywords" content="OAuth 2.0, OIDC, Authentication, Authorization, Identity Management">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/oauth-20-vs-oidc-understanding-the-key-differences-and-when-to-use-each/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css" integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF&#43;13Dyqob6ASlTrTye8=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/oauth-20-vs-oidc-understanding-the-key-differences-and-when-to-use-each/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+  <link rel="stylesheet" href="/css/custom.css">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/oauth-20-vs-oidc-understanding-the-key-differences-and-when-to-use-each/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="OAuth 2.0 vs. OIDC: Understanding the Key Differences and When to Use Each">
+  <meta property="og:description" content="OAuth 2.0 and OpenID Connect (OIDC) are two fundamental protocols in the world of authentication and authorization. While they often go hand in hand, they serve distinct purposes and are not interchangeable. This blog post will delve into the differences between OAuth 2.0 and OIDC, clarify their roles, and help you determine when to use each.
+What is OAuth 2.0? OAuth 2.0 is an authorization framework that enables applications to access resources on behalf of a user without sharing the user’s credentials. It’s designed to provide a secure and flexible way for third-party applications to access user data stored on a server, such as emails, photos, or calendar events.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-05-21T11:51:36+00:00">
+    <meta property="article:modified_time" content="2025-05-21T11:51:37+00:00">
+    <meta property="article:tag" content="OAuth 2.0">
+    <meta property="article:tag" content="OIDC">
+    <meta property="article:tag" content="Authentication">
+    <meta property="article:tag" content="Authorization">
+    <meta property="article:tag" content="Identity Management">
+      <meta property="og:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:title" content="OAuth 2.0 vs. OIDC: Understanding the Key Differences and When to Use Each">
+<meta name="twitter:description" content="OAuth 2.0 and OpenID Connect (OIDC) are two fundamental protocols in the world of authentication and authorization. While they often go hand in hand, they serve distinct purposes and are not interchangeable. This blog post will delve into the differences between OAuth 2.0 and OIDC, clarify their roles, and help you determine when to use each.
+
+What is OAuth 2.0?
+OAuth 2.0 is an authorization framework that enables applications to access resources on behalf of a user without sharing the user&rsquo;s credentials. It&rsquo;s designed to provide a secure and flexible way for third-party applications to access user data stored on a server, such as emails, photos, or calendar events.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "OAuth 2.0 vs. OIDC: Understanding the Key Differences and When to Use Each",
+      "item": "https://www.iamdevbox.com/posts/oauth-20-vs-oidc-understanding-the-key-differences-and-when-to-use-each/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "OAuth 2.0 vs. OIDC: Understanding the Key Differences and When to Use Each",
+  "name": "OAuth 2.0 vs. OIDC: Understanding the Key Differences and When to Use Each",
+  "description": "OAuth 2.0 and OpenID Connect (OIDC) are two fundamental protocols in the world of authentication and authorization. While they often go hand in hand, they serve distinct purposes and are not interchangeable. This blog post will delve into the differences between OAuth 2.0 and OIDC, clarify their roles, and help you determine when to use each.\nWhat is OAuth 2.0? OAuth 2.0 is an authorization framework that enables applications to access resources on behalf of a user without sharing the user\u0026rsquo;s credentials. It\u0026rsquo;s designed to provide a secure and flexible way for third-party applications to access user data stored on a server, such as emails, photos, or calendar events.\n",
+  "keywords": [
+    "OAuth 2.0", "OIDC", "Authentication", "Authorization", "Identity Management"
+  ],
+  "articleBody": "OAuth 2.0 and OpenID Connect (OIDC) are two fundamental protocols in the world of authentication and authorization. While they often go hand in hand, they serve distinct purposes and are not interchangeable. This blog post will delve into the differences between OAuth 2.0 and OIDC, clarify their roles, and help you determine when to use each.\nWhat is OAuth 2.0? OAuth 2.0 is an authorization framework that enables applications to access resources on behalf of a user without sharing the user’s credentials. It’s designed to provide a secure and flexible way for third-party applications to access user data stored on a server, such as emails, photos, or calendar events.\nCore Concepts of OAuth 2.0 Authorization Grant: A method used by the resource owner to grant access to a protected resource. OAuth 2.0 defines several grant types, including:\nAuthorization Code: Used for web applications. Implicit: Used for browser-based applications. Resource Owner Password Credentials: Used for trusted applications. Client Credentials: Used for applications that need to access resources on their own behalf. Access Token: A short-lived token issued by the authorization server. It is used by the client to access protected resources.\nRefresh Token: A token that can be used to obtain a new access token after the current one has expired.\nOAuth 2.0 Use Case: Accessing User Data Imagine you’re building a web application that needs to access a user’s Google Calendar. Using OAuth 2.0, the user can grant your application permission to access their calendar without sharing their Google password. The authorization server (Google) issues an access token, which your application uses to make API requests to Google’s servers.\nWhat is OpenID Connect (OIDC)? OIDC is built on top of OAuth 2.0 and adds an authentication layer. While OAuth 2.0 focuses on authorization, OIDC is specifically designed to authenticate users and provide their identity information. It enables single sign-on (SSO) across multiple applications and services.\nOIDC Core Concepts Identity Token: A JSON Web Token (JWT) that contains user claims, such as username, email, and other profile information.\nAuthentication Endpoint: The endpoint where the user authenticates and consents to share their identity information.\nUserInfo Endpoint: An optional endpoint that provides additional user information.\nOIDC Use Case: User Authentication Consider a scenario where you want to implement SSO across multiple applications. Using OIDC, users can log in once and access multiple applications without re-entering their credentials. For example, logging in to your company’s intranet using your corporate email and password allows you to access other services like the cloud storage or project management tool without logging in again.\nKey Differences Between OAuth 2.0 and OIDC Feature OAuth 2.0 OIDC Primary Function Authorization (access control) Authentication (user identification) Token Type Access Token (for resource access) Identity Token (for user authentication) Scope Grants access to specific resources Provides user identity information Use Case Accessing user data (e.g., Google Calendar, Facebook photos) Authenticating users and enabling SSO across applications Protocol Focuses on resource access Built on top of OAuth 2.0 to add authentication capabilities Do You Need OIDC for Login? The answer depends on your use case:\nIf you need only authorization (access to resources): OAuth 2.0 alone might suffice. For example, if your application needs to access a user’s email or photos, OAuth 2.0 can handle the authorization process.\nIf you need authentication (user identification): OIDC is the way to go. OIDC not only handles authorization but also provides user identity information, making it ideal for scenarios where you need to authenticate users and manage their sessions across multiple applications.\nReal-World Example: Implementing Login with OIDC Suppose you’re building a web application that allows users to log in using their Google account. By integrating OIDC, you can:\nRedirect users to Google’s authentication page. After successful authentication, Google (the identity provider) returns an identity token to your application. Your application can then verify the token and retrieve user information like their email, name, and profile picture. Implementation Considerations OAuth 2.0 Implementation If you’re using OAuth 2.0 for resource access, you’ll typically follow the Authorization Code Flow:\nRedirect to Authorization Server: Your application redirects the user to the authorization server (e.g., Google) with a request for an authorization code. User Grants Permission: The user logs in and grants permission for your application to access their data. Authorization Code Issued: The authorization server issues an authorization code to your application. Exchange Code for Tokens: Your application exchanges the authorization code for an access token and, optionally, a refresh token. Access Protected Resources: Use the access token to make API requests to the resource server. Code Example (OAuth 2.0 Authorization Code Flow):\nimport requests # Step 1: Redirect to authorization server redirect_uri = \"https://your-app.com/callback\" auth_url = f\"https://auth-server.com/authorize?client_id=CLIENT_ID\u0026redirect_uri={redirect_uri}\u0026response_type=code\" # Step 2: User grants permission and authorization server redirects back with code code = \"AUTHORIZATION_CODE\" # Step 3: Exchange code for tokens token_url = \"https://auth-server.com/token\" data = { \"client_id ",
+  "wordCount" : "809",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/static/IAMDevBox.com.png","datePublished": "2025-05-21T11:51:36Z",
+  "dateModified": "2025-05-21T11:51:37Z",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/oauth-20-vs-oidc-understanding-the-key-differences-and-when-to-use-each/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script><meta name="description" content="OAuth 2.0 vs. OIDC: Understanding the Key Differences and When to Use Each - IAMDevBox"><script>
+    window.addEventListener("DOMContentLoaded", async () => {
+        if (document.querySelector('.mermaid')) {
+        const mermaid = await import('https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs');
+        mermaid.default.initialize({ startOnLoad: true, theme: "default" });
+        }
+    });
+    </script>
+
+
+    
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-B6QCH29975');
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      OAuth 2.0 vs. OIDC: Understanding the Key Differences and When to Use Each
+    </h1>
+    <div class="post-meta">4 min&nbsp;·&nbsp;809 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#what-is-oauth-20" aria-label="What is OAuth 2.0?">What is OAuth 2.0?</a><ul>
+                        
+                <li>
+                    <a href="#core-concepts-of-oauth-20" aria-label="Core Concepts of OAuth 2.0">Core Concepts of OAuth 2.0</a></li>
+                <li>
+                    <a href="#oauth-20-use-case-accessing-user-data" aria-label="OAuth 2.0 Use Case: Accessing User Data">OAuth 2.0 Use Case: Accessing User Data</a></li></ul>
+                </li>
+                <li>
+                    <a href="#what-is-openid-connect-oidc" aria-label="What is OpenID Connect (OIDC)?">What is OpenID Connect (OIDC)?</a><ul>
+                        
+                <li>
+                    <a href="#oidc-core-concepts" aria-label="OIDC Core Concepts">OIDC Core Concepts</a></li>
+                <li>
+                    <a href="#oidc-use-case-user-authentication" aria-label="OIDC Use Case: User Authentication">OIDC Use Case: User Authentication</a></li></ul>
+                </li>
+                <li>
+                    <a href="#key-differences-between-oauth-20-and-oidc" aria-label="Key Differences Between OAuth 2.0 and OIDC">Key Differences Between OAuth 2.0 and OIDC</a></li>
+                <li>
+                    <a href="#do-you-need-oidc-for-login" aria-label="Do You Need OIDC for Login?">Do You Need OIDC for Login?</a><ul>
+                        
+                <li>
+                    <a href="#real-world-example-implementing-login-with-oidc" aria-label="Real-World Example: Implementing Login with OIDC">Real-World Example: Implementing Login with OIDC</a></li></ul>
+                </li>
+                <li>
+                    <a href="#implementation-considerations" aria-label="Implementation Considerations">Implementation Considerations</a><ul>
+                        
+                <li>
+                    <a href="#oauth-20-implementation" aria-label="OAuth 2.0 Implementation">OAuth 2.0 Implementation</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>OAuth 2.0 and OpenID Connect (OIDC) are two fundamental protocols in the world of authentication and authorization. While they often go hand in hand, they serve distinct purposes and are not interchangeable. This blog post will delve into the differences between OAuth 2.0 and OIDC, clarify their roles, and help you determine when to use each.</p>
+<hr>
+<h3 id="what-is-oauth-20"><strong>What is OAuth 2.0?</strong><a hidden class="anchor" aria-hidden="true" href="#what-is-oauth-20">#</a></h3>
+<p>OAuth 2.0 is an authorization framework that enables applications to access resources on behalf of a user without sharing the user&rsquo;s credentials. It&rsquo;s designed to provide a secure and flexible way for third-party applications to access user data stored on a server, such as emails, photos, or calendar events.</p>
+<h4 id="core-concepts-of-oauth-20"><strong>Core Concepts of OAuth 2.0</strong><a hidden class="anchor" aria-hidden="true" href="#core-concepts-of-oauth-20">#</a></h4>
+<ul>
+<li>
+<p><strong>Authorization Grant</strong>: A method used by the resource owner to grant access to a protected resource. OAuth 2.0 defines several grant types, including:</p>
+<ul>
+<li><strong>Authorization Code</strong>: Used for web applications.</li>
+<li><strong>Implicit</strong>: Used for browser-based applications.</li>
+<li><strong>Resource Owner Password Credentials</strong>: Used for trusted applications.</li>
+<li><strong>Client Credentials</strong>: Used for applications that need to access resources on their own behalf.</li>
+</ul>
+</li>
+<li>
+<p><strong>Access Token</strong>: A short-lived token issued by the authorization server. It is used by the client to access protected resources.</p>
+</li>
+<li>
+<p><strong>Refresh Token</strong>: A token that can be used to obtain a new access token after the current one has expired.</p>
+</li>
+</ul>
+<h4 id="oauth-20-use-case-accessing-user-data"><strong>OAuth 2.0 Use Case: Accessing User Data</strong><a hidden class="anchor" aria-hidden="true" href="#oauth-20-use-case-accessing-user-data">#</a></h4>
+<p>Imagine you&rsquo;re building a web application that needs to access a user&rsquo;s Google Calendar. Using OAuth 2.0, the user can grant your application permission to access their calendar without sharing their Google password. The authorization server (Google) issues an access token, which your application uses to make API requests to Google&rsquo;s servers.</p>
+<hr>
+<h3 id="what-is-openid-connect-oidc"><strong>What is OpenID Connect (OIDC)?</strong><a hidden class="anchor" aria-hidden="true" href="#what-is-openid-connect-oidc">#</a></h3>
+<p>OIDC is built on top of OAuth 2.0 and adds an authentication layer. While OAuth 2.0 focuses on authorization, OIDC is specifically designed to authenticate users and provide their identity information. It enables single sign-on (SSO) across multiple applications and services.</p>
+<h4 id="oidc-core-concepts"><strong>OIDC Core Concepts</strong><a hidden class="anchor" aria-hidden="true" href="#oidc-core-concepts">#</a></h4>
+<ul>
+<li>
+<p><strong>Identity Token</strong>: A JSON Web Token (JWT) that contains user claims, such as username, email, and other profile information.</p>
+</li>
+<li>
+<p><strong>Authentication Endpoint</strong>: The endpoint where the user authenticates and consents to share their identity information.</p>
+</li>
+<li>
+<p><strong>UserInfo Endpoint</strong>: An optional endpoint that provides additional user information.</p>
+</li>
+</ul>
+<h4 id="oidc-use-case-user-authentication"><strong>OIDC Use Case: User Authentication</strong><a hidden class="anchor" aria-hidden="true" href="#oidc-use-case-user-authentication">#</a></h4>
+<p>Consider a scenario where you want to implement SSO across multiple applications. Using OIDC, users can log in once and access multiple applications without re-entering their credentials. For example, logging in to your company&rsquo;s intranet using your corporate email and password allows you to access other services like the cloud storage or project management tool without logging in again.</p>
+<hr>
+<h3 id="key-differences-between-oauth-20-and-oidc"><strong>Key Differences Between OAuth 2.0 and OIDC</strong><a hidden class="anchor" aria-hidden="true" href="#key-differences-between-oauth-20-and-oidc">#</a></h3>
+<table>
+  <thead>
+      <tr>
+          <th><strong>Feature</strong></th>
+          <th><strong>OAuth 2.0</strong></th>
+          <th><strong>OIDC</strong></th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>Primary Function</strong></td>
+          <td>Authorization (access control)</td>
+          <td>Authentication (user identification)</td>
+      </tr>
+      <tr>
+          <td><strong>Token Type</strong></td>
+          <td>Access Token (for resource access)</td>
+          <td>Identity Token (for user authentication)</td>
+      </tr>
+      <tr>
+          <td><strong>Scope</strong></td>
+          <td>Grants access to specific resources</td>
+          <td>Provides user identity information</td>
+      </tr>
+      <tr>
+          <td><strong>Use Case</strong></td>
+          <td>Accessing user data (e.g., Google Calendar, Facebook photos)</td>
+          <td>Authenticating users and enabling SSO across applications</td>
+      </tr>
+      <tr>
+          <td><strong>Protocol</strong></td>
+          <td>Focuses on resource access</td>
+          <td>Built on top of OAuth 2.0 to add authentication capabilities</td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h3 id="do-you-need-oidc-for-login"><strong>Do You Need OIDC for Login?</strong><a hidden class="anchor" aria-hidden="true" href="#do-you-need-oidc-for-login">#</a></h3>
+<p>The answer depends on your use case:</p>
+<ul>
+<li>
+<p><strong>If you need only authorization (access to resources)</strong>: OAuth 2.0 alone might suffice. For example, if your application needs to access a user&rsquo;s email or photos, OAuth 2.0 can handle the authorization process.</p>
+</li>
+<li>
+<p><strong>If you need authentication (user identification)</strong>: OIDC is the way to go. OIDC not only handles authorization but also provides user identity information, making it ideal for scenarios where you need to authenticate users and manage their sessions across multiple applications.</p>
+</li>
+</ul>
+<h4 id="real-world-example-implementing-login-with-oidc"><strong>Real-World Example: Implementing Login with OIDC</strong><a hidden class="anchor" aria-hidden="true" href="#real-world-example-implementing-login-with-oidc">#</a></h4>
+<p>Suppose you&rsquo;re building a web application that allows users to log in using their Google account. By integrating OIDC, you can:</p>
+<ol>
+<li>Redirect users to Google&rsquo;s authentication page.</li>
+<li>After successful authentication, Google (the identity provider) returns an identity token to your application.</li>
+<li>Your application can then verify the token and retrieve user information like their email, name, and profile picture.</li>
+</ol>
+<hr>
+<h3 id="implementation-considerations"><strong>Implementation Considerations</strong><a hidden class="anchor" aria-hidden="true" href="#implementation-considerations">#</a></h3>
+<h4 id="oauth-20-implementation"><strong>OAuth 2.0 Implementation</strong><a hidden class="anchor" aria-hidden="true" href="#oauth-20-implementation">#</a></h4>
+<p>If you&rsquo;re using OAuth 2.0 for resource access, you&rsquo;ll typically follow the <strong>Authorization Code Flow</strong>:</p>
+<ol>
+<li><strong>Redirect to Authorization Server</strong>: Your application redirects the user to the authorization server (e.g., Google) with a request for an authorization code.</li>
+<li><strong>User Grants Permission</strong>: The user logs in and grants permission for your application to access their data.</li>
+<li><strong>Authorization Code Issued</strong>: The authorization server issues an authorization code to your application.</li>
+<li><strong>Exchange Code for Tokens</strong>: Your application exchanges the authorization code for an access token and, optionally, a refresh token.</li>
+<li><strong>Access Protected Resources</strong>: Use the access token to make API requests to the resource server.</li>
+</ol>
+<p><strong>Code Example (OAuth 2.0 Authorization Code Flow):</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> requests
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Step 1: Redirect to authorization server</span>
+</span></span><span style="display:flex;"><span>redirect_uri <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;https://your-app.com/callback&#34;</span>
+</span></span><span style="display:flex;"><span>auth_url <span style="color:#f92672">=</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;https://auth-server.com/authorize?client_id=CLIENT_ID&amp;redirect_uri=</span><span style="color:#e6db74">{</span>redirect_uri<span style="color:#e6db74">}</span><span style="color:#e6db74">&amp;response_type=code&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Step 2: User grants permission and authorization server redirects back with code</span>
+</span></span><span style="display:flex;"><span>code <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;AUTHORIZATION_CODE&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Step 3: Exchange code for tokens</span>
+</span></span><span style="display:flex;"><span>token_url <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;https://auth-server.com/token&#34;</span>
+</span></span><span style="display:flex;"><span>data <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;client_id</span>
+</span></span></code></pre></div>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/oauth-2.0/">OAuth 2.0</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/oidc/">OIDC</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/authentication/">Authentication</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/authorization/">Authorization</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/identity-management/">Identity Management</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/comparing-forgerock-ping-auth0-and-keycloak-a-practical-guide/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Comparing ForgeRock, Ping, Auth0, and Keycloak: A Practical Guide</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/how-account-takeover-scams-are-outsmarting-fraud-detection-systems/">
+    <span class="title">Next »</span>
+    <br>
+    <span>How Account Takeover Scams Are Outsmarting Fraud Detection Systems</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/forgerock-identity-gateway-api-security-best-practices/" class="custom-link">
+              ForgeRock Identity Gateway: API Security Best Practices
+            </a>
+            <small class="custom-date">2025-06-02</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/forgerock-vs-keycloak-choosing-the-right-iam-solution-for-your-organization/" class="custom-link">
+              ForgeRock vs Keycloak: Choosing the Right IAM Solution for Your Organization
+            </a>
+            <small class="custom-date">2025-05-28</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/the-evolution-of-multi-tenant-identity-management-systems-architecture/" class="custom-link">
+              The Evolution of Multi-Tenant Identity Management Systems Architecture
+            </a>
+            <small class="custom-date">2025-05-28</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/setting-up-a-private-self-hosted-oidc-provider-on-aws-for-enhanced-authentication/" class="custom-link">
+              Setting Up a Private Self-Hosted OIDC Provider on AWS for Enhanced Authentication
+            </a>
+            <small class="custom-date">2025-05-27</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/designing-a-distributed-authorization-server-architecture/" class="custom-link">
+              Designing a Distributed Authorization Server Architecture
+            </a>
+            <small class="custom-date">2025-05-26</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/forgerock-identity-gateway-api-security-best-practices/" class="custom-link">
+                ForgeRock Identity Gateway: API Security Best Practices
+              </a>
+              <small class="custom-date">2025-06-02</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/designing-containerized-java-microservice-architecture/" class="custom-link">
+                Designing Containerized Java Microservice Architecture
+              </a>
+              <small class="custom-date">2025-06-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/forgerock-vs-keycloak-choosing-the-right-iam-solution-for-your-organization/" class="custom-link">
+                ForgeRock vs Keycloak: Choosing the Right IAM Solution for Your Organization
+              </a>
+              <small class="custom-date">2025-05-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/setting-up-a-cicd-pipeline-to-kubernetes-with-github-actions/" class="custom-link">
+                Setting Up a CI/CD Pipeline to Kubernetes with GitHub Actions
+              </a>
+              <small class="custom-date">2025-05-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/deploying-highly-available-java-microservices-on-kubernetes-a-step-by-step-guide/" class="custom-link">
+                Deploying Highly Available Java Microservices on Kubernetes: A Step-by-Step Guide
+              </a>
+              <small class="custom-date">2025-05-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

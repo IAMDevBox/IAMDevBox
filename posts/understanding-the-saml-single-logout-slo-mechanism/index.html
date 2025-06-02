@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Understanding the SAML Single Logout (SLO) Mechanism | IAMDevBox</title>
+<meta name="keywords" content="SAML, Single Logout, Identity Provider, Service Provider, Federation">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/understanding-the-saml-single-logout-slo-mechanism/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css" integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF&#43;13Dyqob6ASlTrTye8=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/understanding-the-saml-single-logout-slo-mechanism/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+  <link rel="stylesheet" href="/css/custom.css">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/understanding-the-saml-single-logout-slo-mechanism/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Understanding the SAML Single Logout (SLO) Mechanism">
+  <meta property="og:description" content="SAML (Security Assertion Markup Language) is a widely adopted standard for Single Sign-On (SSO) in enterprise identity federation. Just as SAML SSO simplifies user authentication across multiple systems, SAML Single Logout (SLO) provides a standardized way to terminate sessions across those same systems. Let’s explore how it works and the critical differences between redirect vs POST bindings, SP-initiated vs IdP-initiated logout, and the essential role of the Session Index.
+🔐 What is SAML Single Logout (SLO)? SAML Single Logout (SLO) allows a user to log out from one application (Service Provider, or SP) and have that logout propagated to all other applications that the user has accessed during their session. This prevents “orphaned sessions” and ensures consistent security behavior across systems.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:modified_time" content="2025-05-07T10:44:24-04:00">
+    <meta property="article:tag" content="SAML">
+    <meta property="article:tag" content="Single Logout">
+    <meta property="article:tag" content="Identity Provider">
+    <meta property="article:tag" content="Service Provider">
+    <meta property="article:tag" content="Federation">
+      <meta property="og:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:title" content="Understanding the SAML Single Logout (SLO) Mechanism">
+<meta name="twitter:description" content="SAML (Security Assertion Markup Language) is a widely adopted standard for Single Sign-On (SSO) in enterprise identity federation. Just as SAML SSO simplifies user authentication across multiple systems, SAML Single Logout (SLO) provides a standardized way to terminate sessions across those same systems. Let’s explore how it works and the critical differences between redirect vs POST bindings, SP-initiated vs IdP-initiated logout, and the essential role of the Session Index.
+
+🔐 What is SAML Single Logout (SLO)?
+SAML Single Logout (SLO) allows a user to log out from one application (Service Provider, or SP) and have that logout propagated to all other applications that the user has accessed during their session. This prevents “orphaned sessions” and ensures consistent security behavior across systems.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Understanding the SAML Single Logout (SLO) Mechanism",
+      "item": "https://www.iamdevbox.com/posts/understanding-the-saml-single-logout-slo-mechanism/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Understanding the SAML Single Logout (SLO) Mechanism",
+  "name": "Understanding the SAML Single Logout (SLO) Mechanism",
+  "description": "SAML (Security Assertion Markup Language) is a widely adopted standard for Single Sign-On (SSO) in enterprise identity federation. Just as SAML SSO simplifies user authentication across multiple systems, SAML Single Logout (SLO) provides a standardized way to terminate sessions across those same systems. Let’s explore how it works and the critical differences between redirect vs POST bindings, SP-initiated vs IdP-initiated logout, and the essential role of the Session Index.\n🔐 What is SAML Single Logout (SLO)? SAML Single Logout (SLO) allows a user to log out from one application (Service Provider, or SP) and have that logout propagated to all other applications that the user has accessed during their session. This prevents “orphaned sessions” and ensures consistent security behavior across systems.\n",
+  "keywords": [
+    "SAML", "Single Logout", "Identity Provider", "Service Provider", "Federation"
+  ],
+  "articleBody": "SAML (Security Assertion Markup Language) is a widely adopted standard for Single Sign-On (SSO) in enterprise identity federation. Just as SAML SSO simplifies user authentication across multiple systems, SAML Single Logout (SLO) provides a standardized way to terminate sessions across those same systems. Let’s explore how it works and the critical differences between redirect vs POST bindings, SP-initiated vs IdP-initiated logout, and the essential role of the Session Index.\n🔐 What is SAML Single Logout (SLO)? SAML Single Logout (SLO) allows a user to log out from one application (Service Provider, or SP) and have that logout propagated to all other applications that the user has accessed during their session. This prevents “orphaned sessions” and ensures consistent security behavior across systems.\nWhen SLO is triggered, the identity provider (IdP) or an SP notifies all other connected SPs to terminate the user session. These notifications are based on the SAML LogoutRequest and LogoutResponse messages, which are exchanged using specified bindings.\n🔄 Redirect Binding vs POST Binding In SAML SLO, two common bindings are used for transporting messages between SPs and the IdP:\n🔁 Redirect Binding Mechanism: SAML messages are sent through the URL (as query parameters). Usage: Typically used for GET requests. Advantages: Simple and browser-friendly. No form submission required. Limitations: URL length limitations can restrict message size. Less secure due to URL visibility in browser history and logs. 📨 POST Binding Mechanism: SAML messages are transmitted in the body of an HTTP POST request via an auto-submitting HTML form. Usage: Ideal when messages are large or security is a priority. Advantages: More secure (message not visible in URL). Can handle larger payloads. Limitations: Requires a form to be rendered and submitted, making it slightly more complex. In practice, many implementations support both, and the choice often depends on organizational security requirements and browser behavior.\n🆚 SP-Initiated vs IdP-Initiated Logout 🔹 SP-Initiated Logout The logout process starts from a Service Provider. The SP sends a LogoutRequest to the IdP. The IdP coordinates the logout with other SPs where the user has active sessions. Use case: When users explicitly log out from an application they were using. 🔸 IdP-Initiated Logout The logout starts from the Identity Provider. The IdP initiates the SLO by sending LogoutRequests to all participating SPs. Use case: Admin-triggered logouts, centralized session management, or user logs out directly from the IdP portal. In both flows, the IdP acts as the central authority to notify SPs and manage the logout lifecycle.\n🧩 The Role of Session Index The Session Index is a critical attribute in the SAML assertion issued during login. It uniquely identifies a session established between the SP and the IdP.\nDuring logout, the Session Index is included in the LogoutRequest. It tells the IdP which session to terminate. Without it, the IdP might not know exactly which user session to close, especially if the same user has multiple sessions.\nSession Index in SP-Initiated Logout: The SP provides the Session Index to the IdP, ensuring the correct session is invalidated. Session Index in IdP Session Store: Enables efficient mapping of users to SP sessions, allowing full session sweep on logout. This small but powerful attribute ensures session integrity and precise control over session termination across systems.\n✅ Summary SAML SLO is essential for securing federated environments where users access multiple applications through a single identity source. Understanding the differences between Redirect and POST bindings, SP-initiated and IdP-initiated flows, and the function of the Session Index can help ensure a secure and seamless logout experience.\nWhether you’re designing an SSO/SLO infrastructure or auditing an existing one, these concepts are foundational to keeping user sessions safe and consistent across your digital ecosystem.\n",
+  "wordCount" : "612",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/static/IAMDevBox.com.png","datePublished": "0001-01-01T00:00:00Z",
+  "dateModified": "2025-05-07T10:44:24-04:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/understanding-the-saml-single-logout-slo-mechanism/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script><meta name="description" content="Understanding the SAML Single Logout (SLO) Mechanism - IAMDevBox"><script>
+    window.addEventListener("DOMContentLoaded", async () => {
+        if (document.querySelector('.mermaid')) {
+        const mermaid = await import('https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs');
+        mermaid.default.initialize({ startOnLoad: true, theme: "default" });
+        }
+    });
+    </script>
+
+
+    
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-B6QCH29975');
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Understanding the SAML Single Logout (SLO) Mechanism
+    </h1>
+    <div class="post-meta">3 min&nbsp;·&nbsp;612 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#-what-is-saml-single-logout-slo" aria-label="🔐 What is SAML Single Logout (SLO)?">🔐 What is SAML Single Logout (SLO)?</a></li>
+                <li>
+                    <a href="#-redirect-binding-vs-post-binding" aria-label="🔄 Redirect Binding vs POST Binding">🔄 Redirect Binding vs POST Binding</a><ul>
+                        
+                <li>
+                    <a href="#-redirect-binding" aria-label="🔁 Redirect Binding">🔁 Redirect Binding</a></li>
+                <li>
+                    <a href="#-post-binding" aria-label="📨 POST Binding">📨 POST Binding</a></li></ul>
+                </li>
+                <li>
+                    <a href="#-sp-initiated-vs-idp-initiated-logout" aria-label="🆚 SP-Initiated vs IdP-Initiated Logout">🆚 SP-Initiated vs IdP-Initiated Logout</a><ul>
+                        
+                <li>
+                    <a href="#-sp-initiated-logout" aria-label="🔹 SP-Initiated Logout">🔹 SP-Initiated Logout</a></li>
+                <li>
+                    <a href="#-idp-initiated-logout" aria-label="🔸 IdP-Initiated Logout">🔸 IdP-Initiated Logout</a></li></ul>
+                </li>
+                <li>
+                    <a href="#-the-role-of-session-index" aria-label="🧩 The Role of Session Index">🧩 The Role of Session Index</a></li>
+                <li>
+                    <a href="#-summary" aria-label="✅ Summary">✅ Summary</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>SAML (Security Assertion Markup Language) is a widely adopted standard for Single Sign-On (SSO) in enterprise identity federation. Just as SAML SSO simplifies user authentication across multiple systems, SAML Single Logout (SLO) provides a standardized way to terminate sessions across those same systems. Let’s explore how it works and the critical differences between redirect vs POST bindings, SP-initiated vs IdP-initiated logout, and the essential role of the Session Index.</p>
+<hr>
+<h3 id="-what-is-saml-single-logout-slo">🔐 What is SAML Single Logout (SLO)?<a hidden class="anchor" aria-hidden="true" href="#-what-is-saml-single-logout-slo">#</a></h3>
+<p>SAML Single Logout (SLO) allows a user to log out from one application (Service Provider, or SP) and have that logout propagated to all other applications that the user has accessed during their session. This prevents “orphaned sessions” and ensures consistent security behavior across systems.</p>
+<p>When SLO is triggered, the identity provider (IdP) or an SP notifies all other connected SPs to terminate the user session. These notifications are based on the SAML LogoutRequest and LogoutResponse messages, which are exchanged using specified bindings.</p>
+<hr>
+<h3 id="-redirect-binding-vs-post-binding">🔄 Redirect Binding vs POST Binding<a hidden class="anchor" aria-hidden="true" href="#-redirect-binding-vs-post-binding">#</a></h3>
+<p>In SAML SLO, two common bindings are used for transporting messages between SPs and the IdP:</p>
+<h4 id="-redirect-binding">🔁 Redirect Binding<a hidden class="anchor" aria-hidden="true" href="#-redirect-binding">#</a></h4>
+<ul>
+<li><strong>Mechanism</strong>: SAML messages are sent through the URL (as query parameters).</li>
+<li><strong>Usage</strong>: Typically used for GET requests.</li>
+<li><strong>Advantages</strong>: Simple and browser-friendly. No form submission required.</li>
+<li><strong>Limitations</strong>: URL length limitations can restrict message size. Less secure due to URL visibility in browser history and logs.</li>
+</ul>
+<h4 id="-post-binding">📨 POST Binding<a hidden class="anchor" aria-hidden="true" href="#-post-binding">#</a></h4>
+<ul>
+<li><strong>Mechanism</strong>: SAML messages are transmitted in the body of an HTTP POST request via an auto-submitting HTML form.</li>
+<li><strong>Usage</strong>: Ideal when messages are large or security is a priority.</li>
+<li><strong>Advantages</strong>: More secure (message not visible in URL). Can handle larger payloads.</li>
+<li><strong>Limitations</strong>: Requires a form to be rendered and submitted, making it slightly more complex.</li>
+</ul>
+<p>In practice, many implementations support both, and the choice often depends on organizational security requirements and browser behavior.</p>
+<hr>
+<h3 id="-sp-initiated-vs-idp-initiated-logout">🆚 SP-Initiated vs IdP-Initiated Logout<a hidden class="anchor" aria-hidden="true" href="#-sp-initiated-vs-idp-initiated-logout">#</a></h3>
+<h4 id="-sp-initiated-logout">🔹 SP-Initiated Logout<a hidden class="anchor" aria-hidden="true" href="#-sp-initiated-logout">#</a></h4>
+<ul>
+<li>The logout process starts from a Service Provider.</li>
+<li>The SP sends a <code>LogoutRequest</code> to the IdP.</li>
+<li>The IdP coordinates the logout with other SPs where the user has active sessions.</li>
+<li><strong>Use case</strong>: When users explicitly log out from an application they were using.</li>
+</ul>
+<h4 id="-idp-initiated-logout">🔸 IdP-Initiated Logout<a hidden class="anchor" aria-hidden="true" href="#-idp-initiated-logout">#</a></h4>
+<ul>
+<li>The logout starts from the Identity Provider.</li>
+<li>The IdP initiates the SLO by sending <code>LogoutRequest</code>s to all participating SPs.</li>
+<li><strong>Use case</strong>: Admin-triggered logouts, centralized session management, or user logs out directly from the IdP portal.</li>
+</ul>
+<p>In both flows, the IdP acts as the central authority to notify SPs and manage the logout lifecycle.</p>
+<hr>
+<h3 id="-the-role-of-session-index">🧩 The Role of Session Index<a hidden class="anchor" aria-hidden="true" href="#-the-role-of-session-index">#</a></h3>
+<p>The <strong>Session Index</strong> is a critical attribute in the SAML assertion issued during login. It uniquely identifies a session established between the SP and the IdP.</p>
+<p>During logout, the Session Index is included in the <code>LogoutRequest</code>. It tells the IdP <em>which session</em> to terminate. Without it, the IdP might not know exactly which user session to close, especially if the same user has multiple sessions.</p>
+<ul>
+<li><strong>Session Index in SP-Initiated Logout</strong>: The SP provides the Session Index to the IdP, ensuring the correct session is invalidated.</li>
+<li><strong>Session Index in IdP Session Store</strong>: Enables efficient mapping of users to SP sessions, allowing full session sweep on logout.</li>
+</ul>
+<p>This small but powerful attribute ensures session integrity and precise control over session termination across systems.</p>
+<hr>
+<h3 id="-summary">✅ Summary<a hidden class="anchor" aria-hidden="true" href="#-summary">#</a></h3>
+<p>SAML SLO is essential for securing federated environments where users access multiple applications through a single identity source. Understanding the differences between Redirect and POST bindings, SP-initiated and IdP-initiated flows, and the function of the Session Index can help ensure a secure and seamless logout experience.</p>
+<p>Whether you&rsquo;re designing an SSO/SLO infrastructure or auditing an existing one, these concepts are foundational to keeping user sessions safe and consistent across your digital ecosystem.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/saml/">SAML</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/single-logout/">Single Logout</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/identity-provider/">Identity Provider</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/service-provider/">Service Provider</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/federation/">Federation</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/understanding-the-client-credentials-flow-in-oauth-20/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Understanding the Client Credentials Flow in OAuth 2.0</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/testing-saml-and-oidc-authorization-flows-with-postman/" class="custom-link">
+              Testing SAML and OIDC Authorization Flows with Postman
+            </a>
+            <small class="custom-date">2025-05-26</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/implementing-federated-identity-authentication-with-forgerock-and-google-workspace-idp-mode/" class="custom-link">
+              Implementing Federated Identity Authentication with ForgeRock and Google Workspace (IdP Mode)
+            </a>
+            <small class="custom-date">2025-05-24</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/understanding-saml-cookie-issues-why-you-keep-redirecting-to-the-login-page/" class="custom-link">
+              Understanding SAML Cookie Issues: Why You Keep Redirecting to the Login Page
+            </a>
+            <small class="custom-date">2025-05-24</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/understanding-single-sign-on-sso-and-saml-simplified/" class="custom-link">
+              Understanding Single Sign-On (SSO) and SAML: Simplified
+            </a>
+            <small class="custom-date">2025-05-22</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/troubleshooting-the-issuer-is-invalid-when-using-okta/" class="custom-link">
+              Troubleshooting &#34;The Issuer is Invalid&#34; When Using Okta
+            </a>
+            <small class="custom-date">2025-05-19</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/forgerock-identity-gateway-api-security-best-practices/" class="custom-link">
+                ForgeRock Identity Gateway: API Security Best Practices
+              </a>
+              <small class="custom-date">2025-06-02</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/designing-containerized-java-microservice-architecture/" class="custom-link">
+                Designing Containerized Java Microservice Architecture
+              </a>
+              <small class="custom-date">2025-06-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/forgerock-vs-keycloak-choosing-the-right-iam-solution-for-your-organization/" class="custom-link">
+                ForgeRock vs Keycloak: Choosing the Right IAM Solution for Your Organization
+              </a>
+              <small class="custom-date">2025-05-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/setting-up-a-cicd-pipeline-to-kubernetes-with-github-actions/" class="custom-link">
+                Setting Up a CI/CD Pipeline to Kubernetes with GitHub Actions
+              </a>
+              <small class="custom-date">2025-05-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/deploying-highly-available-java-microservices-on-kubernetes-a-step-by-step-guide/" class="custom-link">
+                Deploying Highly Available Java Microservices on Kubernetes: A Step-by-Step Guide
+              </a>
+              <small class="custom-date">2025-05-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

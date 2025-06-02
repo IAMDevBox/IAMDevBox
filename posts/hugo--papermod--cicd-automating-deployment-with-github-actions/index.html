@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Hugo &#43; PaperMod &#43; CI/CD: Automating Deployment with GitHub Actions | IAMDevBox</title>
+<meta name="keywords" content="Hugo, PaperMod, CI/CD, GitHub Actions, Static Site, Deployment">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/hugo--papermod--cicd-automating-deployment-with-github-actions/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css" integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF&#43;13Dyqob6ASlTrTye8=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/hugo--papermod--cicd-automating-deployment-with-github-actions/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+  <link rel="stylesheet" href="/css/custom.css">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/hugo--papermod--cicd-automating-deployment-with-github-actions/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Hugo &#43; PaperMod &#43; CI/CD: Automating Deployment with GitHub Actions">
+  <meta property="og:description" content="In the world of modern web development, static site generators like Hugo have become increasingly popular due to their speed, flexibility, and ease of use. Combined with a sleek theme like PaperMod and automated deployment pipelines using GitHub Actions, developers can streamline their workflow and focus on creating content rather than managing infrastructure. In this blog post, we’ll explore how to set up a Hugo site with PaperMod and automate its deployment using CI/CD with GitHub Actions. We’ll also discuss best practices, common pitfalls, and how to optimize your setup for maximum efficiency.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-05-19T00:13:51+00:00">
+    <meta property="article:modified_time" content="2025-05-19T00:13:51+00:00">
+    <meta property="article:tag" content="Hugo">
+    <meta property="article:tag" content="PaperMod">
+    <meta property="article:tag" content="CI/CD">
+    <meta property="article:tag" content="GitHub Actions">
+    <meta property="article:tag" content="Static Site">
+    <meta property="article:tag" content="Deployment">
+      <meta property="og:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:title" content="Hugo &#43; PaperMod &#43; CI/CD: Automating Deployment with GitHub Actions">
+<meta name="twitter:description" content="In the world of modern web development, static site generators like Hugo have become increasingly popular due to their speed, flexibility, and ease of use. Combined with a sleek theme like PaperMod and automated deployment pipelines using GitHub Actions, developers can streamline their workflow and focus on creating content rather than managing infrastructure. In this blog post, we’ll explore how to set up a Hugo site with PaperMod and automate its deployment using CI/CD with GitHub Actions. We’ll also discuss best practices, common pitfalls, and how to optimize your setup for maximum efficiency.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Hugo + PaperMod + CI/CD: Automating Deployment with GitHub Actions",
+      "item": "https://www.iamdevbox.com/posts/hugo--papermod--cicd-automating-deployment-with-github-actions/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Hugo + PaperMod + CI/CD: Automating Deployment with GitHub Actions",
+  "name": "Hugo \u002b PaperMod \u002b CI\/CD: Automating Deployment with GitHub Actions",
+  "description": "In the world of modern web development, static site generators like Hugo have become increasingly popular due to their speed, flexibility, and ease of use. Combined with a sleek theme like PaperMod and automated deployment pipelines using GitHub Actions, developers can streamline their workflow and focus on creating content rather than managing infrastructure. In this blog post, we’ll explore how to set up a Hugo site with PaperMod and automate its deployment using CI/CD with GitHub Actions. We’ll also discuss best practices, common pitfalls, and how to optimize your setup for maximum efficiency.\n",
+  "keywords": [
+    "Hugo", "PaperMod", "CI/CD", "GitHub Actions", "Static Site", "Deployment"
+  ],
+  "articleBody": "In the world of modern web development, static site generators like Hugo have become increasingly popular due to their speed, flexibility, and ease of use. Combined with a sleek theme like PaperMod and automated deployment pipelines using GitHub Actions, developers can streamline their workflow and focus on creating content rather than managing infrastructure. In this blog post, we’ll explore how to set up a Hugo site with PaperMod and automate its deployment using CI/CD with GitHub Actions. We’ll also discuss best practices, common pitfalls, and how to optimize your setup for maximum efficiency.\n1. Introduction to Hugo and PaperMod Hugo is a fast and modern static site generator written in Go. It supports a wide range of templates, themes, and plugins, making it a versatile tool for building anything from personal blogs to enterprise-level documentation sites. PaperMod is a minimalist, responsive, and SEO-friendly theme designed for Hugo, perfect for developers and technical writers who value simplicity and performance.\nBefore diving into the setup, let’s briefly outline the components we’ll be working with:\nHugo: The static site generator. PaperMod: The theme that gives your site its visual identity. GitHub: For hosting your site’s source code. GitHub Actions: For automating the build and deployment process. 2. Setting Up Your Hugo Site with PaperMod The first step is to set up your Hugo site and install the PaperMod theme. Here’s a step-by-step guide:\nInstall Hugo: Ensure you have Hugo installed on your system. You can download it from the official website or use the following command:\nbrew install hugo # For macOS Create a New Hugo Site: Run the following command to create a new Hugo site:\nhugo new site my-site cd my-site Install PaperMod: Add the PaperMod theme to your site:\ngit submodule add https://github.com/adityatelange/hugo-PaperMod.git themes/papermod Initialize the Site: Create a new content page:\nhugo new content/posts/my-first-post.md Configure the Theme: Copy the example configuration file to your site’s root directory:\ncp themes/papermod/exampleSite/config.toml config.toml Build and Serve: Build your site and start the development server:\nhugo server --theme=PaperMod 3. Setting Up CI/CD with GitHub Actions Now that your site is set up, let’s automate the deployment process using GitHub Actions. This will ensure that every time you push changes to your repository, the site is built and deployed automatically.\nCreate a GitHub Repository: Push your Hugo site to a new GitHub repository. For example:\ngit init git add . git commit -m \"Initial commit\" git push -u origin main Set Up GitHub Pages: Enable GitHub Pages in your repository settings to host your site. Choose the gh-pages branch as the source.\nCreate a GitHub Actions Workflow: Create a new file in your repository at .github/workflows/deploy.yml with the following content:\nname: Hugo CI/CD on: push: branches: [ main ] jobs: build-and-deploy: runs-on: ubuntu-latest steps: - name: Checkout repository uses: actions/checkout@v3 - name: Set up Hugo uses: actions/setup-go@v3 with: go-version: '1.20' - name: Install Hugo run: | go install github.com/gohugoio/hugo@latest - name: Build Hugo site run: | hugo --theme=PaperMod --baseURL=https://yourusername.github.io/your-repo-name/ - name: Deploy to GitHub Pages uses: actions/deploy-pages@v1 with: target_branch: gh-pages build_command: \"\" publish_dir: ./public/ Push and Test: Push your changes to GitHub and watch the workflow run. Your site should be deployed to GitHub Pages automatically.\n4. Real-World Case Study Let’s consider a real-world example: deploying a personal blog using Hugo, PaperMod, and GitHub Actions. The blog consists of technical articles, tutorials, and project showcases. By automating the deployment process, the author ensures that every new article is live within minutes of being written.\nIn this case, the author also integrated custom analytics and SEO tools into the workflow. This demonstrates the flexibility of the setup and how it can be extended to meet specific needs.\n5. Extending and Optimizing Your Setup Once you have the basic setup in place, there are several ways to extend and optimize it:\nAdd Custom Shortcodes: Hugo supports custom shortcodes, allowing you to create reusable components for your site. Implement Versioning: Use Git tags to version your site’s content and track changes over time. Optimize Build Times: Experiment with different Hugo configurations to reduce build times, especially for larger sites. Add Pre-Commit Hooks: Use tools like pre-commit to run linting and formatting checks before committing changes. 6. Conclusion By combining Hugo, PaperMod, and GitHub Actions, you can create a fast, modern, and automated workflow for building and deploying static sites. This setup is ideal for developers who value simplicity, performance, and scalability. Whether you’re building a personal blog, a documentation site, or a portfolio, this approach ensures that your content is always up-to-date and accessible.\nNow it’s your turn! Have you used Hugo and GitHub Actions before? How do you handle static site deployment? Let me know in the comments below.\n",
+  "wordCount" : "783",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/static/IAMDevBox.com.png","datePublished": "2025-05-19T00:13:51Z",
+  "dateModified": "2025-05-19T00:13:51Z",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/hugo--papermod--cicd-automating-deployment-with-github-actions/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script><meta name="description" content="Hugo &#43; PaperMod &#43; CI/CD: Automating Deployment with GitHub Actions - IAMDevBox"><script>
+    window.addEventListener("DOMContentLoaded", async () => {
+        if (document.querySelector('.mermaid')) {
+        const mermaid = await import('https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs');
+        mermaid.default.initialize({ startOnLoad: true, theme: "default" });
+        }
+    });
+    </script>
+
+
+    
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-B6QCH29975');
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Hugo &#43; PaperMod &#43; CI/CD: Automating Deployment with GitHub Actions
+    </h1>
+    <div class="post-meta">4 min&nbsp;·&nbsp;783 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#1-introduction-to-hugo-and-papermod" aria-label="1. Introduction to Hugo and PaperMod">1. Introduction to Hugo and PaperMod</a></li>
+                <li>
+                    <a href="#2-setting-up-your-hugo-site-with-papermod" aria-label="2. Setting Up Your Hugo Site with PaperMod">2. Setting Up Your Hugo Site with PaperMod</a></li>
+                <li>
+                    <a href="#3-setting-up-cicd-with-github-actions" aria-label="3. Setting Up CI/CD with GitHub Actions">3. Setting Up CI/CD with GitHub Actions</a></li>
+                <li>
+                    <a href="#4-real-world-case-study" aria-label="4. Real-World Case Study">4. Real-World Case Study</a></li>
+                <li>
+                    <a href="#5-extending-and-optimizing-your-setup" aria-label="5. Extending and Optimizing Your Setup">5. Extending and Optimizing Your Setup</a></li>
+                <li>
+                    <a href="#6-conclusion" aria-label="6. Conclusion">6. Conclusion</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>In the world of modern web development, static site generators like Hugo have become increasingly popular due to their speed, flexibility, and ease of use. Combined with a sleek theme like PaperMod and automated deployment pipelines using GitHub Actions, developers can streamline their workflow and focus on creating content rather than managing infrastructure. In this blog post, we’ll explore how to set up a Hugo site with PaperMod and automate its deployment using CI/CD with GitHub Actions. We’ll also discuss best practices, common pitfalls, and how to optimize your setup for maximum efficiency.</p>
+<hr>
+<h3 id="1-introduction-to-hugo-and-papermod"><strong>1. Introduction to Hugo and PaperMod</strong><a hidden class="anchor" aria-hidden="true" href="#1-introduction-to-hugo-and-papermod">#</a></h3>
+<p>Hugo is a fast and modern static site generator written in Go. It supports a wide range of templates, themes, and plugins, making it a versatile tool for building anything from personal blogs to enterprise-level documentation sites. PaperMod is a minimalist, responsive, and SEO-friendly theme designed for Hugo, perfect for developers and technical writers who value simplicity and performance.</p>
+<p>Before diving into the setup, let’s briefly outline the components we’ll be working with:</p>
+<ul>
+<li><strong>Hugo</strong>: The static site generator.</li>
+<li><strong>PaperMod</strong>: The theme that gives your site its visual identity.</li>
+<li><strong>GitHub</strong>: For hosting your site’s source code.</li>
+<li><strong>GitHub Actions</strong>: For automating the build and deployment process.</li>
+</ul>
+<hr>
+<h3 id="2-setting-up-your-hugo-site-with-papermod"><strong>2. Setting Up Your Hugo Site with PaperMod</strong><a hidden class="anchor" aria-hidden="true" href="#2-setting-up-your-hugo-site-with-papermod">#</a></h3>
+<p>The first step is to set up your Hugo site and install the PaperMod theme. Here’s a step-by-step guide:</p>
+<ol>
+<li>
+<p><strong>Install Hugo</strong>:
+Ensure you have Hugo installed on your system. You can download it from the <a href="https://gohugo.io/">official website</a> or use the following command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>brew install hugo  <span style="color:#75715e"># For macOS</span>
+</span></span></code></pre></div></li>
+<li>
+<p><strong>Create a New Hugo Site</strong>:
+Run the following command to create a new Hugo site:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>hugo new site my-site
+</span></span><span style="display:flex;"><span>cd my-site
+</span></span></code></pre></div></li>
+<li>
+<p><strong>Install PaperMod</strong>:
+Add the PaperMod theme to your site:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>git submodule add https://github.com/adityatelange/hugo-PaperMod.git themes/papermod
+</span></span></code></pre></div></li>
+<li>
+<p><strong>Initialize the Site</strong>:
+Create a new content page:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>hugo new content/posts/my-first-post.md
+</span></span></code></pre></div></li>
+<li>
+<p><strong>Configure the Theme</strong>:
+Copy the example configuration file to your site’s root directory:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cp themes/papermod/exampleSite/config.toml config.toml
+</span></span></code></pre></div></li>
+<li>
+<p><strong>Build and Serve</strong>:
+Build your site and start the development server:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>hugo server --theme<span style="color:#f92672">=</span>PaperMod
+</span></span></code></pre></div></li>
+</ol>
+<hr>
+<h3 id="3-setting-up-cicd-with-github-actions"><strong>3. Setting Up CI/CD with GitHub Actions</strong><a hidden class="anchor" aria-hidden="true" href="#3-setting-up-cicd-with-github-actions">#</a></h3>
+<p>Now that your site is set up, let’s automate the deployment process using GitHub Actions. This will ensure that every time you push changes to your repository, the site is built and deployed automatically.</p>
+<ol>
+<li>
+<p><strong>Create a GitHub Repository</strong>:
+Push your Hugo site to a new GitHub repository. For example:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>git init
+</span></span><span style="display:flex;"><span>git add .
+</span></span><span style="display:flex;"><span>git commit -m <span style="color:#e6db74">&#34;Initial commit&#34;</span>
+</span></span><span style="display:flex;"><span>git push -u origin main
+</span></span></code></pre></div></li>
+<li>
+<p><strong>Set Up GitHub Pages</strong>:
+Enable GitHub Pages in your repository settings to host your site. Choose the <code>gh-pages</code> branch as the source.</p>
+</li>
+<li>
+<p><strong>Create a GitHub Actions Workflow</strong>:
+Create a new file in your repository at <code>.github/workflows/deploy.yml</code> with the following content:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">name</span>: <span style="color:#ae81ff">Hugo CI/CD</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">on</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">push</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">branches</span>: [ <span style="color:#ae81ff">main ]</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">jobs</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">build-and-deploy</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">runs-on</span>: <span style="color:#ae81ff">ubuntu-latest</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">steps</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Checkout repository</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">uses</span>: <span style="color:#ae81ff">actions/checkout@v3</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Set up Hugo</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">uses</span>: <span style="color:#ae81ff">actions/setup-go@v3</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">with</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">go-version</span>: <span style="color:#e6db74">&#39;1.20&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Install Hugo</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">run</span>: |<span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        go install github.com/gohugoio/hugo@latest</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Build Hugo site</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">run</span>: |<span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        hugo --theme=PaperMod --baseURL=https://yourusername.github.io/your-repo-name/</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Deploy to GitHub Pages</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">uses</span>: <span style="color:#ae81ff">actions/deploy-pages@v1</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">with</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">target_branch</span>: <span style="color:#ae81ff">gh-pages</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">build_command</span>: <span style="color:#e6db74">&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">publish_dir</span>: <span style="color:#ae81ff">./public/</span>
+</span></span></code></pre></div></li>
+<li>
+<p><strong>Push and Test</strong>:
+Push your changes to GitHub and watch the workflow run. Your site should be deployed to GitHub Pages automatically.</p>
+</li>
+</ol>
+<hr>
+<h3 id="4-real-world-case-study"><strong>4. Real-World Case Study</strong><a hidden class="anchor" aria-hidden="true" href="#4-real-world-case-study">#</a></h3>
+<p>Let’s consider a real-world example: deploying a personal blog using Hugo, PaperMod, and GitHub Actions. The blog consists of technical articles, tutorials, and project showcases. By automating the deployment process, the author ensures that every new article is live within minutes of being written.</p>
+<p>In this case, the author also integrated custom analytics and SEO tools into the workflow. This demonstrates the flexibility of the setup and how it can be extended to meet specific needs.</p>
+<hr>
+<h3 id="5-extending-and-optimizing-your-setup"><strong>5. Extending and Optimizing Your Setup</strong><a hidden class="anchor" aria-hidden="true" href="#5-extending-and-optimizing-your-setup">#</a></h3>
+<p>Once you have the basic setup in place, there are several ways to extend and optimize it:</p>
+<ul>
+<li><strong>Add Custom Shortcodes</strong>: Hugo supports custom shortcodes, allowing you to create reusable components for your site.</li>
+<li><strong>Implement Versioning</strong>: Use Git tags to version your site’s content and track changes over time.</li>
+<li><strong>Optimize Build Times</strong>: Experiment with different Hugo configurations to reduce build times, especially for larger sites.</li>
+<li><strong>Add Pre-Commit Hooks</strong>: Use tools like <code>pre-commit</code> to run linting and formatting checks before committing changes.</li>
+</ul>
+<hr>
+<h3 id="6-conclusion"><strong>6. Conclusion</strong><a hidden class="anchor" aria-hidden="true" href="#6-conclusion">#</a></h3>
+<p>By combining Hugo, PaperMod, and GitHub Actions, you can create a fast, modern, and automated workflow for building and deploying static sites. This setup is ideal for developers who value simplicity, performance, and scalability. Whether you’re building a personal blog, a documentation site, or a portfolio, this approach ensures that your content is always up-to-date and accessible.</p>
+<p>Now it’s your turn! Have you used Hugo and GitHub Actions before? How do you handle static site deployment? Let me know in the comments below.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/hugo/">Hugo</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/papermod/">PaperMod</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/ci/cd/">CI/CD</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/github-actions/">GitHub Actions</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/static-site/">Static Site</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/deployment/">Deployment</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/the-digital-battlefield-combating-forged-identity-documents-in-the-modern-age/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>The Digital Battlefield: Combating Forged Identity Documents in the Modern Age</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/the-future-of-passwordless-authentication-trends-and-implications/">
+    <span class="title">Next »</span>
+    <br>
+    <span>The Future of Passwordless Authentication: Trends and Implications</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/setting-up-a-cicd-pipeline-to-kubernetes-with-github-actions/" class="custom-link">
+              Setting Up a CI/CD Pipeline to Kubernetes with GitHub Actions
+            </a>
+            <small class="custom-date">2025-05-28</small>
+          </li>
+          
+        
+      
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/integrating-iam-security-testing-into-cicd-pipelines/" class="custom-link">
+              Integrating IAM Security Testing into CI/CD Pipelines
+            </a>
+            <small class="custom-date">2025-05-18</small>
+          </li>
+          
+        
+      
+
+      
+    </ul>
+
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/forgerock-identity-gateway-api-security-best-practices/" class="custom-link">
+                ForgeRock Identity Gateway: API Security Best Practices
+              </a>
+              <small class="custom-date">2025-06-02</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/designing-containerized-java-microservice-architecture/" class="custom-link">
+                Designing Containerized Java Microservice Architecture
+              </a>
+              <small class="custom-date">2025-06-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/forgerock-vs-keycloak-choosing-the-right-iam-solution-for-your-organization/" class="custom-link">
+                ForgeRock vs Keycloak: Choosing the Right IAM Solution for Your Organization
+              </a>
+              <small class="custom-date">2025-05-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/setting-up-a-cicd-pipeline-to-kubernetes-with-github-actions/" class="custom-link">
+                Setting Up a CI/CD Pipeline to Kubernetes with GitHub Actions
+              </a>
+              <small class="custom-date">2025-05-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/deploying-highly-available-java-microservices-on-kubernetes-a-step-by-step-guide/" class="custom-link">
+                Deploying Highly Available Java Microservices on Kubernetes: A Step-by-Step Guide
+              </a>
+              <small class="custom-date">2025-05-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>SAML Security: Digital Signatures, Encryption, and X.509 Certificate Verification | IAMDevBox</title>
+<meta name="keywords" content="SAML Security, XML Digital Signature, XML Encryption, X.509 Certificates, Replay Attack Prevention">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/saml-security-digital-signatures-encryption-and-x509-certificate-verification/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css" integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF&#43;13Dyqob6ASlTrTye8=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/saml-security-digital-signatures-encryption-and-x509-certificate-verification/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+  <link rel="stylesheet" href="/css/custom.css">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/saml-security-digital-signatures-encryption-and-x509-certificate-verification/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="SAML Security: Digital Signatures, Encryption, and X.509 Certificate Verification">
+  <meta property="og:description" content="Security Assertion Markup Language (SAML) employs robust security mechanisms to ensure secure identity federation. This post examines SAML’s cryptographic foundations, focusing on XML Digital Signatures, XML Encryption, X.509 certificate verification, and defenses against replay attacks.
+1. XML Digital Signatures in SAML SAML messages utilize XML Digital Signature (XML DSig) to guarantee message integrity and authenticity through asymmetric cryptography.
+Implementation Details:
+Signature Generation: Apply canonicalization (typically Exclusive XML Canonicalization) to normalize the XML structure Generate a message digest using SHA-256 or stronger algorithms Encrypt the digest with the sender’s private key Embed the signature in a &lt;ds:Signature&gt; element containing: SignedInfo (canonicalization method, signature algorithm, references) SignatureValue KeyInfo (optional X.509 certificate) Verification Process:">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-05-07T11:25:38+00:00">
+    <meta property="article:modified_time" content="2025-05-07T11:25:38-04:00">
+    <meta property="article:tag" content="SAML Security">
+    <meta property="article:tag" content="XML Digital Signature">
+    <meta property="article:tag" content="XML Encryption">
+    <meta property="article:tag" content="X.509 Certificates">
+    <meta property="article:tag" content="Replay Attack Prevention">
+      <meta property="og:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:title" content="SAML Security: Digital Signatures, Encryption, and X.509 Certificate Verification">
+<meta name="twitter:description" content="Security Assertion Markup Language (SAML) employs robust security mechanisms to ensure secure identity federation. This post examines SAML&rsquo;s cryptographic foundations, focusing on XML Digital Signatures, XML Encryption, X.509 certificate verification, and defenses against replay attacks.
+1. XML Digital Signatures in SAML
+SAML messages utilize XML Digital Signature (XML DSig) to guarantee message integrity and authenticity through asymmetric cryptography.
+Implementation Details:
+
+Signature Generation:
+
+Apply canonicalization (typically Exclusive XML Canonicalization) to normalize the XML structure
+Generate a message digest using SHA-256 or stronger algorithms
+Encrypt the digest with the sender&rsquo;s private key
+Embed the signature in a &lt;ds:Signature&gt; element containing:
+
+SignedInfo (canonicalization method, signature algorithm, references)
+SignatureValue
+KeyInfo (optional X.509 certificate)
+
+
+
+
+
+Verification Process:">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "SAML Security: Digital Signatures, Encryption, and X.509 Certificate Verification",
+      "item": "https://www.iamdevbox.com/posts/saml-security-digital-signatures-encryption-and-x509-certificate-verification/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "SAML Security: Digital Signatures, Encryption, and X.509 Certificate Verification",
+  "name": "SAML Security: Digital Signatures, Encryption, and X.509 Certificate Verification",
+  "description": "Security Assertion Markup Language (SAML) employs robust security mechanisms to ensure secure identity federation. This post examines SAML\u0026rsquo;s cryptographic foundations, focusing on XML Digital Signatures, XML Encryption, X.509 certificate verification, and defenses against replay attacks.\n1. XML Digital Signatures in SAML SAML messages utilize XML Digital Signature (XML DSig) to guarantee message integrity and authenticity through asymmetric cryptography.\nImplementation Details:\nSignature Generation: Apply canonicalization (typically Exclusive XML Canonicalization) to normalize the XML structure Generate a message digest using SHA-256 or stronger algorithms Encrypt the digest with the sender\u0026rsquo;s private key Embed the signature in a \u0026lt;ds:Signature\u0026gt; element containing: SignedInfo (canonicalization method, signature algorithm, references) SignatureValue KeyInfo (optional X.509 certificate) Verification Process:\n",
+  "keywords": [
+    "SAML Security", "XML Digital Signature", "XML Encryption", "X.509 Certificates", "Replay Attack Prevention"
+  ],
+  "articleBody": "Security Assertion Markup Language (SAML) employs robust security mechanisms to ensure secure identity federation. This post examines SAML’s cryptographic foundations, focusing on XML Digital Signatures, XML Encryption, X.509 certificate verification, and defenses against replay attacks.\n1. XML Digital Signatures in SAML SAML messages utilize XML Digital Signature (XML DSig) to guarantee message integrity and authenticity through asymmetric cryptography.\nImplementation Details:\nSignature Generation: Apply canonicalization (typically Exclusive XML Canonicalization) to normalize the XML structure Generate a message digest using SHA-256 or stronger algorithms Encrypt the digest with the sender’s private key Embed the signature in a element containing: SignedInfo (canonicalization method, signature algorithm, references) SignatureValue KeyInfo (optional X.509 certificate) Verification Process:\nValidate the certificate chain and revocation status Re-canonicalize the signed elements Recompute the digest and compare with the decrypted signature Verify the signature covers all required elements 2. XML Encryption in SAML SAML implements XML Encryption to protect sensitive assertion data through a hybrid encryption approach.\nEncryption Workflow:\nGenerate a random symmetric key (AES-256 recommended) Encrypt the payload data with the symmetric key Encrypt the symmetric key with the recipient’s public key (RSA-OAEP preferred) Structure the encrypted data as: containing: Encryption method CipherValue KeyInfo with encrypted key Optional for key transport Decryption Considerations:\nImplement proper key wrapping for symmetric key protection Support multiple encryption algorithms for interoperability Validate encrypted data size limitations 3. X.509 Certificate Validation Proper certificate handling is critical for SAML security operations.\nComprehensive Validation Checklist:\nChain Validation:\nVerify root CA trust Check intermediate certificates Validate path constraints Certificate Properties:\nConfirm valid time window Verify key usage extensions Check subject alternative names Revocation Checking:\nImplement OCSP stapling Support CRL distribution points Enforce revocation checking policies Operational Best Practices:\nMaintain separate certificates for signing and encryption Implement certificate pinning where appropriate Enforce strong cryptographic algorithms (minimum RSA-2048, ECDSA-256) 4. Replay Attack Mitigation SAML implementations must incorporate multiple defenses against message replay.\nDefensive Strategies:\nTemporal Controls:\nEnforce strict time windows (recommended ≤5 minutes) Validate timestamps Implement clock synchronization (NTP) Message Tracking:\nMaintain an assertion ID registry Implement sliding window expiration Log all processed assertions Protocol Enhancements:\nRequire elements Implement signed audience restrictions Enforce one-time-use policies Operational Safeguards:\nMonitor for duplicate message IDs Implement rate limiting Conduct regular security audits Security Implementation Checklist For production SAML deployments:\nEnforce XML signature verification Implement mandatory element encryption Configure strict certificate validation Deploy replay protection mechanisms Maintain comprehensive security logging These security measures form the foundation of trustworthy SAML implementations, ensuring secure identity propagation across organizational boundaries while maintaining compliance with security best practices.\n",
+  "wordCount" : "426",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/static/IAMDevBox.com.png","datePublished": "2025-05-07T11:25:38Z",
+  "dateModified": "2025-05-07T11:25:38-04:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/saml-security-digital-signatures-encryption-and-x509-certificate-verification/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script><meta name="description" content="SAML Security: Digital Signatures, Encryption, and X.509 Certificate Verification - IAMDevBox"><script>
+    window.addEventListener("DOMContentLoaded", async () => {
+        if (document.querySelector('.mermaid')) {
+        const mermaid = await import('https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs');
+        mermaid.default.initialize({ startOnLoad: true, theme: "default" });
+        }
+    });
+    </script>
+
+
+    
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-B6QCH29975');
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      SAML Security: Digital Signatures, Encryption, and X.509 Certificate Verification
+    </h1>
+    <div class="post-meta">2 min&nbsp;·&nbsp;426 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#1-xml-digital-signatures-in-saml" aria-label="1. XML Digital Signatures in SAML">1. XML Digital Signatures in SAML</a></li>
+                <li>
+                    <a href="#2-xml-encryption-in-saml" aria-label="2. XML Encryption in SAML">2. XML Encryption in SAML</a></li>
+                <li>
+                    <a href="#3-x509-certificate-validation" aria-label="3. X.509 Certificate Validation">3. X.509 Certificate Validation</a></li>
+                <li>
+                    <a href="#4-replay-attack-mitigation" aria-label="4. Replay Attack Mitigation">4. Replay Attack Mitigation</a></li>
+                <li>
+                    <a href="#security-implementation-checklist" aria-label="Security Implementation Checklist">Security Implementation Checklist</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>Security Assertion Markup Language (SAML) employs robust security mechanisms to ensure secure identity federation. This post examines SAML&rsquo;s cryptographic foundations, focusing on XML Digital Signatures, XML Encryption, X.509 certificate verification, and defenses against replay attacks.</p>
+<h3 id="1-xml-digital-signatures-in-saml"><strong>1. XML Digital Signatures in SAML</strong><a hidden class="anchor" aria-hidden="true" href="#1-xml-digital-signatures-in-saml">#</a></h3>
+<p>SAML messages utilize XML Digital Signature (XML DSig) to guarantee message integrity and authenticity through asymmetric cryptography.</p>
+<p><strong>Implementation Details:</strong></p>
+<ul>
+<li><strong>Signature Generation:</strong>
+<ol>
+<li>Apply canonicalization (typically Exclusive XML Canonicalization) to normalize the XML structure</li>
+<li>Generate a message digest using SHA-256 or stronger algorithms</li>
+<li>Encrypt the digest with the sender&rsquo;s private key</li>
+<li>Embed the signature in a <code>&lt;ds:Signature&gt;</code> element containing:
+<ul>
+<li>SignedInfo (canonicalization method, signature algorithm, references)</li>
+<li>SignatureValue</li>
+<li>KeyInfo (optional X.509 certificate)</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+<p><strong>Verification Process:</strong></p>
+<ol>
+<li>Validate the certificate chain and revocation status</li>
+<li>Re-canonicalize the signed elements</li>
+<li>Recompute the digest and compare with the decrypted signature</li>
+<li>Verify the signature covers all required elements</li>
+</ol>
+<h3 id="2-xml-encryption-in-saml"><strong>2. XML Encryption in SAML</strong><a hidden class="anchor" aria-hidden="true" href="#2-xml-encryption-in-saml">#</a></h3>
+<p>SAML implements XML Encryption to protect sensitive assertion data through a hybrid encryption approach.</p>
+<p><strong>Encryption Workflow:</strong></p>
+<ol>
+<li>Generate a random symmetric key (AES-256 recommended)</li>
+<li>Encrypt the payload data with the symmetric key</li>
+<li>Encrypt the symmetric key with the recipient&rsquo;s public key (RSA-OAEP preferred)</li>
+<li>Structure the encrypted data as:
+<ul>
+<li><code>&lt;EncryptedData&gt;</code> containing:
+<ul>
+<li>Encryption method</li>
+<li>CipherValue</li>
+<li>KeyInfo with encrypted key</li>
+</ul>
+</li>
+<li>Optional <code>&lt;EncryptedKey&gt;</code> for key transport</li>
+</ul>
+</li>
+</ol>
+<p><strong>Decryption Considerations:</strong></p>
+<ul>
+<li>Implement proper key wrapping for symmetric key protection</li>
+<li>Support multiple encryption algorithms for interoperability</li>
+<li>Validate encrypted data size limitations</li>
+</ul>
+<h3 id="3-x509-certificate-validation"><strong>3. X.509 Certificate Validation</strong><a hidden class="anchor" aria-hidden="true" href="#3-x509-certificate-validation">#</a></h3>
+<p>Proper certificate handling is critical for SAML security operations.</p>
+<p><strong>Comprehensive Validation Checklist:</strong></p>
+<ol>
+<li>
+<p><strong>Chain Validation:</strong></p>
+<ul>
+<li>Verify root CA trust</li>
+<li>Check intermediate certificates</li>
+<li>Validate path constraints</li>
+</ul>
+</li>
+<li>
+<p><strong>Certificate Properties:</strong></p>
+<ul>
+<li>Confirm valid time window</li>
+<li>Verify key usage extensions</li>
+<li>Check subject alternative names</li>
+</ul>
+</li>
+<li>
+<p><strong>Revocation Checking:</strong></p>
+<ul>
+<li>Implement OCSP stapling</li>
+<li>Support CRL distribution points</li>
+<li>Enforce revocation checking policies</li>
+</ul>
+</li>
+</ol>
+<p><strong>Operational Best Practices:</strong></p>
+<ul>
+<li>Maintain separate certificates for signing and encryption</li>
+<li>Implement certificate pinning where appropriate</li>
+<li>Enforce strong cryptographic algorithms (minimum RSA-2048, ECDSA-256)</li>
+</ul>
+<h3 id="4-replay-attack-mitigation"><strong>4. Replay Attack Mitigation</strong><a hidden class="anchor" aria-hidden="true" href="#4-replay-attack-mitigation">#</a></h3>
+<p>SAML implementations must incorporate multiple defenses against message replay.</p>
+<p><strong>Defensive Strategies:</strong></p>
+<ol>
+<li>
+<p><strong>Temporal Controls:</strong></p>
+<ul>
+<li>Enforce strict <code>&lt;Conditions&gt;</code> time windows (recommended ≤5 minutes)</li>
+<li>Validate <code>&lt;IssueInstant&gt;</code> timestamps</li>
+<li>Implement clock synchronization (NTP)</li>
+</ul>
+</li>
+<li>
+<p><strong>Message Tracking:</strong></p>
+<ul>
+<li>Maintain an assertion ID registry</li>
+<li>Implement sliding window expiration</li>
+<li>Log all processed assertions</li>
+</ul>
+</li>
+<li>
+<p><strong>Protocol Enhancements:</strong></p>
+<ul>
+<li>Require <code>&lt;SubjectConfirmation&gt;</code> elements</li>
+<li>Implement signed audience restrictions</li>
+<li>Enforce one-time-use policies</li>
+</ul>
+</li>
+<li>
+<p><strong>Operational Safeguards:</strong></p>
+<ul>
+<li>Monitor for duplicate message IDs</li>
+<li>Implement rate limiting</li>
+<li>Conduct regular security audits</li>
+</ul>
+</li>
+</ol>
+<h3 id="security-implementation-checklist"><strong>Security Implementation Checklist</strong><a hidden class="anchor" aria-hidden="true" href="#security-implementation-checklist">#</a></h3>
+<p>For production SAML deployments:</p>
+<ul>
+<li><input disabled="" type="checkbox"> Enforce XML signature verification</li>
+<li><input disabled="" type="checkbox"> Implement mandatory element encryption</li>
+<li><input disabled="" type="checkbox"> Configure strict certificate validation</li>
+<li><input disabled="" type="checkbox"> Deploy replay protection mechanisms</li>
+<li><input disabled="" type="checkbox"> Maintain comprehensive security logging</li>
+</ul>
+<p>These security measures form the foundation of trustworthy SAML implementations, ensuring secure identity propagation across organizational boundaries while maintaining compliance with security best practices.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/saml-security/">SAML Security</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/xml-digital-signature/">XML Digital Signature</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/xml-encryption/">XML Encryption</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/x.509-certificates/">X.509 Certificates</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/replay-attack-prevention/">Replay Attack Prevention</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/how-to-install-configure-and-launch-oracle-cloud-infrastructure-oci-free-tier-instances-via-cli/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>How to Install, Configure, and Launch Oracle Cloud Infrastructure (OCI) Free Tier Instances via CLI</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/configuring-saml-login-with-spring-security/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Configuring SAML Login with Spring Security</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+      
+
+      
+        <li>No related articles found. Try checking out the latest articles.</li>
+      
+    </ul>
+
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/forgerock-identity-gateway-api-security-best-practices/" class="custom-link">
+                ForgeRock Identity Gateway: API Security Best Practices
+              </a>
+              <small class="custom-date">2025-06-02</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/designing-containerized-java-microservice-architecture/" class="custom-link">
+                Designing Containerized Java Microservice Architecture
+              </a>
+              <small class="custom-date">2025-06-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/forgerock-vs-keycloak-choosing-the-right-iam-solution-for-your-organization/" class="custom-link">
+                ForgeRock vs Keycloak: Choosing the Right IAM Solution for Your Organization
+              </a>
+              <small class="custom-date">2025-05-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/setting-up-a-cicd-pipeline-to-kubernetes-with-github-actions/" class="custom-link">
+                Setting Up a CI/CD Pipeline to Kubernetes with GitHub Actions
+              </a>
+              <small class="custom-date">2025-05-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/deploying-highly-available-java-microservices-on-kubernetes-a-step-by-step-guide/" class="custom-link">
+                Deploying Highly Available Java Microservices on Kubernetes: A Step-by-Step Guide
+              </a>
+              <small class="custom-date">2025-05-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

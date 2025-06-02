@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Understanding the Authorization Code Flow with PKCE in OAuth 2.0 | IAMDevBox</title>
+<meta name="keywords" content="OAuth 2.0, Authorization Code Flow, PKCE, Mobile Security, SPA, Authentication">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/understanding-the-authorization-code-flow-with-pkce-in-oauth-20/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css" integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF&#43;13Dyqob6ASlTrTye8=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/understanding-the-authorization-code-flow-with-pkce-in-oauth-20/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+  <link rel="stylesheet" href="/css/custom.css">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/understanding-the-authorization-code-flow-with-pkce-in-oauth-20/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Understanding the Authorization Code Flow with PKCE in OAuth 2.0">
+  <meta property="og:description" content="OAuth 2.0 is a widely used authorization framework that allows applications to obtain limited access to user resources without handling user credentials directly. The Authorization Code Flow with PKCE (Proof Key for Code Exchange) is a security-enhanced version of the Authorization Code Flow, specifically designed to address vulnerabilities in public clients like mobile apps and single-page applications (SPAs) that cannot safely store a client secret.
+Why PKCE Is Needed Traditional Authorization Code Flow relies on a client_secret to authenticate the client when exchanging an authorization code for a token. In public clients (like browser apps or mobile apps), this secret cannot be safely stored. Without proper safeguards, attackers could intercept the authorization code during redirection and exchange it for tokens.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:modified_time" content="2025-05-07T09:28:02-04:00">
+    <meta property="article:tag" content="OAuth 2.0">
+    <meta property="article:tag" content="Authorization Code Flow">
+    <meta property="article:tag" content="PKCE">
+    <meta property="article:tag" content="Mobile Security">
+    <meta property="article:tag" content="SPA">
+    <meta property="article:tag" content="Authentication">
+      <meta property="og:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:title" content="Understanding the Authorization Code Flow with PKCE in OAuth 2.0">
+<meta name="twitter:description" content="OAuth 2.0 is a widely used authorization framework that allows applications to obtain limited access to user resources without handling user credentials directly. The Authorization Code Flow with PKCE (Proof Key for Code Exchange) is a security-enhanced version of the Authorization Code Flow, specifically designed to address vulnerabilities in public clients like mobile apps and single-page applications (SPAs) that cannot safely store a client secret.
+Why PKCE Is Needed
+Traditional Authorization Code Flow relies on a client_secret to authenticate the client when exchanging an authorization code for a token. In public clients (like browser apps or mobile apps), this secret cannot be safely stored. Without proper safeguards, attackers could intercept the authorization code during redirection and exchange it for tokens.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Understanding the Authorization Code Flow with PKCE in OAuth 2.0",
+      "item": "https://www.iamdevbox.com/posts/understanding-the-authorization-code-flow-with-pkce-in-oauth-20/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Understanding the Authorization Code Flow with PKCE in OAuth 2.0",
+  "name": "Understanding the Authorization Code Flow with PKCE in OAuth 2.0",
+  "description": "OAuth 2.0 is a widely used authorization framework that allows applications to obtain limited access to user resources without handling user credentials directly. The Authorization Code Flow with PKCE (Proof Key for Code Exchange) is a security-enhanced version of the Authorization Code Flow, specifically designed to address vulnerabilities in public clients like mobile apps and single-page applications (SPAs) that cannot safely store a client secret.\nWhy PKCE Is Needed Traditional Authorization Code Flow relies on a client_secret to authenticate the client when exchanging an authorization code for a token. In public clients (like browser apps or mobile apps), this secret cannot be safely stored. Without proper safeguards, attackers could intercept the authorization code during redirection and exchange it for tokens.\n",
+  "keywords": [
+    "OAuth 2.0", "Authorization Code Flow", "PKCE", "Mobile Security", "SPA", "Authentication"
+  ],
+  "articleBody": "OAuth 2.0 is a widely used authorization framework that allows applications to obtain limited access to user resources without handling user credentials directly. The Authorization Code Flow with PKCE (Proof Key for Code Exchange) is a security-enhanced version of the Authorization Code Flow, specifically designed to address vulnerabilities in public clients like mobile apps and single-page applications (SPAs) that cannot safely store a client secret.\nWhy PKCE Is Needed Traditional Authorization Code Flow relies on a client_secret to authenticate the client when exchanging an authorization code for a token. In public clients (like browser apps or mobile apps), this secret cannot be safely stored. Without proper safeguards, attackers could intercept the authorization code during redirection and exchange it for tokens.\nPKCE mitigates this threat by introducing a one-time verification mechanism between the client and the authorization server that does not rely on a client secret, making the flow secure for public clients.\nHow Authorization Code Flow with PKCE Works Here’s a step-by-step breakdown of the process:\n1. Client Generates a Code Verifier and Code Challenge The code verifier is a cryptographically random string (43–128 characters). The code challenge is derived by applying a SHA256 hash (or using plain) to the code verifier and base64-url encoding the result. code_verifier = \"randomly_generated_string\" code_challenge = BASE64URL-ENCODE(SHA256(code_verifier)) 2. Client Initiates Authorization Request The client redirects the user to the authorization server’s /authorize endpoint with the following parameters:\nresponse_type=code client_id redirect_uri scope code_challenge code_challenge_method=S256 GET /authorize? response_type=code\u0026 client_id=your-client-id\u0026 redirect_uri=https://app.com/callback\u0026 scope=openid profile email\u0026 code_challenge=E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM\u0026 code_challenge_method=S256 3. User Authenticates and Grants Access The user logs in and approves the authorization request. The authorization server redirects back to the redirect_uri with an authorization code.\n4. Client Sends Token Request The client then sends a POST request to the /token endpoint including:\ngrant_type=authorization_code code (received in step 3) redirect_uri (must match original) client_id code_verifier POST /token Content-Type: application/x-www-form-urlencoded grant_type=authorization_code\u0026 code=SplxlOBeZQQYbYS6WxSbIA\u0026 redirect_uri=https://app.com/callback\u0026 client_id=your-client-id\u0026 code_verifier=randomly_generated_string 5. Authorization Server Validates Code Verifier The server hashes the code_verifier and compares it to the original code_challenge. If they match, it returns:\naccess_token id_token (if OpenID Connect is used) refresh_token (if applicable) 6. Client Uses Access Token The client includes the access_token in the Authorization: Bearer header to access protected resources.\nSecurity Advantages of PKCE Protects against authorization code interception Eliminates reliance on client secrets for public clients Recommended by the OAuth 2.1 draft for all client types When to Use PKCE Mobile applications (iOS, Android) Single-page applications (SPA) Any client that cannot securely store a client_secret Conclusion The Authorization Code Flow with PKCE represents a modern, secure way for public clients to participate in OAuth 2.0. By binding the authorization code to a dynamically generated key pair, PKCE eliminates a major vulnerability and strengthens trust in user authorization without requiring secret storage. As OAuth continues to evolve, PKCE is considered a best practice and should be the default choice for native and browser-based applications.\n",
+  "wordCount" : "480",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/static/IAMDevBox.com.png","datePublished": "0001-01-01T00:00:00Z",
+  "dateModified": "2025-05-07T09:28:02-04:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/understanding-the-authorization-code-flow-with-pkce-in-oauth-20/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script><meta name="description" content="Understanding the Authorization Code Flow with PKCE in OAuth 2.0 - IAMDevBox"><script>
+    window.addEventListener("DOMContentLoaded", async () => {
+        if (document.querySelector('.mermaid')) {
+        const mermaid = await import('https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs');
+        mermaid.default.initialize({ startOnLoad: true, theme: "default" });
+        }
+    });
+    </script>
+
+
+    
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-B6QCH29975');
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Understanding the Authorization Code Flow with PKCE in OAuth 2.0
+    </h1>
+    <div class="post-meta">3 min&nbsp;·&nbsp;480 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#why-pkce-is-needed" aria-label="Why PKCE Is Needed">Why PKCE Is Needed</a></li>
+                <li>
+                    <a href="#how-authorization-code-flow-with-pkce-works" aria-label="How Authorization Code Flow with PKCE Works">How Authorization Code Flow with PKCE Works</a><ul>
+                        
+                <li>
+                    <a href="#1-client-generates-a-code-verifier-and-code-challenge" aria-label="1. Client Generates a Code Verifier and Code Challenge">1. Client Generates a Code Verifier and Code Challenge</a></li>
+                <li>
+                    <a href="#2-client-initiates-authorization-request" aria-label="2. Client Initiates Authorization Request">2. Client Initiates Authorization Request</a></li>
+                <li>
+                    <a href="#3-user-authenticates-and-grants-access" aria-label="3. User Authenticates and Grants Access">3. User Authenticates and Grants Access</a></li>
+                <li>
+                    <a href="#4-client-sends-token-request" aria-label="4. Client Sends Token Request">4. Client Sends Token Request</a></li>
+                <li>
+                    <a href="#5-authorization-server-validates-code-verifier" aria-label="5. Authorization Server Validates Code Verifier">5. Authorization Server Validates Code Verifier</a></li>
+                <li>
+                    <a href="#6-client-uses-access-token" aria-label="6. Client Uses Access Token">6. Client Uses Access Token</a></li></ul>
+                </li>
+                <li>
+                    <a href="#security-advantages-of-pkce" aria-label="Security Advantages of PKCE">Security Advantages of PKCE</a></li>
+                <li>
+                    <a href="#when-to-use-pkce" aria-label="When to Use PKCE">When to Use PKCE</a></li>
+                <li>
+                    <a href="#conclusion" aria-label="Conclusion">Conclusion</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>OAuth 2.0 is a widely used authorization framework that allows applications to obtain limited access to user resources without handling user credentials directly. The <strong>Authorization Code Flow with PKCE (Proof Key for Code Exchange)</strong> is a security-enhanced version of the Authorization Code Flow, specifically designed to address vulnerabilities in <strong>public clients</strong> like <strong>mobile apps</strong> and <strong>single-page applications (SPAs)</strong> that cannot safely store a client secret.</p>
+<h3 id="why-pkce-is-needed">Why PKCE Is Needed<a hidden class="anchor" aria-hidden="true" href="#why-pkce-is-needed">#</a></h3>
+<p>Traditional Authorization Code Flow relies on a <code>client_secret</code> to authenticate the client when exchanging an authorization code for a token. In public clients (like browser apps or mobile apps), this secret cannot be safely stored. Without proper safeguards, attackers could intercept the authorization code during redirection and exchange it for tokens.</p>
+<p>PKCE mitigates this threat by introducing a one-time verification mechanism between the client and the authorization server that does <strong>not rely on a client secret</strong>, making the flow secure for public clients.</p>
+<h3 id="how-authorization-code-flow-with-pkce-works">How Authorization Code Flow with PKCE Works<a hidden class="anchor" aria-hidden="true" href="#how-authorization-code-flow-with-pkce-works">#</a></h3>
+<p>Here’s a step-by-step breakdown of the process:</p>
+<h4 id="1-client-generates-a-code-verifier-and-code-challenge">1. <strong>Client Generates a Code Verifier and Code Challenge</strong><a hidden class="anchor" aria-hidden="true" href="#1-client-generates-a-code-verifier-and-code-challenge">#</a></h4>
+<ul>
+<li>The <strong>code verifier</strong> is a cryptographically random string (43–128 characters).</li>
+<li>The <strong>code challenge</strong> is derived by applying a SHA256 hash (or using plain) to the code verifier and base64-url encoding the result.</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-plaintext" data-lang="plaintext"><span style="display:flex;"><span>code_verifier = &#34;randomly_generated_string&#34;
+</span></span><span style="display:flex;"><span>code_challenge = BASE64URL-ENCODE(SHA256(code_verifier))
+</span></span></code></pre></div><h4 id="2-client-initiates-authorization-request">2. <strong>Client Initiates Authorization Request</strong><a hidden class="anchor" aria-hidden="true" href="#2-client-initiates-authorization-request">#</a></h4>
+<p>The client redirects the user to the authorization server’s <code>/authorize</code> endpoint with the following parameters:</p>
+<ul>
+<li><code>response_type=code</code></li>
+<li><code>client_id</code></li>
+<li><code>redirect_uri</code></li>
+<li><code>scope</code></li>
+<li><code>code_challenge</code></li>
+<li><code>code_challenge_method=S256</code></li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-http" data-lang="http"><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">GET /authorize?
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">  response_type=code&amp;
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">  client_id=your-client-id&amp;
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">  redirect_uri=https://app.com/callback&amp;
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">  scope=openid profile email&amp;
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">  code_challenge=E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM&amp;
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">  code_challenge_method=S256
+</span></span></span></code></pre></div><h4 id="3-user-authenticates-and-grants-access">3. <strong>User Authenticates and Grants Access</strong><a hidden class="anchor" aria-hidden="true" href="#3-user-authenticates-and-grants-access">#</a></h4>
+<p>The user logs in and approves the authorization request. The authorization server redirects back to the <code>redirect_uri</code> with an <strong>authorization code</strong>.</p>
+<h4 id="4-client-sends-token-request">4. <strong>Client Sends Token Request</strong><a hidden class="anchor" aria-hidden="true" href="#4-client-sends-token-request">#</a></h4>
+<p>The client then sends a <code>POST</code> request to the <code>/token</code> endpoint including:</p>
+<ul>
+<li><code>grant_type=authorization_code</code></li>
+<li><code>code</code> (received in step 3)</li>
+<li><code>redirect_uri</code> (must match original)</li>
+<li><code>client_id</code></li>
+<li><code>code_verifier</code></li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-http" data-lang="http"><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">POST /token
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">Content-Type: application/x-www-form-urlencoded
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">grant_type=authorization_code&amp;
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">code=SplxlOBeZQQYbYS6WxSbIA&amp;
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">redirect_uri=https://app.com/callback&amp;
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">client_id=your-client-id&amp;
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">code_verifier=randomly_generated_string
+</span></span></span></code></pre></div><h4 id="5-authorization-server-validates-code-verifier">5. <strong>Authorization Server Validates Code Verifier</strong><a hidden class="anchor" aria-hidden="true" href="#5-authorization-server-validates-code-verifier">#</a></h4>
+<p>The server hashes the <code>code_verifier</code> and compares it to the original <code>code_challenge</code>. If they match, it returns:</p>
+<ul>
+<li><code>access_token</code></li>
+<li><code>id_token</code> (if OpenID Connect is used)</li>
+<li><code>refresh_token</code> (if applicable)</li>
+</ul>
+<h4 id="6-client-uses-access-token">6. <strong>Client Uses Access Token</strong><a hidden class="anchor" aria-hidden="true" href="#6-client-uses-access-token">#</a></h4>
+<p>The client includes the <code>access_token</code> in the <code>Authorization: Bearer</code> header to access protected resources.</p>
+<hr>
+<h3 id="security-advantages-of-pkce">Security Advantages of PKCE<a hidden class="anchor" aria-hidden="true" href="#security-advantages-of-pkce">#</a></h3>
+<ul>
+<li><strong>Protects against authorization code interception</strong></li>
+<li><strong>Eliminates reliance on client secrets for public clients</strong></li>
+<li><strong>Recommended by the OAuth 2.1 draft for all client types</strong></li>
+</ul>
+<hr>
+<h3 id="when-to-use-pkce">When to Use PKCE<a hidden class="anchor" aria-hidden="true" href="#when-to-use-pkce">#</a></h3>
+<ul>
+<li>Mobile applications (iOS, Android)</li>
+<li>Single-page applications (SPA)</li>
+<li>Any client that cannot securely store a <code>client_secret</code></li>
+</ul>
+<hr>
+<h3 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h3>
+<p>The Authorization Code Flow with PKCE represents a modern, secure way for public clients to participate in OAuth 2.0. By binding the authorization code to a dynamically generated key pair, PKCE eliminates a major vulnerability and strengthens trust in user authorization without requiring secret storage. As OAuth continues to evolve, PKCE is considered a best practice and should be the default choice for native and browser-based applications.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/oauth-2.0/">OAuth 2.0</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/authorization-code-flow/">Authorization Code Flow</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/pkce/">PKCE</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/mobile-security/">Mobile Security</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/spa/">SPA</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/authentication/">Authentication</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/understanding-the-authorization-code-flow-in-oauth-20/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Understanding the Authorization Code Flow in OAuth 2.0</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/understanding-the-basic-components-of-saml/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Understanding the Basic Components of SAML</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/forgerock-identity-gateway-api-security-best-practices/" class="custom-link">
+              ForgeRock Identity Gateway: API Security Best Practices
+            </a>
+            <small class="custom-date">2025-06-02</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/the-evolution-of-multi-tenant-identity-management-systems-architecture/" class="custom-link">
+              The Evolution of Multi-Tenant Identity Management Systems Architecture
+            </a>
+            <small class="custom-date">2025-05-28</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/designing-a-distributed-authorization-server-architecture/" class="custom-link">
+              Designing a Distributed Authorization Server Architecture
+            </a>
+            <small class="custom-date">2025-05-26</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/integrating-pingone-advanced-identity-cloud-a-comprehensive-guide-for-spa-and-api/" class="custom-link">
+              Integrating PingOne Advanced Identity Cloud: A Comprehensive Guide for SPA and API
+            </a>
+            <small class="custom-date">2025-05-24</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/implementing-federated-identity-authentication-with-forgerock-and-google-workspace-idp-mode/" class="custom-link">
+              Implementing Federated Identity Authentication with ForgeRock and Google Workspace (IdP Mode)
+            </a>
+            <small class="custom-date">2025-05-24</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/forgerock-identity-gateway-api-security-best-practices/" class="custom-link">
+                ForgeRock Identity Gateway: API Security Best Practices
+              </a>
+              <small class="custom-date">2025-06-02</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/designing-containerized-java-microservice-architecture/" class="custom-link">
+                Designing Containerized Java Microservice Architecture
+              </a>
+              <small class="custom-date">2025-06-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/forgerock-vs-keycloak-choosing-the-right-iam-solution-for-your-organization/" class="custom-link">
+                ForgeRock vs Keycloak: Choosing the Right IAM Solution for Your Organization
+              </a>
+              <small class="custom-date">2025-05-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/setting-up-a-cicd-pipeline-to-kubernetes-with-github-actions/" class="custom-link">
+                Setting Up a CI/CD Pipeline to Kubernetes with GitHub Actions
+              </a>
+              <small class="custom-date">2025-05-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/deploying-highly-available-java-microservices-on-kubernetes-a-step-by-step-guide/" class="custom-link">
+                Deploying Highly Available Java Microservices on Kubernetes: A Step-by-Step Guide
+              </a>
+              <small class="custom-date">2025-05-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

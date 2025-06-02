@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Mastering SAML Response Debugging and Troubleshooting Techniques | IAMDevBox</title>
+<meta name="keywords" content="SAML, Authentication, Debugging, Signature Validation, Identity Federation">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/mastering-saml-response-debugging-and-troubleshooting-techniques/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css" integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF&#43;13Dyqob6ASlTrTye8=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/mastering-saml-response-debugging-and-troubleshooting-techniques/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+  <link rel="stylesheet" href="/css/custom.css">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/mastering-saml-response-debugging-and-troubleshooting-techniques/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Mastering SAML Response Debugging and Troubleshooting Techniques">
+  <meta property="og:description" content="Security Assertion Markup Language (SAML) is a cornerstone protocol in modern federated identity and Single Sign-On (SSO) architectures. While it greatly simplifies the login experience for users, debugging issues with SAML responses can be complex due to cryptographic signatures, strict protocol compliance, and encoding formats. This blog post walks through essential techniques to effectively debug and troubleshoot SAML responses, along with recommended tools and common errors.
+🛠️ Recommended Tools for Decoding SAML Responses To debug a SAML authentication issue, you must first be able to inspect the raw SAML response. Here are two essential tools every engineer should have:">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:modified_time" content="2025-05-07T09:45:28-04:00">
+    <meta property="article:tag" content="SAML">
+    <meta property="article:tag" content="Authentication">
+    <meta property="article:tag" content="Debugging">
+    <meta property="article:tag" content="Signature Validation">
+    <meta property="article:tag" content="Identity Federation">
+      <meta property="og:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:title" content="Mastering SAML Response Debugging and Troubleshooting Techniques">
+<meta name="twitter:description" content="Security Assertion Markup Language (SAML) is a cornerstone protocol in modern federated identity and Single Sign-On (SSO) architectures. While it greatly simplifies the login experience for users, debugging issues with SAML responses can be complex due to cryptographic signatures, strict protocol compliance, and encoding formats. This blog post walks through essential techniques to effectively debug and troubleshoot SAML responses, along with recommended tools and common errors.
+
+🛠️ Recommended Tools for Decoding SAML Responses
+To debug a SAML authentication issue, you must first be able to inspect the raw SAML response. Here are two essential tools every engineer should have:">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Mastering SAML Response Debugging and Troubleshooting Techniques",
+      "item": "https://www.iamdevbox.com/posts/mastering-saml-response-debugging-and-troubleshooting-techniques/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Mastering SAML Response Debugging and Troubleshooting Techniques",
+  "name": "Mastering SAML Response Debugging and Troubleshooting Techniques",
+  "description": "Security Assertion Markup Language (SAML) is a cornerstone protocol in modern federated identity and Single Sign-On (SSO) architectures. While it greatly simplifies the login experience for users, debugging issues with SAML responses can be complex due to cryptographic signatures, strict protocol compliance, and encoding formats. This blog post walks through essential techniques to effectively debug and troubleshoot SAML responses, along with recommended tools and common errors.\n🛠️ Recommended Tools for Decoding SAML Responses To debug a SAML authentication issue, you must first be able to inspect the raw SAML response. Here are two essential tools every engineer should have:\n",
+  "keywords": [
+    "SAML", "Authentication", "Debugging", "Signature Validation", "Identity Federation"
+  ],
+  "articleBody": "Security Assertion Markup Language (SAML) is a cornerstone protocol in modern federated identity and Single Sign-On (SSO) architectures. While it greatly simplifies the login experience for users, debugging issues with SAML responses can be complex due to cryptographic signatures, strict protocol compliance, and encoding formats. This blog post walks through essential techniques to effectively debug and troubleshoot SAML responses, along with recommended tools and common errors.\n🛠️ Recommended Tools for Decoding SAML Responses To debug a SAML authentication issue, you must first be able to inspect the raw SAML response. Here are two essential tools every engineer should have:\nSAMLTracer (Browser Extension): This Firefox and Chrome extension captures SAML messages in real-time as they are exchanged between the Identity Provider (IdP) and the Service Provider (SP). It shows the Base64-encoded SAML assertion, HTTP headers, and redirects, making it invaluable for live debugging.\nSAMLTool.com: A web-based suite offering SAML decoder, encoder, and signature verification utilities. You can paste a SAML response and get it decoded, formatted, and validated within seconds.\n🧪 Decoding and Analyzing the SAML Response When analyzing a SAML response, follow these key steps:\nBase64 Decode the SAML Response The SAML Response is typically transmitted in Base64-encoded format. Use a tool like SAMLTool or any Base64 decoder to decode it into raw XML.\nFormat the XML for Readability SAML assertions are structured XML documents. Formatting the XML helps reveal structure, namespaces, and hierarchical relationships, making it easier to locate key elements like , , and .\nValidate the Digital Signature Verifying the signature ensures the authenticity and integrity of the SAML assertion. This step checks if the response was indeed issued by the trusted IdP and hasn’t been tampered with. Most SAML toolkits and IdPs use X.509 certificates for this purpose.\n⚠️ Common SAML Errors and How to Fix Them ❌ Audience Mismatch This occurs when the Audience specified in the assertion does not match the expected entity ID (i.e., the SP’s identifier). Ensure your SP is configured with the correct entity ID and that the IdP is issuing responses for the correct audience.\n❌ Signature Invalid Invalid signatures usually result from:\nIncorrect or missing certificate configuration Changes in the SAML assertion post-signing XML canonicalization issues Always use the correct public certificate from the IdP and ensure no middleware or proxy modifies the assertion.\n⏰ Clock Skew SAML responses include time-based attributes such as NotBefore and NotOnOrAfter. If there’s a significant difference between the IdP and SP clocks, the assertion may be rejected. Most systems allow a clock skew tolerance (e.g., 3–5 minutes), but it’s best practice to synchronize clocks using NTP.\n🔄 Putting It All Together Troubleshooting SAML requires a methodical approach:\nCapture the SAML flow using SAMLTracer. Decode the SAML response with SAMLTool. Format the XML and check for values like Audience, Recipient, and time conditions. Validate the digital signature. Cross-check time settings and entity IDs. With the right tools and understanding, debugging SAML becomes a manageable and even enlightening process. Happy tracing! 🧩\n",
+  "wordCount" : "497",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/static/IAMDevBox.com.png","datePublished": "0001-01-01T00:00:00Z",
+  "dateModified": "2025-05-07T09:45:28-04:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/mastering-saml-response-debugging-and-troubleshooting-techniques/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script><meta name="description" content="Mastering SAML Response Debugging and Troubleshooting Techniques - IAMDevBox"><script>
+    window.addEventListener("DOMContentLoaded", async () => {
+        if (document.querySelector('.mermaid')) {
+        const mermaid = await import('https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs');
+        mermaid.default.initialize({ startOnLoad: true, theme: "default" });
+        }
+    });
+    </script>
+
+
+    
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-B6QCH29975');
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Mastering SAML Response Debugging and Troubleshooting Techniques
+    </h1>
+    <div class="post-meta">3 min&nbsp;·&nbsp;497 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#-recommended-tools-for-decoding-saml-responses" aria-label="🛠️ Recommended Tools for Decoding SAML Responses">🛠️ Recommended Tools for Decoding SAML Responses</a></li>
+                <li>
+                    <a href="#-decoding-and-analyzing-the-saml-response" aria-label="🧪 Decoding and Analyzing the SAML Response">🧪 Decoding and Analyzing the SAML Response</a></li>
+                <li>
+                    <a href="#-common-saml-errors-and-how-to-fix-them" aria-label="⚠️ Common SAML Errors and How to Fix Them">⚠️ Common SAML Errors and How to Fix Them</a><ul>
+                        
+                <li>
+                    <a href="#-audience-mismatch" aria-label="❌ Audience Mismatch">❌ Audience Mismatch</a></li>
+                <li>
+                    <a href="#-signature-invalid" aria-label="❌ Signature Invalid">❌ Signature Invalid</a></li>
+                <li>
+                    <a href="#-clock-skew" aria-label="⏰ Clock Skew">⏰ Clock Skew</a></li></ul>
+                </li>
+                <li>
+                    <a href="#-putting-it-all-together" aria-label="🔄 Putting It All Together">🔄 Putting It All Together</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>Security Assertion Markup Language (SAML) is a cornerstone protocol in modern federated identity and Single Sign-On (SSO) architectures. While it greatly simplifies the login experience for users, debugging issues with SAML responses can be complex due to cryptographic signatures, strict protocol compliance, and encoding formats. This blog post walks through essential techniques to effectively debug and troubleshoot SAML responses, along with recommended tools and common errors.</p>
+<hr>
+<h3 id="-recommended-tools-for-decoding-saml-responses">🛠️ Recommended Tools for Decoding SAML Responses<a hidden class="anchor" aria-hidden="true" href="#-recommended-tools-for-decoding-saml-responses">#</a></h3>
+<p>To debug a SAML authentication issue, you must first be able to inspect the raw SAML response. Here are two essential tools every engineer should have:</p>
+<ul>
+<li>
+<p><strong>SAMLTracer</strong> (Browser Extension): This Firefox and Chrome extension captures SAML messages in real-time as they are exchanged between the Identity Provider (IdP) and the Service Provider (SP). It shows the Base64-encoded SAML assertion, HTTP headers, and redirects, making it invaluable for live debugging.</p>
+</li>
+<li>
+<p><strong>SAMLTool.com</strong>: A web-based suite offering SAML decoder, encoder, and signature verification utilities. You can paste a SAML response and get it decoded, formatted, and validated within seconds.</p>
+</li>
+</ul>
+<hr>
+<h3 id="-decoding-and-analyzing-the-saml-response">🧪 Decoding and Analyzing the SAML Response<a hidden class="anchor" aria-hidden="true" href="#-decoding-and-analyzing-the-saml-response">#</a></h3>
+<p>When analyzing a SAML response, follow these key steps:</p>
+<ol>
+<li>
+<p><strong>Base64 Decode the SAML Response</strong>
+The SAML <code>Response</code> is typically transmitted in Base64-encoded format. Use a tool like SAMLTool or any Base64 decoder to decode it into raw XML.</p>
+</li>
+<li>
+<p><strong>Format the XML for Readability</strong>
+SAML assertions are structured XML documents. Formatting the XML helps reveal structure, namespaces, and hierarchical relationships, making it easier to locate key elements like <code>&lt;Assertion&gt;</code>, <code>&lt;Conditions&gt;</code>, and <code>&lt;Signature&gt;</code>.</p>
+</li>
+<li>
+<p><strong>Validate the Digital Signature</strong>
+Verifying the signature ensures the authenticity and integrity of the SAML assertion. This step checks if the response was indeed issued by the trusted IdP and hasn’t been tampered with. Most SAML toolkits and IdPs use X.509 certificates for this purpose.</p>
+</li>
+</ol>
+<hr>
+<h3 id="-common-saml-errors-and-how-to-fix-them">⚠️ Common SAML Errors and How to Fix Them<a hidden class="anchor" aria-hidden="true" href="#-common-saml-errors-and-how-to-fix-them">#</a></h3>
+<h4 id="-audience-mismatch">❌ Audience Mismatch<a hidden class="anchor" aria-hidden="true" href="#-audience-mismatch">#</a></h4>
+<p>This occurs when the <code>Audience</code> specified in the assertion does not match the expected entity ID (i.e., the SP’s identifier). Ensure your SP is configured with the correct entity ID and that the IdP is issuing responses for the correct audience.</p>
+<h4 id="-signature-invalid">❌ Signature Invalid<a hidden class="anchor" aria-hidden="true" href="#-signature-invalid">#</a></h4>
+<p>Invalid signatures usually result from:</p>
+<ul>
+<li>Incorrect or missing certificate configuration</li>
+<li>Changes in the SAML assertion post-signing</li>
+<li>XML canonicalization issues</li>
+</ul>
+<p>Always use the correct public certificate from the IdP and ensure no middleware or proxy modifies the assertion.</p>
+<h4 id="-clock-skew">⏰ Clock Skew<a hidden class="anchor" aria-hidden="true" href="#-clock-skew">#</a></h4>
+<p>SAML responses include time-based attributes such as <code>NotBefore</code> and <code>NotOnOrAfter</code>. If there’s a significant difference between the IdP and SP clocks, the assertion may be rejected. Most systems allow a clock skew tolerance (e.g., 3–5 minutes), but it’s best practice to synchronize clocks using NTP.</p>
+<hr>
+<h3 id="-putting-it-all-together">🔄 Putting It All Together<a hidden class="anchor" aria-hidden="true" href="#-putting-it-all-together">#</a></h3>
+<p>Troubleshooting SAML requires a methodical approach:</p>
+<ul>
+<li>Capture the SAML flow using SAMLTracer.</li>
+<li>Decode the SAML response with SAMLTool.</li>
+<li>Format the XML and check for values like <code>Audience</code>, <code>Recipient</code>, and time conditions.</li>
+<li>Validate the digital signature.</li>
+<li>Cross-check time settings and entity IDs.</li>
+</ul>
+<p>With the right tools and understanding, debugging SAML becomes a manageable and even enlightening process. Happy tracing! 🧩</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/saml/">SAML</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/authentication/">Authentication</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/debugging/">Debugging</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/signature-validation/">Signature Validation</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/identity-federation/">Identity Federation</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/implementing-saml-sso-with-forgerock/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Implementing SAML SSO with ForgeRock</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/understanding-iam/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Understanding Identity and Access Management (IAM)</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/forgerock-identity-gateway-api-security-best-practices/" class="custom-link">
+              ForgeRock Identity Gateway: API Security Best Practices
+            </a>
+            <small class="custom-date">2025-06-02</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/the-evolution-of-multi-tenant-identity-management-systems-architecture/" class="custom-link">
+              The Evolution of Multi-Tenant Identity Management Systems Architecture
+            </a>
+            <small class="custom-date">2025-05-28</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/testing-saml-and-oidc-authorization-flows-with-postman/" class="custom-link">
+              Testing SAML and OIDC Authorization Flows with Postman
+            </a>
+            <small class="custom-date">2025-05-26</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/understanding-saml-cookie-issues-why-you-keep-redirecting-to-the-login-page/" class="custom-link">
+              Understanding SAML Cookie Issues: Why You Keep Redirecting to the Login Page
+            </a>
+            <small class="custom-date">2025-05-24</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/configuring-ldap-single-sign-on-for-burp-suite-enterprise-edition-a-step-by-step-guide/" class="custom-link">
+              Configuring LDAP Single Sign-On for Burp Suite Enterprise Edition: A Step-by-Step Guide
+            </a>
+            <small class="custom-date">2025-05-23</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/forgerock-identity-gateway-api-security-best-practices/" class="custom-link">
+                ForgeRock Identity Gateway: API Security Best Practices
+              </a>
+              <small class="custom-date">2025-06-02</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/designing-containerized-java-microservice-architecture/" class="custom-link">
+                Designing Containerized Java Microservice Architecture
+              </a>
+              <small class="custom-date">2025-06-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/forgerock-vs-keycloak-choosing-the-right-iam-solution-for-your-organization/" class="custom-link">
+                ForgeRock vs Keycloak: Choosing the Right IAM Solution for Your Organization
+              </a>
+              <small class="custom-date">2025-05-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/setting-up-a-cicd-pipeline-to-kubernetes-with-github-actions/" class="custom-link">
+                Setting Up a CI/CD Pipeline to Kubernetes with GitHub Actions
+              </a>
+              <small class="custom-date">2025-05-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/deploying-highly-available-java-microservices-on-kubernetes-a-step-by-step-guide/" class="custom-link">
+                Deploying Highly Available Java Microservices on Kubernetes: A Step-by-Step Guide
+              </a>
+              <small class="custom-date">2025-05-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
