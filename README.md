@@ -38,14 +38,15 @@ Explore these tools at [iamdevbox.com/tools](https://iamdevbox.com/tools)
 
 Join the community and keep up-to-date across platforms:
 
-| Platform         | Link                                           |
-|------------------|------------------------------------------------|
-| 🔵 Website       | [iamdevbox.com](https://iamdevbox.com)          |
-| 🐦 X (Twitter)    | [@IAMDevBox](https://twitter.com/IAMDevBox)     |
-| 🐘 Mastodon      | [@iamdevbox@mastodon.social](https://mastodon.social/@iamdevbox) |
-| 🌀 Tumblr        | [iamdevbox](https://iamdevbox.tumblr.com)       |
-| 💻 DEV.to        | [@iamdevbox](https://dev.to/iamdevbox)           |
-| 🐙 GitHub        | [iamdevbox](https://github.com/iamdevbox)         |
+| Platform         | Link                                                                 |
+|------------------|----------------------------------------------------------------------|
+| 🔵 Website       | [iamdevbox.com](https://iamdevbox.com)                               |
+| 🐦 X (Twitter)    | [@IAMDevBox](https://twitter.com/IAMDevBox)                          |
+| 🐘 Mastodon      | [@iamdevbox@mastodon.social](https://mastodon.social/@iamdevbox)     |
+| 🌀 Tumblr        | [iamdevbox](https://iamdevbox.tumblr.com)                            |
+| 💻 DEV.to        | [@iamdevbox](https://dev.to/iamdevbox)                                |
+| 🐙 GitHub        | [iamdevbox](https://github.com/iamdevbox)                             |
+| 📺 YouTube       | [@IAMDevBox](https://www.youtube.com/@IAMDevBox)                      |
 
 ---
 
