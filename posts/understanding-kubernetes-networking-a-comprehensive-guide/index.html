@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Understanding Kubernetes Networking: A Comprehensive Guide | IAMDevBox</title>
+<meta name="keywords" content="">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/understanding-kubernetes-networking-a-comprehensive-guide/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css" integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF&#43;13Dyqob6ASlTrTye8=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/understanding-kubernetes-networking-a-comprehensive-guide/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.f87e4df74f4f070695effe5d49ae4914eb9228356e4300800036f51859f72d47.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.f87e4df74f4f070695effe5d49ae4914eb9228356e4300800036f51859f72d47.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/understanding-kubernetes-networking-a-comprehensive-guide/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Understanding Kubernetes Networking: A Comprehensive Guide">
+  <meta property="og:description" content="Kubernetes networking is a critical aspect of managing containerized applications, ensuring efficient communication between components and with external...">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-06-04T15:31:15+00:00">
+    <meta property="article:modified_time" content="2025-06-06T19:33:33-04:00">
+      <meta property="og:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:title" content="Understanding Kubernetes Networking: A Comprehensive Guide">
+<meta name="twitter:description" content="Kubernetes networking is a critical aspect of managing containerized applications, ensuring efficient communication between components and with external...">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Understanding Kubernetes Networking: A Comprehensive Guide",
+      "item": "https://www.iamdevbox.com/posts/understanding-kubernetes-networking-a-comprehensive-guide/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Understanding Kubernetes Networking: A Comprehensive Guide",
+  "name": "Understanding Kubernetes Networking: A Comprehensive Guide",
+  "description": "Kubernetes networking is a critical aspect of managing containerized applications, ensuring efficient communication between components and with external...",
+  "keywords": [
+    
+  ],
+  "articleBody": "Understanding Kubernetes Networking: A Comprehensive Guide\nKubernetes networking is a critical aspect of managing containerized applications, ensuring efficient communication between components and with external systems. Here’s a structured approach to understanding the key concepts and components involved:\n1. Pods and Containers Pods: The fundamental unit in Kubernetes, pods can contain multiple containers. Each pod shares a single network IP, allowing containers within the same pod to communicate directly without additional setup. 2. Services Role: Services provide a stable IP and DNS name for pods, enabling consistent communication despite pod lifecycle changes. Traffic Routing: Services use labels to identify target pods, often employing round-robin or load balancing algorithms to distribute traffic. 3. Networking Models Flat Network Model: Each pod gets its own IP, allowing direct communication without routers, enhancing efficiency in large clusters. 4. CNI Plugins Tools: Plugins like Calico and Flannel manage network configurations, handling IP assignment and routing, crucial for implementing network models. 5. Network Policies Security: Define rules to restrict pod communication, essential for enforcing security best practices and least privilege. 6. Ingress Controllers External Traffic: Manage incoming requests, offering features like SSL termination and load balancing, integrating seamlessly with services. 7. Service Meshes Advanced Features: Tools like Istio provide advanced networking capabilities, including encryption and traffic management, ideal for complex applications. 8. Cross-Node Communication Routing: CNI plugins ensure traffic between pods on different nodes is efficiently routed, minimizing latency and bottlenecks. 9. NodePorts and LoadBalancers Exposure: NodePorts expose services on node ports, while LoadBalancers use external solutions for scalability, each with trade-offs in complexity and cost. 10. Security Considerations Encryption and Policies: Built-in mechanisms and network policies ensure secure communication, protecting data in transit. 11. Testing and Troubleshooting Tools: Utilize kubectl commands to inspect network configurations and diagnose issues, crucial for maintaining cluster health. Conclusion Kubernetes networking is a blend of understanding components, models, tools, and best practices. Hands-on practice in a local cluster can significantly enhance comprehension and troubleshooting skills. By mastering these elements, you can effectively manage and optimize your Kubernetes environment for scalability, security, and efficiency.\n",
+  "wordCount" : "342",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/static/IAMDevBox.com.png","datePublished": "2025-06-04T15:31:15Z",
+  "dateModified": "2025-06-06T19:33:33-04:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/understanding-kubernetes-networking-a-comprehensive-guide/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script><meta name="description" content="Kubernetes networking is a critical aspect of managing containerized applications, ensuring efficient communication between components and with external...">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/devops-is-not-just-tools--its-a-cultural-transformation\/"
+            },
+            "headline": "\"DevOps Is Not Just Tools — It’s a Cultural Transformation\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-06-09T14:56:04Z",
+            "dateModified": "2025-06-09T14:56:16Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/orchestrating-kubernetes-and-iam-with-terraform-a-comprehensive-guide\/"
+            },
+            "headline": "\"Orchestrating Kubernetes and IAM with Terraform: A Comprehensive Guide\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-06-08T13:49:52Z",
+            "dateModified": "2025-06-08T09:53:31-04:00"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/navigating-iam-challenges-in-multi-cloud-environments\/"
+            },
+            "headline": "\"Navigating IAM Challenges in Multi-Cloud Environments\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-06-06T14:59:32Z",
+            "dateModified": "2025-06-06T19:33:33-04:00"
+          }
+  ]
+}
+</script>
+    
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    if (document.querySelector('.mermaid')) {
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+        mermaid.initialize({ startOnLoad: true, theme: "default" });
+        };
+        document.head.appendChild(script);
+    }
+    });
+    </script>
+
+    
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-B6QCH29975');
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Understanding Kubernetes Networking: A Comprehensive Guide
+    </h1>
+    
+    <div class="post-meta">2 min&nbsp;·&nbsp;342 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#1-pods-and-containers" aria-label="1. Pods and Containers">1. Pods and Containers</a></li>
+                <li>
+                    <a href="#2-services" aria-label="2. Services">2. Services</a></li>
+                <li>
+                    <a href="#3-networking-models" aria-label="3. Networking Models">3. Networking Models</a></li>
+                <li>
+                    <a href="#4-cni-plugins" aria-label="4. CNI Plugins">4. CNI Plugins</a></li>
+                <li>
+                    <a href="#5-network-policies" aria-label="5. Network Policies">5. Network Policies</a></li>
+                <li>
+                    <a href="#6-ingress-controllers" aria-label="6. Ingress Controllers">6. Ingress Controllers</a></li>
+                <li>
+                    <a href="#7-service-meshes" aria-label="7. Service Meshes">7. Service Meshes</a></li>
+                <li>
+                    <a href="#8-cross-node-communication" aria-label="8. Cross-Node Communication">8. Cross-Node Communication</a></li>
+                <li>
+                    <a href="#9-nodeports-and-loadbalancers" aria-label="9. NodePorts and LoadBalancers">9. NodePorts and LoadBalancers</a></li>
+                <li>
+                    <a href="#10-security-considerations" aria-label="10. Security Considerations">10. Security Considerations</a></li>
+                <li>
+                    <a href="#11-testing-and-troubleshooting" aria-label="11. Testing and Troubleshooting">11. Testing and Troubleshooting</a></li>
+                <li>
+                    <a href="#conclusion" aria-label="Conclusion">Conclusion</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p><strong>Understanding Kubernetes Networking: A Comprehensive Guide</strong></p>
+<p>Kubernetes networking is a critical aspect of managing containerized applications, ensuring efficient communication between components and with external systems. Here&rsquo;s a structured approach to understanding the key concepts and components involved:</p>
+<h3 id="1-pods-and-containers">1. <strong>Pods and Containers</strong><a hidden class="anchor" aria-hidden="true" href="#1-pods-and-containers">#</a></h3>
+<ul>
+<li><strong>Pods</strong>: The fundamental unit in Kubernetes, pods can contain multiple containers. Each pod shares a single network IP, allowing containers within the same pod to communicate directly without additional setup.</li>
+</ul>
+<h3 id="2-services">2. <strong>Services</strong><a hidden class="anchor" aria-hidden="true" href="#2-services">#</a></h3>
+<ul>
+<li><strong>Role</strong>: Services provide a stable IP and DNS name for pods, enabling consistent communication despite pod lifecycle changes.</li>
+<li><strong>Traffic Routing</strong>: Services use labels to identify target pods, often employing round-robin or load balancing algorithms to distribute traffic.</li>
+</ul>
+<h3 id="3-networking-models">3. <strong>Networking Models</strong><a hidden class="anchor" aria-hidden="true" href="#3-networking-models">#</a></h3>
+<ul>
+<li><strong>Flat Network Model</strong>: Each pod gets its own IP, allowing direct communication without routers, enhancing efficiency in large clusters.</li>
+</ul>
+<h3 id="4-cni-plugins">4. <strong>CNI Plugins</strong><a hidden class="anchor" aria-hidden="true" href="#4-cni-plugins">#</a></h3>
+<ul>
+<li><strong>Tools</strong>: Plugins like Calico and Flannel manage network configurations, handling IP assignment and routing, crucial for implementing network models.</li>
+</ul>
+<h3 id="5-network-policies">5. <strong>Network Policies</strong><a hidden class="anchor" aria-hidden="true" href="#5-network-policies">#</a></h3>
+<ul>
+<li><strong>Security</strong>: Define rules to restrict pod communication, essential for enforcing security best practices and least privilege.</li>
+</ul>
+<h3 id="6-ingress-controllers">6. <strong>Ingress Controllers</strong><a hidden class="anchor" aria-hidden="true" href="#6-ingress-controllers">#</a></h3>
+<ul>
+<li><strong>External Traffic</strong>: Manage incoming requests, offering features like SSL termination and load balancing, integrating seamlessly with services.</li>
+</ul>
+<h3 id="7-service-meshes">7. <strong>Service Meshes</strong><a hidden class="anchor" aria-hidden="true" href="#7-service-meshes">#</a></h3>
+<ul>
+<li><strong>Advanced Features</strong>: Tools like Istio provide advanced networking capabilities, including encryption and traffic management, ideal for complex applications.</li>
+</ul>
+<h3 id="8-cross-node-communication">8. <strong>Cross-Node Communication</strong><a hidden class="anchor" aria-hidden="true" href="#8-cross-node-communication">#</a></h3>
+<ul>
+<li><strong>Routing</strong>: CNI plugins ensure traffic between pods on different nodes is efficiently routed, minimizing latency and bottlenecks.</li>
+</ul>
+<h3 id="9-nodeports-and-loadbalancers">9. <strong>NodePorts and LoadBalancers</strong><a hidden class="anchor" aria-hidden="true" href="#9-nodeports-and-loadbalancers">#</a></h3>
+<ul>
+<li><strong>Exposure</strong>: NodePorts expose services on node ports, while LoadBalancers use external solutions for scalability, each with trade-offs in complexity and cost.</li>
+</ul>
+<h3 id="10-security-considerations">10. <strong>Security Considerations</strong><a hidden class="anchor" aria-hidden="true" href="#10-security-considerations">#</a></h3>
+<ul>
+<li><strong>Encryption and Policies</strong>: Built-in mechanisms and network policies ensure secure communication, protecting data in transit.</li>
+</ul>
+<h3 id="11-testing-and-troubleshooting">11. <strong>Testing and Troubleshooting</strong><a hidden class="anchor" aria-hidden="true" href="#11-testing-and-troubleshooting">#</a></h3>
+<ul>
+<li><strong>Tools</strong>: Utilize kubectl commands to inspect network configurations and diagnose issues, crucial for maintaining cluster health.</li>
+</ul>
+<h3 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h3>
+<p>Kubernetes networking is a blend of understanding components, models, tools, and best practices. Hands-on practice in a local cluster can significantly enhance comprehension and troubleshooting skills. By mastering these elements, you can effectively manage and optimize your Kubernetes environment for scalability, security, and efficiency.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/how-to-revoke-oauth-20-tokens-and-secure-your-applications/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>How to Revoke OAuth 2.0 Tokens and Secure Your Applications</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/building-complete-oidc-login-flow-urls-in-forgerock-identity-cloud/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Building Complete OIDC Login Flow URLs in ForgeRock Identity Cloud</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/devops-is-not-just-tools--its-a-cultural-transformation/" class="custom-link">
+                DevOps Is Not Just Tools — It’s a Cultural Transformation
+              </a>
+              <small class="custom-date">2025-06-09</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/orchestrating-kubernetes-and-iam-with-terraform-a-comprehensive-guide/" class="custom-link">
+                Orchestrating Kubernetes and IAM with Terraform: A Comprehensive Guide
+              </a>
+              <small class="custom-date">2025-06-08</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/navigating-iam-challenges-in-multi-cloud-environments/" class="custom-link">
+                Navigating IAM Challenges in Multi-Cloud Environments
+              </a>
+              <small class="custom-date">2025-06-06</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/best-practices-for-writing-java-dockerfiles/" class="custom-link">
+                Best Practices for Writing Java Dockerfiles
+              </a>
+              <small class="custom-date">2025-06-05</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/building-unified-identity-strategy-in-multi-cloud-environments/" class="custom-link">
+                Building Unified Identity Strategy in Multi-Cloud Environments
+              </a>
+              <small class="custom-date">2025-06-04</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

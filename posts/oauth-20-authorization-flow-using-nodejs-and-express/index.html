@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>OAuth 2.0 Authorization Flow Using Node.js and Express | IAMDevBox</title>
+<meta name="keywords" content="OAuth 2.0, Node.js, Express, Authorization Code Flow, Web Security, Identity">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/oauth-20-authorization-flow-using-nodejs-and-express/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css" integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF&#43;13Dyqob6ASlTrTye8=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/oauth-20-authorization-flow-using-nodejs-and-express/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.f87e4df74f4f070695effe5d49ae4914eb9228356e4300800036f51859f72d47.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.f87e4df74f4f070695effe5d49ae4914eb9228356e4300800036f51859f72d47.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/oauth-20-authorization-flow-using-nodejs-and-express/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="OAuth 2.0 Authorization Flow Using Node.js and Express">
+  <meta property="og:description" content="OAuth 2.0 is the foundation for modern identity and access management, enabling applications to delegate user authentication securely. In this guide, you&#39;ll...">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-06-04T21:09:19+00:00">
+    <meta property="article:modified_time" content="2025-06-06T19:33:33-04:00">
+    <meta property="article:tag" content="OAuth 2.0">
+    <meta property="article:tag" content="Node.js">
+    <meta property="article:tag" content="Express">
+    <meta property="article:tag" content="Authorization Code Flow">
+    <meta property="article:tag" content="Web Security">
+    <meta property="article:tag" content="Identity">
+      <meta property="og:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:title" content="OAuth 2.0 Authorization Flow Using Node.js and Express">
+<meta name="twitter:description" content="OAuth 2.0 is the foundation for modern identity and access management, enabling applications to delegate user authentication securely. In this guide, you&#39;ll...">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "OAuth 2.0 Authorization Flow Using Node.js and Express",
+      "item": "https://www.iamdevbox.com/posts/oauth-20-authorization-flow-using-nodejs-and-express/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "OAuth 2.0 Authorization Flow Using Node.js and Express",
+  "name": "OAuth 2.0 Authorization Flow Using Node.js and Express",
+  "description": "OAuth 2.0 is the foundation for modern identity and access management, enabling applications to delegate user authentication securely. In this guide, you'll...",
+  "keywords": [
+    "OAuth 2.0", "Node.js", "Express", "Authorization Code Flow", "Web Security", "Identity"
+  ],
+  "articleBody": "OAuth 2.0 is the foundation for modern identity and access management, enabling applications to delegate user authentication securely. In this guide, you’ll learn how to implement the Authorization Code Flow—the most secure OAuth flow for web apps—using Node.js and Express. This is ideal for server-rendered apps or Backend-for-Frontend (BFF) patterns where you control the server exchanging the code for tokens.\nWe’ll walk through everything from route setup to token exchange using only open-source libraries and built-in Express functionality.\nWhy Authorization Code Flow in Node.js? Node.js is widely used for building scalable web applications. The Authorization Code Flow ensures:\nSecure handling of access and refresh tokens. Server-side exchange of credentials. Improved user experience with redirect-based login. Compatibility with providers like ForgeRock, Auth0, Okta, or Google. How the Flow Works Here’s a visual of the standard Authorization Code Flow in a Node.js web app:\n+--------+ (1) Redirect to AuthZ URL +---------------+ | |-----------------------------------------\u003e| | | | | Authorization | | User | (2) Login \u0026 Grant Access | Server | | |\u003c-----------------------------------------| | | | (3) Redirect with Code +---------------+ | |-----------------------------------------\u003e| Express App | | | (4) Token Exchange (code) | | | |\u003c-----------------------------------------| | +--------+ (5) Session Starts +---------------+ Step 1: Set Up the Express Server // Node.js (Express) starter app with OAuth 2.0 support const express = require('express'); const session = require('express-session'); const axios = require('axios'); const querystring = require('querystring'); const app = express(); const port = 3000; app.use(session({ secret: 'your-session-secret', resave: false, saveUninitialized: true })); Step 2: Redirect to Authorization Server // Endpoint to start OAuth 2.0 login app.get('/login', (req, res) =\u003e { const params = { response_type: 'code', client_id: 'your-client-id', redirect_uri: 'http://localhost:3000/callback', scope: 'openid profile email', state: 'random_state_string' // CSRF protection }; const authUrl = `https://your-oauth-server.com/oauth2/authorize?${querystring.stringify(params)}`; res.redirect(authUrl); }); Step 3: Handle Callback and Exchange Code for Tokens // OAuth 2.0 callback route app.get('/callback', async (req, res) =\u003e { const { code } = req.query; try { const tokenResponse = await axios.post('https://your-oauth-server.com/oauth2/token', querystring.stringify({ grant_type: 'authorization_code', code, redirect_uri: 'http://localhost:3000/callback', client_id: 'your-client-id', client_secret: 'your-client-secret' }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } } ); req.session.tokens = tokenResponse.data; res.redirect('/profile'); } catch (err) { res.status(500).send('Token exchange failed'); } }); Step 4: Access Protected Resources // Protected route using access token app.get('/profile', async (req, res) =\u003e { if (!req.session.tokens) return res.redirect('/login'); try { const userInfo = await axios.get('https://your-oauth-server.com/userinfo', { headers: { Authorization: `Bearer ${req.session.tokens.access_token}` } }); res.send(`${JSON.stringify(userInfo.data, null, 2)}`); } catch (err) { res.status(401).send('Access denied'); } }); Step 5: Logout and Clean Session // End session app.get('/logout', (req, res) =\u003e { req.session.destroy(); res.send('Logged out'); }); Security Notes Always validate the state parameter for CSRF protection. Use HTTPS in production environments. Use secure cookies and proper session handling in production. Real Use Cases and Extensions Node.js is often used in:\nBuilding OAuth 2.0 gateways Integrating with ForgeRock or Auth0 BFF flows Custom login experiences with Express and React hybrid apps 👉 Related:\nUnderstanding the Authorization Code Flow in OAuth 2.0\nUnderstanding the Authorization Code Flow with PKCE in OAuth 2.0\nConclusion OAuth 2.0 with Node.js and Express provides a flexible, secure, and standards-compliant foundation for managing user identity and sessions. With minimal dependencies, you can build your own OAuth login layer or integrate with existing providers.\n💡 What’s Next?\nHow do you refresh tokens automatically using express-session? Should you implement PKCE for public-facing SPAs in Node.js? What role does OAuth 2.1 play in evolving this pattern? Stay tuned as we cover these questions and more in the upcoming posts.\n",
+  "wordCount" : "574",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/static/IAMDevBox.com.png","datePublished": "2025-06-04T21:09:19Z",
+  "dateModified": "2025-06-06T19:33:33-04:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/oauth-20-authorization-flow-using-nodejs-and-express/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script><meta name="description" content="OAuth 2.0 is the foundation for modern identity and access management, enabling applications to delegate user authentication securely. In this guide, you&#39;ll...">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/devops-is-not-just-tools--its-a-cultural-transformation\/"
+            },
+            "headline": "\"DevOps Is Not Just Tools — It’s a Cultural Transformation\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-06-09T14:56:04Z",
+            "dateModified": "2025-06-09T14:56:16Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/orchestrating-kubernetes-and-iam-with-terraform-a-comprehensive-guide\/"
+            },
+            "headline": "\"Orchestrating Kubernetes and IAM with Terraform: A Comprehensive Guide\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-06-08T13:49:52Z",
+            "dateModified": "2025-06-08T09:53:31-04:00"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/navigating-iam-challenges-in-multi-cloud-environments\/"
+            },
+            "headline": "\"Navigating IAM Challenges in Multi-Cloud Environments\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-06-06T14:59:32Z",
+            "dateModified": "2025-06-06T19:33:33-04:00"
+          }
+  ]
+}
+</script>
+    
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    if (document.querySelector('.mermaid')) {
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+        mermaid.initialize({ startOnLoad: true, theme: "default" });
+        };
+        document.head.appendChild(script);
+    }
+    });
+    </script>
+
+    
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-B6QCH29975');
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      OAuth 2.0 Authorization Flow Using Node.js and Express
+    </h1>
+    
+    <div class="post-meta">3 min&nbsp;·&nbsp;574 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#why-authorization-code-flow-in-nodejs" aria-label="Why Authorization Code Flow in Node.js?">Why Authorization Code Flow in Node.js?</a></li>
+                <li>
+                    <a href="#how-the-flow-works" aria-label="How the Flow Works">How the Flow Works</a></li>
+                <li>
+                    <a href="#step-1-set-up-the-express-server" aria-label="Step 1: Set Up the Express Server">Step 1: Set Up the Express Server</a></li>
+                <li>
+                    <a href="#step-2-redirect-to-authorization-server" aria-label="Step 2: Redirect to Authorization Server">Step 2: Redirect to Authorization Server</a></li>
+                <li>
+                    <a href="#step-3-handle-callback-and-exchange-code-for-tokens" aria-label="Step 3: Handle Callback and Exchange Code for Tokens">Step 3: Handle Callback and Exchange Code for Tokens</a></li>
+                <li>
+                    <a href="#step-4-access-protected-resources" aria-label="Step 4: Access Protected Resources">Step 4: Access Protected Resources</a></li>
+                <li>
+                    <a href="#step-5-logout-and-clean-session" aria-label="Step 5: Logout and Clean Session">Step 5: Logout and Clean Session</a></li>
+                <li>
+                    <a href="#security-notes" aria-label="Security Notes">Security Notes</a></li>
+                <li>
+                    <a href="#real-use-cases-and-extensions" aria-label="Real Use Cases and Extensions">Real Use Cases and Extensions</a></li>
+                <li>
+                    <a href="#conclusion" aria-label="Conclusion">Conclusion</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>OAuth 2.0 is the foundation for modern identity and access management, enabling applications to delegate user authentication securely. In this guide, you&rsquo;ll learn how to implement the <strong>Authorization Code Flow</strong>—the most secure OAuth flow for web apps—using <strong>Node.js and Express</strong>. This is ideal for server-rendered apps or Backend-for-Frontend (BFF) patterns where you control the server exchanging the code for tokens.</p>
+<p>We&rsquo;ll walk through everything from route setup to token exchange using only open-source libraries and built-in Express functionality.</p>
+<hr>
+<h3 id="why-authorization-code-flow-in-nodejs"><strong>Why Authorization Code Flow in Node.js?</strong><a hidden class="anchor" aria-hidden="true" href="#why-authorization-code-flow-in-nodejs">#</a></h3>
+<p>Node.js is widely used for building scalable web applications. The Authorization Code Flow ensures:</p>
+<ul>
+<li>Secure handling of access and refresh tokens.</li>
+<li>Server-side exchange of credentials.</li>
+<li>Improved user experience with redirect-based login.</li>
+<li>Compatibility with providers like ForgeRock, Auth0, Okta, or Google.</li>
+</ul>
+<hr>
+<h3 id="how-the-flow-works"><strong>How the Flow Works</strong><a hidden class="anchor" aria-hidden="true" href="#how-the-flow-works">#</a></h3>
+<p>Here’s a visual of the standard Authorization Code Flow in a Node.js web app:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-plaintext" data-lang="plaintext"><span style="display:flex;"><span>+--------+        (1) Redirect to AuthZ URL         +---------------+
+</span></span><span style="display:flex;"><span>|        |-----------------------------------------&gt;|               |
+</span></span><span style="display:flex;"><span>|        |                                          | Authorization |
+</span></span><span style="display:flex;"><span>|  User  |        (2) Login &amp; Grant Access          |     Server    |
+</span></span><span style="display:flex;"><span>|        |&lt;-----------------------------------------|               |
+</span></span><span style="display:flex;"><span>|        |        (3) Redirect with Code            +---------------+
+</span></span><span style="display:flex;"><span>|        |-----------------------------------------&gt;|  Express App  |
+</span></span><span style="display:flex;"><span>|        |        (4) Token Exchange (code)         |               |
+</span></span><span style="display:flex;"><span>|        |&lt;-----------------------------------------|               |
+</span></span><span style="display:flex;"><span>+--------+        (5) Session Starts                +---------------+
+</span></span></code></pre></div><hr>
+<h3 id="step-1-set-up-the-express-server"><strong>Step 1: Set Up the Express Server</strong><a hidden class="anchor" aria-hidden="true" href="#step-1-set-up-the-express-server">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75715e">// Node.js (Express) starter app with OAuth 2.0 support
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">express</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;express&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">session</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;express-session&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">axios</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;axios&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">querystring</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;querystring&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">app</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">express</span>();
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">port</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">3000</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">use</span>(<span style="color:#a6e22e">session</span>({
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">secret</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;your-session-secret&#39;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">resave</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">false</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">saveUninitialized</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>}));
+</span></span></code></pre></div><hr>
+<h3 id="step-2-redirect-to-authorization-server"><strong>Step 2: Redirect to Authorization Server</strong><a hidden class="anchor" aria-hidden="true" href="#step-2-redirect-to-authorization-server">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75715e">// Endpoint to start OAuth 2.0 login
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#39;/login&#39;</span>, (<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>) =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">params</span> <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">response_type</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;code&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">client_id</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;your-client-id&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">redirect_uri</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;http://localhost:3000/callback&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">scope</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;openid profile email&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">state</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;random_state_string&#39;</span> <span style="color:#75715e">// CSRF protection
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  };
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">authUrl</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">`https://your-oauth-server.com/oauth2/authorize?</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">querystring</span>.<span style="color:#a6e22e">stringify</span>(<span style="color:#a6e22e">params</span>)<span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">redirect</span>(<span style="color:#a6e22e">authUrl</span>);
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><hr>
+<h3 id="step-3-handle-callback-and-exchange-code-for-tokens"><strong>Step 3: Handle Callback and Exchange Code for Tokens</strong><a hidden class="anchor" aria-hidden="true" href="#step-3-handle-callback-and-exchange-code-for-tokens">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75715e">// OAuth 2.0 callback route
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#39;/callback&#39;</span>, <span style="color:#66d9ef">async</span> (<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>) =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> { <span style="color:#a6e22e">code</span> } <span style="color:#f92672">=</span> <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">query</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">tokenResponse</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">axios</span>.<span style="color:#a6e22e">post</span>(<span style="color:#e6db74">&#39;https://your-oauth-server.com/oauth2/token&#39;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">querystring</span>.<span style="color:#a6e22e">stringify</span>({
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">grant_type</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;authorization_code&#39;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">code</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">redirect_uri</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;http://localhost:3000/callback&#39;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">client_id</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;your-client-id&#39;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">client_secret</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;your-client-secret&#39;</span>
+</span></span><span style="display:flex;"><span>      }),
+</span></span><span style="display:flex;"><span>      { <span style="color:#a6e22e">headers</span><span style="color:#f92672">:</span> { <span style="color:#e6db74">&#39;Content-Type&#39;</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;application/x-www-form-urlencoded&#39;</span> } }
+</span></span><span style="display:flex;"><span>    );
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">session</span>.<span style="color:#a6e22e">tokens</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">tokenResponse</span>.<span style="color:#a6e22e">data</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">redirect</span>(<span style="color:#e6db74">&#39;/profile&#39;</span>);
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">catch</span> (<span style="color:#a6e22e">err</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">status</span>(<span style="color:#ae81ff">500</span>).<span style="color:#a6e22e">send</span>(<span style="color:#e6db74">&#39;Token exchange failed&#39;</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><hr>
+<h3 id="step-4-access-protected-resources"><strong>Step 4: Access Protected Resources</strong><a hidden class="anchor" aria-hidden="true" href="#step-4-access-protected-resources">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75715e">// Protected route using access token
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#39;/profile&#39;</span>, <span style="color:#66d9ef">async</span> (<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>) =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">session</span>.<span style="color:#a6e22e">tokens</span>) <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">redirect</span>(<span style="color:#e6db74">&#39;/login&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">userInfo</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">axios</span>.<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#39;https://your-oauth-server.com/userinfo&#39;</span>, {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">headers</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">Authorization</span><span style="color:#f92672">:</span> <span style="color:#e6db74">`Bearer </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">session</span>.<span style="color:#a6e22e">tokens</span>.<span style="color:#a6e22e">access_token</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">send</span>(<span style="color:#e6db74">`&lt;pre&gt;</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">JSON</span>.<span style="color:#a6e22e">stringify</span>(<span style="color:#a6e22e">userInfo</span>.<span style="color:#a6e22e">data</span>, <span style="color:#66d9ef">null</span>, <span style="color:#ae81ff">2</span>)<span style="color:#e6db74">}</span><span style="color:#e6db74">&lt;/pre&gt;`</span>);
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">catch</span> (<span style="color:#a6e22e">err</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">status</span>(<span style="color:#ae81ff">401</span>).<span style="color:#a6e22e">send</span>(<span style="color:#e6db74">&#39;Access denied&#39;</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><hr>
+<h3 id="step-5-logout-and-clean-session"><strong>Step 5: Logout and Clean Session</strong><a hidden class="anchor" aria-hidden="true" href="#step-5-logout-and-clean-session">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75715e">// End session
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#39;/logout&#39;</span>, (<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>) =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">session</span>.<span style="color:#a6e22e">destroy</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">send</span>(<span style="color:#e6db74">&#39;Logged out&#39;</span>);
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><hr>
+<h3 id="security-notes"><strong>Security Notes</strong><a hidden class="anchor" aria-hidden="true" href="#security-notes">#</a></h3>
+<ul>
+<li>Always validate the <code>state</code> parameter for CSRF protection.</li>
+<li>Use HTTPS in production environments.</li>
+<li>Use secure cookies and proper session handling in production.</li>
+</ul>
+<hr>
+<h3 id="real-use-cases-and-extensions"><strong>Real Use Cases and Extensions</strong><a hidden class="anchor" aria-hidden="true" href="#real-use-cases-and-extensions">#</a></h3>
+<p>Node.js is often used in:</p>
+<ul>
+<li>Building OAuth 2.0 gateways</li>
+<li>Integrating with ForgeRock or Auth0 BFF flows</li>
+<li>Custom login experiences with Express and React hybrid apps</li>
+</ul>
+<p><strong>👉 Related:</strong></p>
+<p><a href="/posts/understanding-the-authorization-code-flow-in-oauth-20/">Understanding the Authorization Code Flow in OAuth 2.0</a></p>
+<p><a href="/posts/understanding-the-authorization-code-flow-with-pkce-in-oauth-20/">Understanding the Authorization Code Flow with PKCE in OAuth 2.0</a></p>
+<hr>
+<h3 id="conclusion"><strong>Conclusion</strong><a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h3>
+<p>OAuth 2.0 with Node.js and Express provides a flexible, secure, and standards-compliant foundation for managing user identity and sessions. With minimal dependencies, you can build your own OAuth login layer or integrate with existing providers.</p>
+<p>💡 <strong>What’s Next?</strong></p>
+<ul>
+<li>How do you refresh tokens automatically using <code>express-session</code>?</li>
+<li>Should you implement PKCE for public-facing SPAs in Node.js?</li>
+<li>What role does OAuth 2.1 play in evolving this pattern?</li>
+</ul>
+<p>Stay tuned as we cover these questions and more in the upcoming posts.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/oauth-2.0/">OAuth 2.0</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/node.js/">Node.js</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/express/">Express</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/authorization-code-flow/">Authorization Code Flow</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/web-security/">Web Security</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/identity/">Identity</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/how-to-introspect-oauth-20-tokens-and-validate-their-status-in-real-time/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>How to Introspect OAuth 2.0 Tokens and Validate Their Status in Real Time</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/how-to-implement-the-oauth-20-authorization-code-flow-in-java/">
+    <span class="title">Next »</span>
+    <br>
+    <span>How to Implement the OAuth 2.0 Authorization Code Flow in Java</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/building-unified-identity-strategy-in-multi-cloud-environments/" class="custom-link">
+              Building Unified Identity Strategy in Multi-Cloud Environments
+            </a>
+            <small class="custom-date">2025-06-04</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/oauth-20-token-introspection-real-time-validation-explained/" class="custom-link">
+              OAuth 2.0 Token Introspection: Real-Time Validation Explained
+            </a>
+            <small class="custom-date">2025-06-04</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/oauth-21-whats-changing-and-why-it-matters/" class="custom-link">
+              OAuth 2.1: What’s Changing and Why It Matters
+            </a>
+            <small class="custom-date">2025-06-04</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/understanding-token-revocation-and-when-to-use-it/" class="custom-link">
+              Understanding Token Revocation and When to Use It
+            </a>
+            <small class="custom-date">2025-06-04</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/how-we-solved-token-misrouting-in-forgerock-identity-cloud/" class="custom-link">
+              How We Solved Token Misrouting in ForgeRock Identity Cloud
+            </a>
+            <small class="custom-date">2025-06-04</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/devops-is-not-just-tools--its-a-cultural-transformation/" class="custom-link">
+                DevOps Is Not Just Tools — It’s a Cultural Transformation
+              </a>
+              <small class="custom-date">2025-06-09</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/orchestrating-kubernetes-and-iam-with-terraform-a-comprehensive-guide/" class="custom-link">
+                Orchestrating Kubernetes and IAM with Terraform: A Comprehensive Guide
+              </a>
+              <small class="custom-date">2025-06-08</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/navigating-iam-challenges-in-multi-cloud-environments/" class="custom-link">
+                Navigating IAM Challenges in Multi-Cloud Environments
+              </a>
+              <small class="custom-date">2025-06-06</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/best-practices-for-writing-java-dockerfiles/" class="custom-link">
+                Best Practices for Writing Java Dockerfiles
+              </a>
+              <small class="custom-date">2025-06-05</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/building-unified-identity-strategy-in-multi-cloud-environments/" class="custom-link">
+                Building Unified Identity Strategy in Multi-Cloud Environments
+              </a>
+              <small class="custom-date">2025-06-04</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

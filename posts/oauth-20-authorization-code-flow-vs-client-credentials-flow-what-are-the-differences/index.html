@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>OAuth 2.0 Authorization Code Flow vs Client Credentials Flow: What Are the Differences? | IAMDevBox</title>
+<meta name="keywords" content="OAuth 2.0, Authorization Code Flow, Client Credentials Flow, Machine-to-Machine, Security">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/oauth-20-authorization-code-flow-vs-client-credentials-flow-what-are-the-differences/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css" integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF&#43;13Dyqob6ASlTrTye8=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/oauth-20-authorization-code-flow-vs-client-credentials-flow-what-are-the-differences/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.f87e4df74f4f070695effe5d49ae4914eb9228356e4300800036f51859f72d47.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.f87e4df74f4f070695effe5d49ae4914eb9228356e4300800036f51859f72d47.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/oauth-20-authorization-code-flow-vs-client-credentials-flow-what-are-the-differences/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="OAuth 2.0 Authorization Code Flow vs Client Credentials Flow: What Are the Differences?">
+  <meta property="og:description" content="OAuth 2.0 offers multiple flows designed to accommodate different use cases, ranging from user-driven web apps to backend services operating without direct user...">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-06-04T09:19:32+00:00">
+    <meta property="article:modified_time" content="2025-06-06T19:33:33-04:00">
+    <meta property="article:tag" content="OAuth 2.0">
+    <meta property="article:tag" content="Authorization Code Flow">
+    <meta property="article:tag" content="Client Credentials Flow">
+    <meta property="article:tag" content="Machine-to-Machine">
+    <meta property="article:tag" content="Security">
+      <meta property="og:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:title" content="OAuth 2.0 Authorization Code Flow vs Client Credentials Flow: What Are the Differences?">
+<meta name="twitter:description" content="OAuth 2.0 offers multiple flows designed to accommodate different use cases, ranging from user-driven web apps to backend services operating without direct user...">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "OAuth 2.0 Authorization Code Flow vs Client Credentials Flow: What Are the Differences?",
+      "item": "https://www.iamdevbox.com/posts/oauth-20-authorization-code-flow-vs-client-credentials-flow-what-are-the-differences/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "OAuth 2.0 Authorization Code Flow vs Client Credentials Flow: What Are the Differences?",
+  "name": "OAuth 2.0 Authorization Code Flow vs Client Credentials Flow: What Are the Differences?",
+  "description": "OAuth 2.0 offers multiple flows designed to accommodate different use cases, ranging from user-driven web apps to backend services operating without direct user...",
+  "keywords": [
+    "OAuth 2.0", "Authorization Code Flow", "Client Credentials Flow", "Machine-to-Machine", "Security"
+  ],
+  "articleBody": "OAuth 2.0 offers multiple flows designed to accommodate different use cases, ranging from user-driven web apps to backend services operating without direct user interaction. Two commonly used flows in the ecosystem are the Authorization Code Flow and the Client Credentials Flow. Each serves distinct purposes and understanding their differences is critical for building secure and efficient authentication systems.\nUnderstanding the Authorization Code Flow The Authorization Code Flow is primarily designed for applications that involve user interaction. It allows an application to obtain an authorization code after the user authenticates, which is then exchanged on the server side for an access token. This flow supports features like refresh tokens and scopes and is commonly used in web and mobile applications.\nWhat is the Client Credentials Flow? The Client Credentials Flow is intended for machine-to-machine (M2M) communication where no user is involved. Here, the client application directly requests an access token from the authorization server by authenticating itself with its client ID and client secret. This flow is ideal for service accounts, APIs, or backend microservices that need to authenticate and authorize themselves to access protected resources.\nKey Differences Feature Authorization Code Flow Client Credentials Flow User Involvement Yes, user authentication required No user involved Token Request Method Authorization code exchanged via backend server Direct token request using client credentials Use Case User-facing apps (web, mobile) Backend services, APIs, M2M Support for Refresh Token Yes Typically no Security Considerations Requires secure backend for token exchange Client secret must be securely stored Security Considerations Authorization Code Flow leverages an intermediate authorization code and often PKCE to mitigate interception risks, especially for public clients. The Client Credentials Flow depends on secure storage of client credentials, since the token request is made directly without user context.\nExample Scenario: Using Client Credentials Flow Imagine a backend microservice that needs to call another API to fetch data on behalf of the service itself (not a user). It uses Client Credentials Flow to authenticate to the authorization server, obtain an access token, and then call the downstream API securely.\nPOST /token HTTP/1.1 Host: authorization-server.com Content-Type: application/x-www-form-urlencoded grant_type=client_credentials\u0026 client_id=your_client_id\u0026 client_secret=your_client_secret\u0026 scope=read:data The server responds with an access token usable by the microservice.\nChoosing the Right Flow Use Authorization Code Flow when your application involves user authentication and you need to act on behalf of a user. Use Client Credentials Flow for server-to-server communication without user context. When building modern SPAs, prefer Authorization Code Flow with PKCE instead of Implicit Flow for better security. Thought-Provoking Questions How do you securely store client secrets in your backend or microservices? Are there scenarios where you might combine both flows in a single application ecosystem? How does token scope management differ between these flows in your use case? Conclusion Both Authorization Code Flow and Client Credentials Flow are fundamental OAuth 2.0 flows tailored for different application scenarios. Selecting the appropriate flow based on whether user interaction is needed or not is key to maintaining security and functionality. For modern architectures, mixing these flows where necessary while following security best practices will yield the best results.\n👉 Related: Understanding the Authorization Code Flow in OAuth 2.0\n👉 Related: Understanding the Authorization Code Flow with PKCE in OAuth 2.0\n",
+  "wordCount" : "534",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/static/IAMDevBox.com.png","datePublished": "2025-06-04T09:19:32Z",
+  "dateModified": "2025-06-06T19:33:33-04:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/oauth-20-authorization-code-flow-vs-client-credentials-flow-what-are-the-differences/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script><meta name="description" content="OAuth 2.0 offers multiple flows designed to accommodate different use cases, ranging from user-driven web apps to backend services operating without direct user...">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/devops-is-not-just-tools--its-a-cultural-transformation\/"
+            },
+            "headline": "\"DevOps Is Not Just Tools — It’s a Cultural Transformation\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-06-09T14:56:04Z",
+            "dateModified": "2025-06-09T14:56:16Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/orchestrating-kubernetes-and-iam-with-terraform-a-comprehensive-guide\/"
+            },
+            "headline": "\"Orchestrating Kubernetes and IAM with Terraform: A Comprehensive Guide\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-06-08T13:49:52Z",
+            "dateModified": "2025-06-08T09:53:31-04:00"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/navigating-iam-challenges-in-multi-cloud-environments\/"
+            },
+            "headline": "\"Navigating IAM Challenges in Multi-Cloud Environments\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-06-06T14:59:32Z",
+            "dateModified": "2025-06-06T19:33:33-04:00"
+          }
+  ]
+}
+</script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "\"What is the Client Credentials Flow?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Please refer to the article for detailed explanation.\""
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "\"How do you securely store client secrets in your backend or microservices?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Please refer to the article for detailed explanation.\""
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "\"Are there scenarios where you might combine both flows in a single application ecosystem?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Please refer to the article for detailed explanation.\""
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "\"How does token scope management differ between these flows in your use case?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Please refer to the article for detailed explanation.\""
+      }
+    }
+  ]
+}
+</script>
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    if (document.querySelector('.mermaid')) {
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+        mermaid.initialize({ startOnLoad: true, theme: "default" });
+        };
+        document.head.appendChild(script);
+    }
+    });
+    </script>
+
+    
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-B6QCH29975');
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      OAuth 2.0 Authorization Code Flow vs Client Credentials Flow: What Are the Differences?
+    </h1>
+    
+    <div class="post-meta">3 min&nbsp;·&nbsp;534 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#understanding-the-authorization-code-flow" aria-label="Understanding the Authorization Code Flow">Understanding the Authorization Code Flow</a></li>
+                <li>
+                    <a href="#what-is-the-client-credentials-flow" aria-label="What is the Client Credentials Flow?">What is the Client Credentials Flow?</a></li>
+                <li>
+                    <a href="#key-differences" aria-label="Key Differences">Key Differences</a></li>
+                <li>
+                    <a href="#security-considerations" aria-label="Security Considerations">Security Considerations</a></li>
+                <li>
+                    <a href="#example-scenario-using-client-credentials-flow" aria-label="Example Scenario: Using Client Credentials Flow">Example Scenario: Using Client Credentials Flow</a></li>
+                <li>
+                    <a href="#choosing-the-right-flow" aria-label="Choosing the Right Flow">Choosing the Right Flow</a></li>
+                <li>
+                    <a href="#thought-provoking-questions" aria-label="Thought-Provoking Questions">Thought-Provoking Questions</a></li>
+                <li>
+                    <a href="#conclusion" aria-label="Conclusion">Conclusion</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>OAuth 2.0 offers multiple flows designed to accommodate different use cases, ranging from user-driven web apps to backend services operating without direct user interaction. Two commonly used flows in the ecosystem are the Authorization Code Flow and the Client Credentials Flow. Each serves distinct purposes and understanding their differences is critical for building secure and efficient authentication systems.</p>
+<h3 id="understanding-the-authorization-code-flow"><strong>Understanding the Authorization Code Flow</strong><a hidden class="anchor" aria-hidden="true" href="#understanding-the-authorization-code-flow">#</a></h3>
+<p>The Authorization Code Flow is primarily designed for applications that involve user interaction. It allows an application to obtain an authorization code after the user authenticates, which is then exchanged on the server side for an access token. This flow supports features like refresh tokens and scopes and is commonly used in web and mobile applications.</p>
+<h3 id="what-is-the-client-credentials-flow"><strong>What is the Client Credentials Flow?</strong><a hidden class="anchor" aria-hidden="true" href="#what-is-the-client-credentials-flow">#</a></h3>
+<p>The Client Credentials Flow is intended for machine-to-machine (M2M) communication where no user is involved. Here, the client application directly requests an access token from the authorization server by authenticating itself with its client ID and client secret. This flow is ideal for service accounts, APIs, or backend microservices that need to authenticate and authorize themselves to access protected resources.</p>
+<h3 id="key-differences"><strong>Key Differences</strong><a hidden class="anchor" aria-hidden="true" href="#key-differences">#</a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>Feature</th>
+          <th>Authorization Code Flow</th>
+          <th>Client Credentials Flow</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>User Involvement</td>
+          <td>Yes, user authentication required</td>
+          <td>No user involved</td>
+      </tr>
+      <tr>
+          <td>Token Request Method</td>
+          <td>Authorization code exchanged via backend server</td>
+          <td>Direct token request using client credentials</td>
+      </tr>
+      <tr>
+          <td>Use Case</td>
+          <td>User-facing apps (web, mobile)</td>
+          <td>Backend services, APIs, M2M</td>
+      </tr>
+      <tr>
+          <td>Support for Refresh Token</td>
+          <td>Yes</td>
+          <td>Typically no</td>
+      </tr>
+      <tr>
+          <td>Security Considerations</td>
+          <td>Requires secure backend for token exchange</td>
+          <td>Client secret must be securely stored</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="security-considerations"><strong>Security Considerations</strong><a hidden class="anchor" aria-hidden="true" href="#security-considerations">#</a></h3>
+<p>Authorization Code Flow leverages an intermediate authorization code and often PKCE to mitigate interception risks, especially for public clients. The Client Credentials Flow depends on secure storage of client credentials, since the token request is made directly without user context.</p>
+<h3 id="example-scenario-using-client-credentials-flow"><strong>Example Scenario: Using Client Credentials Flow</strong><a hidden class="anchor" aria-hidden="true" href="#example-scenario-using-client-credentials-flow">#</a></h3>
+<p>Imagine a backend microservice that needs to call another API to fetch data on behalf of the service itself (not a user). It uses Client Credentials Flow to authenticate to the authorization server, obtain an access token, and then call the downstream API securely.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>POST /token HTTP/1.1
+</span></span><span style="display:flex;"><span>Host: authorization-server.com
+</span></span><span style="display:flex;"><span>Content-Type: application/x-www-form-urlencoded
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>grant_type<span style="color:#f92672">=</span>client_credentials&amp;
+</span></span><span style="display:flex;"><span>client_id<span style="color:#f92672">=</span>your_client_id&amp;
+</span></span><span style="display:flex;"><span>client_secret<span style="color:#f92672">=</span>your_client_secret&amp;
+</span></span><span style="display:flex;"><span>scope<span style="color:#f92672">=</span>read:data
+</span></span></code></pre></div><p>The server responds with an access token usable by the microservice.</p>
+<h3 id="choosing-the-right-flow"><strong>Choosing the Right Flow</strong><a hidden class="anchor" aria-hidden="true" href="#choosing-the-right-flow">#</a></h3>
+<ul>
+<li>Use <strong>Authorization Code Flow</strong> when your application involves user authentication and you need to act on behalf of a user.</li>
+<li>Use <strong>Client Credentials Flow</strong> for server-to-server communication without user context.</li>
+<li>When building modern SPAs, prefer Authorization Code Flow with PKCE instead of Implicit Flow for better security.</li>
+</ul>
+<h3 id="thought-provoking-questions"><strong>Thought-Provoking Questions</strong><a hidden class="anchor" aria-hidden="true" href="#thought-provoking-questions">#</a></h3>
+<ul>
+<li>How do you securely store client secrets in your backend or microservices?</li>
+<li>Are there scenarios where you might combine both flows in a single application ecosystem?</li>
+<li>How does token scope management differ between these flows in your use case?</li>
+</ul>
+<h3 id="conclusion"><strong>Conclusion</strong><a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h3>
+<p>Both Authorization Code Flow and Client Credentials Flow are fundamental OAuth 2.0 flows tailored for different application scenarios. Selecting the appropriate flow based on whether user interaction is needed or not is key to maintaining security and functionality. For modern architectures, mixing these flows where necessary while following security best practices will yield the best results.</p>
+<p><strong>👉 Related:</strong> <a href="/posts/understanding-the-authorization-code-flow-in-oauth-20/">Understanding the Authorization Code Flow in OAuth 2.0</a></p>
+<p><strong>👉 Related:</strong> <a href="/posts/understanding-the-authorization-code-flow-with-pkce-in-oauth-20/">Understanding the Authorization Code Flow with PKCE in OAuth 2.0</a></p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/oauth-2.0/">OAuth 2.0</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/authorization-code-flow/">Authorization Code Flow</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/client-credentials-flow/">Client Credentials Flow</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/machine-to-machine/">Machine-to-Machine</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/security/">Security</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/authorization-code-flow-vs-implicit-flow-which-one-should-you-use/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Authorization Code Flow vs Implicit Flow: Which One Should You Use?</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/enterprise-iam-architecture/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Enterprise IAM Architecture Cluster</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/navigating-iam-challenges-in-multi-cloud-environments/" class="custom-link">
+              Navigating IAM Challenges in Multi-Cloud Environments
+            </a>
+            <small class="custom-date">2025-06-06</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/building-unified-identity-strategy-in-multi-cloud-environments/" class="custom-link">
+              Building Unified Identity Strategy in Multi-Cloud Environments
+            </a>
+            <small class="custom-date">2025-06-04</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/oauth-20-token-introspection-real-time-validation-explained/" class="custom-link">
+              OAuth 2.0 Token Introspection: Real-Time Validation Explained
+            </a>
+            <small class="custom-date">2025-06-04</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/oauth-21-whats-changing-and-why-it-matters/" class="custom-link">
+              OAuth 2.1: What’s Changing and Why It Matters
+            </a>
+            <small class="custom-date">2025-06-04</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/understanding-token-revocation-and-when-to-use-it/" class="custom-link">
+              Understanding Token Revocation and When to Use It
+            </a>
+            <small class="custom-date">2025-06-04</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/devops-is-not-just-tools--its-a-cultural-transformation/" class="custom-link">
+                DevOps Is Not Just Tools — It’s a Cultural Transformation
+              </a>
+              <small class="custom-date">2025-06-09</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/orchestrating-kubernetes-and-iam-with-terraform-a-comprehensive-guide/" class="custom-link">
+                Orchestrating Kubernetes and IAM with Terraform: A Comprehensive Guide
+              </a>
+              <small class="custom-date">2025-06-08</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/navigating-iam-challenges-in-multi-cloud-environments/" class="custom-link">
+                Navigating IAM Challenges in Multi-Cloud Environments
+              </a>
+              <small class="custom-date">2025-06-06</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/best-practices-for-writing-java-dockerfiles/" class="custom-link">
+                Best Practices for Writing Java Dockerfiles
+              </a>
+              <small class="custom-date">2025-06-05</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/building-unified-identity-strategy-in-multi-cloud-environments/" class="custom-link">
+                Building Unified Identity Strategy in Multi-Cloud Environments
+              </a>
+              <small class="custom-date">2025-06-04</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

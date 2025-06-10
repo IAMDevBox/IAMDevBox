@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>How OAuth 2.1 Refresh Tokens Work: Best Practices and Expiry | IAMDevBox</title>
+<meta name="keywords" content="OAuth 2.1, Refresh Tokens, Token Expiry, Security, OAuth Best Practices">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/how-oauth-21-refresh-tokens-work-best-practices-and-expiry/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css" integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF&#43;13Dyqob6ASlTrTye8=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/how-oauth-21-refresh-tokens-work-best-practices-and-expiry/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.f87e4df74f4f070695effe5d49ae4914eb9228356e4300800036f51859f72d47.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.f87e4df74f4f070695effe5d49ae4914eb9228356e4300800036f51859f72d47.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/how-oauth-21-refresh-tokens-work-best-practices-and-expiry/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="How OAuth 2.1 Refresh Tokens Work: Best Practices and Expiry">
+  <meta property="og:description" content="OAuth 2.1 introduces refinements to enhance the security and usability of OAuth flows, especially around refresh tokens. Understanding how refresh tokens work...">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-06-04T21:09:20+00:00">
+    <meta property="article:modified_time" content="2025-06-06T19:33:33-04:00">
+    <meta property="article:tag" content="OAuth 2.1">
+    <meta property="article:tag" content="Refresh Tokens">
+    <meta property="article:tag" content="Token Expiry">
+    <meta property="article:tag" content="Security">
+    <meta property="article:tag" content="OAuth Best Practices">
+      <meta property="og:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:title" content="How OAuth 2.1 Refresh Tokens Work: Best Practices and Expiry">
+<meta name="twitter:description" content="OAuth 2.1 introduces refinements to enhance the security and usability of OAuth flows, especially around refresh tokens. Understanding how refresh tokens work...">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "How OAuth 2.1 Refresh Tokens Work: Best Practices and Expiry",
+      "item": "https://www.iamdevbox.com/posts/how-oauth-21-refresh-tokens-work-best-practices-and-expiry/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "How OAuth 2.1 Refresh Tokens Work: Best Practices and Expiry",
+  "name": "How OAuth 2.1 Refresh Tokens Work: Best Practices and Expiry",
+  "description": "OAuth 2.1 introduces refinements to enhance the security and usability of OAuth flows, especially around refresh tokens. Understanding how refresh tokens work...",
+  "keywords": [
+    "OAuth 2.1", "Refresh Tokens", "Token Expiry", "Security", "OAuth Best Practices"
+  ],
+  "articleBody": "OAuth 2.1 introduces refinements to enhance the security and usability of OAuth flows, especially around refresh tokens. Understanding how refresh tokens work in OAuth 2.1, their lifecycle, and best practices is essential for developers and security architects aiming to build robust authentication systems.\nWhat Are Refresh Tokens? Refresh tokens are long-lived credentials issued by the authorization server alongside access tokens. Their purpose is to obtain new access tokens without requiring the user to re-authenticate, enabling seamless user sessions.\nOAuth 2.1 Updates to Refresh Tokens OAuth 2.1 builds on OAuth 2.0 by:\nRecommending refresh tokens be rotated on every use to prevent replay attacks. Mandating the use of PKCE even for confidential clients, enhancing security. Clarifying that refresh tokens should be securely stored and limited in scope. Encouraging short-lived access tokens with refresh tokens as the secure renewal mechanism. How Refresh Token Rotation Works With rotation, each time a client uses a refresh token to get a new access token, the server issues a new refresh token. The previous refresh token is invalidated immediately.\n1. Client sends refresh token to authorization server. 2. Server verifies token and issues new access and refresh tokens. 3. Old refresh token is revoked. 4. Client replaces stored refresh token with the new one. This approach reduces risks if a refresh token leaks — stolen tokens quickly become invalid.\nManaging Refresh Token Expiry Refresh tokens can have absolute or sliding expiration:\nAbsolute expiry: Token is valid until a fixed expiration date regardless of use. Sliding expiry: Token expiration is extended with each use, but up to a max lifetime. Set expiry durations carefully balancing user convenience and security:\nExample: Access token lifetime 15 minutes; refresh token lifetime 14 days. Revoke refresh tokens upon suspicious activity or logout. Security Best Practices Use Secure Storage: Store refresh tokens securely on the client (e.g., encrypted storage on mobile devices). Implement Token Binding: Bind refresh tokens to client properties or device identifiers. Use HTTPS only to transmit tokens to prevent interception. Employ Refresh Token Revocation: Allow users or admins to revoke tokens on demand. Monitor for Refresh Token Abuse: Detect abnormal usage patterns to identify leaks. Implementing Refresh Tokens in OAuth 2.1 Most OAuth libraries now support refresh token rotation and PKCE by default. When implementing:\nAlways include PKCE even for confidential clients. Validate refresh tokens strictly on the server side. Handle errors gracefully, forcing user re-authentication if refresh fails. Log refresh token issuance and revocation events for audit. Example Refresh Token Request (cURL) curl -X POST \"https://auth.example.com/oauth2/token\" \\ -H \"Content-Type: application/x-www-form-urlencoded\" \\ -d \"grant_type=refresh_token\u0026refresh_token=old_refresh_token_here\u0026client_id=your_client_id\u0026client_secret=your_client_secret\u0026code_verifier=your_code_verifier\" Conclusion OAuth 2.1 refresh tokens improve security and session management by enforcing rotation and stronger client protections. Adopting these best practices ensures secure, user-friendly OAuth implementations.\n👉 Related:\nUnderstanding the Authorization Code Flow with PKCE in OAuth 2.0\nOAuth 2.0 Token Introspection: Real-Time Validation Explained\n💡 How do you handle refresh token rotation and expiry in your OAuth implementations? Are there scenarios where longer refresh token lifetimes are justified?\n",
+  "wordCount" : "494",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/static/IAMDevBox.com.png","datePublished": "2025-06-04T21:09:20Z",
+  "dateModified": "2025-06-06T19:33:33-04:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/how-oauth-21-refresh-tokens-work-best-practices-and-expiry/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script><meta name="description" content="OAuth 2.1 introduces refinements to enhance the security and usability of OAuth flows, especially around refresh tokens. Understanding how refresh tokens work...">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/devops-is-not-just-tools--its-a-cultural-transformation\/"
+            },
+            "headline": "\"DevOps Is Not Just Tools — It’s a Cultural Transformation\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-06-09T14:56:04Z",
+            "dateModified": "2025-06-09T14:56:16Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/orchestrating-kubernetes-and-iam-with-terraform-a-comprehensive-guide\/"
+            },
+            "headline": "\"Orchestrating Kubernetes and IAM with Terraform: A Comprehensive Guide\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-06-08T13:49:52Z",
+            "dateModified": "2025-06-08T09:53:31-04:00"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/navigating-iam-challenges-in-multi-cloud-environments\/"
+            },
+            "headline": "\"Navigating IAM Challenges in Multi-Cloud Environments\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-06-06T14:59:32Z",
+            "dateModified": "2025-06-06T19:33:33-04:00"
+          }
+  ]
+}
+</script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "\"What Are Refresh Tokens?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Please refer to the article for detailed explanation.\""
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "\"How do you handle refresh token rotation and expiry in your OAuth implementations?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Please refer to the article for detailed explanation.\""
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "\"Are there scenarios where longer refresh token lifetimes are justified?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Please refer to the article for detailed explanation.\""
+      }
+    }
+  ]
+}
+</script>
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    if (document.querySelector('.mermaid')) {
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+        mermaid.initialize({ startOnLoad: true, theme: "default" });
+        };
+        document.head.appendChild(script);
+    }
+    });
+    </script>
+
+    
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-B6QCH29975');
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      How OAuth 2.1 Refresh Tokens Work: Best Practices and Expiry
+    </h1>
+    
+    <div class="post-meta">3 min&nbsp;·&nbsp;494 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#what-are-refresh-tokens" aria-label="What Are Refresh Tokens?">What Are Refresh Tokens?</a></li>
+                <li>
+                    <a href="#oauth-21-updates-to-refresh-tokens" aria-label="OAuth 2.1 Updates to Refresh Tokens">OAuth 2.1 Updates to Refresh Tokens</a></li>
+                <li>
+                    <a href="#how-refresh-token-rotation-works" aria-label="How Refresh Token Rotation Works">How Refresh Token Rotation Works</a></li>
+                <li>
+                    <a href="#managing-refresh-token-expiry" aria-label="Managing Refresh Token Expiry">Managing Refresh Token Expiry</a></li>
+                <li>
+                    <a href="#security-best-practices" aria-label="Security Best Practices">Security Best Practices</a></li>
+                <li>
+                    <a href="#implementing-refresh-tokens-in-oauth-21" aria-label="Implementing Refresh Tokens in OAuth 2.1">Implementing Refresh Tokens in OAuth 2.1</a></li>
+                <li>
+                    <a href="#example-refresh-token-request-curl" aria-label="Example Refresh Token Request (cURL)">Example Refresh Token Request (cURL)</a></li>
+                <li>
+                    <a href="#conclusion" aria-label="Conclusion">Conclusion</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>OAuth 2.1 introduces refinements to enhance the security and usability of OAuth flows, especially around refresh tokens. Understanding how refresh tokens work in OAuth 2.1, their lifecycle, and best practices is essential for developers and security architects aiming to build robust authentication systems.</p>
+<hr>
+<h3 id="what-are-refresh-tokens"><strong>What Are Refresh Tokens?</strong><a hidden class="anchor" aria-hidden="true" href="#what-are-refresh-tokens">#</a></h3>
+<p>Refresh tokens are long-lived credentials issued by the authorization server alongside access tokens. Their purpose is to obtain new access tokens without requiring the user to re-authenticate, enabling seamless user sessions.</p>
+<hr>
+<h3 id="oauth-21-updates-to-refresh-tokens"><strong>OAuth 2.1 Updates to Refresh Tokens</strong><a hidden class="anchor" aria-hidden="true" href="#oauth-21-updates-to-refresh-tokens">#</a></h3>
+<p>OAuth 2.1 builds on OAuth 2.0 by:</p>
+<ul>
+<li>Recommending refresh tokens be rotated on every use to prevent replay attacks.</li>
+<li>Mandating the use of PKCE even for confidential clients, enhancing security.</li>
+<li>Clarifying that refresh tokens should be securely stored and limited in scope.</li>
+<li>Encouraging short-lived access tokens with refresh tokens as the secure renewal mechanism.</li>
+</ul>
+<hr>
+<h3 id="how-refresh-token-rotation-works"><strong>How Refresh Token Rotation Works</strong><a hidden class="anchor" aria-hidden="true" href="#how-refresh-token-rotation-works">#</a></h3>
+<p>With rotation, each time a client uses a refresh token to get a new access token, the server issues a new refresh token. The previous refresh token is invalidated immediately.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-plaintext" data-lang="plaintext"><span style="display:flex;"><span>1. Client sends refresh token to authorization server.
+</span></span><span style="display:flex;"><span>2. Server verifies token and issues new access and refresh tokens.
+</span></span><span style="display:flex;"><span>3. Old refresh token is revoked.
+</span></span><span style="display:flex;"><span>4. Client replaces stored refresh token with the new one.
+</span></span></code></pre></div><p>This approach reduces risks if a refresh token leaks — stolen tokens quickly become invalid.</p>
+<hr>
+<h3 id="managing-refresh-token-expiry"><strong>Managing Refresh Token Expiry</strong><a hidden class="anchor" aria-hidden="true" href="#managing-refresh-token-expiry">#</a></h3>
+<p>Refresh tokens can have absolute or sliding expiration:</p>
+<ul>
+<li><strong>Absolute expiry</strong>: Token is valid until a fixed expiration date regardless of use.</li>
+<li><strong>Sliding expiry</strong>: Token expiration is extended with each use, but up to a max lifetime.</li>
+</ul>
+<p>Set expiry durations carefully balancing user convenience and security:</p>
+<ul>
+<li>Example: Access token lifetime 15 minutes; refresh token lifetime 14 days.</li>
+<li>Revoke refresh tokens upon suspicious activity or logout.</li>
+</ul>
+<hr>
+<h3 id="security-best-practices"><strong>Security Best Practices</strong><a hidden class="anchor" aria-hidden="true" href="#security-best-practices">#</a></h3>
+<ul>
+<li>Use <strong>Secure Storage</strong>: Store refresh tokens securely on the client (e.g., encrypted storage on mobile devices).</li>
+<li>Implement <strong>Token Binding</strong>: Bind refresh tokens to client properties or device identifiers.</li>
+<li>Use <strong>HTTPS only</strong> to transmit tokens to prevent interception.</li>
+<li>Employ <strong>Refresh Token Revocation</strong>: Allow users or admins to revoke tokens on demand.</li>
+<li>Monitor for <strong>Refresh Token Abuse</strong>: Detect abnormal usage patterns to identify leaks.</li>
+</ul>
+<hr>
+<h3 id="implementing-refresh-tokens-in-oauth-21"><strong>Implementing Refresh Tokens in OAuth 2.1</strong><a hidden class="anchor" aria-hidden="true" href="#implementing-refresh-tokens-in-oauth-21">#</a></h3>
+<p>Most OAuth libraries now support refresh token rotation and PKCE by default. When implementing:</p>
+<ul>
+<li>Always include PKCE even for confidential clients.</li>
+<li>Validate refresh tokens strictly on the server side.</li>
+<li>Handle errors gracefully, forcing user re-authentication if refresh fails.</li>
+<li>Log refresh token issuance and revocation events for audit.</li>
+</ul>
+<hr>
+<h3 id="example-refresh-token-request-curl"><strong>Example Refresh Token Request (cURL)</strong><a hidden class="anchor" aria-hidden="true" href="#example-refresh-token-request-curl">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -X POST <span style="color:#e6db74">&#34;https://auth.example.com/oauth2/token&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>-H <span style="color:#e6db74">&#34;Content-Type: application/x-www-form-urlencoded&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>-d <span style="color:#e6db74">&#34;grant_type=refresh_token&amp;refresh_token=old_refresh_token_here&amp;client_id=your_client_id&amp;client_secret=your_client_secret&amp;code_verifier=your_code_verifier&#34;</span>
+</span></span></code></pre></div><hr>
+<h3 id="conclusion"><strong>Conclusion</strong><a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h3>
+<p>OAuth 2.1 refresh tokens improve security and session management by enforcing rotation and stronger client protections. Adopting these best practices ensures secure, user-friendly OAuth implementations.</p>
+<hr>
+<p><strong>👉 Related:</strong></p>
+<p><a href="/posts/understanding-the-authorization-code-flow-with-pkce-in-oauth-20/">Understanding the Authorization Code Flow with PKCE in OAuth 2.0</a></p>
+<p><a href="/posts/oauth-20-token-introspection-real-time-validation-explained/">OAuth 2.0 Token Introspection: Real-Time Validation Explained</a></p>
+<hr>
+<p>💡 <strong>How do you handle refresh token rotation and expiry in your OAuth implementations? Are there scenarios where longer refresh token lifetimes are justified?</strong></p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/oauth-2.1/">OAuth 2.1</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/refresh-tokens/">Refresh Tokens</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/token-expiry/">Token Expiry</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/security/">Security</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/oauth-best-practices/">OAuth Best Practices</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/forgerock-am-script-customization-a-practical-guide/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>ForgeRock AM Script Customization: A Practical Guide</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/how-we-solved-token-misrouting-in-forgerock-identity-cloud/">
+    <span class="title">Next »</span>
+    <br>
+    <span>How We Solved Token Misrouting in ForgeRock Identity Cloud</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/navigating-iam-challenges-in-multi-cloud-environments/" class="custom-link">
+              Navigating IAM Challenges in Multi-Cloud Environments
+            </a>
+            <small class="custom-date">2025-06-06</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/oauth-20-token-introspection-real-time-validation-explained/" class="custom-link">
+              OAuth 2.0 Token Introspection: Real-Time Validation Explained
+            </a>
+            <small class="custom-date">2025-06-04</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/oauth-21-whats-changing-and-why-it-matters/" class="custom-link">
+              OAuth 2.1: What’s Changing and Why It Matters
+            </a>
+            <small class="custom-date">2025-06-04</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/understanding-token-revocation-and-when-to-use-it/" class="custom-link">
+              Understanding Token Revocation and When to Use It
+            </a>
+            <small class="custom-date">2025-06-04</small>
+          </li>
+          
+        
+      
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/integrating-oauth-20-with-react-spa-using-backend-for-frontend-bff/" class="custom-link">
+              Integrating OAuth 2.0 with React SPA using Backend-for-Frontend (BFF)
+            </a>
+            <small class="custom-date">2025-06-04</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/devops-is-not-just-tools--its-a-cultural-transformation/" class="custom-link">
+                DevOps Is Not Just Tools — It’s a Cultural Transformation
+              </a>
+              <small class="custom-date">2025-06-09</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/orchestrating-kubernetes-and-iam-with-terraform-a-comprehensive-guide/" class="custom-link">
+                Orchestrating Kubernetes and IAM with Terraform: A Comprehensive Guide
+              </a>
+              <small class="custom-date">2025-06-08</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/navigating-iam-challenges-in-multi-cloud-environments/" class="custom-link">
+                Navigating IAM Challenges in Multi-Cloud Environments
+              </a>
+              <small class="custom-date">2025-06-06</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/best-practices-for-writing-java-dockerfiles/" class="custom-link">
+                Best Practices for Writing Java Dockerfiles
+              </a>
+              <small class="custom-date">2025-06-05</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/building-unified-identity-strategy-in-multi-cloud-environments/" class="custom-link">
+                Building Unified Identity Strategy in Multi-Cloud Environments
+              </a>
+              <small class="custom-date">2025-06-04</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

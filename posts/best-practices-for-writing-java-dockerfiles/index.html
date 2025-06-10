@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Best Practices for Writing Java Dockerfiles | IAMDevBox</title>
+<meta name="keywords" content="Docker, Java, Dockerfile, Best Practices, Containerization">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/best-practices-for-writing-java-dockerfiles/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css" integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF&#43;13Dyqob6ASlTrTye8=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/best-practices-for-writing-java-dockerfiles/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.f87e4df74f4f070695effe5d49ae4914eb9228356e4300800036f51859f72d47.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.f87e4df74f4f070695effe5d49ae4914eb9228356e4300800036f51859f72d47.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/best-practices-for-writing-java-dockerfiles/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Best Practices for Writing Java Dockerfiles">
+  <meta property="og:description" content="Docker has become a cornerstone of modern software development, enabling developers to package applications and their dependencies into lightweight, portable...">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-06-05T21:59:25+00:00">
+    <meta property="article:modified_time" content="2025-06-06T19:33:33-04:00">
+    <meta property="article:tag" content="Docker">
+    <meta property="article:tag" content="Java">
+    <meta property="article:tag" content="Dockerfile">
+    <meta property="article:tag" content="Best Practices">
+    <meta property="article:tag" content="Containerization">
+      <meta property="og:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:title" content="Best Practices for Writing Java Dockerfiles">
+<meta name="twitter:description" content="Docker has become a cornerstone of modern software development, enabling developers to package applications and their dependencies into lightweight, portable...">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Best Practices for Writing Java Dockerfiles",
+      "item": "https://www.iamdevbox.com/posts/best-practices-for-writing-java-dockerfiles/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Best Practices for Writing Java Dockerfiles",
+  "name": "Best Practices for Writing Java Dockerfiles",
+  "description": "Docker has become a cornerstone of modern software development, enabling developers to package applications and their dependencies into lightweight, portable...",
+  "keywords": [
+    "Docker", "Java", "Dockerfile", "Best Practices", "Containerization"
+  ],
+  "articleBody": "Docker has become a cornerstone of modern software development, enabling developers to package applications and their dependencies into lightweight, portable containers. For Java applications, writing an efficient and secure Dockerfile is crucial to ensure optimal performance, scalability, and maintainability. This blog post explores best practices for writing Java Dockerfiles, covering everything from minimizing image size to optimizing resource usage.\n1. Use a Minimal Base Image The foundation of any Dockerfile is the base image. For Java applications, it’s essential to choose a base image that is both lightweight and secure. The Eclipse Temurin or AdoptOpenJDK images are excellent choices, as they are optimized for Java applications and regularly updated.\nExample: Minimal Base Image # Use a minimal base image with the required JDK version FROM eclipse-temurin:17-jdk-jammy # Set the working directory WORKDIR /app # Copy the application JAR file COPY target/my-java-app.jar . # Expose the application port EXPOSE 8080 # Define the command to run the application CMD [\"java\", \"-jar\", \"my-java-app.jar\"] Explanation:\nThis Dockerfile starts with a minimal base image (eclipse-temurin:17-jdk-jammy), which includes only the necessary components for running a Java application. By avoiding bloated images, you reduce the attack surface and improve performance.\n2. Optimize for Multi-Stage Builds Multi-stage builds are a powerful feature of Docker that allow you to separate the build environment from the runtime environment. This approach minimizes the final image size by discarding unnecessary build tools and dependencies.\nExample: Multi-Stage Build # Stage 1: Build the application FROM maven:3.8.6-eclipse-temurin-17-jdk AS builder WORKDIR /app COPY src src COPY pom.xml . RUN mvn clean package -DskipTests # Stage 2: Runtime environment FROM eclipse-temurin:17-jdk-jammy WORKDIR /app COPY --from=builder /app/target/my-java-app.jar . EXPOSE 8080 CMD [\"java\", \"-jar\", \"my-java-app.jar\"] Explanation:\nIn this example, the first stage uses a Maven image to build the Java application. The second stage uses a minimal JDK image and copies only the JAR file from the first stage. This reduces the final image size and improves security by removing build tools.\n3. Configure Environment Variables Properly Environment variables are essential for configuring applications at runtime. They allow you to decouple configuration from code and adapt the application to different environments (e.g., development, testing, production).\nExample: Setting Environment Variables # Set environment variables ENV JAVA_OPTS=\"-Xmx512m -Xms256m -XX:+UseG1GC\" ENV APP_ENV=\"production\" ENV DB_URL=\"jdbc:mysql://database:3306/mydb\" # Run the application with the configured options CMD [\"java\", \"-jar\", \"my-java-app.jar\"] Explanation:\nThe JAVA_OPTS variable configures JVM memory settings and garbage collection. The APP_ENV and DB_URL variables provide runtime configuration for the application. Using environment variables ensures flexibility and avoids hardcoding sensitive information.\n4. Leverage Docker Build Caching Docker’s build caching mechanism can significantly speed up the build process by reusing previously built layers. To take full advantage of this, organize your Dockerfile to place frequently changing instructions (e.g., COPY) after less frequently changing instructions (e.g., RUN).\nExample: Optimizing Build Caching # Place frequently changing instructions at the end FROM eclipse-temurin:17-jdk-jammy WORKDIR /app # Install system dependencies RUN apt-get update \u0026\u0026 apt-get install -y \\ curl \\ \u0026\u0026 rm -rf /var/lib/apt/lists/* # Copy only the JAR file at the end COPY target/my-java-app.jar . EXPOSE 8080 CMD [\"java\", \"-jar\", \"my-java-app.jar\"] Explanation:\nBy placing the COPY instruction at the end, you ensure that Docker only rebuilds this layer when the JAR file changes. This reduces build time and improves efficiency.\n5. Implement Resource Limits and Constraints Java applications can be resource-intensive, especially in production environments. Docker allows you to set resource limits (e.g., CPU, memory) to prevent a single container from monopolizing system resources.\nExample: Setting Resource Limits # Set memory limits ENV JAVA_OPTS=\"-Xmx512m -Xms256m\" # Run the application CMD [\"java\", \"-jar\", \"my-java-app.jar\"] Explanation:\nThe JAVA_OPTS variable sets the maximum and initial heap sizes for the JVM. This ensures that the application doesn’t consume excessive memory, which could destabilize the host system or other containers.\n6. Follow Security Best Practices Security is a critical consideration when building Docker images. Java applications are often targets for attacks due to their widespread use and potential vulnerabilities.\nExample: Securing the Image # Use a non-root user RUN groupadd -g 1000 appuser \u0026\u0026 useradd -u 1000 -g appuser appuser # Switch to the non-root user USER appuser # Copy the JAR file to the user's directory COPY --chown=appuser:appuser target/my-java-app.jar . # Run the application with reduced privileges CMD [\"java\", \"-jar\", \"my-java-app.jar\"] Explanation:\nThis Dockerfile creates a non-root user (appuser) and switches to it before running the application. By avoiding running containers as root, you reduce the risk of privilege escalation attacks.\n7. Test and Debug Locally Before deploying your Java application to production, it’s essential to test it locally using Docker. This allows you to identify and fix issues early in the development cycle.\nExample: ",
+  "wordCount" : "774",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/static/IAMDevBox.com.png","datePublished": "2025-06-05T21:59:25Z",
+  "dateModified": "2025-06-06T19:33:33-04:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/best-practices-for-writing-java-dockerfiles/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script><meta name="description" content="Docker has become a cornerstone of modern software development, enabling developers to package applications and their dependencies into lightweight, portable...">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/devops-is-not-just-tools--its-a-cultural-transformation\/"
+            },
+            "headline": "\"DevOps Is Not Just Tools — It’s a Cultural Transformation\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-06-09T14:56:04Z",
+            "dateModified": "2025-06-09T14:56:16Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/orchestrating-kubernetes-and-iam-with-terraform-a-comprehensive-guide\/"
+            },
+            "headline": "\"Orchestrating Kubernetes and IAM with Terraform: A Comprehensive Guide\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-06-08T13:49:52Z",
+            "dateModified": "2025-06-08T09:53:31-04:00"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/navigating-iam-challenges-in-multi-cloud-environments\/"
+            },
+            "headline": "\"Navigating IAM Challenges in Multi-Cloud Environments\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-06-06T14:59:32Z",
+            "dateModified": "2025-06-06T19:33:33-04:00"
+          }
+  ]
+}
+</script>
+    
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    if (document.querySelector('.mermaid')) {
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+        mermaid.initialize({ startOnLoad: true, theme: "default" });
+        };
+        document.head.appendChild(script);
+    }
+    });
+    </script>
+
+    
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-B6QCH29975');
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Best Practices for Writing Java Dockerfiles
+    </h1>
+    
+    <div class="post-meta">4 min&nbsp;·&nbsp;774 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#1-use-a-minimal-base-image" aria-label="1. Use a Minimal Base Image">1. Use a Minimal Base Image</a><ul>
+                        
+                <li>
+                    <a href="#example-minimal-base-image" aria-label="Example: Minimal Base Image">Example: Minimal Base Image</a></li></ul>
+                </li>
+                <li>
+                    <a href="#2-optimize-for-multi-stage-builds" aria-label="2. Optimize for Multi-Stage Builds">2. Optimize for Multi-Stage Builds</a><ul>
+                        
+                <li>
+                    <a href="#example-multi-stage-build" aria-label="Example: Multi-Stage Build">Example: Multi-Stage Build</a></li></ul>
+                </li>
+                <li>
+                    <a href="#3-configure-environment-variables-properly" aria-label="3. Configure Environment Variables Properly">3. Configure Environment Variables Properly</a><ul>
+                        
+                <li>
+                    <a href="#example-setting-environment-variables" aria-label="Example: Setting Environment Variables">Example: Setting Environment Variables</a></li></ul>
+                </li>
+                <li>
+                    <a href="#4-leverage-docker-build-caching" aria-label="4. Leverage Docker Build Caching">4. Leverage Docker Build Caching</a><ul>
+                        
+                <li>
+                    <a href="#example-optimizing-build-caching" aria-label="Example: Optimizing Build Caching">Example: Optimizing Build Caching</a></li></ul>
+                </li>
+                <li>
+                    <a href="#5-implement-resource-limits-and-constraints" aria-label="5. Implement Resource Limits and Constraints">5. Implement Resource Limits and Constraints</a><ul>
+                        
+                <li>
+                    <a href="#example-setting-resource-limits" aria-label="Example: Setting Resource Limits">Example: Setting Resource Limits</a></li></ul>
+                </li>
+                <li>
+                    <a href="#6-follow-security-best-practices" aria-label="6. Follow Security Best Practices">6. Follow Security Best Practices</a><ul>
+                        
+                <li>
+                    <a href="#example-securing-the-image" aria-label="Example: Securing the Image">Example: Securing the Image</a></li></ul>
+                </li>
+                <li>
+                    <a href="#7-test-and-debug-locally" aria-label="7. Test and Debug Locally">7. Test and Debug Locally</a><ul>
+                        
+                <li>
+                    <a href="#example" aria-label="Example:">Example:</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>Docker has become a cornerstone of modern software development, enabling developers to package applications and their dependencies into lightweight, portable containers. For Java applications, writing an efficient and secure Dockerfile is crucial to ensure optimal performance, scalability, and maintainability. This blog post explores best practices for writing Java Dockerfiles, covering everything from minimizing image size to optimizing resource usage.</p>
+<hr>
+<h3 id="1-use-a-minimal-base-image"><strong>1. Use a Minimal Base Image</strong><a hidden class="anchor" aria-hidden="true" href="#1-use-a-minimal-base-image">#</a></h3>
+<p>The foundation of any Dockerfile is the base image. For Java applications, it’s essential to choose a base image that is both lightweight and secure. The <code>Eclipse Temurin</code> or <code>AdoptOpenJDK</code> images are excellent choices, as they are optimized for Java applications and regularly updated.</p>
+<h4 id="example-minimal-base-image">Example: Minimal Base Image<a hidden class="anchor" aria-hidden="true" href="#example-minimal-base-image">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dockerfile" data-lang="dockerfile"><span style="display:flex;"><span><span style="color:#75715e"># Use a minimal base image with the required JDK version</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> eclipse-temurin:17-jdk-jammy</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Set the working directory</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">WORKDIR</span><span style="color:#e6db74"> /app</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Copy the application JAR file</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> target/my-java-app.jar .<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Expose the application port</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">EXPOSE</span><span style="color:#e6db74"> 8080</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Define the command to run the application</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">CMD</span> [<span style="color:#e6db74">&#34;java&#34;</span>, <span style="color:#e6db74">&#34;-jar&#34;</span>, <span style="color:#e6db74">&#34;my-java-app.jar&#34;</span>]<span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p><strong>Explanation:</strong><br>
+This Dockerfile starts with a minimal base image (<code>eclipse-temurin:17-jdk-jammy</code>), which includes only the necessary components for running a Java application. By avoiding bloated images, you reduce the attack surface and improve performance.</p>
+<hr>
+<h3 id="2-optimize-for-multi-stage-builds"><strong>2. Optimize for Multi-Stage Builds</strong><a hidden class="anchor" aria-hidden="true" href="#2-optimize-for-multi-stage-builds">#</a></h3>
+<p>Multi-stage builds are a powerful feature of Docker that allow you to separate the build environment from the runtime environment. This approach minimizes the final image size by discarding unnecessary build tools and dependencies.</p>
+<h4 id="example-multi-stage-build">Example: Multi-Stage Build<a hidden class="anchor" aria-hidden="true" href="#example-multi-stage-build">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dockerfile" data-lang="dockerfile"><span style="display:flex;"><span><span style="color:#75715e"># Stage 1: Build the application</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> maven:3.8.6-eclipse-temurin-17-jdk AS builder</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">WORKDIR</span><span style="color:#e6db74"> /app</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> src src<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> pom.xml .<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> mvn clean package -DskipTests<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Stage 2: Runtime environment</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> eclipse-temurin:17-jdk-jammy</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">WORKDIR</span><span style="color:#e6db74"> /app</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> --from<span style="color:#f92672">=</span>builder /app/target/my-java-app.jar .<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">EXPOSE</span><span style="color:#e6db74"> 8080</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">CMD</span> [<span style="color:#e6db74">&#34;java&#34;</span>, <span style="color:#e6db74">&#34;-jar&#34;</span>, <span style="color:#e6db74">&#34;my-java-app.jar&#34;</span>]<span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p><strong>Explanation:</strong><br>
+In this example, the first stage uses a Maven image to build the Java application. The second stage uses a minimal JDK image and copies only the JAR file from the first stage. This reduces the final image size and improves security by removing build tools.</p>
+<hr>
+<h3 id="3-configure-environment-variables-properly"><strong>3. Configure Environment Variables Properly</strong><a hidden class="anchor" aria-hidden="true" href="#3-configure-environment-variables-properly">#</a></h3>
+<p>Environment variables are essential for configuring applications at runtime. They allow you to decouple configuration from code and adapt the application to different environments (e.g., development, testing, production).</p>
+<h4 id="example-setting-environment-variables">Example: Setting Environment Variables<a hidden class="anchor" aria-hidden="true" href="#example-setting-environment-variables">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dockerfile" data-lang="dockerfile"><span style="display:flex;"><span><span style="color:#75715e"># Set environment variables</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> JAVA_OPTS<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;-Xmx512m -Xms256m -XX:+UseG1GC&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> APP_ENV<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;production&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> DB_URL<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;jdbc:mysql://database:3306/mydb&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Run the application with the configured options</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">CMD</span> [<span style="color:#e6db74">&#34;java&#34;</span>, <span style="color:#e6db74">&#34;-jar&#34;</span>, <span style="color:#e6db74">&#34;my-java-app.jar&#34;</span>]<span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p><strong>Explanation:</strong><br>
+The <code>JAVA_OPTS</code> variable configures JVM memory settings and garbage collection. The <code>APP_ENV</code> and <code>DB_URL</code> variables provide runtime configuration for the application. Using environment variables ensures flexibility and avoids hardcoding sensitive information.</p>
+<hr>
+<h3 id="4-leverage-docker-build-caching"><strong>4. Leverage Docker Build Caching</strong><a hidden class="anchor" aria-hidden="true" href="#4-leverage-docker-build-caching">#</a></h3>
+<p>Docker’s build caching mechanism can significantly speed up the build process by reusing previously built layers. To take full advantage of this, organize your Dockerfile to place frequently changing instructions (e.g., <code>COPY</code>) after less frequently changing instructions (e.g., <code>RUN</code>).</p>
+<h4 id="example-optimizing-build-caching">Example: Optimizing Build Caching<a hidden class="anchor" aria-hidden="true" href="#example-optimizing-build-caching">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dockerfile" data-lang="dockerfile"><span style="display:flex;"><span><span style="color:#75715e"># Place frequently changing instructions at the end</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> eclipse-temurin:17-jdk-jammy</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">WORKDIR</span><span style="color:#e6db74"> /app</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Install system dependencies</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> apt-get update <span style="color:#f92672">&amp;&amp;</span> apt-get install -y <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    curl <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    <span style="color:#f92672">&amp;&amp;</span> rm -rf /var/lib/apt/lists/*<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Copy only the JAR file at the end</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> target/my-java-app.jar .<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">EXPOSE</span><span style="color:#e6db74"> 8080</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">CMD</span> [<span style="color:#e6db74">&#34;java&#34;</span>, <span style="color:#e6db74">&#34;-jar&#34;</span>, <span style="color:#e6db74">&#34;my-java-app.jar&#34;</span>]<span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p><strong>Explanation:</strong><br>
+By placing the <code>COPY</code> instruction at the end, you ensure that Docker only rebuilds this layer when the JAR file changes. This reduces build time and improves efficiency.</p>
+<hr>
+<h3 id="5-implement-resource-limits-and-constraints"><strong>5. Implement Resource Limits and Constraints</strong><a hidden class="anchor" aria-hidden="true" href="#5-implement-resource-limits-and-constraints">#</a></h3>
+<p>Java applications can be resource-intensive, especially in production environments. Docker allows you to set resource limits (e.g., CPU, memory) to prevent a single container from monopolizing system resources.</p>
+<h4 id="example-setting-resource-limits">Example: Setting Resource Limits<a hidden class="anchor" aria-hidden="true" href="#example-setting-resource-limits">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dockerfile" data-lang="dockerfile"><span style="display:flex;"><span><span style="color:#75715e"># Set memory limits</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> JAVA_OPTS<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;-Xmx512m -Xms256m&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Run the application</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">CMD</span> [<span style="color:#e6db74">&#34;java&#34;</span>, <span style="color:#e6db74">&#34;-jar&#34;</span>, <span style="color:#e6db74">&#34;my-java-app.jar&#34;</span>]<span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p><strong>Explanation:</strong><br>
+The <code>JAVA_OPTS</code> variable sets the maximum and initial heap sizes for the JVM. This ensures that the application doesn’t consume excessive memory, which could destabilize the host system or other containers.</p>
+<hr>
+<h3 id="6-follow-security-best-practices"><strong>6. Follow Security Best Practices</strong><a hidden class="anchor" aria-hidden="true" href="#6-follow-security-best-practices">#</a></h3>
+<p>Security is a critical consideration when building Docker images. Java applications are often targets for attacks due to their widespread use and potential vulnerabilities.</p>
+<h4 id="example-securing-the-image">Example: Securing the Image<a hidden class="anchor" aria-hidden="true" href="#example-securing-the-image">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dockerfile" data-lang="dockerfile"><span style="display:flex;"><span><span style="color:#75715e"># Use a non-root user</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> groupadd -g <span style="color:#ae81ff">1000</span> appuser <span style="color:#f92672">&amp;&amp;</span> useradd -u <span style="color:#ae81ff">1000</span> -g appuser appuser<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Switch to the non-root user</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">USER</span><span style="color:#e6db74"> appuser</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Copy the JAR file to the user&#39;s directory</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> --chown<span style="color:#f92672">=</span>appuser:appuser target/my-java-app.jar .<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Run the application with reduced privileges</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">CMD</span> [<span style="color:#e6db74">&#34;java&#34;</span>, <span style="color:#e6db74">&#34;-jar&#34;</span>, <span style="color:#e6db74">&#34;my-java-app.jar&#34;</span>]<span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p><strong>Explanation:</strong><br>
+This Dockerfile creates a non-root user (<code>appuser</code>) and switches to it before running the application. By avoiding running containers as <code>root</code>, you reduce the risk of privilege escalation attacks.</p>
+<hr>
+<h3 id="7-test-and-debug-locally"><strong>7. Test and Debug Locally</strong><a hidden class="anchor" aria-hidden="true" href="#7-test-and-debug-locally">#</a></h3>
+<p>Before deploying your Java application to production, it’s essential to test it locally using Docker. This allows you to identify and fix issues early in the development cycle.</p>
+<h4 id="example">Example:<a hidden class="anchor" aria-hidden="true" href="#example">#</a></h4>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/docker/">Docker</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/java/">Java</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/dockerfile/">Dockerfile</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/best-practices/">Best Practices</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/containerization/">Containerization</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/navigating-iam-challenges-in-multi-cloud-environments/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Navigating IAM Challenges in Multi-Cloud Environments</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/building-unified-identity-strategy-in-multi-cloud-environments/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Building Unified Identity Strategy in Multi-Cloud Environments</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/how-to-implement-the-oauth-20-authorization-code-flow-in-java/" class="custom-link">
+              How to Implement the OAuth 2.0 Authorization Code Flow in Java
+            </a>
+            <small class="custom-date">2025-06-04</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/how-to-refresh-access-tokens-in-oauth-20-java-example-included/" class="custom-link">
+              How to Refresh Access Tokens in OAuth 2.0 (Java Example Included)
+            </a>
+            <small class="custom-date">2025-06-04</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/mastering-livesync-and-scheduled-tasks-best-practices-for-developers/" class="custom-link">
+              Mastering LiveSync and Scheduled Tasks: Best Practices for Developers
+            </a>
+            <small class="custom-date">2025-05-18</small>
+          </li>
+          
+        
+      
+
+      
+    </ul>
+
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/devops-is-not-just-tools--its-a-cultural-transformation/" class="custom-link">
+                DevOps Is Not Just Tools — It’s a Cultural Transformation
+              </a>
+              <small class="custom-date">2025-06-09</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/orchestrating-kubernetes-and-iam-with-terraform-a-comprehensive-guide/" class="custom-link">
+                Orchestrating Kubernetes and IAM with Terraform: A Comprehensive Guide
+              </a>
+              <small class="custom-date">2025-06-08</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/navigating-iam-challenges-in-multi-cloud-environments/" class="custom-link">
+                Navigating IAM Challenges in Multi-Cloud Environments
+              </a>
+              <small class="custom-date">2025-06-06</small>
+            </li>
+            
+          
+        
+      
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/building-unified-identity-strategy-in-multi-cloud-environments/" class="custom-link">
+                Building Unified Identity Strategy in Multi-Cloud Environments
+              </a>
+              <small class="custom-date">2025-06-04</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/decentralized-identity-and-oauth-can-they-work-together/" class="custom-link">
+                Decentralized Identity and OAuth: Can They Work Together?
+              </a>
+              <small class="custom-date">2025-06-04</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
