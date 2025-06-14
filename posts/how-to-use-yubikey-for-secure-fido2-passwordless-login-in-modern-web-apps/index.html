@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>How to Use YubiKey for Secure FIDO2 Passwordless Login in Modern Web Apps | IAMDevBox</title>
+<meta name="keywords" content="yubikey, fido2, passwordless authentication, webauthn">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/how-to-use-yubikey-for-secure-fido2-passwordless-login-in-modern-web-apps/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css" integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF&#43;13Dyqob6ASlTrTye8=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/how-to-use-yubikey-for-secure-fido2-passwordless-login-in-modern-web-apps/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.f87e4df74f4f070695effe5d49ae4914eb9228356e4300800036f51859f72d47.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.f87e4df74f4f070695effe5d49ae4914eb9228356e4300800036f51859f72d47.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/how-to-use-yubikey-for-secure-fido2-passwordless-login-in-modern-web-apps/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="How to Use YubiKey for Secure FIDO2 Passwordless Login in Modern Web Apps">
+  <meta property="og:description" content="Learn how to implement secure, passwordless login using YubiKey, FIDO2, and WebAuthn in modern web applications with optional ForgeRock Identity Cloud integration.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-06-12T07:52:15-04:00">
+    <meta property="article:modified_time" content="2025-06-12T07:57:01-04:00">
+    <meta property="article:tag" content="Yubikey">
+    <meta property="article:tag" content="FIDO2">
+    <meta property="article:tag" content="Passwordless Authentication">
+    <meta property="article:tag" content="WebAuthn">
+      <meta property="og:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:title" content="How to Use YubiKey for Secure FIDO2 Passwordless Login in Modern Web Apps">
+<meta name="twitter:description" content="Learn how to implement secure, passwordless login using YubiKey, FIDO2, and WebAuthn in modern web applications with optional ForgeRock Identity Cloud integration.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "How to Use YubiKey for Secure FIDO2 Passwordless Login in Modern Web Apps",
+      "item": "https://www.iamdevbox.com/posts/how-to-use-yubikey-for-secure-fido2-passwordless-login-in-modern-web-apps/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "How to Use YubiKey for Secure FIDO2 Passwordless Login in Modern Web Apps",
+  "name": "How to Use YubiKey for Secure FIDO2 Passwordless Login in Modern Web Apps",
+  "description": "Learn how to implement secure, passwordless login using YubiKey, FIDO2, and WebAuthn in modern web applications with optional ForgeRock Identity Cloud integration.",
+  "keywords": [
+    "yubikey", "fido2", "passwordless authentication", "webauthn"
+  ],
+  "articleBody": "Introduction Password-based authentication has long been the weakest link in application security. With phishing, credential stuffing, and password reuse rampant, modern organizations are looking toward passwordless authentication methods that are more secure and user-friendly.\nThis post explains how to use a YubiKey hardware security key to implement FIDO2-based passwordless login using WebAuthn, including optional integration with enterprise IAM solutions like ForgeRock Identity Cloud.\nWhat Is FIDO2 and Why YubiKey? FIDO2 is an open standard for passwordless authentication, co-developed by the FIDO Alliance and the World Wide Web Consortium (W3C). It combines two components:\nWebAuthn – A browser API that allows web applications to use public key cryptography. CTAP2 (Client to Authenticator Protocol) – Used by external authenticators like YubiKey. The YubiKey stores private credentials securely and never shares them with a server. Authentication involves a challenge-response flow where a cryptographic signature is verified, and the user physically touches the key to complete the login—making it phishing-resistant and secure.\nPrerequisites To follow along, you’ll need:\nA YubiKey 5 Series or compatible FIDO2 device. A modern browser (Chrome, Firefox, Safari, or Edge). Basic knowledge of JavaScript and server-side APIs. A web app project using Node.js, Python, or Java (server-side). (Optional) Access to ForgeRock Identity Cloud or ForgeRock AM. How YubiKey + WebAuthn Login Works Here’s a simplified flow of how passwordless authentication works using YubiKey and WebAuthn:\n+--------------------+ +----------------+ +----------------+ | Web Browser | \u003c----\u003e | Web Server | \u003c----\u003e | Database | +--------------------+ +----------------+ +----------------+ | | | |---- Start Registration ----\u003e| | |\u003c-- Send Challenge (RP) -----| | | | | |-- Create Credential w/Key -\u003e| | | |--- Store Public Key ----\u003e| | | | |---- Start Login -----------\u003e| | |\u003c-- Send Challenge ----------| | |-- Auth w/ YubiKey ---------\u003e|--- Verify Signature ----\u003e| | | | Step 1: User Registration Using WebAuthn + YubiKey During user registration, a credential is generated and stored securely on the client-side YubiKey. The public key is saved on the server.\nClient-side JavaScript // Step 1: Get public key registration options from the server const options = await fetch('/register/options').then(res =\u003e res.json()); // Step 2: Use WebAuthn API to create credentials with YubiKey const credential = await navigator.credentials.create({ publicKey: options }); // Step 3: Send the new credential to server for verification and storage await fetch('/register/complete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(credential) }); Server-side (simplified) // Verify client response and store public key const { id, publicKey } = parseWebAuthnCredential(clientPayload); saveUserCredential(userId, id, publicKey); Step 2: Passwordless Login Using WebAuthn After registration, the user can log in without a password using their YubiKey.\nClient-side JavaScript // Step 1: Request login challenge const requestOptions = await fetch('/login/options').then(res =\u003e res.json()); // Step 2: Use WebAuthn API to get assertion from YubiKey const assertion = await navigator.credentials.get({ publicKey: requestOptions }); // Step 3: Send the signed assertion to the server await fetch('/login/complete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(assertion) }); Server-side Verification // Verify assertion using stored public key const isValid = verifyWebAuthnAssertion(assertion, storedPublicKey); if (isValid) loginUser(userId); Optional: ForgeRock Identity Cloud Integration ForgeRock provides native support for WebAuthn through Authentication Trees.\nHow to Enable WebAuthn in ForgeRock Go to Journeys \u003e Select your Tree (e.g., Passwordless Login)\nAdd WebAuthn Registration Node and WebAuthn Authentication Node\nConfigure options:\nUser verification: preferred or required Authenticator attachment: cross-platform (for YubiKey) Deploy and test in a browser that supports WebAuthn\nThis setup allows ForgeRock to act as the Relying Party (RP) and coordinate the entire WebAuthn challenge/response lifecycle.\nSecurity Considerations YubiKey supports origin binding, so credentials are only valid for the domain they were created on. Use multi-device support or allow backup credentials in case a user loses their YubiKey. Always use TLS for all WebAuthn endpoints. Conclusion Hardware-based authentication like YubiKey with FIDO2 and WebAuthn is a proven way to eliminate passwords without compromising security. By following the steps above, you can offer users a fast, secure, and phishing-resistant login experience that integrates seamlessly with modern identity providers such as ForgeRock.\nPasswordless authentication is not the future—it’s already here.\nAdditional Resources WebAuthn on MDN YubiKey Developer Guide FIDO Alliance Documentation ForgeRock/Ping WebAuthn Node Docs ",
+  "wordCount" : "689",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/IAMDevBox.com.jpg","datePublished": "2025-06-12T07:52:15-04:00",
+  "dateModified": "2025-06-12T07:57:01-04:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/how-to-use-yubikey-for-secure-fido2-passwordless-login-in-modern-web-apps/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script><meta name="description" content="Learn how to implement secure, passwordless login using YubiKey, FIDO2, and WebAuthn in modern web applications with optional ForgeRock Identity Cloud integration.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/advanced-forgerock-forgeops-helm-deployment-on-openshift-crc-custom-images-secrets-and-security-contexts\/"
+            },
+            "headline": "\"Advanced ForgeRock ForgeOps Helm Deployment on OpenShift CRC: Custom Images, Secrets, and Security Contexts\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-06-14T12:40:16-04:00",
+            "dateModified": "2025-06-14T13:16:33-04:00"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/deploying-forgerock-forgeops-on-red-hat-openshift-crc-a-step-by-step-guide\/"
+            },
+            "headline": "\"Deploying ForgeRock ForgeOps on Red Hat OpenShift CRC: A Step-by-Step Guide\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-06-14T12:40:16-04:00",
+            "dateModified": "2025-06-14T13:16:33-04:00"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-decoding-and-validation-how-to-securely-parse-and-verify-your-tokens\/"
+            },
+            "headline": "\"JWT Decoding and Validation: How to Securely Parse and Verify Your Tokens\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-06-14T11:53:59-04:00",
+            "dateModified": "2025-06-14T11:59:00-04:00"
+          }
+  ]
+}
+</script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "\"What is the difference between FIDO2 and WebAuthn?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Please refer to the article for detailed explanation.\""
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "\"How do I implement passwordless login using YubiKey?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Please refer to the article for detailed explanation.\""
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "\"Can YubiKey be used with ForgeRock Identity Cloud?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Please refer to the article for detailed explanation.\""
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "\"Is WebAuthn supported in all modern browsers?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Please refer to the article for detailed explanation.\""
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "\"What happens if a user loses their YubiKey?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Please refer to the article for detailed explanation.\""
+      }
+    }
+  ]
+}
+</script>
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    if (document.querySelector('.mermaid')) {
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+        mermaid.initialize({ startOnLoad: true, theme: "default" });
+        };
+        document.head.appendChild(script);
+    }
+    });
+    </script>
+
+    
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-B6QCH29975');
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      How to Use YubiKey for Secure FIDO2 Passwordless Login in Modern Web Apps
+    </h1>
+    
+    <div class="post-meta">4 min&nbsp;·&nbsp;689 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#introduction" aria-label="Introduction">Introduction</a></li>
+                <li>
+                    <a href="#what-is-fido2-and-why-yubikey" aria-label="What Is FIDO2 and Why YubiKey?">What Is FIDO2 and Why YubiKey?</a></li>
+                <li>
+                    <a href="#prerequisites" aria-label="Prerequisites">Prerequisites</a></li>
+                <li>
+                    <a href="#how-yubikey--webauthn-login-works" aria-label="How YubiKey &#43; WebAuthn Login Works">How YubiKey + WebAuthn Login Works</a></li>
+                <li>
+                    <a href="#step-1-user-registration-using-webauthn--yubikey" aria-label="Step 1: User Registration Using WebAuthn &#43; YubiKey">Step 1: User Registration Using WebAuthn + YubiKey</a><ul>
+                        
+                <li>
+                    <a href="#client-side-javascript" aria-label="Client-side JavaScript">Client-side JavaScript</a></li>
+                <li>
+                    <a href="#server-side-simplified" aria-label="Server-side (simplified)">Server-side (simplified)</a></li></ul>
+                </li>
+                <li>
+                    <a href="#step-2-passwordless-login-using-webauthn" aria-label="Step 2: Passwordless Login Using WebAuthn">Step 2: Passwordless Login Using WebAuthn</a><ul>
+                        
+                <li>
+                    <a href="#client-side-javascript-1" aria-label="Client-side JavaScript">Client-side JavaScript</a></li>
+                <li>
+                    <a href="#server-side-verification" aria-label="Server-side Verification">Server-side Verification</a></li></ul>
+                </li>
+                <li>
+                    <a href="#optional-forgerock-identity-cloud-integration" aria-label="Optional: ForgeRock Identity Cloud Integration">Optional: ForgeRock Identity Cloud Integration</a><ul>
+                        
+                <li>
+                    <a href="#how-to-enable-webauthn-in-forgerock" aria-label="How to Enable WebAuthn in ForgeRock">How to Enable WebAuthn in ForgeRock</a></li></ul>
+                </li>
+                <li>
+                    <a href="#security-considerations" aria-label="Security Considerations">Security Considerations</a></li>
+                <li>
+                    <a href="#conclusion" aria-label="Conclusion">Conclusion</a></li>
+                <li>
+                    <a href="#additional-resources" aria-label="Additional Resources">Additional Resources</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h2 id="introduction">Introduction<a hidden class="anchor" aria-hidden="true" href="#introduction">#</a></h2>
+<p>Password-based authentication has long been the weakest link in application security. With phishing, credential stuffing, and password reuse rampant, modern organizations are looking toward <strong>passwordless authentication</strong> methods that are more secure and user-friendly.</p>
+<p>This post explains how to use a <strong>YubiKey</strong> hardware security key to implement <strong>FIDO2-based passwordless login</strong> using <strong>WebAuthn</strong>, including optional integration with enterprise IAM solutions like <strong>ForgeRock Identity Cloud</strong>.</p>
+<h2 id="what-is-fido2-and-why-yubikey">What Is FIDO2 and Why YubiKey?<a hidden class="anchor" aria-hidden="true" href="#what-is-fido2-and-why-yubikey">#</a></h2>
+<p><strong>FIDO2</strong> is an open standard for passwordless authentication, co-developed by the FIDO Alliance and the World Wide Web Consortium (W3C). It combines two components:</p>
+<ul>
+<li><strong>WebAuthn</strong> – A browser API that allows web applications to use public key cryptography.</li>
+<li><strong>CTAP2 (Client to Authenticator Protocol)</strong> – Used by external authenticators like YubiKey.</li>
+</ul>
+<p>The YubiKey stores private credentials securely and never shares them with a server. Authentication involves a <strong>challenge-response flow</strong> where a cryptographic signature is verified, and the user physically touches the key to complete the login—making it phishing-resistant and secure.</p>
+<h2 id="prerequisites">Prerequisites<a hidden class="anchor" aria-hidden="true" href="#prerequisites">#</a></h2>
+<p>To follow along, you’ll need:</p>
+<ul>
+<li>A <strong>YubiKey 5 Series</strong> or compatible FIDO2 device.</li>
+<li>A modern browser (Chrome, Firefox, Safari, or Edge).</li>
+<li>Basic knowledge of JavaScript and server-side APIs.</li>
+<li>A web app project using Node.js, Python, or Java (server-side).</li>
+<li>(Optional) Access to <strong>ForgeRock Identity Cloud</strong> or <strong>ForgeRock AM</strong>.</li>
+</ul>
+<h2 id="how-yubikey--webauthn-login-works">How YubiKey + WebAuthn Login Works<a hidden class="anchor" aria-hidden="true" href="#how-yubikey--webauthn-login-works">#</a></h2>
+<p>Here&rsquo;s a simplified flow of how passwordless authentication works using YubiKey and WebAuthn:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>+--------------------+        +----------------+        +----------------+
+</span></span><span style="display:flex;"><span>|   Web Browser      | &lt;----&gt; |   Web Server   | &lt;----&gt; |   Database     |
+</span></span><span style="display:flex;"><span>+--------------------+        +----------------+        +----------------+
+</span></span><span style="display:flex;"><span>        |                             |                          |
+</span></span><span style="display:flex;"><span>        |---- Start Registration ----&gt;|                          |
+</span></span><span style="display:flex;"><span>        |&lt;-- Send Challenge (RP) -----|                          |
+</span></span><span style="display:flex;"><span>        |                             |                          |
+</span></span><span style="display:flex;"><span>        |-- Create Credential w/Key -&gt;|                          |
+</span></span><span style="display:flex;"><span>        |                             |--- Store Public Key ----&gt;|
+</span></span><span style="display:flex;"><span>        |                             |                          |
+</span></span><span style="display:flex;"><span>        |---- Start Login -----------&gt;|                          |
+</span></span><span style="display:flex;"><span>        |&lt;-- Send Challenge ----------|                          |
+</span></span><span style="display:flex;"><span>        |-- Auth w/ YubiKey ---------&gt;|--- Verify Signature ----&gt;|
+</span></span><span style="display:flex;"><span>        |                             |                          |
+</span></span></code></pre></div><h2 id="step-1-user-registration-using-webauthn--yubikey">Step 1: User Registration Using WebAuthn + YubiKey<a hidden class="anchor" aria-hidden="true" href="#step-1-user-registration-using-webauthn--yubikey">#</a></h2>
+<p>During user registration, a credential is generated and stored securely on the client-side YubiKey. The public key is saved on the server.</p>
+<h3 id="client-side-javascript">Client-side JavaScript<a hidden class="anchor" aria-hidden="true" href="#client-side-javascript">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75715e">// Step 1: Get public key registration options from the server
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">options</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">fetch</span>(<span style="color:#e6db74">&#39;/register/options&#39;</span>).<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">res</span> =&gt; <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">json</span>());
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Step 2: Use WebAuthn API to create credentials with YubiKey
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">credential</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">navigator</span>.<span style="color:#a6e22e">credentials</span>.<span style="color:#a6e22e">create</span>({ <span style="color:#a6e22e">publicKey</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">options</span> });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Step 3: Send the new credential to server for verification and storage
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">await</span> <span style="color:#a6e22e">fetch</span>(<span style="color:#e6db74">&#39;/register/complete&#39;</span>, {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">method</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;POST&#39;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">headers</span><span style="color:#f92672">:</span> { <span style="color:#e6db74">&#39;Content-Type&#39;</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;application/json&#39;</span> },
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">body</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">JSON</span>.<span style="color:#a6e22e">stringify</span>(<span style="color:#a6e22e">credential</span>)
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><h3 id="server-side-simplified">Server-side (simplified)<a hidden class="anchor" aria-hidden="true" href="#server-side-simplified">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// Verify client response and store public key
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> { <span style="color:#a6e22e">id</span>, <span style="color:#a6e22e">publicKey</span> } <span style="color:#f92672">=</span> <span style="color:#a6e22e">parseWebAuthnCredential</span>(<span style="color:#a6e22e">clientPayload</span>);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">saveUserCredential</span>(<span style="color:#a6e22e">userId</span>, <span style="color:#a6e22e">id</span>, <span style="color:#a6e22e">publicKey</span>);
+</span></span></code></pre></div><h2 id="step-2-passwordless-login-using-webauthn">Step 2: Passwordless Login Using WebAuthn<a hidden class="anchor" aria-hidden="true" href="#step-2-passwordless-login-using-webauthn">#</a></h2>
+<p>After registration, the user can log in without a password using their YubiKey.</p>
+<h3 id="client-side-javascript-1">Client-side JavaScript<a hidden class="anchor" aria-hidden="true" href="#client-side-javascript-1">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75715e">// Step 1: Request login challenge
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">requestOptions</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">fetch</span>(<span style="color:#e6db74">&#39;/login/options&#39;</span>).<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">res</span> =&gt; <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">json</span>());
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Step 2: Use WebAuthn API to get assertion from YubiKey
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">assertion</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">navigator</span>.<span style="color:#a6e22e">credentials</span>.<span style="color:#a6e22e">get</span>({ <span style="color:#a6e22e">publicKey</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">requestOptions</span> });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Step 3: Send the signed assertion to the server
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">await</span> <span style="color:#a6e22e">fetch</span>(<span style="color:#e6db74">&#39;/login/complete&#39;</span>, {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">method</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;POST&#39;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">headers</span><span style="color:#f92672">:</span> { <span style="color:#e6db74">&#39;Content-Type&#39;</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;application/json&#39;</span> },
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">body</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">JSON</span>.<span style="color:#a6e22e">stringify</span>(<span style="color:#a6e22e">assertion</span>)
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><h3 id="server-side-verification">Server-side Verification<a hidden class="anchor" aria-hidden="true" href="#server-side-verification">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// Verify assertion using stored public key
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">isValid</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">verifyWebAuthnAssertion</span>(<span style="color:#a6e22e">assertion</span>, <span style="color:#a6e22e">storedPublicKey</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">isValid</span>) <span style="color:#a6e22e">loginUser</span>(<span style="color:#a6e22e">userId</span>);
+</span></span></code></pre></div><h2 id="optional-forgerock-identity-cloud-integration">Optional: ForgeRock Identity Cloud Integration<a hidden class="anchor" aria-hidden="true" href="#optional-forgerock-identity-cloud-integration">#</a></h2>
+<p>ForgeRock provides native support for WebAuthn through <strong>Authentication Trees</strong>.</p>
+<h3 id="how-to-enable-webauthn-in-forgerock">How to Enable WebAuthn in ForgeRock<a hidden class="anchor" aria-hidden="true" href="#how-to-enable-webauthn-in-forgerock">#</a></h3>
+<ol>
+<li>
+<p>Go to <strong>Journeys</strong> &gt; Select your Tree (e.g., <code>Passwordless Login</code>)</p>
+</li>
+<li>
+<p>Add <strong>WebAuthn Registration Node</strong> and <strong>WebAuthn Authentication Node</strong></p>
+</li>
+<li>
+<p>Configure options:</p>
+<ul>
+<li>User verification: <code>preferred</code> or <code>required</code></li>
+<li>Authenticator attachment: <code>cross-platform</code> (for YubiKey)</li>
+</ul>
+</li>
+<li>
+<p>Deploy and test in a browser that supports WebAuthn</p>
+</li>
+</ol>
+<p>This setup allows ForgeRock to act as the <strong>Relying Party (RP)</strong> and coordinate the entire WebAuthn challenge/response lifecycle.</p>
+<h2 id="security-considerations">Security Considerations<a hidden class="anchor" aria-hidden="true" href="#security-considerations">#</a></h2>
+<ul>
+<li>YubiKey supports <strong>origin binding</strong>, so credentials are only valid for the domain they were created on.</li>
+<li>Use <strong>multi-device support</strong> or allow backup credentials in case a user loses their YubiKey.</li>
+<li>Always use <strong>TLS</strong> for all WebAuthn endpoints.</li>
+</ul>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>Hardware-based authentication like <strong>YubiKey with FIDO2</strong> and <strong>WebAuthn</strong> is a proven way to eliminate passwords without compromising security.
+By following the steps above, you can offer users a fast, secure, and phishing-resistant login experience that integrates seamlessly with modern identity providers such as ForgeRock.</p>
+<p>Passwordless authentication is not the future—it’s already here.</p>
+<h2 id="additional-resources">Additional Resources<a hidden class="anchor" aria-hidden="true" href="#additional-resources">#</a></h2>
+<ul>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API">WebAuthn on MDN</a></li>
+<li><a href="https://developers.yubico.com/">YubiKey Developer Guide</a></li>
+<li><a href="https://fidoalliance.org/specifications/">FIDO Alliance Documentation</a></li>
+<li><a href="https://docs.pingidentity.com/auth-node-ref/latest/auth-node-webauthn-auth.html">ForgeRock/Ping WebAuthn Node Docs</a></li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/yubikey/">Yubikey</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/fido2/">FIDO2</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/passwordless-authentication/">Passwordless Authentication</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/webauthn/">WebAuthn</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/kubernetes-vs-openshift-iam-integration-rbac-and-real-world-devsecops-practices/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Kubernetes vs OpenShift: IAM Integration, RBAC, and Real-World DevSecOps Practices</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/client-credentials-flow-in-oauth-20-complete-guide-with-real-world-examples/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Client Credentials Flow in OAuth 2.0: Complete Guide with Real-World Examples</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/fido-vs-fido2-understanding-the-evolution-of-passwordless-authentication/" class="custom-link">
+              FIDO vs FIDO2: Understanding the Evolution of Passwordless Authentication
+            </a>
+            <small class="custom-date">2025-06-12</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/implementing-fido2-authentication-with-security-keys-in-enterprise-applications/" class="custom-link">
+              Implementing FIDO2 Authentication with Security Keys in Enterprise Applications
+            </a>
+            <small class="custom-date">2025-06-12</small>
+          </li>
+          
+        
+      
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/fido-login-explained-how-to-build-scalable-passwordless-authentication/" class="custom-link">
+              FIDO Login Explained: How to Build Scalable Passwordless Authentication
+            </a>
+            <small class="custom-date">2025-06-11</small>
+          </li>
+          
+        
+      
+
+      
+    </ul>
+
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/advanced-forgerock-forgeops-helm-deployment-on-openshift-crc-custom-images-secrets-and-security-contexts/" class="custom-link">
+                Advanced ForgeRock ForgeOps Helm Deployment on OpenShift CRC: Custom Images, Secrets, and Security Contexts
+              </a>
+              <small class="custom-date">2025-06-14</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/deploying-forgerock-forgeops-on-red-hat-openshift-crc-a-step-by-step-guide/" class="custom-link">
+                Deploying ForgeRock ForgeOps on Red Hat OpenShift CRC: A Step-by-Step Guide
+              </a>
+              <small class="custom-date">2025-06-14</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-decoding-and-validation-how-to-securely-parse-and-verify-your-tokens/" class="custom-link">
+                JWT Decoding and Validation: How to Securely Parse and Verify Your Tokens
+              </a>
+              <small class="custom-date">2025-06-14</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/how-to-debug-and-understand-saml-response-xml-a-practical-guide/" class="custom-link">
+                How to Debug and Understand SAML Response XML: A Practical Guide
+              </a>
+              <small class="custom-date">2025-06-14</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/applying-java-modules-in-modern-microservice-architecture/" class="custom-link">
+                Applying Java Modules in Modern Microservice Architecture
+              </a>
+              <small class="custom-date">2025-06-14</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

@@ -76,9 +76,9 @@
     <meta property="article:tag" content="Authorization Code Flow">
     <meta property="article:tag" content="Secure APIs">
     <meta property="article:tag" content="Identity Integration">
-      <meta property="og:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+      <meta property="og:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
 <meta name="twitter:title" content="How to Implement the OAuth 2.0 Authorization Code Flow in Java">
 <meta name="twitter:description" content="OAuth 2.0&#39;s Authorization Code Flow is the go-to standard for securing web applications that need to interact with identity providers on behalf of users. In...">
 
@@ -116,7 +116,7 @@
   "articleBody": "OAuth 2.0’s Authorization Code Flow is the go-to standard for securing web applications that need to interact with identity providers on behalf of users. In this guide, we’ll walk through how to implement this flow in Java using industry-standard libraries — and explain each step along the way.\nWhy Use the Authorization Code Flow in Java Web Apps? Java remains dominant in enterprise web application development, and OAuth 2.0 is the de facto standard for authorization. When building server-side rendered applications or backend services that interact with identity providers like ForgeRock, Auth0, or Okta, the Authorization Code Flow is the most secure option — especially when combined with HTTPS and secure session management.\n🧠 Unlike the Implicit Flow, the Authorization Code Flow keeps tokens out of the browser, reducing attack surfaces.\nArchitecture Overview Before diving into code, here’s how the Authorization Code Flow works conceptually:\n[User] → [Java Web App] → [Authorization Server (e.g., ForgeRock, Auth0)] ↓ Authorization Code ↓ [Java Web App] ↔ [Token Endpoint] ↓ Access Token / Refresh Token ↓ [Java Web App] → [API Resource] Libraries \u0026 Tools You’ll Need Spring Boot (or any Java web framework) Spring Security OAuth2 Client – simplifies OAuth flow Maven or Gradle Optional: a secure credentials vault (e.g., HashiCorp Vault or AWS Secrets Manager) Step-by-Step Java Implementation 1. Configure Dependencies (Maven) Add the required dependencies for Spring Boot and OAuth2 Client support.\norg.springframework.boot spring-boot-starter-oauth2-client 2. Application Properties Configuration Configure the OAuth2 client settings to match your identity provider.\nspring.security.oauth2.client.registration.my-oauth-client.client-id=your-client-id spring.security.oauth2.client.registration.my-oauth-client.client-secret=your-client-secret spring.security.oauth2.client.registration.my-oauth-client.authorization-grant-type=authorization_code spring.security.oauth2.client.registration.my-oauth-client.redirect-uri={baseUrl}/login/oauth2/code/{registrationId} spring.security.oauth2.client.registration.my-oauth-client.scope=openid,profile,email spring.security.oauth2.client.provider.my-oauth-provider.authorization-uri=https://auth.example.com/oauth2/authorize spring.security.oauth2.client.provider.my-oauth-provider.token-uri=https://auth.example.com/oauth2/token spring.security.oauth2.client.provider.my-oauth-provider.user-info-uri=https://auth.example.com/userinfo ☝️ This config tells Spring Security where to redirect users, where to obtain tokens, and which scopes to request.\n3. Set Up the Security Configuration You can keep it simple with auto-config:\n// Java configuration with Spring Boot auto-configuration @EnableWebSecurity public class SecurityConfig { // You can extend this to customize filter chains if needed } Or extend for more control:\n@Configuration @EnableWebSecurity public class SecurityConfig extends WebSecurityConfigurerAdapter { @Override protected void configure(HttpSecurity http) throws Exception { http .authorizeRequests() .antMatchers(\"/\", \"/login**\").permitAll() .anyRequest().authenticated() .and() .oauth2Login(); // handles the full OAuth2 login flow } } 4. Handle the Authenticated Session Once authenticated, Spring Security populates a Principal object:\n@Controller public class HomeController { @GetMapping(\"/profile\") public String profile(Model model, @AuthenticationPrincipal OAuth2User principal) { model.addAttribute(\"name\", principal.getAttribute(\"name\")); // e.g., user full name model.addAttribute(\"email\", principal.getAttribute(\"email\")); // user email return \"profile\"; // render Thymeleaf or JSP view } } Example: cURL Request to Token Endpoint If you ever want to test the token exchange manually:\n# Replace with actual values from your provider curl -X POST https://auth.example.com/oauth2/token \\ -H \"Content-Type: application/x-www-form-urlencoded\" \\ -d \"grant_type=authorization_code\" \\ -d \"code=AUTH_CODE_FROM_CALLBACK\" \\ -d \"redirect_uri=https://yourapp.com/login/oauth2/code/my-oauth-client\" \\ -d \"client_id=your-client-id\" \\ -d \"client_secret=your-client-secret\" Common Pitfalls Redirect URI mismatch: Must match exactly between your app and the identity provider Session expiration: You must manage user sessions securely server-side State parameter validation: Spring handles this internally, but be cautious if implementing manually Real World Use Cases Internal corporate apps integrating with SSO (e.g., ForgeRock Identity Cloud or Azure AD) Customer-facing apps needing social login via Google, Facebook, etc. APIs requiring delegated access on behalf of users 👉 Related: Understanding the Authorization Code Flow in OAuth 2.0\n👉 Related: Authorization Code Flow vs Implicit Flow: Which One Should You Use?\nConclusion: Java + OAuth 2.0 = Secure, Scalable Identity Integration Implementing OAuth 2.0 Authorization Code Flow in Java is more straightforward than ever with the help of Spring Security. By using this pattern, your apps gain secure delegated access without exposing user credentials or sensitive tokens in the browser.\n💡 Are you storing refresh tokens securely? 💡 Do you need to support multi-tenant OAuth configurations?\nThese are good follow-up questions to explore as you scale up your solution. Ready to see how PKCE, refresh tokens, and custom token validation fit into the flow? Let’s tackle those in the next guide.\n",
   "wordCount" : "646",
   "inLanguage": "en",
-  "image": "https://www.iamdevbox.com/static/IAMDevBox.com.png","datePublished": "2025-06-04T21:09:18Z",
+  "image": "https://www.iamdevbox.com/IAMDevBox.com.jpg","datePublished": "2025-06-04T21:09:18Z",
   "dateModified": "2025-06-06T19:33:33-04:00",
   "author":{
     "@type": "Person",
@@ -144,9 +144,9 @@
             "@type": "Article",
             "mainEntityOfPage": {
               "@type": "WebPage",
-              "@id": "https:\/\/www.iamdevbox.com\/posts\/devops-is-not-just-tools--its-a-cultural-transformation\/"
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/advanced-forgerock-forgeops-helm-deployment-on-openshift-crc-custom-images-secrets-and-security-contexts\/"
             },
-            "headline": "\"DevOps Is Not Just Tools — It’s a Cultural Transformation\"",
+            "headline": "\"Advanced ForgeRock ForgeOps Helm Deployment on OpenShift CRC: Custom Images, Secrets, and Security Contexts\"",
             "author": {
               "@type": "Person",
               "name": "IAMDevBox"
@@ -163,16 +163,16 @@
               "@type": "ImageObject",
               "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
             },
-            "datePublished": "2025-06-09T14:56:04Z",
-            "dateModified": "2025-06-09T14:56:16Z"
+            "datePublished": "2025-06-14T12:40:16-04:00",
+            "dateModified": "2025-06-14T13:16:33-04:00"
           },
           {
             "@type": "Article",
             "mainEntityOfPage": {
               "@type": "WebPage",
-              "@id": "https:\/\/www.iamdevbox.com\/posts\/orchestrating-kubernetes-and-iam-with-terraform-a-comprehensive-guide\/"
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/deploying-forgerock-forgeops-on-red-hat-openshift-crc-a-step-by-step-guide\/"
             },
-            "headline": "\"Orchestrating Kubernetes and IAM with Terraform: A Comprehensive Guide\"",
+            "headline": "\"Deploying ForgeRock ForgeOps on Red Hat OpenShift CRC: A Step-by-Step Guide\"",
             "author": {
               "@type": "Person",
               "name": "IAMDevBox"
@@ -189,16 +189,16 @@
               "@type": "ImageObject",
               "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
             },
-            "datePublished": "2025-06-08T13:49:52Z",
-            "dateModified": "2025-06-08T09:53:31-04:00"
+            "datePublished": "2025-06-14T12:40:16-04:00",
+            "dateModified": "2025-06-14T13:16:33-04:00"
           },
           {
             "@type": "Article",
             "mainEntityOfPage": {
               "@type": "WebPage",
-              "@id": "https:\/\/www.iamdevbox.com\/posts\/navigating-iam-challenges-in-multi-cloud-environments\/"
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-decoding-and-validation-how-to-securely-parse-and-verify-your-tokens\/"
             },
-            "headline": "\"Navigating IAM Challenges in Multi-Cloud Environments\"",
+            "headline": "\"JWT Decoding and Validation: How to Securely Parse and Verify Your Tokens\"",
             "author": {
               "@type": "Person",
               "name": "IAMDevBox"
@@ -215,8 +215,8 @@
               "@type": "ImageObject",
               "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
             },
-            "datePublished": "2025-06-06T14:59:32Z",
-            "dateModified": "2025-06-06T19:33:33-04:00"
+            "datePublished": "2025-06-14T11:53:59-04:00",
+            "dateModified": "2025-06-14T11:59:00-04:00"
           }
   ]
 }
@@ -564,6 +564,16 @@
       
         
           <li class="custom-list-item">
+            <a href="/posts/helm-for-java-microservices-packaging--deploying-made-easy/" class="custom-link">
+              Helm for Java Microservices: Packaging &amp; Deploying Made Easy
+            </a>
+            <small class="custom-date">2025-06-10</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
             <a href="/posts/best-practices-for-writing-java-dockerfiles/" class="custom-link">
               Best Practices for Writing Java Dockerfiles
             </a>
@@ -602,14 +612,6 @@
           
         
       
-        
-          <li class="custom-list-item">
-            <a href="/posts/understanding-token-revocation-and-when-to-use-it/" class="custom-link">
-              Understanding Token Revocation and When to Use It
-            </a>
-            <small class="custom-date">2025-06-04</small>
-          </li>
-          
         
       
         
@@ -701,10 +703,10 @@
         
           
             <li class="custom-list-item">
-              <a href="/posts/devops-is-not-just-tools--its-a-cultural-transformation/" class="custom-link">
-                DevOps Is Not Just Tools — It’s a Cultural Transformation
+              <a href="/posts/advanced-forgerock-forgeops-helm-deployment-on-openshift-crc-custom-images-secrets-and-security-contexts/" class="custom-link">
+                Advanced ForgeRock ForgeOps Helm Deployment on OpenShift CRC: Custom Images, Secrets, and Security Contexts
               </a>
-              <small class="custom-date">2025-06-09</small>
+              <small class="custom-date">2025-06-14</small>
             </li>
             
           
@@ -713,10 +715,10 @@
         
           
             <li class="custom-list-item">
-              <a href="/posts/orchestrating-kubernetes-and-iam-with-terraform-a-comprehensive-guide/" class="custom-link">
-                Orchestrating Kubernetes and IAM with Terraform: A Comprehensive Guide
+              <a href="/posts/deploying-forgerock-forgeops-on-red-hat-openshift-crc-a-step-by-step-guide/" class="custom-link">
+                Deploying ForgeRock ForgeOps on Red Hat OpenShift CRC: A Step-by-Step Guide
               </a>
-              <small class="custom-date">2025-06-08</small>
+              <small class="custom-date">2025-06-14</small>
             </li>
             
           
@@ -725,10 +727,10 @@
         
           
             <li class="custom-list-item">
-              <a href="/posts/navigating-iam-challenges-in-multi-cloud-environments/" class="custom-link">
-                Navigating IAM Challenges in Multi-Cloud Environments
+              <a href="/posts/jwt-decoding-and-validation-how-to-securely-parse-and-verify-your-tokens/" class="custom-link">
+                JWT Decoding and Validation: How to Securely Parse and Verify Your Tokens
               </a>
-              <small class="custom-date">2025-06-06</small>
+              <small class="custom-date">2025-06-14</small>
             </li>
             
           
@@ -737,10 +739,10 @@
         
           
             <li class="custom-list-item">
-              <a href="/posts/best-practices-for-writing-java-dockerfiles/" class="custom-link">
-                Best Practices for Writing Java Dockerfiles
+              <a href="/posts/how-to-debug-and-understand-saml-response-xml-a-practical-guide/" class="custom-link">
+                How to Debug and Understand SAML Response XML: A Practical Guide
               </a>
-              <small class="custom-date">2025-06-05</small>
+              <small class="custom-date">2025-06-14</small>
             </li>
             
           
@@ -749,12 +751,76 @@
         
           
             <li class="custom-list-item">
-              <a href="/posts/building-unified-identity-strategy-in-multi-cloud-environments/" class="custom-link">
-                Building Unified Identity Strategy in Multi-Cloud Environments
+              <a href="/posts/applying-java-modules-in-modern-microservice-architecture/" class="custom-link">
+                Applying Java Modules in Modern Microservice Architecture
               </a>
-              <small class="custom-date">2025-06-04</small>
+              <small class="custom-date">2025-06-14</small>
             </li>
             
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
           
         
       

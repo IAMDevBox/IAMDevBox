@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Helm for Java Microservices: Packaging &amp; Deploying Made Easy | IAMDevBox</title>
+<meta name="keywords" content="Helm, Java, Microservices, Kubernetes">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/helm-for-java-microservices-packaging--deploying-made-easy/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css" integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF&#43;13Dyqob6ASlTrTye8=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/helm-for-java-microservices-packaging--deploying-made-easy/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.f87e4df74f4f070695effe5d49ae4914eb9228356e4300800036f51859f72d47.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.f87e4df74f4f070695effe5d49ae4914eb9228356e4300800036f51859f72d47.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/helm-for-java-microservices-packaging--deploying-made-easy/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Helm for Java Microservices: Packaging & Deploying Made Easy">
+  <meta property="og:description" content="Discover how Helm simplifies packaging and deploying Java microservices on Kubernetes, making your workflow efficient and scalable.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-06-10T14:53:43+00:00">
+    <meta property="article:modified_time" content="2025-06-10T14:53:58+00:00">
+    <meta property="article:tag" content="Helm">
+    <meta property="article:tag" content="Java">
+    <meta property="article:tag" content="Microservices">
+    <meta property="article:tag" content="Kubernetes">
+      <meta property="og:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:title" content="Helm for Java Microservices: Packaging &amp; Deploying Made Easy">
+<meta name="twitter:description" content="Discover how Helm simplifies packaging and deploying Java microservices on Kubernetes, making your workflow efficient and scalable.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Helm for Java Microservices: Packaging \u0026 Deploying Made Easy",
+      "item": "https://www.iamdevbox.com/posts/helm-for-java-microservices-packaging--deploying-made-easy/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Helm for Java Microservices: Packaging \u0026 Deploying Made Easy",
+  "name": "Helm for Java Microservices: Packaging \u0026 Deploying Made Easy",
+  "description": "Discover how Helm simplifies packaging and deploying Java microservices on Kubernetes, making your workflow efficient and scalable.",
+  "keywords": [
+    "Helm", "Java", "Microservices", "Kubernetes"
+  ],
+  "articleBody": "In the rapidly evolving landscape of cloud-native development, Java microservices have become a cornerstone of modern applications. However, the complexity of packaging and deploying these services on Kubernetes can be daunting. Enter Helm, a powerful tool that streamlines the process of packaging, configuring, and deploying applications on Kubernetes. In this blog post, we’ll explore how Helm can make your Java microservices deployment process more efficient and scalable.\nUnderstanding Helm and Its Role in Microservices Helm is a package manager for Kubernetes, designed to help you easily package, configure, and deploy applications. It uses charts, which are collections of files that describe a related set of Kubernetes resources. Helm charts allow you to define your application’s deployment configuration in a consistent and repeatable way.\nFor Java microservices, Helm provides a structured approach to packaging and deploying your services. It allows you to define all the necessary Kubernetes resources, such as Deployments, Services, and ConfigMaps, in a single, easy-to-manage chart. This approach not only simplifies the deployment process but also ensures consistency across different environments.\nSetting Up Your Development Environment Before diving into creating your Helm chart, you’ll need to set up your development environment. Here’s what you’ll need:\nKubernetes Cluster: A running Kubernetes cluster where you’ll deploy your microservices. You can use a local setup like Minikube or a cloud-based cluster. Helm CLI: The Helm command-line tool, which you’ll use to package and deploy your charts. Java Development Kit (JDK): The JDK for compiling and running your Java microservices. Build Tool: A build tool like Maven or Gradle for building your Java project. Installing Helm To install Helm, follow these steps:\ncurl -fsSL -o get-helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 chmod 700 get-helm.sh ./get-helm.sh After installation, verify that Helm is working by running:\nhelm version Creating Your First Helm Chart Now that you have your environment set up, it’s time to create your first Helm chart for a Java microservice. We’ll walk through the process of creating a simple Java microservice and packaging it using Helm.\nStep 1: Creating the Java Microservice Let’s start by creating a simple Java microservice using Maven. Create a new directory for your project and initialize it with Maven:\nmkdir my-java-service cd my-java-service mvn archetype:generate -DgroupId=com.example -DartifactId=my-java-service -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false This will create a basic Java project structure. Replace the contents of src/main/java/com/example/App.java with the following code:\npackage com.example; import java.io.IOException; import org.springframework.boot.SpringApplication; import org.springframework.boot.autoconfigure.SpringBootApplication; @SpringBootApplication public class App { public static void main(String[] args) throws IOException { SpringApplication.run(App.class, args); } } Step 2: Building the Docker Image Next, we’ll containerize our Java microservice using Docker. Create a Dockerfile in the root directory of your project:\n# Use an official OpenJDK runtime as the base image FROM openjdk:17-jdk # Set the working directory WORKDIR /app # Copy the JAR file into the container COPY target/*.jar app.jar # Expose the port the app runs on EXPOSE 8080 # Command to run the application CMD [\"java\", \"-jar\", \"app.jar\"] Build the Docker image using the following command:\ndocker build -t my-java-service . Step 3: Creating the Helm Chart Now, let’s create a Helm chart for our Java microservice. Run the following command to initialize a new chart:\nhelm create my-java-chart This will create a new directory my-java-chart with the basic structure of a Helm chart. Navigate into the directory:\ncd my-java-chart Step 4: Customizing the Chart The default Helm chart includes a templates/ directory with some basic Kubernetes resources. We’ll modify these templates to suit our Java microservice.\nModifying the Deployment Edit the templates/deployment.yaml file to define our Deployment:\napiVersion: apps/v1 kind: Deployment metadata: name: {{ include \"my-java-chart.fullname\" . }} labels: app.kubernetes.io/name: {{ include \"my-java-chart.name\" . }} app.kubernetes.io/instance: {{ .Release.Name }} spec: replicas: {{ .Values.replicaCount }} selector: matchLabels: app.kubernetes.io/name: {{ include \"my-java-chart.name\" . }} app.kubernetes.io/instance: {{ .Release.Name }} template: metadata: labels: app.kubernetes.io/name: {{ include \"my-java-chart.name\" . }} app.kubernetes.io/instance: {{ .Release.Name }} spec: containers: - name: {{ .Chart.Name }} image: \"{{ .Values.image.repository }}:{{ .Values.image.tag }}\" imagePullPolicy: {{ .Values.image.pullPolicy }} ports: - containerPort: 8080 env: - name: JAVA_OPTS value: \"{{ .Values.javaOpts }}\" Modifying the Service Edit the templates/service.yaml file to define our Service:\napiVersion: v1 kind: Service metadata: name: {{ include \"my-java-chart.fullname\" . }} labels: app.kubernetes.io/name: {{ include \"my-java-chart.name\" . }} app.kubernetes.io/instance: {{ .Release.Name }} spec: type: {{ .Values.service.type }} ports: - port: {{ .Values.service.port }} targetPort: 8080 protocol: TCP name: http selector: app.kubernetes.io/name: {{ include \"my-java-chart.name\" . }} app.kubernetes.io/instance: {{ .Release.Name }} Updating the Values File The values.yaml file contains the default values for our chart. Update it to include our specific configurations:\n# Default values for my-java-chart. # This is a YAML-formatted file. # Declare variables to be passed into your templates. replicaCount: 1 image: repository: my-java-service tag: latest pullPolicy: IfNotPresent service: type: ClusterIP port: 8080 javaOpts: -Xmx512m Step 5: Building and Deploying the Chart With our chart customized, we can now build and deploy it to our Kubernetes cluster.\nBuilding the Chart Run the following command to package our chart into a .tgz file:\nhelm package . This will create a file named my-java-chart-0.1.0.tgz in your current directory.\nDeploying the Chart Deploy the chart to your Kubernetes cluster using the following command:\nhelm install my-java-release ./my-java-chart-0.1.0.tgz This will deploy our Java microservice along with all the defined Kubernetes resources.\nManaging Your Deployments Helm provides several commands to manage your deployments, including upgrading, rolling back, and deleting releases.\nUpgrading a Release If you make changes to your chart, you can upgrade your release to apply the changes:\nhelm upgrade my-java-release ./my-java-chart-0.1.0.tgz Rolling Back a Release If an upgrade fails, you can roll back to a previous version:\nhelm rollback my-java-release 1 Deleting a Release To completely remove a release, including all associated resources:\nhelm delete my-java-release Best Practices for Helm and Java Microservices When working with Helm and Java microservices, there are several best practices to keep in mind:\nVersioning: Always version your Helm charts and Docker images. This allows you to roll back to previous versions if needed. Configuration Management: Use Helm’s values files to manage configuration across different environments. Avoid hardcoding values in your templates. Security: Use Kubernetes secrets for sensitive information like passwords and API keys. Avoid embedding sensitive data directly in your Helm charts. Testing: Test your Helm charts in a staging environment before deploying them to production. This helps catch any issues early in the process. Documentation: Keep your Helm charts well-documented. Include comments in your templates and maintain a README file for your chart. Conclusion Helm is a powerful tool that simplifies the process of packaging and deploying Java microservices on Kubernetes. By using Helm charts, you can define your application’s deployment configuration in a consistent and repeatable way, making your workflow more efficient and scalable.\nIn this blog post, we’ve walked through the process of creating a Helm chart for a Java microservice, from setting up your development environment to deploying your chart to a Kubernetes cluster. We’ve also covered some best practices to help you manage your deployments effectively.\nIf you’re working with Java microservices and Kubernetes, I highly recommend giving Helm a try. It’s a valuable addition to your toolkit that can help you streamline your deployment process and improve your overall development workflow.\n",
+  "wordCount" : "1189",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/IAMDevBox.com.jpg","datePublished": "2025-06-10T14:53:43Z",
+  "dateModified": "2025-06-10T14:53:58Z",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/helm-for-java-microservices-packaging--deploying-made-easy/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script><meta name="description" content="Discover how Helm simplifies packaging and deploying Java microservices on Kubernetes, making your workflow efficient and scalable.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/advanced-forgerock-forgeops-helm-deployment-on-openshift-crc-custom-images-secrets-and-security-contexts\/"
+            },
+            "headline": "\"Advanced ForgeRock ForgeOps Helm Deployment on OpenShift CRC: Custom Images, Secrets, and Security Contexts\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-06-14T12:40:16-04:00",
+            "dateModified": "2025-06-14T13:16:33-04:00"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/deploying-forgerock-forgeops-on-red-hat-openshift-crc-a-step-by-step-guide\/"
+            },
+            "headline": "\"Deploying ForgeRock ForgeOps on Red Hat OpenShift CRC: A Step-by-Step Guide\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-06-14T12:40:16-04:00",
+            "dateModified": "2025-06-14T13:16:33-04:00"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-decoding-and-validation-how-to-securely-parse-and-verify-your-tokens\/"
+            },
+            "headline": "\"JWT Decoding and Validation: How to Securely Parse and Verify Your Tokens\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-06-14T11:53:59-04:00",
+            "dateModified": "2025-06-14T11:59:00-04:00"
+          }
+  ]
+}
+</script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "\"Why is Helm beneficial for Java microservices?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Please refer to the article for detailed explanation.\""
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "\"How does Helm integrate with Java build tools like Maven and Gradle?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Please refer to the article for detailed explanation.\""
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "\"What are common challenges when packaging Java microservices with Helm?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Please refer to the article for detailed explanation.\""
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "\"How can I manage dependencies in a Helm chart for Java applications?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Please refer to the article for detailed explanation.\""
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "\"What best practices should I follow when deploying Java microservices with Helm?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Please refer to the article for detailed explanation.\""
+      }
+    }
+  ]
+}
+</script>
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    if (document.querySelector('.mermaid')) {
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+        mermaid.initialize({ startOnLoad: true, theme: "default" });
+        };
+        document.head.appendChild(script);
+    }
+    });
+    </script>
+
+    
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-B6QCH29975');
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Helm for Java Microservices: Packaging &amp; Deploying Made Easy
+    </h1>
+    
+    <div class="post-meta">6 min&nbsp;·&nbsp;1189 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#understanding-helm-and-its-role-in-microservices" aria-label="Understanding Helm and Its Role in Microservices">Understanding Helm and Its Role in Microservices</a></li>
+                <li>
+                    <a href="#setting-up-your-development-environment" aria-label="Setting Up Your Development Environment">Setting Up Your Development Environment</a><ul>
+                        
+                <li>
+                    <a href="#installing-helm" aria-label="Installing Helm">Installing Helm</a></li></ul>
+                </li>
+                <li>
+                    <a href="#creating-your-first-helm-chart" aria-label="Creating Your First Helm Chart">Creating Your First Helm Chart</a><ul>
+                        
+                <li>
+                    <a href="#step-1-creating-the-java-microservice" aria-label="Step 1: Creating the Java Microservice">Step 1: Creating the Java Microservice</a></li>
+                <li>
+                    <a href="#step-2-building-the-docker-image" aria-label="Step 2: Building the Docker Image">Step 2: Building the Docker Image</a></li>
+                <li>
+                    <a href="#step-3-creating-the-helm-chart" aria-label="Step 3: Creating the Helm Chart">Step 3: Creating the Helm Chart</a></li>
+                <li>
+                    <a href="#step-4-customizing-the-chart" aria-label="Step 4: Customizing the Chart">Step 4: Customizing the Chart</a><ul>
+                        
+                <li>
+                    <a href="#modifying-the-deployment" aria-label="Modifying the Deployment">Modifying the Deployment</a></li>
+                <li>
+                    <a href="#modifying-the-service" aria-label="Modifying the Service">Modifying the Service</a></li>
+                <li>
+                    <a href="#updating-the-values-file" aria-label="Updating the Values File">Updating the Values File</a></li></ul>
+                </li>
+                <li>
+                    <a href="#step-5-building-and-deploying-the-chart" aria-label="Step 5: Building and Deploying the Chart">Step 5: Building and Deploying the Chart</a><ul>
+                        
+                <li>
+                    <a href="#building-the-chart" aria-label="Building the Chart">Building the Chart</a></li>
+                <li>
+                    <a href="#deploying-the-chart" aria-label="Deploying the Chart">Deploying the Chart</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#managing-your-deployments" aria-label="Managing Your Deployments">Managing Your Deployments</a><ul>
+                        
+                <li>
+                    <a href="#upgrading-a-release" aria-label="Upgrading a Release">Upgrading a Release</a></li>
+                <li>
+                    <a href="#rolling-back-a-release" aria-label="Rolling Back a Release">Rolling Back a Release</a></li>
+                <li>
+                    <a href="#deleting-a-release" aria-label="Deleting a Release">Deleting a Release</a></li></ul>
+                </li>
+                <li>
+                    <a href="#best-practices-for-helm-and-java-microservices" aria-label="Best Practices for Helm and Java Microservices">Best Practices for Helm and Java Microservices</a></li>
+                <li>
+                    <a href="#conclusion" aria-label="Conclusion">Conclusion</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>In the rapidly evolving landscape of cloud-native development, Java microservices have become a cornerstone of modern applications. However, the complexity of packaging and deploying these services on Kubernetes can be daunting. Enter Helm, a powerful tool that streamlines the process of packaging, configuring, and deploying applications on Kubernetes. In this blog post, we&rsquo;ll explore how Helm can make your Java microservices deployment process more efficient and scalable.</p>
+<h2 id="understanding-helm-and-its-role-in-microservices">Understanding Helm and Its Role in Microservices<a hidden class="anchor" aria-hidden="true" href="#understanding-helm-and-its-role-in-microservices">#</a></h2>
+<p>Helm is a package manager for Kubernetes, designed to help you easily package, configure, and deploy applications. It uses charts, which are collections of files that describe a related set of Kubernetes resources. Helm charts allow you to define your application&rsquo;s deployment configuration in a consistent and repeatable way.</p>
+<p>For Java microservices, Helm provides a structured approach to packaging and deploying your services. It allows you to define all the necessary Kubernetes resources, such as Deployments, Services, and ConfigMaps, in a single, easy-to-manage chart. This approach not only simplifies the deployment process but also ensures consistency across different environments.</p>
+<h2 id="setting-up-your-development-environment">Setting Up Your Development Environment<a hidden class="anchor" aria-hidden="true" href="#setting-up-your-development-environment">#</a></h2>
+<p>Before diving into creating your Helm chart, you&rsquo;ll need to set up your development environment. Here&rsquo;s what you&rsquo;ll need:</p>
+<ol>
+<li><strong>Kubernetes Cluster</strong>: A running Kubernetes cluster where you&rsquo;ll deploy your microservices. You can use a local setup like Minikube or a cloud-based cluster.</li>
+<li><strong>Helm CLI</strong>: The Helm command-line tool, which you&rsquo;ll use to package and deploy your charts.</li>
+<li><strong>Java Development Kit (JDK)</strong>: The JDK for compiling and running your Java microservices.</li>
+<li><strong>Build Tool</strong>: A build tool like Maven or Gradle for building your Java project.</li>
+</ol>
+<h3 id="installing-helm">Installing Helm<a hidden class="anchor" aria-hidden="true" href="#installing-helm">#</a></h3>
+<p>To install Helm, follow these steps:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -fsSL -o get-helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+</span></span><span style="display:flex;"><span>chmod <span style="color:#ae81ff">700</span> get-helm.sh
+</span></span><span style="display:flex;"><span>./get-helm.sh
+</span></span></code></pre></div><p>After installation, verify that Helm is working by running:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>helm version
+</span></span></code></pre></div><h2 id="creating-your-first-helm-chart">Creating Your First Helm Chart<a hidden class="anchor" aria-hidden="true" href="#creating-your-first-helm-chart">#</a></h2>
+<p>Now that you have your environment set up, it&rsquo;s time to create your first Helm chart for a Java microservice. We&rsquo;ll walk through the process of creating a simple Java microservice and packaging it using Helm.</p>
+<h3 id="step-1-creating-the-java-microservice">Step 1: Creating the Java Microservice<a hidden class="anchor" aria-hidden="true" href="#step-1-creating-the-java-microservice">#</a></h3>
+<p>Let&rsquo;s start by creating a simple Java microservice using Maven. Create a new directory for your project and initialize it with Maven:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>mkdir my-java-service
+</span></span><span style="display:flex;"><span>cd my-java-service
+</span></span><span style="display:flex;"><span>mvn archetype:generate -DgroupId<span style="color:#f92672">=</span>com.example -DartifactId<span style="color:#f92672">=</span>my-java-service -DarchetypeArtifactId<span style="color:#f92672">=</span>maven-archetype-quickstart -DinteractiveMode<span style="color:#f92672">=</span>false
+</span></span></code></pre></div><p>This will create a basic Java project structure. Replace the contents of <code>src/main/java/com/example/App.java</code> with the following code:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#f92672">package</span> com.example;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.io.IOException;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.springframework.boot.SpringApplication;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.springframework.boot.autoconfigure.SpringBootApplication;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@SpringBootApplication</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">App</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span>(String<span style="color:#f92672">[]</span> args) <span style="color:#66d9ef">throws</span> IOException {
+</span></span><span style="display:flex;"><span>        SpringApplication.<span style="color:#a6e22e">run</span>(App.<span style="color:#a6e22e">class</span>, args);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="step-2-building-the-docker-image">Step 2: Building the Docker Image<a hidden class="anchor" aria-hidden="true" href="#step-2-building-the-docker-image">#</a></h3>
+<p>Next, we&rsquo;ll containerize our Java microservice using Docker. Create a <code>Dockerfile</code> in the root directory of your project:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dockerfile" data-lang="dockerfile"><span style="display:flex;"><span><span style="color:#75715e"># Use an official OpenJDK runtime as the base image</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> openjdk:17-jdk</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Set the working directory</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">WORKDIR</span><span style="color:#e6db74"> /app</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Copy the JAR file into the container</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> target/*.jar app.jar<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Expose the port the app runs on</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">EXPOSE</span><span style="color:#e6db74"> 8080</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Command to run the application</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">CMD</span> [<span style="color:#e6db74">&#34;java&#34;</span>, <span style="color:#e6db74">&#34;-jar&#34;</span>, <span style="color:#e6db74">&#34;app.jar&#34;</span>]<span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p>Build the Docker image using the following command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>docker build -t my-java-service .
+</span></span></code></pre></div><h3 id="step-3-creating-the-helm-chart">Step 3: Creating the Helm Chart<a hidden class="anchor" aria-hidden="true" href="#step-3-creating-the-helm-chart">#</a></h3>
+<p>Now, let&rsquo;s create a Helm chart for our Java microservice. Run the following command to initialize a new chart:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>helm create my-java-chart
+</span></span></code></pre></div><p>This will create a new directory <code>my-java-chart</code> with the basic structure of a Helm chart. Navigate into the directory:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cd my-java-chart
+</span></span></code></pre></div><h3 id="step-4-customizing-the-chart">Step 4: Customizing the Chart<a hidden class="anchor" aria-hidden="true" href="#step-4-customizing-the-chart">#</a></h3>
+<p>The default Helm chart includes a <code>templates/</code> directory with some basic Kubernetes resources. We&rsquo;ll modify these templates to suit our Java microservice.</p>
+<h4 id="modifying-the-deployment">Modifying the Deployment<a hidden class="anchor" aria-hidden="true" href="#modifying-the-deployment">#</a></h4>
+<p>Edit the <code>templates/deployment.yaml</code> file to define our Deployment:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">apps/v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Deployment</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: {{ <span style="color:#ae81ff">include &#34;my-java-chart.fullname&#34; . }}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">labels</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">app.kubernetes.io/name</span>: {{ <span style="color:#ae81ff">include &#34;my-java-chart.name&#34; . }}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">app.kubernetes.io/instance</span>: {{ <span style="color:#ae81ff">.Release.Name }}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">replicas</span>: {{ <span style="color:#ae81ff">.Values.replicaCount }}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">selector</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">matchLabels</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">app.kubernetes.io/name</span>: {{ <span style="color:#ae81ff">include &#34;my-java-chart.name&#34; . }}</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">app.kubernetes.io/instance</span>: {{ <span style="color:#ae81ff">.Release.Name }}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">template</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">labels</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">app.kubernetes.io/name</span>: {{ <span style="color:#ae81ff">include &#34;my-java-chart.name&#34; . }}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">app.kubernetes.io/instance</span>: {{ <span style="color:#ae81ff">.Release.Name }}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">containers</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: {{ <span style="color:#ae81ff">.Chart.Name }}</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">image</span>: <span style="color:#e6db74">&#34;{{ .Values.image.repository }}:{{ .Values.image.tag }}&#34;</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">imagePullPolicy</span>: {{ <span style="color:#ae81ff">.Values.image.pullPolicy }}</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>            - <span style="color:#f92672">containerPort</span>: <span style="color:#ae81ff">8080</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">env</span>:
+</span></span><span style="display:flex;"><span>            - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">JAVA_OPTS</span>
+</span></span><span style="display:flex;"><span>              <span style="color:#f92672">value</span>: <span style="color:#e6db74">&#34;{{ .Values.javaOpts }}&#34;</span>
+</span></span></code></pre></div><h4 id="modifying-the-service">Modifying the Service<a hidden class="anchor" aria-hidden="true" href="#modifying-the-service">#</a></h4>
+<p>Edit the <code>templates/service.yaml</code> file to define our Service:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: {{ <span style="color:#ae81ff">include &#34;my-java-chart.fullname&#34; . }}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">labels</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">app.kubernetes.io/name</span>: {{ <span style="color:#ae81ff">include &#34;my-java-chart.name&#34; . }}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">app.kubernetes.io/instance</span>: {{ <span style="color:#ae81ff">.Release.Name }}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">type</span>: {{ <span style="color:#ae81ff">.Values.service.type }}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">port</span>: {{ <span style="color:#ae81ff">.Values.service.port }}</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">targetPort</span>: <span style="color:#ae81ff">8080</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">protocol</span>: <span style="color:#ae81ff">TCP</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">name</span>: <span style="color:#ae81ff">http</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">selector</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">app.kubernetes.io/name</span>: {{ <span style="color:#ae81ff">include &#34;my-java-chart.name&#34; . }}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">app.kubernetes.io/instance</span>: {{ <span style="color:#ae81ff">.Release.Name }}</span>
+</span></span></code></pre></div><h4 id="updating-the-values-file">Updating the Values File<a hidden class="anchor" aria-hidden="true" href="#updating-the-values-file">#</a></h4>
+<p>The <code>values.yaml</code> file contains the default values for our chart. Update it to include our specific configurations:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># Default values for my-java-chart.</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># This is a YAML-formatted file.</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Declare variables to be passed into your templates.</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">replicaCount</span>: <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">image</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">repository</span>: <span style="color:#ae81ff">my-java-service</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">tag</span>: <span style="color:#ae81ff">latest</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">pullPolicy</span>: <span style="color:#ae81ff">IfNotPresent</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">service</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">type</span>: <span style="color:#ae81ff">ClusterIP</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">port</span>: <span style="color:#ae81ff">8080</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">javaOpts</span>: -<span style="color:#ae81ff">Xmx512m</span>
+</span></span></code></pre></div><h3 id="step-5-building-and-deploying-the-chart">Step 5: Building and Deploying the Chart<a hidden class="anchor" aria-hidden="true" href="#step-5-building-and-deploying-the-chart">#</a></h3>
+<p>With our chart customized, we can now build and deploy it to our Kubernetes cluster.</p>
+<h4 id="building-the-chart">Building the Chart<a hidden class="anchor" aria-hidden="true" href="#building-the-chart">#</a></h4>
+<p>Run the following command to package our chart into a <code>.tgz</code> file:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>helm package .
+</span></span></code></pre></div><p>This will create a file named <code>my-java-chart-0.1.0.tgz</code> in your current directory.</p>
+<h4 id="deploying-the-chart">Deploying the Chart<a hidden class="anchor" aria-hidden="true" href="#deploying-the-chart">#</a></h4>
+<p>Deploy the chart to your Kubernetes cluster using the following command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>helm install my-java-release ./my-java-chart-0.1.0.tgz
+</span></span></code></pre></div><p>This will deploy our Java microservice along with all the defined Kubernetes resources.</p>
+<h2 id="managing-your-deployments">Managing Your Deployments<a hidden class="anchor" aria-hidden="true" href="#managing-your-deployments">#</a></h2>
+<p>Helm provides several commands to manage your deployments, including upgrading, rolling back, and deleting releases.</p>
+<h3 id="upgrading-a-release">Upgrading a Release<a hidden class="anchor" aria-hidden="true" href="#upgrading-a-release">#</a></h3>
+<p>If you make changes to your chart, you can upgrade your release to apply the changes:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>helm upgrade my-java-release ./my-java-chart-0.1.0.tgz
+</span></span></code></pre></div><h3 id="rolling-back-a-release">Rolling Back a Release<a hidden class="anchor" aria-hidden="true" href="#rolling-back-a-release">#</a></h3>
+<p>If an upgrade fails, you can roll back to a previous version:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>helm rollback my-java-release <span style="color:#ae81ff">1</span>
+</span></span></code></pre></div><h3 id="deleting-a-release">Deleting a Release<a hidden class="anchor" aria-hidden="true" href="#deleting-a-release">#</a></h3>
+<p>To completely remove a release, including all associated resources:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>helm delete my-java-release
+</span></span></code></pre></div><h2 id="best-practices-for-helm-and-java-microservices">Best Practices for Helm and Java Microservices<a hidden class="anchor" aria-hidden="true" href="#best-practices-for-helm-and-java-microservices">#</a></h2>
+<p>When working with Helm and Java microservices, there are several best practices to keep in mind:</p>
+<ol>
+<li><strong>Versioning</strong>: Always version your Helm charts and Docker images. This allows you to roll back to previous versions if needed.</li>
+<li><strong>Configuration Management</strong>: Use Helm&rsquo;s values files to manage configuration across different environments. Avoid hardcoding values in your templates.</li>
+<li><strong>Security</strong>: Use Kubernetes secrets for sensitive information like passwords and API keys. Avoid embedding sensitive data directly in your Helm charts.</li>
+<li><strong>Testing</strong>: Test your Helm charts in a staging environment before deploying them to production. This helps catch any issues early in the process.</li>
+<li><strong>Documentation</strong>: Keep your Helm charts well-documented. Include comments in your templates and maintain a README file for your chart.</li>
+</ol>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>Helm is a powerful tool that simplifies the process of packaging and deploying Java microservices on Kubernetes. By using Helm charts, you can define your application&rsquo;s deployment configuration in a consistent and repeatable way, making your workflow more efficient and scalable.</p>
+<p>In this blog post, we&rsquo;ve walked through the process of creating a Helm chart for a Java microservice, from setting up your development environment to deploying your chart to a Kubernetes cluster. We&rsquo;ve also covered some best practices to help you manage your deployments effectively.</p>
+<p>If you&rsquo;re working with Java microservices and Kubernetes, I highly recommend giving Helm a try. It&rsquo;s a valuable addition to your toolkit that can help you streamline your deployment process and improve your overall development workflow.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/helm/">Helm</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/java/">Java</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/microservices/">Microservices</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/kubernetes/">Kubernetes</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/oauth2-deep-dive-with-forgerock-access-management/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>OAuth2 Deep Dive with ForgeRock Access Management</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/devops-is-not-just-tools--its-a-cultural-transformation/">
+    <span class="title">Next »</span>
+    <br>
+    <span>DevOps Is Not Just Tools — It’s a Cultural Transformation</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/applying-java-modules-in-modern-microservice-architecture/" class="custom-link">
+              Applying Java Modules in Modern Microservice Architecture
+            </a>
+            <small class="custom-date">2025-06-14</small>
+          </li>
+          
+        
+      
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/best-practices-for-writing-java-dockerfiles/" class="custom-link">
+              Best Practices for Writing Java Dockerfiles
+            </a>
+            <small class="custom-date">2025-06-05</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/how-to-implement-the-oauth-20-authorization-code-flow-in-java/" class="custom-link">
+              How to Implement the OAuth 2.0 Authorization Code Flow in Java
+            </a>
+            <small class="custom-date">2025-06-04</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/how-to-refresh-access-tokens-in-oauth-20-java-example-included/" class="custom-link">
+              How to Refresh Access Tokens in OAuth 2.0 (Java Example Included)
+            </a>
+            <small class="custom-date">2025-06-04</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/setting-up-a-cicd-pipeline-to-kubernetes-with-github-actions/" class="custom-link">
+              Setting Up a CI/CD Pipeline to Kubernetes with GitHub Actions
+            </a>
+            <small class="custom-date">2025-05-28</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/advanced-forgerock-forgeops-helm-deployment-on-openshift-crc-custom-images-secrets-and-security-contexts/" class="custom-link">
+                Advanced ForgeRock ForgeOps Helm Deployment on OpenShift CRC: Custom Images, Secrets, and Security Contexts
+              </a>
+              <small class="custom-date">2025-06-14</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/deploying-forgerock-forgeops-on-red-hat-openshift-crc-a-step-by-step-guide/" class="custom-link">
+                Deploying ForgeRock ForgeOps on Red Hat OpenShift CRC: A Step-by-Step Guide
+              </a>
+              <small class="custom-date">2025-06-14</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-decoding-and-validation-how-to-securely-parse-and-verify-your-tokens/" class="custom-link">
+                JWT Decoding and Validation: How to Securely Parse and Verify Your Tokens
+              </a>
+              <small class="custom-date">2025-06-14</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/how-to-debug-and-understand-saml-response-xml-a-practical-guide/" class="custom-link">
+                How to Debug and Understand SAML Response XML: A Practical Guide
+              </a>
+              <small class="custom-date">2025-06-14</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/applying-java-modules-in-modern-microservice-architecture/" class="custom-link">
+                Applying Java Modules in Modern Microservice Architecture
+              </a>
+              <small class="custom-date">2025-06-14</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

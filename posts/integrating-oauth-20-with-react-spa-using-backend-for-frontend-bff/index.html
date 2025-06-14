@@ -77,9 +77,9 @@
     <meta property="article:tag" content="BFF">
     <meta property="article:tag" content="Authorization Code Flow">
     <meta property="article:tag" content="Security">
-      <meta property="og:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+      <meta property="og:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
 <meta name="twitter:title" content="Integrating OAuth 2.0 with React SPA using Backend-for-Frontend (BFF)">
 <meta name="twitter:description" content="Single Page Applications (SPAs) like React apps face unique challenges when handling OAuth 2.0 flows due to security concerns with exposing tokens in the...">
 
@@ -117,7 +117,7 @@
   "articleBody": "Single Page Applications (SPAs) like React apps face unique challenges when handling OAuth 2.0 flows due to security concerns with exposing tokens in the browser. The Backend-for-Frontend (BFF) pattern provides an elegant solution by shifting sensitive OAuth token handling to a trusted backend while keeping the frontend lightweight.\nThis article walks you through implementing the OAuth 2.0 Authorization Code Flow with PKCE using React as the frontend and a Node.js/Express backend acting as the BFF.\nWhy Use BFF for OAuth 2.0 in React SPA? SPAs are public clients; they cannot securely store client secrets. Handling tokens only on the backend reduces XSS and CSRF risks. BFF acts as a secure token proxy for API calls. Enables easier session management and refresh token rotation. Overview of the Architecture User Browser (React SPA) | (1) Login redirect (2) OAuth server login and consent | | v v Backend-for-Frontend (Node.js/Express) | (3) Token exchange and storage | (4) API requests with access token Step 1: React SPA - Initiate Login In React, you trigger the login by requesting the BFF to redirect:\n// React snippet to call BFF login function login() { window.location.href = 'http://localhost:3000/login'; } The frontend does not handle tokens directly — it just redirects users.\nStep 2: BFF - Redirect to OAuth Server Backend prepares the authorization URL with PKCE parameters:\n// Express /login route to redirect user to OAuth server const crypto = require('crypto'); const querystring = require('querystring'); app.get('/login', (req, res) =\u003e { // Generate code_verifier and code_challenge for PKCE const codeVerifier = crypto.randomBytes(32).toString('hex'); const codeChallenge = base64urlEncode(sha256(codeVerifier)); // Store codeVerifier in session or secure cookie req.session.codeVerifier = codeVerifier; const params = { response_type: 'code', client_id: process.env.CLIENT_ID, redirect_uri: 'http://localhost:3000/callback', scope: 'openid profile email', code_challenge: codeChallenge, code_challenge_method: 'S256', state: crypto.randomBytes(16).toString('hex') }; const authUrl = `https://oauth-server.com/authorize?${querystring.stringify(params)}`; res.redirect(authUrl); }); Step 3: BFF - Handle Callback and Exchange Code app.get('/callback', async (req, res) =\u003e { const { code } = req.query; const codeVerifier = req.session.codeVerifier; try { const tokenResponse = await axios.post('https://oauth-server.com/token', querystring.stringify({ grant_type: 'authorization_code', code, redirect_uri: 'http://localhost:3000/callback', client_id: process.env.CLIENT_ID, code_verifier: codeVerifier }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } } ); // Store tokens securely in session req.session.tokens = tokenResponse.data; // Redirect to frontend SPA res.redirect('http://localhost:3001'); // React app URL } catch (error) { res.status(500).send('Token exchange failed'); } }); Step 4: React SPA Fetches Data via BFF React SPA calls the BFF API to access protected resources without seeing tokens:\n// React fetch example async function fetchProfile() { const response = await fetch('http://localhost:3000/api/profile', { credentials: 'include' }); const profile = await response.json(); console.log(profile); } Step 5: BFF Proxy API Requests with Access Token app.get('/api/profile', async (req, res) =\u003e { if (!req.session.tokens) return res.status(401).send('Unauthorized'); try { const userInfo = await axios.get('https://oauth-server.com/userinfo', { headers: { Authorization: `Bearer ${req.session.tokens.access_token}` } }); res.json(userInfo.data); } catch (error) { res.status(500).send('Failed to fetch user info'); } }); Security Considerations Use HTTPS to protect data in transit. Secure cookies and proper session handling on the backend. Rotate tokens and implement refresh token logic on the BFF. Protect endpoints from CSRF attacks. Real-World Use Cases The BFF pattern is increasingly popular for SPA apps that require OAuth 2.0 login flows without exposing tokens to the browser — used by enterprises with ForgeRock Identity Cloud, Auth0, and others.\n👉 Related:\nUnderstanding the Authorization Code Flow with PKCE in OAuth 2.0\nHow to Implement the OAuth 2.0 Authorization Code Flow in Java\nConclusion The Backend-for-Frontend pattern enhances security and scalability for OAuth 2.0 in React SPAs. By delegating token handling to a trusted backend, you reduce attack surfaces and simplify token lifecycle management.\n💡 What else can you explore?\nHow to implement refresh token rotation securely in the BFF? What’s new in OAuth 2.1 that impacts SPA security models? Can BFF be combined with decentralized identity solutions? Stay tuned for deeper dives into these topics soon.\n",
   "wordCount" : "632",
   "inLanguage": "en",
-  "image": "https://www.iamdevbox.com/static/IAMDevBox.com.png","datePublished": "2025-06-04T21:09:20Z",
+  "image": "https://www.iamdevbox.com/IAMDevBox.com.jpg","datePublished": "2025-06-04T21:09:20Z",
   "dateModified": "2025-06-06T19:33:33-04:00",
   "author":{
     "@type": "Person",
@@ -145,9 +145,9 @@
             "@type": "Article",
             "mainEntityOfPage": {
               "@type": "WebPage",
-              "@id": "https:\/\/www.iamdevbox.com\/posts\/devops-is-not-just-tools--its-a-cultural-transformation\/"
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/advanced-forgerock-forgeops-helm-deployment-on-openshift-crc-custom-images-secrets-and-security-contexts\/"
             },
-            "headline": "\"DevOps Is Not Just Tools — It’s a Cultural Transformation\"",
+            "headline": "\"Advanced ForgeRock ForgeOps Helm Deployment on OpenShift CRC: Custom Images, Secrets, and Security Contexts\"",
             "author": {
               "@type": "Person",
               "name": "IAMDevBox"
@@ -164,16 +164,16 @@
               "@type": "ImageObject",
               "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
             },
-            "datePublished": "2025-06-09T14:56:04Z",
-            "dateModified": "2025-06-09T14:56:16Z"
+            "datePublished": "2025-06-14T12:40:16-04:00",
+            "dateModified": "2025-06-14T13:16:33-04:00"
           },
           {
             "@type": "Article",
             "mainEntityOfPage": {
               "@type": "WebPage",
-              "@id": "https:\/\/www.iamdevbox.com\/posts\/orchestrating-kubernetes-and-iam-with-terraform-a-comprehensive-guide\/"
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/deploying-forgerock-forgeops-on-red-hat-openshift-crc-a-step-by-step-guide\/"
             },
-            "headline": "\"Orchestrating Kubernetes and IAM with Terraform: A Comprehensive Guide\"",
+            "headline": "\"Deploying ForgeRock ForgeOps on Red Hat OpenShift CRC: A Step-by-Step Guide\"",
             "author": {
               "@type": "Person",
               "name": "IAMDevBox"
@@ -190,16 +190,16 @@
               "@type": "ImageObject",
               "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
             },
-            "datePublished": "2025-06-08T13:49:52Z",
-            "dateModified": "2025-06-08T09:53:31-04:00"
+            "datePublished": "2025-06-14T12:40:16-04:00",
+            "dateModified": "2025-06-14T13:16:33-04:00"
           },
           {
             "@type": "Article",
             "mainEntityOfPage": {
               "@type": "WebPage",
-              "@id": "https:\/\/www.iamdevbox.com\/posts\/navigating-iam-challenges-in-multi-cloud-environments\/"
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-decoding-and-validation-how-to-securely-parse-and-verify-your-tokens\/"
             },
-            "headline": "\"Navigating IAM Challenges in Multi-Cloud Environments\"",
+            "headline": "\"JWT Decoding and Validation: How to Securely Parse and Verify Your Tokens\"",
             "author": {
               "@type": "Person",
               "name": "IAMDevBox"
@@ -216,8 +216,8 @@
               "@type": "ImageObject",
               "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
             },
-            "datePublished": "2025-06-06T14:59:32Z",
-            "dateModified": "2025-06-06T19:33:33-04:00"
+            "datePublished": "2025-06-14T11:53:59-04:00",
+            "dateModified": "2025-06-14T11:59:00-04:00"
           }
   ]
 }
@@ -567,6 +567,16 @@
       
         
           <li class="custom-list-item">
+            <a href="/posts/my-devsecops-pipeline-security-from-code-to-production/" class="custom-link">
+              My DevSecOps Pipeline: Security from Code to Production
+            </a>
+            <small class="custom-date">2025-06-13</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
             <a href="/posts/navigating-iam-challenges-in-multi-cloud-environments/" class="custom-link">
               Navigating IAM Challenges in Multi-Cloud Environments
             </a>
@@ -605,14 +615,6 @@
           
         
       
-        
-          <li class="custom-list-item">
-            <a href="/posts/understanding-token-revocation-and-when-to-use-it/" class="custom-link">
-              Understanding Token Revocation and When to Use It
-            </a>
-            <small class="custom-date">2025-06-04</small>
-          </li>
-          
         
       
         
@@ -716,10 +718,10 @@
         
           
             <li class="custom-list-item">
-              <a href="/posts/devops-is-not-just-tools--its-a-cultural-transformation/" class="custom-link">
-                DevOps Is Not Just Tools — It’s a Cultural Transformation
+              <a href="/posts/advanced-forgerock-forgeops-helm-deployment-on-openshift-crc-custom-images-secrets-and-security-contexts/" class="custom-link">
+                Advanced ForgeRock ForgeOps Helm Deployment on OpenShift CRC: Custom Images, Secrets, and Security Contexts
               </a>
-              <small class="custom-date">2025-06-09</small>
+              <small class="custom-date">2025-06-14</small>
             </li>
             
           
@@ -728,10 +730,10 @@
         
           
             <li class="custom-list-item">
-              <a href="/posts/orchestrating-kubernetes-and-iam-with-terraform-a-comprehensive-guide/" class="custom-link">
-                Orchestrating Kubernetes and IAM with Terraform: A Comprehensive Guide
+              <a href="/posts/deploying-forgerock-forgeops-on-red-hat-openshift-crc-a-step-by-step-guide/" class="custom-link">
+                Deploying ForgeRock ForgeOps on Red Hat OpenShift CRC: A Step-by-Step Guide
               </a>
-              <small class="custom-date">2025-06-08</small>
+              <small class="custom-date">2025-06-14</small>
             </li>
             
           
@@ -740,10 +742,10 @@
         
           
             <li class="custom-list-item">
-              <a href="/posts/navigating-iam-challenges-in-multi-cloud-environments/" class="custom-link">
-                Navigating IAM Challenges in Multi-Cloud Environments
+              <a href="/posts/jwt-decoding-and-validation-how-to-securely-parse-and-verify-your-tokens/" class="custom-link">
+                JWT Decoding and Validation: How to Securely Parse and Verify Your Tokens
               </a>
-              <small class="custom-date">2025-06-06</small>
+              <small class="custom-date">2025-06-14</small>
             </li>
             
           
@@ -752,10 +754,10 @@
         
           
             <li class="custom-list-item">
-              <a href="/posts/best-practices-for-writing-java-dockerfiles/" class="custom-link">
-                Best Practices for Writing Java Dockerfiles
+              <a href="/posts/how-to-debug-and-understand-saml-response-xml-a-practical-guide/" class="custom-link">
+                How to Debug and Understand SAML Response XML: A Practical Guide
               </a>
-              <small class="custom-date">2025-06-05</small>
+              <small class="custom-date">2025-06-14</small>
             </li>
             
           
@@ -764,12 +766,76 @@
         
           
             <li class="custom-list-item">
-              <a href="/posts/building-unified-identity-strategy-in-multi-cloud-environments/" class="custom-link">
-                Building Unified Identity Strategy in Multi-Cloud Environments
+              <a href="/posts/applying-java-modules-in-modern-microservice-architecture/" class="custom-link">
+                Applying Java Modules in Modern Microservice Architecture
               </a>
-              <small class="custom-date">2025-06-04</small>
+              <small class="custom-date">2025-06-14</small>
             </li>
             
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
           
         
       

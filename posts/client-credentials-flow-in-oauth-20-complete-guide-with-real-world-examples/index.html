@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Client Credentials Flow in OAuth 2.0: Complete Guide with Real-World Examples | IAMDevBox</title>
+<meta name="keywords" content="oauth2, client-credentials, machine-to-machine, m2m, access-token, server-to-server">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/client-credentials-flow-in-oauth-20-complete-guide-with-real-world-examples/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css" integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF&#43;13Dyqob6ASlTrTye8=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/client-credentials-flow-in-oauth-20-complete-guide-with-real-world-examples/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.f87e4df74f4f070695effe5d49ae4914eb9228356e4300800036f51859f72d47.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.f87e4df74f4f070695effe5d49ae4914eb9228356e4300800036f51859f72d47.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/client-credentials-flow-in-oauth-20-complete-guide-with-real-world-examples/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Client Credentials Flow in OAuth 2.0: Complete Guide with Real-World Examples">
+  <meta property="og:description" content="A practical guide to the OAuth 2.0 Client Credentials Flow for secure machine-to-machine (M2M) authentication. Learn when to use it, how it works, and how to implement it securely.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-06-11T15:51:04-04:00">
+    <meta property="article:modified_time" content="2025-06-12T14:53:49+00:00">
+    <meta property="article:tag" content="OAuth2">
+    <meta property="article:tag" content="Client-Credentials">
+    <meta property="article:tag" content="Machine-to-Machine">
+    <meta property="article:tag" content="M2m">
+    <meta property="article:tag" content="Access Token">
+    <meta property="article:tag" content="Server-to-Server">
+      <meta property="og:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:title" content="Client Credentials Flow in OAuth 2.0: Complete Guide with Real-World Examples">
+<meta name="twitter:description" content="A practical guide to the OAuth 2.0 Client Credentials Flow for secure machine-to-machine (M2M) authentication. Learn when to use it, how it works, and how to implement it securely.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Client Credentials Flow in OAuth 2.0: Complete Guide with Real-World Examples",
+      "item": "https://www.iamdevbox.com/posts/client-credentials-flow-in-oauth-20-complete-guide-with-real-world-examples/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Client Credentials Flow in OAuth 2.0: Complete Guide with Real-World Examples",
+  "name": "Client Credentials Flow in OAuth 2.0: Complete Guide with Real-World Examples",
+  "description": "A practical guide to the OAuth 2.0 Client Credentials Flow for secure machine-to-machine (M2M) authentication. Learn when to use it, how it works, and how to implement it securely.",
+  "keywords": [
+    "oauth2", "client-credentials", "machine-to-machine", "m2m", "access-token", "server-to-server"
+  ],
+  "articleBody": "The Client Credentials Flow is a foundational grant type in OAuth 2.0, designed for machine-to-machine (M2M) communication scenarios where no end-user is involved. This flow enables secure backend services, daemons, or microservices to authenticate themselves and access protected APIs without user interaction.\n🔍 When Should You Use the Client Credentials Flow? Use this flow when:\nA backend service needs to call another internal API A scheduled job or daemon interacts with protected endpoints Microservices need to exchange data without involving users You’re building automated scripts or monitoring tools that access APIs 🔐 How the Flow Works (Step-by-Step) Here’s how the Client Credentials Flow operates:\n+------------+ +------------------+ \\| | --(1) Authenticate \u0026 Request Token -\u003e| | \\| Client | | Authorization | \\| (Backend) |\u003c---------------- Access Token -------| Server | +------------+ +------------------+ The client authenticates using its client_id and client_secret. It makes a POST request to the token endpoint with grant_type=client_credentials. The authorization server returns an access token. The client uses this token to access protected resources. 🧪 Sample Token Request (cURL) curl -X POST https://auth.example.com/oauth2/token \\ -H \"Content-Type: application/x-www-form-urlencoded\" \\ -d \"grant_type=client_credentials\u0026client_id=abc123\u0026client_secret=secret456\" Successful response:\n{ \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6...\", \"token_type\": \"Bearer\", \"expires_in\": 3600, \"scope\": \"read write\" } 🚀 Real-World Use Case Example (Java) Using Spring Security’s OAuth2 client:\nWebClient client = WebClient.builder() .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE) .build(); String token = client.post() .uri(\"https://auth.example.com/oauth2/token\") .body(BodyInserters.fromFormData(\"grant_type\", \"client_credentials\") .with(\"client_id\", \"abc123\") .with(\"client_secret\", \"secret456\")) .retrieve() .bodyToMono(TokenResponse.class) .block() .getAccessToken(); 🛠️ Common Errors and How to Fix Them HTTP Code Meaning Fix Recommendation 401 Invalid client credentials Check client ID/secret or encoding 403 Insufficient scope or no consent Verify scopes assigned to the client 400 Invalid grant Ensure grant_type=client_credentials 🧱 Best Practices for Secure Use 🔐 Use Client Assertions (JWT) instead of static secrets when possible 🕑 Rotate credentials regularly and avoid hardcoding secrets 📜 Limit scopes for each client to follow least privilege principle 📡 Use TLS (HTTPS) for all communication with the token endpoint 📚 Related Resources on IAMDevBox Authorization Code Flow vs Client Credentials Flow Understanding the Authorization Code Flow in OAuth 2.0 Implementing Fine-Grained Access Control with JWT JWT Decoding and Validation in OAuth 2.0 Need more real-world identity solutions? Explore the OAuth 2.0 \u0026 OpenID Connect Deep Cluster for more tutorials like this.\n",
+  "wordCount" : "366",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/IAMDevBox.com.jpg","datePublished": "2025-06-11T15:51:04-04:00",
+  "dateModified": "2025-06-12T14:53:49Z",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/client-credentials-flow-in-oauth-20-complete-guide-with-real-world-examples/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script><meta name="description" content="A practical guide to the OAuth 2.0 Client Credentials Flow for secure machine-to-machine (M2M) authentication. Learn when to use it, how it works, and how to implement it securely.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/advanced-forgerock-forgeops-helm-deployment-on-openshift-crc-custom-images-secrets-and-security-contexts\/"
+            },
+            "headline": "\"Advanced ForgeRock ForgeOps Helm Deployment on OpenShift CRC: Custom Images, Secrets, and Security Contexts\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-06-14T12:40:16-04:00",
+            "dateModified": "2025-06-14T13:16:33-04:00"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/deploying-forgerock-forgeops-on-red-hat-openshift-crc-a-step-by-step-guide\/"
+            },
+            "headline": "\"Deploying ForgeRock ForgeOps on Red Hat OpenShift CRC: A Step-by-Step Guide\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-06-14T12:40:16-04:00",
+            "dateModified": "2025-06-14T13:16:33-04:00"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-decoding-and-validation-how-to-securely-parse-and-verify-your-tokens\/"
+            },
+            "headline": "\"JWT Decoding and Validation: How to Securely Parse and Verify Your Tokens\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-06-14T11:53:59-04:00",
+            "dateModified": "2025-06-14T11:59:00-04:00"
+          }
+  ]
+}
+</script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "\"When Should You Use the Client Credentials Flow?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Please refer to the article for detailed explanation.\""
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "\"Need more real-world identity solutions?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Please refer to the article for detailed explanation.\""
+      }
+    }
+  ]
+}
+</script>
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    if (document.querySelector('.mermaid')) {
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+        mermaid.initialize({ startOnLoad: true, theme: "default" });
+        };
+        document.head.appendChild(script);
+    }
+    });
+    </script>
+
+    
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-B6QCH29975');
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Client Credentials Flow in OAuth 2.0: Complete Guide with Real-World Examples
+    </h1>
+    
+    <div class="post-meta">2 min&nbsp;·&nbsp;366 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#-when-should-you-use-the-client-credentials-flow" aria-label="🔍 When Should You Use the Client Credentials Flow?">🔍 When Should You Use the Client Credentials Flow?</a></li>
+                <li>
+                    <a href="#-how-the-flow-works-step-by-step" aria-label="🔐 How the Flow Works (Step-by-Step)">🔐 How the Flow Works (Step-by-Step)</a></li>
+                <li>
+                    <a href="#-sample-token-request-curl" aria-label="🧪 Sample Token Request (cURL)">🧪 Sample Token Request (cURL)</a></li>
+                <li>
+                    <a href="#-real-world-use-case-example-java" aria-label="🚀 Real-World Use Case Example (Java)">🚀 Real-World Use Case Example (Java)</a></li>
+                <li>
+                    <a href="#-common-errors-and-how-to-fix-them" aria-label="🛠️ Common Errors and How to Fix Them">🛠️ Common Errors and How to Fix Them</a></li>
+                <li>
+                    <a href="#-best-practices-for-secure-use" aria-label="🧱 Best Practices for Secure Use">🧱 Best Practices for Secure Use</a></li>
+                <li>
+                    <a href="#-related-resources-on-iamdevbox" aria-label="📚 Related Resources on IAMDevBox">📚 Related Resources on IAMDevBox</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>The <strong>Client Credentials Flow</strong> is a foundational grant type in OAuth 2.0, designed for <strong>machine-to-machine (M2M)</strong> communication scenarios where no end-user is involved. This flow enables secure backend services, daemons, or microservices to authenticate themselves and access protected APIs without user interaction.</p>
+<hr>
+<h2 id="-when-should-you-use-the-client-credentials-flow">🔍 When Should You Use the Client Credentials Flow?<a hidden class="anchor" aria-hidden="true" href="#-when-should-you-use-the-client-credentials-flow">#</a></h2>
+<p>Use this flow when:</p>
+<ul>
+<li>A backend service needs to call another internal API</li>
+<li>A scheduled job or daemon interacts with protected endpoints</li>
+<li>Microservices need to exchange data without involving users</li>
+<li>You&rsquo;re building automated scripts or monitoring tools that access APIs</li>
+</ul>
+<hr>
+<h2 id="-how-the-flow-works-step-by-step">🔐 How the Flow Works (Step-by-Step)<a hidden class="anchor" aria-hidden="true" href="#-how-the-flow-works-step-by-step">#</a></h2>
+<p>Here’s how the Client Credentials Flow operates:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>+------------+                                      +------------------+
+</span></span><span style="display:flex;"><span>\|           | --(1) Authenticate &amp; Request Token -&gt;|                  |
+</span></span><span style="display:flex;"><span>\|  Client   |                                      | Authorization    |
+</span></span><span style="display:flex;"><span>\| (Backend) |&lt;---------------- Access Token -------|    Server        |
+</span></span><span style="display:flex;"><span>+------------+                                      +------------------+
+</span></span></code></pre></div><ol>
+<li>The client authenticates using its <code>client_id</code> and <code>client_secret</code>.</li>
+<li>It makes a <code>POST</code> request to the token endpoint with <code>grant_type=client_credentials</code>.</li>
+<li>The authorization server returns an access token.</li>
+<li>The client uses this token to access protected resources.</li>
+</ol>
+<hr>
+<h2 id="-sample-token-request-curl">🧪 Sample Token Request (cURL)<a hidden class="anchor" aria-hidden="true" href="#-sample-token-request-curl">#</a></h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -X POST https://auth.example.com/oauth2/token <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Content-Type: application/x-www-form-urlencoded&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -d <span style="color:#e6db74">&#34;grant_type=client_credentials&amp;client_id=abc123&amp;client_secret=secret456&#34;</span>
+</span></span></code></pre></div><p>Successful response:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;access_token&#34;</span>: <span style="color:#e6db74">&#34;eyJhbGciOiJIUzI1NiIsInR5cCI6...&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;token_type&#34;</span>: <span style="color:#e6db74">&#34;Bearer&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;expires_in&#34;</span>: <span style="color:#ae81ff">3600</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;scope&#34;</span>: <span style="color:#e6db74">&#34;read write&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><hr>
+<h2 id="-real-world-use-case-example-java">🚀 Real-World Use Case Example (Java)<a hidden class="anchor" aria-hidden="true" href="#-real-world-use-case-example-java">#</a></h2>
+<p>Using Spring Security’s OAuth2 client:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>WebClient client <span style="color:#f92672">=</span> WebClient.<span style="color:#a6e22e">builder</span>()
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">defaultHeader</span>(HttpHeaders.<span style="color:#a6e22e">CONTENT_TYPE</span>, MediaType.<span style="color:#a6e22e">APPLICATION_FORM_URLENCODED_VALUE</span>)
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">build</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>String token <span style="color:#f92672">=</span> client.<span style="color:#a6e22e">post</span>()
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">uri</span>(<span style="color:#e6db74">&#34;https://auth.example.com/oauth2/token&#34;</span>)
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">body</span>(BodyInserters.<span style="color:#a6e22e">fromFormData</span>(<span style="color:#e6db74">&#34;grant_type&#34;</span>, <span style="color:#e6db74">&#34;client_credentials&#34;</span>)
+</span></span><span style="display:flex;"><span>      .<span style="color:#a6e22e">with</span>(<span style="color:#e6db74">&#34;client_id&#34;</span>, <span style="color:#e6db74">&#34;abc123&#34;</span>)
+</span></span><span style="display:flex;"><span>      .<span style="color:#a6e22e">with</span>(<span style="color:#e6db74">&#34;client_secret&#34;</span>, <span style="color:#e6db74">&#34;secret456&#34;</span>))
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">retrieve</span>()
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">bodyToMono</span>(TokenResponse.<span style="color:#a6e22e">class</span>)
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">block</span>()
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">getAccessToken</span>();
+</span></span></code></pre></div><hr>
+<h2 id="-common-errors-and-how-to-fix-them">🛠️ Common Errors and How to Fix Them<a hidden class="anchor" aria-hidden="true" href="#-common-errors-and-how-to-fix-them">#</a></h2>
+<table>
+  <thead>
+      <tr>
+          <th>HTTP Code</th>
+          <th>Meaning</th>
+          <th>Fix Recommendation</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>401</td>
+          <td>Invalid client credentials</td>
+          <td>Check client ID/secret or encoding</td>
+      </tr>
+      <tr>
+          <td>403</td>
+          <td>Insufficient scope or no consent</td>
+          <td>Verify scopes assigned to the client</td>
+      </tr>
+      <tr>
+          <td>400</td>
+          <td>Invalid grant</td>
+          <td>Ensure <code>grant_type=client_credentials</code></td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h2 id="-best-practices-for-secure-use">🧱 Best Practices for Secure Use<a hidden class="anchor" aria-hidden="true" href="#-best-practices-for-secure-use">#</a></h2>
+<ul>
+<li>🔐 <strong>Use Client Assertions (JWT)</strong> instead of static secrets when possible</li>
+<li>🕑 <strong>Rotate credentials</strong> regularly and avoid hardcoding secrets</li>
+<li>📜 <strong>Limit scopes</strong> for each client to follow least privilege principle</li>
+<li>📡 <strong>Use TLS (HTTPS)</strong> for all communication with the token endpoint</li>
+</ul>
+<hr>
+<h2 id="-related-resources-on-iamdevbox">📚 Related Resources on IAMDevBox<a hidden class="anchor" aria-hidden="true" href="#-related-resources-on-iamdevbox">#</a></h2>
+<ul>
+<li><a href="/posts/oauth-20-authorization-code-flow-vs-client-credentials-flow-what-are-the-differences/">Authorization Code Flow vs Client Credentials Flow</a></li>
+<li><a href="/posts/understanding-the-authorization-code-flow-in-oauth-20/">Understanding the Authorization Code Flow in OAuth 2.0</a></li>
+<li><a href="/posts/implementing-fine-grained-access-control-with-jwt/">Implementing Fine-Grained Access Control with JWT</a></li>
+<li><a href="/posts/jwt-decoding-and-validation-essential-practices-for-secure-oauth-20-implementations/">JWT Decoding and Validation in OAuth 2.0</a></li>
+</ul>
+<hr>
+<p>Need more real-world identity solutions?
+Explore the <a href="/posts/oauth-20-openid-connect-in-practice/">OAuth 2.0 &amp; OpenID Connect Deep Cluster</a> for more tutorials like this.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/oauth2/">OAuth2</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/client-credentials/">Client-Credentials</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/machine-to-machine/">Machine-to-Machine</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/m2m/">M2m</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/access-token/">Access Token</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/server-to-server/">Server-to-Server</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/how-to-use-yubikey-for-secure-fido2-passwordless-login-in-modern-web-apps/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>How to Use YubiKey for Secure FIDO2 Passwordless Login in Modern Web Apps</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/kubernetes-and-openshift-architecture-differences-and-real-world-use-cases/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Kubernetes and OpenShift: Architecture, Differences, and Real-World Use Cases</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/oauth-20-openid-connect-in-practice/" class="custom-link">
+              OAuth 2.0 &amp; OpenID Connect Deep Cluster
+            </a>
+            <small class="custom-date">2025-06-04</small>
+          </li>
+          
+        
+      
+
+      
+    </ul>
+
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/advanced-forgerock-forgeops-helm-deployment-on-openshift-crc-custom-images-secrets-and-security-contexts/" class="custom-link">
+                Advanced ForgeRock ForgeOps Helm Deployment on OpenShift CRC: Custom Images, Secrets, and Security Contexts
+              </a>
+              <small class="custom-date">2025-06-14</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/deploying-forgerock-forgeops-on-red-hat-openshift-crc-a-step-by-step-guide/" class="custom-link">
+                Deploying ForgeRock ForgeOps on Red Hat OpenShift CRC: A Step-by-Step Guide
+              </a>
+              <small class="custom-date">2025-06-14</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-decoding-and-validation-how-to-securely-parse-and-verify-your-tokens/" class="custom-link">
+                JWT Decoding and Validation: How to Securely Parse and Verify Your Tokens
+              </a>
+              <small class="custom-date">2025-06-14</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/how-to-debug-and-understand-saml-response-xml-a-practical-guide/" class="custom-link">
+                How to Debug and Understand SAML Response XML: A Practical Guide
+              </a>
+              <small class="custom-date">2025-06-14</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/applying-java-modules-in-modern-microservice-architecture/" class="custom-link">
+                Applying Java Modules in Modern Microservice Architecture
+              </a>
+              <small class="custom-date">2025-06-14</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

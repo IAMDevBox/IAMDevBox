@@ -70,15 +70,15 @@
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
     <meta property="article:published_time" content="2025-05-22T09:44:22+00:00">
-    <meta property="article:modified_time" content="2025-06-06T19:33:33-04:00">
+    <meta property="article:modified_time" content="2025-06-11T14:30:31-04:00">
     <meta property="article:tag" content="ForgeRock AM">
     <meta property="article:tag" content="Custom Tree Node">
     <meta property="article:tag" content="Email Verification">
     <meta property="article:tag" content="Identity Management">
     <meta property="article:tag" content="Authentication Flows">
-      <meta property="og:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+      <meta property="og:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
 <meta name="twitter:title" content="Building a Custom Email Suspend Node in ForgeRock AM Without IDM">
 <meta name="twitter:description" content="ForgeRock Access Management (AM) offers a powerful and flexible authentication tree system, enabling enterprises to design secure and dynamic login experiences....">
 
@@ -116,8 +116,8 @@
   "articleBody": "ForgeRock Access Management (AM) offers a powerful and flexible authentication tree system, enabling enterprises to design secure and dynamic login experiences. One of its useful features, the EmailSuspendNode, traditionally relies on ForgeRock Identity Management (IDM) for full functionality. But what if you’re not using IDM? This post walks through how to build a custom ForgeRock AM node that replicates the core functionality of EmailSuspendNode—complete with email delivery, resume flow support, and secure suspend/resume logic—all without needing IDM integration.\n🔧 Why Customize EmailSuspendNode in ForgeRock AM? In environments where ForgeRock IDM is not deployed, the native EmailSuspendNode in ForgeRock AM becomes difficult to use out of the box. However, email verification flows are a critical component of modern identity systems—for passwordless authentication, user registration verification, and multi-factor flows.\nA custom node helps bridge this gap, allowing full control over email dispatch, suspend-resume logic, and templated messages within ForgeRock AM alone. This approach is ideal for lightweight deployments or decoupled architectures where IDM is not in scope.\n📬 How the Custom Node Works At a high level, this custom node checks if the current context has resumed from suspension. If not, it triggers the suspend flow, sends a verification email to the user, and halts execution until the user clicks the email link.\nHere’s the main logic in the process() method:\npublic Action process(TreeContext context) throws NodeProcessException { if (context.hasResumedFromSuspend()) { return this.goToNext().build(); } else { return Action.suspend((resumeURI) -\u003e { try { return this.createSuspendOutcome(context, resumeURI); } catch (Exception ex) { logger.error(ex.getMessage()); return SuspendedTextOutputCallback.error(ex.getMessage()); } }).build(); } } This logic ensures a seamless suspend/resume authentication experience. Once the email link is clicked, the flow picks up where it left off.\n🧠 Creating the Resume Email with Custom URL The most critical part of the node is generating a valid resume link and sending it via email. Here’s the method handling that logic:\nprivate SuspendedTextOutputCallback createSuspendOutcome(TreeContext context, URI resumeURI) throws MessagingException { String mail = context.sharedState.get(\"mail\").asString(); String returnUrl = this.config.returnUrl(); if (mail != null \u0026\u0026 returnUrl != null) { String suspendedId = Arrays.stream(resumeURI.getQuery().split(\"\u0026\")) .filter(p -\u003e p.startsWith(\"suspendedId=\")) .map(p -\u003e p.split(\"=\")[1]) .findFirst() .orElse(null); returnUrl = returnUrl + suspendedId; String messageBody = this.config.messageTemplate().replace(\"{{returnUrl}}\", returnUrl); this.sendEmail(this.config.hostName(), String.valueOf(this.config.hostPort()), this.config.username(), this.config.password() == null ? null : String.valueOf(this.config.password()), this.config.emailSubject(), this.config.sslOption(), mail, messageBody); } return SuspendedTextOutputCallback.info(this.config.emailSuspendMessage()); } This function parses the suspended ID from the resume URI, builds a return URL, and sends a templated email. A configuration interface allows full customization.\n✉️ Sending the Email Securely Email delivery is handled via JavaMail API with configurable support for SSL, STARTTLS, or plain SMTP. Here’s a simplified version:\npublic void sendEmail(String smtpHost, String smtpPort, String username, String password, String subject, Config.SslOption sslOption, String recipient, String messageBody) throws MessagingException { Properties props = new Properties(); props.put(\"mail.smtp.host\", smtpHost); props.put(\"mail.smtp.port\", smtpPort); props.put(\"mail.smtp.auth\", String.valueOf(password != null)); if (sslOption == Config.SslOption.SSL) { props.put(\"mail.smtp.ssl.enable\", \"true\"); } else if (sslOption == Config.SslOption.START_TLS) { props.put(\"mail.smtp.starttls.enable\", \"true\"); } Session session = Session.getInstance(props); MimeMessage message = new MimeMessage(session); message.setFrom(new InternetAddress(username)); message.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient)); message.setSubject(subject); message.setContent(messageBody, \"text/html; charset=UTF-8\"); executorService.execute(() -\u003e { try { Transport.send(message, username, password); } catch (MessagingException ex) { logger.error(\"Failed to send email\", ex); } }); } This non-blocking approach ensures authentication flows remain performant and scalable.\n🧩 Configuration Flexibility via Interface The Config interface allows admins to customize everything from SMTP settings to email subject and templates:\n@Attribute(order = 100) default String hostName() { return \"smtp.example.com\"; } @Attribute(order = 800) default String returnUrl() { return \"https://www.example.com/suspendId=\"; } @Attribute(order = 900) default String emailSuspendMessage() { return \"An email has been sent to the address you entered. Click the link in that email to proceed.\"; } This makes it easy to adapt the node for different environments or branding requirements.\n✅ Real-World Use Case: Email Verification Without IDM Imagine a SaaS platform using ForgeRock AM for authentication but handling user profiles in a separate microservice. Instead of spinning up IDM just to manage EmailSuspendNode, this custom node can independently trigger an email verification link, thereby completing login or registration securely.\nThis aligns perfectly with microservices-based identity architectures and zero-trust principles.\n🧭 Diagram: Suspend-Resume Flow ┌──────────────┐ │ AM Tree │ │ Starts Flow │ └──────┬───────┘ │ ▼ ┌──────────────┐ │Custom Suspend│ │ Node │◄────────┐ └──────┬───────┘ │ │ Email Link │ ▼ │ User checks email │ │ │ ▼ │ ┌──────────────┐ │ │Resume with ID│─────────┘ │ Continues │ │ Flow │ └──────────────┘ 💡 Questions to Consider How could you adapt this approach to support SMS-based suspend/resume? What are the trade-offs of managing email verification purely in AM vs. integrating with IDM or an external service? Can this model support progressive profiling and attribute collection over time? By implementing a self-contained email verification node in ForgeRock AM, organizations gain agility, reduce dependencies, and tailor their authentication experience. Whether you’re modernizing legacy apps or building zero-IDM identity platforms, this custom node can be a critical enabler.\n",
   "wordCount" : "799",
   "inLanguage": "en",
-  "image": "https://www.iamdevbox.com/static/IAMDevBox.com.png","datePublished": "2025-05-22T09:44:22Z",
-  "dateModified": "2025-06-06T19:33:33-04:00",
+  "image": "https://www.iamdevbox.com/IAMDevBox.com.jpg","datePublished": "2025-05-22T09:44:22Z",
+  "dateModified": "2025-06-11T14:30:31-04:00",
   "author":{
     "@type": "Person",
     "name": "IAMDevBox"
@@ -144,9 +144,9 @@
             "@type": "Article",
             "mainEntityOfPage": {
               "@type": "WebPage",
-              "@id": "https:\/\/www.iamdevbox.com\/posts\/devops-is-not-just-tools--its-a-cultural-transformation\/"
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/advanced-forgerock-forgeops-helm-deployment-on-openshift-crc-custom-images-secrets-and-security-contexts\/"
             },
-            "headline": "\"DevOps Is Not Just Tools — It’s a Cultural Transformation\"",
+            "headline": "\"Advanced ForgeRock ForgeOps Helm Deployment on OpenShift CRC: Custom Images, Secrets, and Security Contexts\"",
             "author": {
               "@type": "Person",
               "name": "IAMDevBox"
@@ -163,16 +163,16 @@
               "@type": "ImageObject",
               "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
             },
-            "datePublished": "2025-06-09T14:56:04Z",
-            "dateModified": "2025-06-09T14:56:16Z"
+            "datePublished": "2025-06-14T12:40:16-04:00",
+            "dateModified": "2025-06-14T13:16:33-04:00"
           },
           {
             "@type": "Article",
             "mainEntityOfPage": {
               "@type": "WebPage",
-              "@id": "https:\/\/www.iamdevbox.com\/posts\/orchestrating-kubernetes-and-iam-with-terraform-a-comprehensive-guide\/"
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/deploying-forgerock-forgeops-on-red-hat-openshift-crc-a-step-by-step-guide\/"
             },
-            "headline": "\"Orchestrating Kubernetes and IAM with Terraform: A Comprehensive Guide\"",
+            "headline": "\"Deploying ForgeRock ForgeOps on Red Hat OpenShift CRC: A Step-by-Step Guide\"",
             "author": {
               "@type": "Person",
               "name": "IAMDevBox"
@@ -189,16 +189,16 @@
               "@type": "ImageObject",
               "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
             },
-            "datePublished": "2025-06-08T13:49:52Z",
-            "dateModified": "2025-06-08T09:53:31-04:00"
+            "datePublished": "2025-06-14T12:40:16-04:00",
+            "dateModified": "2025-06-14T13:16:33-04:00"
           },
           {
             "@type": "Article",
             "mainEntityOfPage": {
               "@type": "WebPage",
-              "@id": "https:\/\/www.iamdevbox.com\/posts\/navigating-iam-challenges-in-multi-cloud-environments\/"
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-decoding-and-validation-how-to-securely-parse-and-verify-your-tokens\/"
             },
-            "headline": "\"Navigating IAM Challenges in Multi-Cloud Environments\"",
+            "headline": "\"JWT Decoding and Validation: How to Securely Parse and Verify Your Tokens\"",
             "author": {
               "@type": "Person",
               "name": "IAMDevBox"
@@ -215,8 +215,8 @@
               "@type": "ImageObject",
               "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
             },
-            "datePublished": "2025-06-06T14:59:32Z",
-            "dateModified": "2025-06-06T19:33:33-04:00"
+            "datePublished": "2025-06-14T11:53:59-04:00",
+            "dateModified": "2025-06-14T11:59:00-04:00"
           }
   ]
 }
@@ -496,27 +496,27 @@
 <p>This aligns perfectly with microservices-based identity architectures and zero-trust principles.</p>
 <hr>
 <h3 id="-diagram-suspend-resume-flow">🧭 <strong>Diagram: Suspend-Resume Flow</strong><a hidden class="anchor" aria-hidden="true" href="#-diagram-suspend-resume-flow">#</a></h3>
-<pre tabindex="0"><code>┌──────────────┐
-│  AM Tree     │
-│ Starts Flow  │
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│Custom Suspend│
-│   Node       │◄────────┐
-└──────┬───────┘         │
-       │ Email Link      │
-       ▼                 │
-  User checks email      │
-       │                 │
-       ▼                 │
-┌──────────────┐         │
-│Resume with ID│─────────┘
-│ Continues    │
-│ Flow         │
-└──────────────┘
-</code></pre><hr>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>┌──────────────┐
+</span></span><span style="display:flex;"><span>│  AM Tree     │
+</span></span><span style="display:flex;"><span>│ Starts Flow  │
+</span></span><span style="display:flex;"><span>└──────┬───────┘
+</span></span><span style="display:flex;"><span>       │
+</span></span><span style="display:flex;"><span>       ▼
+</span></span><span style="display:flex;"><span>┌──────────────┐
+</span></span><span style="display:flex;"><span>│Custom Suspend│
+</span></span><span style="display:flex;"><span>│   Node       │◄────────┐
+</span></span><span style="display:flex;"><span>└──────┬───────┘         │
+</span></span><span style="display:flex;"><span>       │ Email Link      │
+</span></span><span style="display:flex;"><span>       ▼                 │
+</span></span><span style="display:flex;"><span>  User checks email      │
+</span></span><span style="display:flex;"><span>       │                 │
+</span></span><span style="display:flex;"><span>       ▼                 │
+</span></span><span style="display:flex;"><span>┌──────────────┐         │
+</span></span><span style="display:flex;"><span>│Resume with ID│─────────┘
+</span></span><span style="display:flex;"><span>│ Continues    │
+</span></span><span style="display:flex;"><span>│ Flow         │
+</span></span><span style="display:flex;"><span>└──────────────┘
+</span></span></code></pre></div><hr>
 <h3 id="-questions-to-consider">💡 <strong>Questions to Consider</strong><a hidden class="anchor" aria-hidden="true" href="#-questions-to-consider">#</a></h3>
 <ul>
 <li>How could you adapt this approach to support SMS-based suspend/resume?</li>
@@ -567,6 +567,16 @@
       
         
           <li class="custom-list-item">
+            <a href="/posts/oauth2-deep-dive-with-forgerock-access-management/" class="custom-link">
+              OAuth2 Deep Dive with ForgeRock Access Management
+            </a>
+            <small class="custom-date">2025-06-11</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
             <a href="/posts/navigating-iam-challenges-in-multi-cloud-environments/" class="custom-link">
               Navigating IAM Challenges in Multi-Cloud Environments
             </a>
@@ -605,14 +615,6 @@
           
         
       
-        
-          <li class="custom-list-item">
-            <a href="/posts/the-evolution-of-multi-tenant-identity-management-systems-architecture/" class="custom-link">
-              The Evolution of Multi-Tenant Identity Management Systems Architecture
-            </a>
-            <small class="custom-date">2025-05-28</small>
-          </li>
-          
         
       
         
@@ -672,10 +674,10 @@
         
           
             <li class="custom-list-item">
-              <a href="/posts/devops-is-not-just-tools--its-a-cultural-transformation/" class="custom-link">
-                DevOps Is Not Just Tools — It’s a Cultural Transformation
+              <a href="/posts/advanced-forgerock-forgeops-helm-deployment-on-openshift-crc-custom-images-secrets-and-security-contexts/" class="custom-link">
+                Advanced ForgeRock ForgeOps Helm Deployment on OpenShift CRC: Custom Images, Secrets, and Security Contexts
               </a>
-              <small class="custom-date">2025-06-09</small>
+              <small class="custom-date">2025-06-14</small>
             </li>
             
           
@@ -684,10 +686,10 @@
         
           
             <li class="custom-list-item">
-              <a href="/posts/orchestrating-kubernetes-and-iam-with-terraform-a-comprehensive-guide/" class="custom-link">
-                Orchestrating Kubernetes and IAM with Terraform: A Comprehensive Guide
+              <a href="/posts/deploying-forgerock-forgeops-on-red-hat-openshift-crc-a-step-by-step-guide/" class="custom-link">
+                Deploying ForgeRock ForgeOps on Red Hat OpenShift CRC: A Step-by-Step Guide
               </a>
-              <small class="custom-date">2025-06-08</small>
+              <small class="custom-date">2025-06-14</small>
             </li>
             
           
@@ -696,10 +698,10 @@
         
           
             <li class="custom-list-item">
-              <a href="/posts/navigating-iam-challenges-in-multi-cloud-environments/" class="custom-link">
-                Navigating IAM Challenges in Multi-Cloud Environments
+              <a href="/posts/jwt-decoding-and-validation-how-to-securely-parse-and-verify-your-tokens/" class="custom-link">
+                JWT Decoding and Validation: How to Securely Parse and Verify Your Tokens
               </a>
-              <small class="custom-date">2025-06-06</small>
+              <small class="custom-date">2025-06-14</small>
             </li>
             
           
@@ -708,10 +710,10 @@
         
           
             <li class="custom-list-item">
-              <a href="/posts/best-practices-for-writing-java-dockerfiles/" class="custom-link">
-                Best Practices for Writing Java Dockerfiles
+              <a href="/posts/how-to-debug-and-understand-saml-response-xml-a-practical-guide/" class="custom-link">
+                How to Debug and Understand SAML Response XML: A Practical Guide
               </a>
-              <small class="custom-date">2025-06-05</small>
+              <small class="custom-date">2025-06-14</small>
             </li>
             
           
@@ -720,12 +722,76 @@
         
           
             <li class="custom-list-item">
-              <a href="/posts/building-unified-identity-strategy-in-multi-cloud-environments/" class="custom-link">
-                Building Unified Identity Strategy in Multi-Cloud Environments
+              <a href="/posts/applying-java-modules-in-modern-microservice-architecture/" class="custom-link">
+                Applying Java Modules in Modern Microservice Architecture
               </a>
-              <small class="custom-date">2025-06-04</small>
+              <small class="custom-date">2025-06-14</small>
             </li>
             
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
           
         
       

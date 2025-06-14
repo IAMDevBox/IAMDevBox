@@ -69,14 +69,14 @@
   <meta property="og:locale" content="en-us">
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
-    <meta property="article:modified_time" content="2025-06-06T19:33:33-04:00">
+    <meta property="article:modified_time" content="2025-06-11T14:30:31-04:00">
     <meta property="article:tag" content="OAuth 2.0">
     <meta property="article:tag" content="Authorization Code Flow">
     <meta property="article:tag" content="Authentication">
     <meta property="article:tag" content="Authorization">
-      <meta property="og:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+      <meta property="og:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://www.iamdevbox.com/static/IAMDevBox.com.png">
+<meta name="twitter:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
 <meta name="twitter:title" content="Understanding the Authorization Code Flow in OAuth 2.0">
 <meta name="twitter:description" content="OAuth 2.0 is a widely used authorization framework that enables applications to access user data on behalf of the user without requiring the user to share their...">
 
@@ -114,8 +114,8 @@
   "articleBody": "OAuth 2.0 is a widely used authorization framework that enables applications to access user data on behalf of the user without requiring the user to share their credentials. It provides a secure and standardized approach to delegating access control, ensuring that applications can interact with various services while keeping user information private. The Authorization Code Flow is one of the core grant types in OAuth 2.0, designed for scenarios where both the client and the authorization server need to exchange information securely.\nIn this blog post, we will walk through how the Authorization Code Flow works, its components, and the best practices for using it effectively.\nWhat is the Authorization Code Flow? The Authorization Code Flow is used primarily in web applications where the client (application) and the authorization server (typically a service like Google, Facebook, or a custom identity provider) interact to grant third-party access to a user’s resources. The flow involves multiple steps to ensure secure token exchange between the parties, minimizing the exposure of sensitive data, like user credentials.\nThe Authorization Code Flow is considered one of the most secure methods in OAuth 2.0 because it involves redirecting the user to the authorization server to obtain a short-lived authorization code, which is then exchanged for an access token. This process reduces the risk of exposing the access token to malicious parties.\nKey Components of the Authorization Code Flow Resource Owner (User): The individual whose resources are being accessed. Client (Application): The third-party application requesting access to the user’s data. Authorization Server: The server that authenticates the user and grants authorization codes. Resource Server: The server that hosts the user’s protected resources. Redirect URI: The URI to which the user will be sent after authentication, containing the authorization code. How the Authorization Code Flow Works The flow can be broken down into several steps:\nStep 1: Client Sends Authorization Request The client (application) redirects the user to the authorization server with a request for authorization. The URL request typically includes the following query parameters:\nresponse_type=code: Tells the authorization server that the client is requesting an authorization code. client_id: A unique identifier for the client (application). redirect_uri: The URL to which the user will be redirected after authorization. scope: The permissions the client is requesting (e.g., read access to the user’s profile). state: A random value to prevent CSRF (Cross-Site Request Forgery) attacks. Example URL:\nhttps://auth.example.com/authorize?response_type=code\u0026client_id=CLIENT_ID\u0026redirect_uri=https://clientapp.com/callback\u0026scope=profile\u0026state=randomstring Step 2: User Grants Authorization The user is then presented with a login screen (if not already authenticated) and a consent screen, asking if they want to allow the client access to their resources. If the user agrees, the authorization server redirects the user back to the client’s redirect URI with an authorization code attached as a query parameter.\nExample redirect:\nhttps://clientapp.com/callback?code=AUTHORIZATION_CODE\u0026state=randomstring Step 3: Client Exchanges Authorization Code for Tokens Once the client receives the authorization code, it makes a POST request to the authorization server’s token endpoint to exchange the authorization code for an access token and possibly a refresh token. This request includes:\ngrant_type=authorization_code: Indicates that the client is exchanging an authorization code for tokens. code: The authorization code received in the previous step. redirect_uri: The same redirect URI that was used in the initial request (this ensures that the request is legitimate). client_id and client_secret: The client’s credentials to authenticate the client itself. Example request:\nPOST https://auth.example.com/token Content-Type: application/x-www-form-urlencoded grant_type=authorization_code\u0026code=AUTHORIZATION_CODE\u0026redirect_uri=https://clientapp.com/callback\u0026client_id=CLIENT_ID\u0026client_secret=CLIENT_SECRET Step 4: Authorization Server Issues Tokens If the authorization code is valid, the authorization server responds with a JSON payload containing the access token (used to access protected resources) and optionally a refresh token (used to obtain a new access token once the current one expires).\nExample response:\n{ \"access_token\": \"ACCESS_TOKEN\", \"token_type\": \"bearer\", \"expires_in\": 3600, \"refresh_token\": \"REFRESH_TOKEN\" } Step 5: Client Accesses Protected Resources With the access token, the client can now make API requests to the resource server on behalf of the user. The access token is included in the Authorization header of each request.\nExample API request:\nGET https://api.example.com/userinfo Authorization: Bearer ACCESS_TOKEN Step 6: Refreshing the Access Token Once the access token expires, the client can use the refresh token (if provided) to obtain a new access token from the authorization server without requiring the user to log in again. This is done by sending a request to the token endpoint with the grant_type=refresh_token and the refresh token.\nExample refresh request:\nPOST https://auth.example.com/token Content-Type: application/x-www-form-urlencoded grant_type=refresh_token\u0026refresh_token=REFRESH_TOKEN\u0026client_id=CLIENT_ID\u0026client_secret=CLIENT_SECRET Benefits of the Authorization Code Flow Security: Since the authorization code is exchanged for an access token at the server side (not the user’s browser), the access token is not exposed to the client. This minimizes the risk of token theft. Separation of Concerns: The client only deals with the authorization code and the authorization server’s token endpoint, not the sensitive user credentials. Support for Refresh Tokens: This flow supports the use of refresh tokens, allowing clients to obtain new access tokens without involving the user. Best Practices Use Secure Communication: Always use HTTPS to protect sensitive information, such as authorization codes, access tokens, and user credentials. Validate Redirect URIs: Ensure that the redirect URI provided by the client matches the one registered with the authorization server to prevent malicious redirections. Use State Parameter: Always use the state parameter to prevent CSRF attacks. It should be a random, unpredictable string. Token Expiration Handling: Make sure your application handles expired access tokens by implementing token refresh logic. Conclusion The Authorization Code Flow is a robust and secure method for handling OAuth 2.0 authentication, particularly for web applications. It offers strong security mechanisms by keeping sensitive data like access tokens away from the user’s browser and by utilizing short-lived authorization codes that cannot be misused easily. By understanding the flow and adhering to best practices, developers can create secure applications that integrate seamlessly with OAuth 2.0-compliant authorization servers.\nIf you’re building an application that requires user data access from third-party services, implementing the Authorization Code Flow is a great choice for ensuring both security and usability.\n",
   "wordCount" : "992",
   "inLanguage": "en",
-  "image": "https://www.iamdevbox.com/static/IAMDevBox.com.png","datePublished": "0001-01-01T00:00:00Z",
-  "dateModified": "2025-06-06T19:33:33-04:00",
+  "image": "https://www.iamdevbox.com/IAMDevBox.com.jpg","datePublished": "0001-01-01T00:00:00Z",
+  "dateModified": "2025-06-11T14:30:31-04:00",
   "author":{
     "@type": "Person",
     "name": "IAMDevBox"
@@ -142,9 +142,9 @@
             "@type": "Article",
             "mainEntityOfPage": {
               "@type": "WebPage",
-              "@id": "https:\/\/www.iamdevbox.com\/posts\/devops-is-not-just-tools--its-a-cultural-transformation\/"
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/advanced-forgerock-forgeops-helm-deployment-on-openshift-crc-custom-images-secrets-and-security-contexts\/"
             },
-            "headline": "\"DevOps Is Not Just Tools — It’s a Cultural Transformation\"",
+            "headline": "\"Advanced ForgeRock ForgeOps Helm Deployment on OpenShift CRC: Custom Images, Secrets, and Security Contexts\"",
             "author": {
               "@type": "Person",
               "name": "IAMDevBox"
@@ -161,16 +161,16 @@
               "@type": "ImageObject",
               "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
             },
-            "datePublished": "2025-06-09T14:56:04Z",
-            "dateModified": "2025-06-09T14:56:16Z"
+            "datePublished": "2025-06-14T12:40:16-04:00",
+            "dateModified": "2025-06-14T13:16:33-04:00"
           },
           {
             "@type": "Article",
             "mainEntityOfPage": {
               "@type": "WebPage",
-              "@id": "https:\/\/www.iamdevbox.com\/posts\/orchestrating-kubernetes-and-iam-with-terraform-a-comprehensive-guide\/"
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/deploying-forgerock-forgeops-on-red-hat-openshift-crc-a-step-by-step-guide\/"
             },
-            "headline": "\"Orchestrating Kubernetes and IAM with Terraform: A Comprehensive Guide\"",
+            "headline": "\"Deploying ForgeRock ForgeOps on Red Hat OpenShift CRC: A Step-by-Step Guide\"",
             "author": {
               "@type": "Person",
               "name": "IAMDevBox"
@@ -187,16 +187,16 @@
               "@type": "ImageObject",
               "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
             },
-            "datePublished": "2025-06-08T13:49:52Z",
-            "dateModified": "2025-06-08T09:53:31-04:00"
+            "datePublished": "2025-06-14T12:40:16-04:00",
+            "dateModified": "2025-06-14T13:16:33-04:00"
           },
           {
             "@type": "Article",
             "mainEntityOfPage": {
               "@type": "WebPage",
-              "@id": "https:\/\/www.iamdevbox.com\/posts\/navigating-iam-challenges-in-multi-cloud-environments\/"
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-decoding-and-validation-how-to-securely-parse-and-verify-your-tokens\/"
             },
-            "headline": "\"Navigating IAM Challenges in Multi-Cloud Environments\"",
+            "headline": "\"JWT Decoding and Validation: How to Securely Parse and Verify Your Tokens\"",
             "author": {
               "@type": "Person",
               "name": "IAMDevBox"
@@ -213,8 +213,8 @@
               "@type": "ImageObject",
               "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
             },
-            "datePublished": "2025-06-06T14:59:32Z",
-            "dateModified": "2025-06-06T19:33:33-04:00"
+            "datePublished": "2025-06-14T11:53:59-04:00",
+            "dateModified": "2025-06-14T11:59:00-04:00"
           }
   ]
 }
@@ -402,12 +402,12 @@
 <li><strong>state:</strong> A random value to prevent CSRF (Cross-Site Request Forgery) attacks.</li>
 </ul>
 <p>Example URL:</p>
-<pre tabindex="0"><code>https://auth.example.com/authorize?response_type=code&amp;client_id=CLIENT_ID&amp;redirect_uri=https://clientapp.com/callback&amp;scope=profile&amp;state=randomstring
-</code></pre><h4 id="step-2-user-grants-authorization">Step 2: User Grants Authorization<a hidden class="anchor" aria-hidden="true" href="#step-2-user-grants-authorization">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-http" data-lang="http"><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">https://auth.example.com/authorize?response_type=code&amp;client_id=CLIENT_ID&amp;redirect_uri=https://clientapp.com/callback&amp;scope=profile&amp;state=randomstring
+</span></span></span></code></pre></div><h4 id="step-2-user-grants-authorization">Step 2: User Grants Authorization<a hidden class="anchor" aria-hidden="true" href="#step-2-user-grants-authorization">#</a></h4>
 <p>The user is then presented with a login screen (if not already authenticated) and a consent screen, asking if they want to allow the client access to their resources. If the user agrees, the authorization server redirects the user back to the client’s <strong>redirect URI</strong> with an <strong>authorization code</strong> attached as a query parameter.</p>
 <p>Example redirect:</p>
-<pre tabindex="0"><code>https://clientapp.com/callback?code=AUTHORIZATION_CODE&amp;state=randomstring
-</code></pre><h4 id="step-3-client-exchanges-authorization-code-for-tokens">Step 3: Client Exchanges Authorization Code for Tokens<a hidden class="anchor" aria-hidden="true" href="#step-3-client-exchanges-authorization-code-for-tokens">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-http" data-lang="http"><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">https://clientapp.com/callback?code=AUTHORIZATION_CODE&amp;state=randomstring
+</span></span></span></code></pre></div><h4 id="step-3-client-exchanges-authorization-code-for-tokens">Step 3: Client Exchanges Authorization Code for Tokens<a hidden class="anchor" aria-hidden="true" href="#step-3-client-exchanges-authorization-code-for-tokens">#</a></h4>
 <p>Once the client receives the authorization code, it makes a <strong>POST request</strong> to the <strong>authorization server’s token endpoint</strong> to exchange the authorization code for an <strong>access token</strong> and possibly a <strong>refresh token</strong>. This request includes:</p>
 <ul>
 <li><strong>grant_type=authorization_code:</strong> Indicates that the client is exchanging an authorization code for tokens.</li>
@@ -416,11 +416,11 @@
 <li><strong>client_id and client_secret:</strong> The client’s credentials to authenticate the client itself.</li>
 </ul>
 <p>Example request:</p>
-<pre tabindex="0"><code>POST https://auth.example.com/token
-Content-Type: application/x-www-form-urlencoded
-
-grant_type=authorization_code&amp;code=AUTHORIZATION_CODE&amp;redirect_uri=https://clientapp.com/callback&amp;client_id=CLIENT_ID&amp;client_secret=CLIENT_SECRET
-</code></pre><h4 id="step-4-authorization-server-issues-tokens">Step 4: Authorization Server Issues Tokens<a hidden class="anchor" aria-hidden="true" href="#step-4-authorization-server-issues-tokens">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-http" data-lang="http"><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">POST https://auth.example.com/token
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">Content-Type: application/x-www-form-urlencoded
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">grant_type=authorization_code&amp;code=AUTHORIZATION_CODE&amp;redirect_uri=https://clientapp.com/callback&amp;client_id=CLIENT_ID&amp;client_secret=CLIENT_SECRET
+</span></span></span></code></pre></div><h4 id="step-4-authorization-server-issues-tokens">Step 4: Authorization Server Issues Tokens<a hidden class="anchor" aria-hidden="true" href="#step-4-authorization-server-issues-tokens">#</a></h4>
 <p>If the authorization code is valid, the authorization server responds with a JSON payload containing the <strong>access token</strong> (used to access protected resources) and optionally a <strong>refresh token</strong> (used to obtain a new access token once the current one expires).</p>
 <p>Example response:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
@@ -432,16 +432,16 @@ grant_type=authorization_code&amp;code=AUTHORIZATION_CODE&amp;redirect_uri=https
 </span></span></code></pre></div><h4 id="step-5-client-accesses-protected-resources">Step 5: Client Accesses Protected Resources<a hidden class="anchor" aria-hidden="true" href="#step-5-client-accesses-protected-resources">#</a></h4>
 <p>With the access token, the client can now make API requests to the <strong>resource server</strong> on behalf of the user. The access token is included in the <strong>Authorization</strong> header of each request.</p>
 <p>Example API request:</p>
-<pre tabindex="0"><code>GET https://api.example.com/userinfo
-Authorization: Bearer ACCESS_TOKEN
-</code></pre><h4 id="step-6-refreshing-the-access-token">Step 6: Refreshing the Access Token<a hidden class="anchor" aria-hidden="true" href="#step-6-refreshing-the-access-token">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-http" data-lang="http"><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">GET https://api.example.com/userinfo
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">Authorization: Bearer ACCESS_TOKEN
+</span></span></span></code></pre></div><h4 id="step-6-refreshing-the-access-token">Step 6: Refreshing the Access Token<a hidden class="anchor" aria-hidden="true" href="#step-6-refreshing-the-access-token">#</a></h4>
 <p>Once the access token expires, the client can use the <strong>refresh token</strong> (if provided) to obtain a new access token from the authorization server without requiring the user to log in again. This is done by sending a request to the token endpoint with the <strong>grant_type=refresh_token</strong> and the refresh token.</p>
 <p>Example refresh request:</p>
-<pre tabindex="0"><code>POST https://auth.example.com/token
-Content-Type: application/x-www-form-urlencoded
-
-grant_type=refresh_token&amp;refresh_token=REFRESH_TOKEN&amp;client_id=CLIENT_ID&amp;client_secret=CLIENT_SECRET
-</code></pre><h3 id="benefits-of-the-authorization-code-flow">Benefits of the Authorization Code Flow<a hidden class="anchor" aria-hidden="true" href="#benefits-of-the-authorization-code-flow">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-http" data-lang="http"><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">POST https://auth.example.com/token
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">Content-Type: application/x-www-form-urlencoded
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">grant_type=refresh_token&amp;refresh_token=REFRESH_TOKEN&amp;client_id=CLIENT_ID&amp;client_secret=CLIENT_SECRET
+</span></span></span></code></pre></div><h3 id="benefits-of-the-authorization-code-flow">Benefits of the Authorization Code Flow<a hidden class="anchor" aria-hidden="true" href="#benefits-of-the-authorization-code-flow">#</a></h3>
 <ol>
 <li><strong>Security:</strong> Since the authorization code is exchanged for an access token at the server side (not the user’s browser), the access token is not exposed to the client. This minimizes the risk of token theft.</li>
 <li><strong>Separation of Concerns:</strong> The client only deals with the authorization code and the authorization server’s token endpoint, not the sensitive user credentials.</li>
@@ -498,6 +498,16 @@ grant_type=refresh_token&amp;refresh_token=REFRESH_TOKEN&amp;client_id=CLIENT_ID
       
         
           <li class="custom-list-item">
+            <a href="/posts/oauth2-deep-dive-with-forgerock-access-management/" class="custom-link">
+              OAuth2 Deep Dive with ForgeRock Access Management
+            </a>
+            <small class="custom-date">2025-06-11</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
             <a href="/posts/building-unified-identity-strategy-in-multi-cloud-environments/" class="custom-link">
               Building Unified Identity Strategy in Multi-Cloud Environments
             </a>
@@ -536,14 +546,6 @@ grant_type=refresh_token&amp;refresh_token=REFRESH_TOKEN&amp;client_id=CLIENT_ID
           
         
       
-        
-          <li class="custom-list-item">
-            <a href="/posts/forgerock-am-script-customization-a-practical-guide/" class="custom-link">
-              ForgeRock AM Script Customization: A Practical Guide
-            </a>
-            <small class="custom-date">2025-06-04</small>
-          </li>
-          
         
       
         
@@ -663,10 +665,10 @@ grant_type=refresh_token&amp;refresh_token=REFRESH_TOKEN&amp;client_id=CLIENT_ID
         
           
             <li class="custom-list-item">
-              <a href="/posts/devops-is-not-just-tools--its-a-cultural-transformation/" class="custom-link">
-                DevOps Is Not Just Tools — It’s a Cultural Transformation
+              <a href="/posts/advanced-forgerock-forgeops-helm-deployment-on-openshift-crc-custom-images-secrets-and-security-contexts/" class="custom-link">
+                Advanced ForgeRock ForgeOps Helm Deployment on OpenShift CRC: Custom Images, Secrets, and Security Contexts
               </a>
-              <small class="custom-date">2025-06-09</small>
+              <small class="custom-date">2025-06-14</small>
             </li>
             
           
@@ -675,10 +677,10 @@ grant_type=refresh_token&amp;refresh_token=REFRESH_TOKEN&amp;client_id=CLIENT_ID
         
           
             <li class="custom-list-item">
-              <a href="/posts/orchestrating-kubernetes-and-iam-with-terraform-a-comprehensive-guide/" class="custom-link">
-                Orchestrating Kubernetes and IAM with Terraform: A Comprehensive Guide
+              <a href="/posts/deploying-forgerock-forgeops-on-red-hat-openshift-crc-a-step-by-step-guide/" class="custom-link">
+                Deploying ForgeRock ForgeOps on Red Hat OpenShift CRC: A Step-by-Step Guide
               </a>
-              <small class="custom-date">2025-06-08</small>
+              <small class="custom-date">2025-06-14</small>
             </li>
             
           
@@ -687,10 +689,10 @@ grant_type=refresh_token&amp;refresh_token=REFRESH_TOKEN&amp;client_id=CLIENT_ID
         
           
             <li class="custom-list-item">
-              <a href="/posts/navigating-iam-challenges-in-multi-cloud-environments/" class="custom-link">
-                Navigating IAM Challenges in Multi-Cloud Environments
+              <a href="/posts/jwt-decoding-and-validation-how-to-securely-parse-and-verify-your-tokens/" class="custom-link">
+                JWT Decoding and Validation: How to Securely Parse and Verify Your Tokens
               </a>
-              <small class="custom-date">2025-06-06</small>
+              <small class="custom-date">2025-06-14</small>
             </li>
             
           
@@ -699,10 +701,10 @@ grant_type=refresh_token&amp;refresh_token=REFRESH_TOKEN&amp;client_id=CLIENT_ID
         
           
             <li class="custom-list-item">
-              <a href="/posts/best-practices-for-writing-java-dockerfiles/" class="custom-link">
-                Best Practices for Writing Java Dockerfiles
+              <a href="/posts/how-to-debug-and-understand-saml-response-xml-a-practical-guide/" class="custom-link">
+                How to Debug and Understand SAML Response XML: A Practical Guide
               </a>
-              <small class="custom-date">2025-06-05</small>
+              <small class="custom-date">2025-06-14</small>
             </li>
             
           
@@ -711,12 +713,76 @@ grant_type=refresh_token&amp;refresh_token=REFRESH_TOKEN&amp;client_id=CLIENT_ID
         
           
             <li class="custom-list-item">
-              <a href="/posts/building-unified-identity-strategy-in-multi-cloud-environments/" class="custom-link">
-                Building Unified Identity Strategy in Multi-Cloud Environments
+              <a href="/posts/applying-java-modules-in-modern-microservice-architecture/" class="custom-link">
+                Applying Java Modules in Modern Microservice Architecture
               </a>
-              <small class="custom-date">2025-06-04</small>
+              <small class="custom-date">2025-06-14</small>
             </li>
             
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
           
         
       

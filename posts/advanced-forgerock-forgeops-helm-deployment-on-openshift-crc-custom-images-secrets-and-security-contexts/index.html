@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Advanced ForgeRock ForgeOps Helm Deployment on OpenShift CRC: Custom Images, Secrets, and Security Contexts | IAMDevBox</title>
+<meta name="keywords" content="forgerock, forgeops, helm, openshift, crc, identity platform, kubernetes security, custom docker image, secret management">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/advanced-forgerock-forgeops-helm-deployment-on-openshift-crc-custom-images-secrets-and-security-contexts/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css" integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF&#43;13Dyqob6ASlTrTye8=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/advanced-forgerock-forgeops-helm-deployment-on-openshift-crc-custom-images-secrets-and-security-contexts/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.f87e4df74f4f070695effe5d49ae4914eb9228356e4300800036f51859f72d47.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.f87e4df74f4f070695effe5d49ae4914eb9228356e4300800036f51859f72d47.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/advanced-forgerock-forgeops-helm-deployment-on-openshift-crc-custom-images-secrets-and-security-contexts/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Advanced ForgeRock ForgeOps Helm Deployment on OpenShift CRC: Custom Images, Secrets, and Security Contexts">
+  <meta property="og:description" content="Deploy ForgeRock ForgeOps 7.5 to OpenShift CRC using Helm charts, custom Docker images, fine-grained security context configuration, and secret access policies.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-06-14T12:40:16-04:00">
+    <meta property="article:modified_time" content="2025-06-14T13:16:33-04:00">
+    <meta property="article:tag" content="ForgeRock">
+    <meta property="article:tag" content="Forgeops">
+    <meta property="article:tag" content="Helm">
+    <meta property="article:tag" content="Openshift">
+    <meta property="article:tag" content="Crc">
+    <meta property="article:tag" content="Identity Platform">
+      <meta property="og:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:title" content="Advanced ForgeRock ForgeOps Helm Deployment on OpenShift CRC: Custom Images, Secrets, and Security Contexts">
+<meta name="twitter:description" content="Deploy ForgeRock ForgeOps 7.5 to OpenShift CRC using Helm charts, custom Docker images, fine-grained security context configuration, and secret access policies.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Advanced ForgeRock ForgeOps Helm Deployment on OpenShift CRC: Custom Images, Secrets, and Security Contexts",
+      "item": "https://www.iamdevbox.com/posts/advanced-forgerock-forgeops-helm-deployment-on-openshift-crc-custom-images-secrets-and-security-contexts/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Advanced ForgeRock ForgeOps Helm Deployment on OpenShift CRC: Custom Images, Secrets, and Security Contexts",
+  "name": "Advanced ForgeRock ForgeOps Helm Deployment on OpenShift CRC: Custom Images, Secrets, and Security Contexts",
+  "description": "Deploy ForgeRock ForgeOps 7.5 to OpenShift CRC using Helm charts, custom Docker images, fine-grained security context configuration, and secret access policies.",
+  "keywords": [
+    "forgerock", "forgeops", "helm", "openshift", "crc", "identity platform", "kubernetes security", "custom docker image", "secret management"
+  ],
+  "articleBody": "ForgeRock ForgeOps provides a powerful Helm-based deployment model for the Identity Platform. In this advanced deployment guide, we focus on deploying ForgeOps 7.5 to Red Hat OpenShift CRC (CodeReady Containers) using custom-built Docker images, Helm charts, and fine-grained security controls.\nThis article assumes you’re already familiar with the basics of ForgeOps and OpenShift. If you’re looking for the beginner version of this tutorial, check out:\n👉 Deploying ForgeRock ForgeOps on Red Hat OpenShift CRC: A Step-by-Step Guide\n🔧 Prerequisites OpenShift CRC installed and running ForgeOps 7.5 Git repository cloned Docker or Podman for image builds Helm CLI installed and logged into OpenShift cluster Access to modify /etc/hosts and manage SCCs in OpenShift 🏗️ Step 1: Build Custom Docker Images Build your ForgeOps Identity Platform images locally to customize configurations or plug in custom scripts:\n# Build AM cd forgeops/docker/am-base docker build -t am-base:7.5.0 . cd ../am-cdk docker build --build-arg docker_tag=7.5.0 -t am-cdk:7.5.0 . # Build DS cd forgeops/docker/ds-base docker build -t ds-base:7.5.0 . # Build LDIF Importer cd forgeops/docker/ldif-importer docker build -t ldif-importer:7.5.0 . Once built, tag and push these to your OpenShift CRC’s internal registry:\nTOKEN=$(oc whoami -t) docker login -u kubeadmin -p $TOKEN default-route-openshift-image-registry.apps-crc.testing docker tag am-cdk:7.5.0 default-route-openshift-image-registry.apps-crc.testing/forgeops/am:7.5.0 docker push default-route-openshift-image-registry.apps-crc.testing/forgeops/am:7.5.0 docker tag ds-base:7.5.0 default-route-openshift-image-registry.apps-crc.testing/forgeops/ds:7.5.0 docker push default-route-openshift-image-registry.apps-crc.testing/forgeops/ds:7.5.0 docker tag ldif-importer:7.5.0 default-route-openshift-image-registry.apps-crc.testing/forgeops/ldif-importer:7.5.0 docker push default-route-openshift-image-registry.apps-crc.testing/forgeops/ldif-importer:7.5.0 🔐 Step 2: Prepare Secrets Before Helm Deployment ❗ Common pitfall: Helm templates expect Secrets like ds-passwords and am-env-secrets to already exist. Missing Secrets cause initContainers or main containers to crash.\nYou can manually create the required Secrets (or use kubectl apply -f secrets.yaml) prior to running Helm:\noc create secret generic ds-passwords \\ --from-literal=dirmanager.pw=ForgeRock123 \\ --from-literal=keystore.pw=changeit \\ -n forgeops oc create secret generic am-env-secrets \\ --from-literal=AM_PASSWORD=ForgeRock123 \\ -n forgeops ⚙️ Step 3: Configure Security Context (OpenShift Gotcha) OpenShift enforces Security Context Constraints (SCC), which may block ForgeOps pods from starting.\nAdd anyuid SCC to the namespace’s default service account or create a dedicated one:\noc create namespace forgeops oc adm policy add-scc-to-user anyuid -z default -n forgeops # Optional: Use a separate SA oc create sa forgeops-sa -n forgeops oc adm policy add-scc-to-user anyuid -z forgeops-sa -n forgeops Also, grant access to secrets via RBAC:\noc create role secret-accessor \\ --verb=get,list \\ --resource=secrets \\ -n forgeops oc create rolebinding forgeops-binding \\ --role=secret-accessor \\ --serviceaccount=forgeops:forgeops-sa \\ -n forgeops 📦 Step 4: Deploy with Helm Make sure your values-openshift.yaml overrides match your OpenShift domain and images:\nam: image: repository: default-route-openshift-image-registry.apps-crc.testing/forgeops/am tag: \"7.5.0\" serviceAccount: name: forgeops-sa ds: image: repository: default-route-openshift-image-registry.apps-crc.testing/forgeops/ds tag: \"7.5.0\" persistence: enabled: false Deploy:\ncd forgeops/charts/identity-platform helm upgrade --install identity-platform . \\ --namespace forgeops \\ --values values-openshift.yaml \\ --set 'platform.ingress.hosts={forgeops.example.com}' \\ --set serviceAccount.name=forgeops-sa 🧪 Step 5: Validate and Access Check services: oc get pods -n forgeops\nAdd to /etc/hosts: 127.0.0.1 forgeops.example.com\nAccess AM UI: https://forgeops.example.com/am\n📌 Final Tips Ensure Secrets are created before Helm is invoked Don’t forget OpenShift’s securityContext is stricter than standard Kubernetes Use custom service accounts and RBAC for least privilege Double check image paths when pushing to OpenShift registry 🔗 Related Posts Deploying ForgeRock ForgeOps on Red Hat OpenShift CRC: A Step-by-Step Guide How to Create Custom Docker Images for ForgeOps ",
+  "wordCount" : "522",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/IAMDevBox.com.jpg","datePublished": "2025-06-14T12:40:16-04:00",
+  "dateModified": "2025-06-14T13:16:33-04:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/advanced-forgerock-forgeops-helm-deployment-on-openshift-crc-custom-images-secrets-and-security-contexts/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script><meta name="description" content="Deploy ForgeRock ForgeOps 7.5 to OpenShift CRC using Helm charts, custom Docker images, fine-grained security context configuration, and secret access policies.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/deploying-forgerock-forgeops-on-red-hat-openshift-crc-a-step-by-step-guide\/"
+            },
+            "headline": "\"Deploying ForgeRock ForgeOps on Red Hat OpenShift CRC: A Step-by-Step Guide\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-06-14T12:40:16-04:00",
+            "dateModified": "2025-06-14T13:16:33-04:00"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-decoding-and-validation-how-to-securely-parse-and-verify-your-tokens\/"
+            },
+            "headline": "\"JWT Decoding and Validation: How to Securely Parse and Verify Your Tokens\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-06-14T11:53:59-04:00",
+            "dateModified": "2025-06-14T11:59:00-04:00"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/how-to-debug-and-understand-saml-response-xml-a-practical-guide\/"
+            },
+            "headline": "\"How to Debug and Understand SAML Response XML: A Practical Guide\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-06-14T11:53:58-04:00",
+            "dateModified": "2025-06-14T11:59:00-04:00"
+          }
+  ]
+}
+</script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "{\"answer\":\"Custom images let you pre-bundle organization-specific configurations and artifacts, reducing runtime dependencies and improving consistency.\",\"question\":\"Why use custom Docker images for ForgeOps?\"}",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Please refer to the article for detailed explanation.\""
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "{\"answer\":\"OpenShift enforces stricter default Security Context Constraints (SCC), disallowing containers from running as root unless explicitly granted. This may block ForgeOps containers if not configured.\",\"question\":\"How does OpenShift's securityContext differ from vanilla Kubernetes?\"}",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Please refer to the article for detailed explanation.\""
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "{\"answer\":\"Helm templates expect pre-created Kubernetes Secrets (like `ds-passwords`). If these Secrets aren’t provisioned before Helm install, pods may fail to initialize or crash loop.\",\"question\":\"Why did my Helm deployment fail due to missing Secrets?\"}",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Please refer to the article for detailed explanation.\""
+      }
+    }
+  ]
+}
+</script>
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    if (document.querySelector('.mermaid')) {
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+        mermaid.initialize({ startOnLoad: true, theme: "default" });
+        };
+        document.head.appendChild(script);
+    }
+    });
+    </script>
+
+    
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-B6QCH29975');
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Advanced ForgeRock ForgeOps Helm Deployment on OpenShift CRC: Custom Images, Secrets, and Security Contexts
+    </h1>
+    
+    <div class="post-meta">3 min&nbsp;·&nbsp;522 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#-prerequisites" aria-label="🔧 Prerequisites">🔧 Prerequisites</a></li>
+                <li>
+                    <a href="#-step-1-build-custom-docker-images" aria-label="🏗️ Step 1: Build Custom Docker Images">🏗️ Step 1: Build Custom Docker Images</a></li>
+                <li>
+                    <a href="#-step-2-prepare-secrets-before-helm-deployment" aria-label="🔐 Step 2: Prepare Secrets Before Helm Deployment">🔐 Step 2: Prepare Secrets Before Helm Deployment</a></li>
+                <li>
+                    <a href="#-step-3-configure-security-context-openshift-gotcha" aria-label="⚙️ Step 3: Configure Security Context (OpenShift Gotcha)">⚙️ Step 3: Configure Security Context (OpenShift Gotcha)</a></li>
+                <li>
+                    <a href="#-step-4-deploy-with-helm" aria-label="📦 Step 4: Deploy with Helm">📦 Step 4: Deploy with Helm</a></li>
+                <li>
+                    <a href="#-step-5-validate-and-access" aria-label="🧪 Step 5: Validate and Access">🧪 Step 5: Validate and Access</a></li>
+                <li>
+                    <a href="#-final-tips" aria-label="📌 Final Tips">📌 Final Tips</a></li>
+                <li>
+                    <a href="#-related-posts" aria-label="🔗 Related Posts">🔗 Related Posts</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>ForgeRock ForgeOps provides a powerful Helm-based deployment model for the Identity Platform. In this advanced deployment guide, we focus on deploying ForgeOps 7.5 to <strong>Red Hat OpenShift CRC (CodeReady Containers)</strong> using <strong>custom-built Docker images</strong>, <strong>Helm charts</strong>, and <strong>fine-grained security controls</strong>.</p>
+<p>This article assumes you&rsquo;re already familiar with the basics of ForgeOps and OpenShift. If you&rsquo;re looking for the beginner version of this tutorial, check out:</p>
+<p>👉 <a href="/posts/deploying-forgerock-forgeops-on-red-hat-openshift-crc-a-step-by-step-guide/">Deploying ForgeRock ForgeOps on Red Hat OpenShift CRC: A Step-by-Step Guide</a></p>
+<hr>
+<h2 id="-prerequisites">🔧 Prerequisites<a hidden class="anchor" aria-hidden="true" href="#-prerequisites">#</a></h2>
+<ul>
+<li>OpenShift CRC installed and running</li>
+<li>ForgeOps 7.5 Git repository cloned</li>
+<li>Docker or Podman for image builds</li>
+<li>Helm CLI installed and logged into OpenShift cluster</li>
+<li>Access to modify <code>/etc/hosts</code> and manage SCCs in OpenShift</li>
+</ul>
+<hr>
+<h2 id="-step-1-build-custom-docker-images">🏗️ Step 1: Build Custom Docker Images<a hidden class="anchor" aria-hidden="true" href="#-step-1-build-custom-docker-images">#</a></h2>
+<p>Build your ForgeOps Identity Platform images locally to customize configurations or plug in custom scripts:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Build AM</span>
+</span></span><span style="display:flex;"><span>cd forgeops/docker/am-base
+</span></span><span style="display:flex;"><span>docker build -t am-base:7.5.0 .
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>cd ../am-cdk
+</span></span><span style="display:flex;"><span>docker build --build-arg docker_tag<span style="color:#f92672">=</span>7.5.0 -t am-cdk:7.5.0 .
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Build DS</span>
+</span></span><span style="display:flex;"><span>cd forgeops/docker/ds-base
+</span></span><span style="display:flex;"><span>docker build -t ds-base:7.5.0 .
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Build LDIF Importer</span>
+</span></span><span style="display:flex;"><span>cd forgeops/docker/ldif-importer
+</span></span><span style="display:flex;"><span>docker build -t ldif-importer:7.5.0 .
+</span></span></code></pre></div><p>Once built, tag and push these to your OpenShift CRC’s internal registry:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>TOKEN<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>oc whoami -t<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>docker login -u kubeadmin -p $TOKEN default-route-openshift-image-registry.apps-crc.testing
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>docker tag am-cdk:7.5.0 default-route-openshift-image-registry.apps-crc.testing/forgeops/am:7.5.0
+</span></span><span style="display:flex;"><span>docker push default-route-openshift-image-registry.apps-crc.testing/forgeops/am:7.5.0
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>docker tag ds-base:7.5.0 default-route-openshift-image-registry.apps-crc.testing/forgeops/ds:7.5.0
+</span></span><span style="display:flex;"><span>docker push default-route-openshift-image-registry.apps-crc.testing/forgeops/ds:7.5.0
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>docker tag ldif-importer:7.5.0 default-route-openshift-image-registry.apps-crc.testing/forgeops/ldif-importer:7.5.0
+</span></span><span style="display:flex;"><span>docker push default-route-openshift-image-registry.apps-crc.testing/forgeops/ldif-importer:7.5.0
+</span></span></code></pre></div><hr>
+<h2 id="-step-2-prepare-secrets-before-helm-deployment">🔐 Step 2: Prepare Secrets <em>Before</em> Helm Deployment<a hidden class="anchor" aria-hidden="true" href="#-step-2-prepare-secrets-before-helm-deployment">#</a></h2>
+<blockquote>
+<p>❗ Common pitfall: Helm templates expect Secrets like <code>ds-passwords</code> and <code>am-env-secrets</code> to <strong>already exist</strong>. Missing Secrets cause initContainers or main containers to crash.</p></blockquote>
+<p>You can manually create the required Secrets (or use <code>kubectl apply -f secrets.yaml</code>) prior to running Helm:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>oc create secret generic ds-passwords <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --from-literal<span style="color:#f92672">=</span>dirmanager.pw<span style="color:#f92672">=</span>ForgeRock123 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --from-literal<span style="color:#f92672">=</span>keystore.pw<span style="color:#f92672">=</span>changeit <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -n forgeops
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>oc create secret generic am-env-secrets <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --from-literal<span style="color:#f92672">=</span>AM_PASSWORD<span style="color:#f92672">=</span>ForgeRock123 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -n forgeops
+</span></span></code></pre></div><hr>
+<h2 id="-step-3-configure-security-context-openshift-gotcha">⚙️ Step 3: Configure Security Context (OpenShift Gotcha)<a hidden class="anchor" aria-hidden="true" href="#-step-3-configure-security-context-openshift-gotcha">#</a></h2>
+<p>OpenShift enforces <a href="https://docs.openshift.com/container-platform/latest/authentication/managing-security-context-constraints.html">Security Context Constraints (SCC)</a>, which may block ForgeOps pods from starting.</p>
+<p>Add <code>anyuid</code> SCC to the namespace’s default service account or create a dedicated one:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>oc create namespace forgeops
+</span></span><span style="display:flex;"><span>oc adm policy add-scc-to-user anyuid -z default -n forgeops
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Optional: Use a separate SA</span>
+</span></span><span style="display:flex;"><span>oc create sa forgeops-sa -n forgeops
+</span></span><span style="display:flex;"><span>oc adm policy add-scc-to-user anyuid -z forgeops-sa -n forgeops
+</span></span></code></pre></div><p>Also, grant access to secrets via RBAC:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>oc create role secret-accessor <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --verb<span style="color:#f92672">=</span>get,list <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --resource<span style="color:#f92672">=</span>secrets <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -n forgeops
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>oc create rolebinding forgeops-binding <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --role<span style="color:#f92672">=</span>secret-accessor <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --serviceaccount<span style="color:#f92672">=</span>forgeops:forgeops-sa <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -n forgeops
+</span></span></code></pre></div><hr>
+<h2 id="-step-4-deploy-with-helm">📦 Step 4: Deploy with Helm<a hidden class="anchor" aria-hidden="true" href="#-step-4-deploy-with-helm">#</a></h2>
+<p>Make sure your <code>values-openshift.yaml</code> overrides match your OpenShift domain and images:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">am</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">image</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">repository</span>: <span style="color:#ae81ff">default-route-openshift-image-registry.apps-crc.testing/forgeops/am</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">tag</span>: <span style="color:#e6db74">&#34;7.5.0&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">serviceAccount</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">name</span>: <span style="color:#ae81ff">forgeops-sa</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">ds</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">image</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">repository</span>: <span style="color:#ae81ff">default-route-openshift-image-registry.apps-crc.testing/forgeops/ds</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">tag</span>: <span style="color:#e6db74">&#34;7.5.0&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">persistence</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">enabled</span>: <span style="color:#66d9ef">false</span>
+</span></span></code></pre></div><p>Deploy:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cd forgeops/charts/identity-platform
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>helm upgrade --install identity-platform . <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --namespace forgeops <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --values values-openshift.yaml <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --set <span style="color:#e6db74">&#39;platform.ingress.hosts={forgeops.example.com}&#39;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --set serviceAccount.name<span style="color:#f92672">=</span>forgeops-sa
+</span></span></code></pre></div><hr>
+<h2 id="-step-5-validate-and-access">🧪 Step 5: Validate and Access<a hidden class="anchor" aria-hidden="true" href="#-step-5-validate-and-access">#</a></h2>
+<ul>
+<li>
+<p>Check services:
+<code>oc get pods -n forgeops</code></p>
+</li>
+<li>
+<p>Add to <code>/etc/hosts</code>:
+<code>127.0.0.1 forgeops.example.com</code></p>
+</li>
+<li>
+<p>Access AM UI:
+<code>https://forgeops.example.com/am</code></p>
+</li>
+</ul>
+<hr>
+<h2 id="-final-tips">📌 Final Tips<a hidden class="anchor" aria-hidden="true" href="#-final-tips">#</a></h2>
+<ul>
+<li>Ensure Secrets are created <strong>before</strong> Helm is invoked</li>
+<li>Don’t forget OpenShift’s <code>securityContext</code> is stricter than standard Kubernetes</li>
+<li>Use custom service accounts and RBAC for least privilege</li>
+<li>Double check image paths when pushing to OpenShift registry</li>
+</ul>
+<hr>
+<h2 id="-related-posts">🔗 Related Posts<a hidden class="anchor" aria-hidden="true" href="#-related-posts">#</a></h2>
+<ul>
+<li><a href="/posts/deploying-forgerock-forgeops-on-red-hat-openshift-crc-a-step-by-step-guide/">Deploying ForgeRock ForgeOps on Red Hat OpenShift CRC: A Step-by-Step Guide</a></li>
+<li><a href="https://docs.pingidentity.com/forgeops/7.5/customize/custom-images.html">How to Create Custom Docker Images for ForgeOps</a></li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/forgerock/">ForgeRock</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/forgeops/">Forgeops</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/helm/">Helm</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/openshift/">Openshift</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/crc/">Crc</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/identity-platform/">Identity Platform</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/kubernetes-security/">Kubernetes Security</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/custom-docker-image/">Custom Docker Image</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/secret-management/">Secret Management</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="next" href="https://www.iamdevbox.com/posts/deploying-forgerock-forgeops-on-red-hat-openshift-crc-a-step-by-step-guide/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Deploying ForgeRock ForgeOps on Red Hat OpenShift CRC: A Step-by-Step Guide</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/deploying-forgerock-forgeops-on-red-hat-openshift-crc-a-step-by-step-guide/" class="custom-link">
+              Deploying ForgeRock ForgeOps on Red Hat OpenShift CRC: A Step-by-Step Guide
+            </a>
+            <small class="custom-date">2025-06-14</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/kubernetes-vs-openshift-iam-integration-rbac-and-real-world-devsecops-practices/" class="custom-link">
+              Kubernetes vs OpenShift: IAM Integration, RBAC, and Real-World DevSecOps Practices
+            </a>
+            <small class="custom-date">2025-06-12</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/kubernetes-and-openshift-architecture-differences-and-real-world-use-cases/" class="custom-link">
+              Kubernetes and OpenShift: Architecture, Differences, and Real-World Use Cases
+            </a>
+            <small class="custom-date">2025-06-11</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/forgerock-deep-dive/" class="custom-link">
+              ForgeRock Technical Cluster
+            </a>
+            <small class="custom-date">2025-06-04</small>
+          </li>
+          
+        
+      
+
+      
+    </ul>
+
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/deploying-forgerock-forgeops-on-red-hat-openshift-crc-a-step-by-step-guide/" class="custom-link">
+                Deploying ForgeRock ForgeOps on Red Hat OpenShift CRC: A Step-by-Step Guide
+              </a>
+              <small class="custom-date">2025-06-14</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-decoding-and-validation-how-to-securely-parse-and-verify-your-tokens/" class="custom-link">
+                JWT Decoding and Validation: How to Securely Parse and Verify Your Tokens
+              </a>
+              <small class="custom-date">2025-06-14</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/how-to-debug-and-understand-saml-response-xml-a-practical-guide/" class="custom-link">
+                How to Debug and Understand SAML Response XML: A Practical Guide
+              </a>
+              <small class="custom-date">2025-06-14</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/applying-java-modules-in-modern-microservice-architecture/" class="custom-link">
+                Applying Java Modules in Modern Microservice Architecture
+              </a>
+              <small class="custom-date">2025-06-14</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/my-devsecops-pipeline-security-from-code-to-production/" class="custom-link">
+                My DevSecOps Pipeline: Security from Code to Production
+              </a>
+              <small class="custom-date">2025-06-13</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
