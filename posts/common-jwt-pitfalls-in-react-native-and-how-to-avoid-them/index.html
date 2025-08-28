@@ -1,0 +1,1715 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"><title>Common JWT Pitfalls in React Native and How to Avoid Them | IAMDevBox</title><meta name="description" content="Learn about common pitfalls when using JWT in React Native applications and how to secure your authentication flow effectively."><meta name="keywords" content="React Native, JWT, Authentication, Security, Best Practices"><meta name="author" content="IAMDevBox"><meta name="language" content="en-US">
+<meta property="og:locale" content="en_US"><link rel="canonical" href="https://www.iamdevbox.com/posts/common-jwt-pitfalls-in-react-native-and-how-to-avoid-them/"><meta property="og:title" content="Common JWT Pitfalls in React Native and How to Avoid Them | IAMDevBox">
+<meta property="og:description" content="Learn about common pitfalls when using JWT in React Native applications and how to secure your authentication flow effectively.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/common-jwt-pitfalls-in-react-native-and-how-to-avoid-them/">
+<meta property="og:site_name" content="IAMDevBox">
+<meta property="og:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="IAMDevBox - Identity and Access Management Blog"><meta property="article:published_time" content="2025-08-05T15:00:12Z">
+<meta property="article:modified_time" content="2025-08-05T15:00:28Z">
+<meta property="article:author" content="IAMDevBox">
+<meta property="article:section" content="Posts"><meta property="article:tag" content="React Native"><meta property="article:tag" content="JWT"><meta property="article:tag" content="Authentication"><meta property="article:tag" content="Security"><meta property="article:tag" content="Best Practices"><meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Common JWT Pitfalls in React Native and How to Avoid Them | IAMDevBox">
+<meta name="twitter:description" content="Learn about common pitfalls when using JWT in React Native applications and how to secure your authentication flow effectively.">
+<meta name="twitter:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg"><meta name="twitter:site" content="@iamdevbox"><meta name="twitter:creator" content="@iamdevbox"><meta name="format-detection" content="telephone=no">
+<meta name="theme-color" content="#2e2e33"><link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="dns-prefetch" href="//fonts.googleapis.com">
+<link rel="dns-prefetch" href="//fonts.gstatic.com"><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Common JWT Pitfalls in React Native and How to Avoid Them",
+  "description": "Learn about common pitfalls when using JWT in React Native applications and how to secure your authentication flow effectively.",
+  "image": "https:\/\/www.iamdevbox.com\/IAMDevBox.com.jpg",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https:\/\/www.iamdevbox.com\/IAMDevBox.com.png"
+    }
+  },
+  "datePublished": "2025-08-05T15:00:12Z",
+  "dateModified": "2025-08-05T15:00:28Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/common-jwt-pitfalls-in-react-native-and-how-to-avoid-them\/"
+  },
+  "wordCount":  1123 ,
+  "keywords": "[\"React Native\",\"JWT\",\"Authentication\",\"Security\",\"Best Practices\"]"
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "Common JWT Pitfalls in React Native and How to Avoid Them",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/common-jwt-pitfalls-in-react-native-and-how-to-avoid-them\/"
+    }]
+}
+</script>
+<link crossorigin="anonymous" href="/assets/css/stylesheet.93f625d739f1d6a5c6f20c146bc6a8d26b233492b34b2220c54b12fd46a04ded.css" integrity="sha256-k/Yl1znx1qXG8gwUa8ao0msjNJKzSyIgxUsS/UagTe0=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/common-jwt-pitfalls-in-react-native-and-how-to-avoid-them/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.f87e4df74f4f070695effe5d49ae4914eb9228356e4300800036f51859f72d47.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.f87e4df74f4f070695effe5d49ae4914eb9228356e4300800036f51859f72d47.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/common-jwt-pitfalls-in-react-native-and-how-to-avoid-them/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Common JWT Pitfalls in React Native and How to Avoid Them">
+  <meta property="og:description" content="Learn about common pitfalls when using JWT in React Native applications and how to secure your authentication flow effectively.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-08-05T15:00:12+00:00">
+    <meta property="article:modified_time" content="2025-08-05T15:00:28+00:00">
+    <meta property="article:tag" content="React Native">
+    <meta property="article:tag" content="JWT">
+    <meta property="article:tag" content="Authentication">
+    <meta property="article:tag" content="Security">
+    <meta property="article:tag" content="Best Practices">
+      <meta property="og:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:title" content="Common JWT Pitfalls in React Native and How to Avoid Them">
+<meta name="twitter:description" content="Learn about common pitfalls when using JWT in React Native applications and how to secure your authentication flow effectively.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Common JWT Pitfalls in React Native and How to Avoid Them",
+      "item": "https://www.iamdevbox.com/posts/common-jwt-pitfalls-in-react-native-and-how-to-avoid-them/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Common JWT Pitfalls in React Native and How to Avoid Them",
+  "name": "Common JWT Pitfalls in React Native and How to Avoid Them",
+  "description": "Learn about common pitfalls when using JWT in React Native applications and how to secure your authentication flow effectively.",
+  "keywords": [
+    "React Native", "JWT", "Authentication", "Security", "Best Practices"
+  ],
+  "articleBody": "JSON Web Tokens (JWTs) are a widely used standard for secure authentication and authorization in web and mobile applications. React Native developers often implement JWT-based authentication to secure user sessions. However, without proper implementation, JWTs can introduce security vulnerabilities. In this article, we’ll explore common pitfalls when using JWT in React Native applications and provide actionable solutions to avoid them.\n1. Insecure Token Storage One of the most critical mistakes in JWT implementation is insecure storage of tokens. If a JWT is stored improperly, it can be easily accessed by malicious actors, leading to unauthorized access to user accounts.\nPitfall: Storing Tokens in AsyncStorage Without Encryption React Native’s AsyncStorage is a common choice for storing tokens due to its simplicity. However, storing tokens in plain text makes them vulnerable to attacks, especially if the device is compromised.\nExample of Insecure Storage // Insecure storage of JWT in AsyncStorage const storeToken = async (token) =\u003e { try { await AsyncStorage.setItem('authToken', token); } catch (error) { console.error('Error storing token:', error); } }; Solution: Secure Token Storage with Encryption To secure JWT storage, use encryption. React Native libraries like react-native-crypto can help encrypt tokens before storing them.\nExample of Secure Storage import { Crypto } from 'react-native-crypto'; const storeToken = async (token, encryptionKey) =\u003e { try { const encryptedToken = await Crypto.encrypt(token, encryptionKey); await AsyncStorage.setItem('authToken', encryptedToken); } catch (error) { console.error('Error storing token:', error); } }; 2. Improper Handling of Token Expiration JWT tokens have an expiration time (exp claim). If your application doesn’t handle token expiration correctly, users may experience unexpected logouts or security breaches.\nPitfall: Not Implementing Token Refresh When a token expires, users are typically redirected to the login screen. However, implementing a refresh token mechanism allows users to stay authenticated without re-entering credentials.\nExample of Token Expiration Without Refresh const fetchUserData = async () =\u003e { const token = await AsyncStorage.getItem('authToken'); if (!token) return null; try { const response = await fetch('https://api.example.com/user', { headers: { 'Authorization': `Bearer ${token}`, }, }); return response.json(); } catch (error) { if (error.response \u0026\u0026 error.response.status === 401) { // Token expired, redirect to login navigation.navigate('Login'); } return null; } }; Solution: Implementing Refresh Tokens Use refresh tokens to obtain new access tokens without user intervention. Store refresh tokens securely and use them to fetch new access tokens when the current one expires.\nExample of Token Refresh const fetchUserData = async () =\u003e { const token = await AsyncStorage.getItem('authToken'); if (!token) return null; try { const response = await fetch('https://api.example.com/user', { headers: { 'Authorization': `Bearer ${token}`, }, }); return response.json(); } catch (error) { if (error.response \u0026\u0026 error.response.status === 401) { // Attempt to refresh token const refreshToken = await AsyncStorage.getItem('refreshToken'); if (refreshToken) { const newAccessToken = await fetch('https://api.example.com/refresh', { method: 'POST', headers: { 'Content-Type': 'application/json', }, body: JSON.stringify({ refreshToken }), }).then(response =\u003e response.json()); if (newAccessToken) { await AsyncStorage.setItem('authToken', newAccessToken); return fetchUserData(); } } // If refresh fails, redirect to login navigation.navigate('Login'); } return null; } }; 3. Lack of Audience and Issuer Validation JWT tokens contain claims like aud (audience) and iss (issuer). Failing to validate these claims can leave your application vulnerable to token substitution attacks.\nPitfall: Missing Audience and Issuer Validation If your application doesn’t validate the aud and iss claims, an attacker could use a valid token from another application to gain unauthorized access.\nExample of Missing Validation const verifyToken = async (token) =\u003e { try { const decodedToken = await JWT.decode(token); return decodedToken; } catch (error) { console.error('Token verification failed:', error); return null; } }; Solution: Validating Audience and Issuer Always validate the aud and iss claims to ensure the token is intended for your application and was issued by a trusted source.\nExample of Proper Validation const verifyToken = async (token) =\u003e { try { const decodedToken = await JWT.decode(token); // Validate issuer if (decodedToken.iss !== 'https://api.example.com') { throw new Error('Invalid issuer'); } // Validate audience if (decodedToken.aud !== 'mobile-app') { throw new Error('Invalid audience'); } return decodedToken; } catch (error) { console.error('Token verification failed:', error); return null; } }; 4. Not Using HTTPS JWT tokens are typically transmitted over the network. If your application doesn’t use HTTPS, tokens can be intercepted by attackers.\nPitfall: Using HTTP Instead of HTTPS HTTP doesn’t encrypt data, making it easy for attackers to capture tokens in transit.\nExample of Insecure Network Request const fetchUserData = async () =\u003e { try { const response = await fetch('http://api.example.com/user', { headers: { 'Authorization': `Bearer ${token}`, }, }); return response.json(); } catch (error) { console.error('Error fetching user data:', error); return null; } }; Solution: Enforce HTTPS Always use HTTPS to encrypt network requests and protect JWTs from interception.\nExample of Secure Network Request const fetchUserData = async () =\u003e { try { const response = await fetch('https://api.example.com/user', { headers: { 'Authorization': `Bearer ${token}`, }, }); return response.json(); } catch (error) { console.error('Error fetching user data:', error); return null; } }; 5. Session Fixation Session fixation occurs when an attacker forces a user to use a specific token, allowing the attacker to hijack the session.\nPitfall: Reusing Tokens Without Invalidating Old Ones If your application doesn’t invalidate old tokens when issuing new ones, attackers can reuse old tokens to gain access.\nSolution: Implementing Token Blacklists Maintain a blacklist of invalidated tokens. When a new token is issued, add the old token to the blacklist and check against it during authentication.\nExample of Token Blacklist Implementation const blacklist = new Set(); const invalidateToken = (token) =\u003e { blacklist.add(token); }; const verifyToken = async (token) =\u003e { if (blacklist.has(token)) { throw new Error('Token has been invalidated'); } // Proceed with token verification }; Conclusion Implementing JWT in React Native applications requires careful consideration of security best practices. By addressing common pitfalls such as insecure storage, improper expiration handling, lack of claim validation, unencrypted network requests, and session fixation, you can significantly enhance the security of your authentication flow. Always prioritize secure storage, implement refresh tokens, validate JWT claims, use HTTPS, and maintain token blacklists to protect user sessions.\nText-Based Diagram: Secure JWT Storage Process +-------------------+ +-------------------+ +-------------------+ | User Authenticates | -\u003e | Encrypt JWT Token | -\u003e | Store Encrypted | | and Receives JWT | | with Secure Key | | Token in AsyncStorage| +-------------------+ +-------------------+ +-------------------+ FAQ What are the best practices for storing JWT tokens in React Native? How can I handle token expiration without disrupting the user experience? Why is it important to validate the ‘aud’ and ‘iss’ claims in JWT? What are the risks of not using HTTPS when transmitting JWT tokens? How can I prevent session fixation attacks in my React Native application? Meta Description Learn about common JWT pitfalls in React Native applications and how to implement secure authentication practices to protect user sessions.\n",
+  "wordCount" : "1123",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/IAMDevBox.com.jpg","datePublished": "2025-08-05T15:00:12Z",
+  "dateModified": "2025-08-05T15:00:28Z",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/common-jwt-pitfalls-in-react-native-and-how-to-avoid-them/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script><meta name="description" content="Learn about common pitfalls when using JWT in React Native applications and how to secure your authentication flow effectively.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/is-jwt-decoding-safe-on-the-frontend-security-risks-you-should-know\/"
+            },
+            "headline": "\"Is JWT Decoding Safe on the Frontend? Security Risks You Should Know\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-08-28T14:53:37Z",
+            "dateModified": "2025-08-28T14:53:52Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/what-is-a-jwt-and-how-does-it-work-a-developer-friendly-introduction\/"
+            },
+            "headline": "\"What Is a JWT and How Does It Work? A Developer-Friendly Introduction\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-08-26T15:13:56Z",
+            "dateModified": "2025-08-26T15:14:09Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/build-your-own-jwt-decode-online-tool-with-firebase-functions-and-react\/"
+            },
+            "headline": "\"Build Your Own JWT Decode Online Tool with Firebase Functions and React\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-08-25T19:38:05Z",
+            "dateModified": "2025-08-25T19:38:19Z"
+          }
+  ]
+}
+</script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "\"What are the best practices for storing JWT tokens in React Native?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Please refer to the article for detailed explanation.\""
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "\"How can I handle token expiration without disrupting the user experience?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Please refer to the article for detailed explanation.\""
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "\"Why is it important to validate the 'aud' and 'iss' claims in JWT?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Please refer to the article for detailed explanation.\""
+      }
+    }
+  ]
+}
+</script>
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    if (document.querySelector('.mermaid')) {
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+        mermaid.initialize({ startOnLoad: true, theme: "default" });
+        };
+        document.head.appendChild(script);
+    }
+    });
+    </script>
+
+    
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-B6QCH29975');
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Common JWT Pitfalls in React Native and How to Avoid Them
+    </h1>
+    
+    <div class="post-meta">6 min&nbsp;·&nbsp;1123 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#1-insecure-token-storage" aria-label="1. Insecure Token Storage">1. Insecure Token Storage</a><ul>
+                        
+                <li>
+                    <a href="#pitfall-storing-tokens-in-asyncstorage-without-encryption" aria-label="Pitfall: Storing Tokens in AsyncStorage Without Encryption">Pitfall: Storing Tokens in AsyncStorage Without Encryption</a><ul>
+                        
+                <li>
+                    <a href="#example-of-insecure-storage" aria-label="Example of Insecure Storage">Example of Insecure Storage</a></li></ul>
+                </li>
+                <li>
+                    <a href="#solution-secure-token-storage-with-encryption" aria-label="Solution: Secure Token Storage with Encryption">Solution: Secure Token Storage with Encryption</a><ul>
+                        
+                <li>
+                    <a href="#example-of-secure-storage" aria-label="Example of Secure Storage">Example of Secure Storage</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#2-improper-handling-of-token-expiration" aria-label="2. Improper Handling of Token Expiration">2. Improper Handling of Token Expiration</a><ul>
+                        
+                <li>
+                    <a href="#pitfall-not-implementing-token-refresh" aria-label="Pitfall: Not Implementing Token Refresh">Pitfall: Not Implementing Token Refresh</a><ul>
+                        
+                <li>
+                    <a href="#example-of-token-expiration-without-refresh" aria-label="Example of Token Expiration Without Refresh">Example of Token Expiration Without Refresh</a></li></ul>
+                </li>
+                <li>
+                    <a href="#solution-implementing-refresh-tokens" aria-label="Solution: Implementing Refresh Tokens">Solution: Implementing Refresh Tokens</a><ul>
+                        
+                <li>
+                    <a href="#example-of-token-refresh" aria-label="Example of Token Refresh">Example of Token Refresh</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#3-lack-of-audience-and-issuer-validation" aria-label="3. Lack of Audience and Issuer Validation">3. Lack of Audience and Issuer Validation</a><ul>
+                        
+                <li>
+                    <a href="#pitfall-missing-audience-and-issuer-validation" aria-label="Pitfall: Missing Audience and Issuer Validation">Pitfall: Missing Audience and Issuer Validation</a><ul>
+                        
+                <li>
+                    <a href="#example-of-missing-validation" aria-label="Example of Missing Validation">Example of Missing Validation</a></li></ul>
+                </li>
+                <li>
+                    <a href="#solution-validating-audience-and-issuer" aria-label="Solution: Validating Audience and Issuer">Solution: Validating Audience and Issuer</a><ul>
+                        
+                <li>
+                    <a href="#example-of-proper-validation" aria-label="Example of Proper Validation">Example of Proper Validation</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#4-not-using-https" aria-label="4. Not Using HTTPS">4. Not Using HTTPS</a><ul>
+                        
+                <li>
+                    <a href="#pitfall-using-http-instead-of-https" aria-label="Pitfall: Using HTTP Instead of HTTPS">Pitfall: Using HTTP Instead of HTTPS</a><ul>
+                        
+                <li>
+                    <a href="#example-of-insecure-network-request" aria-label="Example of Insecure Network Request">Example of Insecure Network Request</a></li></ul>
+                </li>
+                <li>
+                    <a href="#solution-enforce-https" aria-label="Solution: Enforce HTTPS">Solution: Enforce HTTPS</a><ul>
+                        
+                <li>
+                    <a href="#example-of-secure-network-request" aria-label="Example of Secure Network Request">Example of Secure Network Request</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#5-session-fixation" aria-label="5. Session Fixation">5. Session Fixation</a><ul>
+                        
+                <li>
+                    <a href="#pitfall-reusing-tokens-without-invalidating-old-ones" aria-label="Pitfall: Reusing Tokens Without Invalidating Old Ones">Pitfall: Reusing Tokens Without Invalidating Old Ones</a></li>
+                <li>
+                    <a href="#solution-implementing-token-blacklists" aria-label="Solution: Implementing Token Blacklists">Solution: Implementing Token Blacklists</a><ul>
+                        
+                <li>
+                    <a href="#example-of-token-blacklist-implementation" aria-label="Example of Token Blacklist Implementation">Example of Token Blacklist Implementation</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#conclusion" aria-label="Conclusion">Conclusion</a></li>
+                <li>
+                    <a href="#text-based-diagram-secure-jwt-storage-process" aria-label="Text-Based Diagram: Secure JWT Storage Process">Text-Based Diagram: Secure JWT Storage Process</a></li>
+                <li>
+                    <a href="#faq" aria-label="FAQ">FAQ</a></li>
+                <li>
+                    <a href="#meta-description" aria-label="Meta Description">Meta Description</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>JSON Web Tokens (JWTs) are a widely used standard for secure authentication and authorization in web and mobile applications. React Native developers often implement JWT-based authentication to secure user sessions. However, without proper implementation, JWTs can introduce security vulnerabilities. In this article, we’ll explore common pitfalls when using JWT in React Native applications and provide actionable solutions to avoid them.</p>
+<hr>
+<h2 id="1-insecure-token-storage">1. <strong>Insecure Token Storage</strong><a hidden class="anchor" aria-hidden="true" href="#1-insecure-token-storage">#</a></h2>
+<p>One of the most critical mistakes in JWT implementation is insecure storage of tokens. If a JWT is stored improperly, it can be easily accessed by malicious actors, leading to unauthorized access to user accounts.</p>
+<h3 id="pitfall-storing-tokens-in-asyncstorage-without-encryption">Pitfall: Storing Tokens in AsyncStorage Without Encryption<a hidden class="anchor" aria-hidden="true" href="#pitfall-storing-tokens-in-asyncstorage-without-encryption">#</a></h3>
+<p>React Native’s <code>AsyncStorage</code> is a common choice for storing tokens due to its simplicity. However, storing tokens in plain text makes them vulnerable to attacks, especially if the device is compromised.</p>
+<h4 id="example-of-insecure-storage">Example of Insecure Storage<a hidden class="anchor" aria-hidden="true" href="#example-of-insecure-storage">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// Insecure storage of JWT in AsyncStorage
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">storeToken</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">async</span> (<span style="color:#a6e22e">token</span>) =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">AsyncStorage</span>.<span style="color:#a6e22e">setItem</span>(<span style="color:#e6db74">&#39;authToken&#39;</span>, <span style="color:#a6e22e">token</span>);
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">catch</span> (<span style="color:#a6e22e">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">error</span>(<span style="color:#e6db74">&#39;Error storing token:&#39;</span>, <span style="color:#a6e22e">error</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><h3 id="solution-secure-token-storage-with-encryption">Solution: Secure Token Storage with Encryption<a hidden class="anchor" aria-hidden="true" href="#solution-secure-token-storage-with-encryption">#</a></h3>
+<p>To secure JWT storage, use encryption. React Native libraries like <code>react-native-crypto</code> can help encrypt tokens before storing them.</p>
+<h4 id="example-of-secure-storage">Example of Secure Storage<a hidden class="anchor" aria-hidden="true" href="#example-of-secure-storage">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">import</span> { <span style="color:#a6e22e">Crypto</span> } <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;react-native-crypto&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">storeToken</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">async</span> (<span style="color:#a6e22e">token</span>, <span style="color:#a6e22e">encryptionKey</span>) =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">encryptedToken</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">Crypto</span>.<span style="color:#a6e22e">encrypt</span>(<span style="color:#a6e22e">token</span>, <span style="color:#a6e22e">encryptionKey</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">AsyncStorage</span>.<span style="color:#a6e22e">setItem</span>(<span style="color:#e6db74">&#39;authToken&#39;</span>, <span style="color:#a6e22e">encryptedToken</span>);
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">catch</span> (<span style="color:#a6e22e">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">error</span>(<span style="color:#e6db74">&#39;Error storing token:&#39;</span>, <span style="color:#a6e22e">error</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><hr>
+<h2 id="2-improper-handling-of-token-expiration">2. <strong>Improper Handling of Token Expiration</strong><a hidden class="anchor" aria-hidden="true" href="#2-improper-handling-of-token-expiration">#</a></h2>
+<p>JWT tokens have an expiration time (<code>exp</code> claim). If your application doesn’t handle token expiration correctly, users may experience unexpected logouts or security breaches.</p>
+<h3 id="pitfall-not-implementing-token-refresh">Pitfall: Not Implementing Token Refresh<a hidden class="anchor" aria-hidden="true" href="#pitfall-not-implementing-token-refresh">#</a></h3>
+<p>When a token expires, users are typically redirected to the login screen. However, implementing a refresh token mechanism allows users to stay authenticated without re-entering credentials.</p>
+<h4 id="example-of-token-expiration-without-refresh">Example of Token Expiration Without Refresh<a hidden class="anchor" aria-hidden="true" href="#example-of-token-expiration-without-refresh">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">fetchUserData</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">async</span> () =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">token</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">AsyncStorage</span>.<span style="color:#a6e22e">getItem</span>(<span style="color:#e6db74">&#39;authToken&#39;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">token</span>) <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">response</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">fetch</span>(<span style="color:#e6db74">&#39;https://api.example.com/user&#39;</span>, {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">headers</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;Authorization&#39;</span><span style="color:#f92672">:</span> <span style="color:#e6db74">`Bearer </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">token</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>,
+</span></span><span style="display:flex;"><span>      },
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">json</span>();
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">catch</span> (<span style="color:#a6e22e">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">error</span>.<span style="color:#a6e22e">response</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">error</span>.<span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">status</span> <span style="color:#f92672">===</span> <span style="color:#ae81ff">401</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e">// Token expired, redirect to login
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>      <span style="color:#a6e22e">navigation</span>.<span style="color:#a6e22e">navigate</span>(<span style="color:#e6db74">&#39;Login&#39;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><h3 id="solution-implementing-refresh-tokens">Solution: Implementing Refresh Tokens<a hidden class="anchor" aria-hidden="true" href="#solution-implementing-refresh-tokens">#</a></h3>
+<p>Use refresh tokens to obtain new access tokens without user intervention. Store refresh tokens securely and use them to fetch new access tokens when the current one expires.</p>
+<h4 id="example-of-token-refresh">Example of Token Refresh<a hidden class="anchor" aria-hidden="true" href="#example-of-token-refresh">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">fetchUserData</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">async</span> () =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">token</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">AsyncStorage</span>.<span style="color:#a6e22e">getItem</span>(<span style="color:#e6db74">&#39;authToken&#39;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">token</span>) <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">response</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">fetch</span>(<span style="color:#e6db74">&#39;https://api.example.com/user&#39;</span>, {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">headers</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;Authorization&#39;</span><span style="color:#f92672">:</span> <span style="color:#e6db74">`Bearer </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">token</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>,
+</span></span><span style="display:flex;"><span>      },
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">json</span>();
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">catch</span> (<span style="color:#a6e22e">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">error</span>.<span style="color:#a6e22e">response</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">error</span>.<span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">status</span> <span style="color:#f92672">===</span> <span style="color:#ae81ff">401</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e">// Attempt to refresh token
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>      <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">refreshToken</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">AsyncStorage</span>.<span style="color:#a6e22e">getItem</span>(<span style="color:#e6db74">&#39;refreshToken&#39;</span>);
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">refreshToken</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">newAccessToken</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">fetch</span>(<span style="color:#e6db74">&#39;https://api.example.com/refresh&#39;</span>, {
+</span></span><span style="display:flex;"><span>          <span style="color:#a6e22e">method</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;POST&#39;</span>,
+</span></span><span style="display:flex;"><span>          <span style="color:#a6e22e">headers</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;Content-Type&#39;</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;application/json&#39;</span>,
+</span></span><span style="display:flex;"><span>          },
+</span></span><span style="display:flex;"><span>          <span style="color:#a6e22e">body</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">JSON</span>.<span style="color:#a6e22e">stringify</span>({ <span style="color:#a6e22e">refreshToken</span> }),
+</span></span><span style="display:flex;"><span>        }).<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">response</span> =&gt; <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">json</span>());
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">newAccessToken</span>) {
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">AsyncStorage</span>.<span style="color:#a6e22e">setItem</span>(<span style="color:#e6db74">&#39;authToken&#39;</span>, <span style="color:#a6e22e">newAccessToken</span>);
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">fetchUserData</span>();
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e">// If refresh fails, redirect to login
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>      <span style="color:#a6e22e">navigation</span>.<span style="color:#a6e22e">navigate</span>(<span style="color:#e6db74">&#39;Login&#39;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><hr>
+<h2 id="3-lack-of-audience-and-issuer-validation">3. <strong>Lack of Audience and Issuer Validation</strong><a hidden class="anchor" aria-hidden="true" href="#3-lack-of-audience-and-issuer-validation">#</a></h2>
+<p>JWT tokens contain claims like <code>aud</code> (audience) and <code>iss</code> (issuer). Failing to validate these claims can leave your application vulnerable to token substitution attacks.</p>
+<h3 id="pitfall-missing-audience-and-issuer-validation">Pitfall: Missing Audience and Issuer Validation<a hidden class="anchor" aria-hidden="true" href="#pitfall-missing-audience-and-issuer-validation">#</a></h3>
+<p>If your application doesn’t validate the <code>aud</code> and <code>iss</code> claims, an attacker could use a valid token from another application to gain unauthorized access.</p>
+<h4 id="example-of-missing-validation">Example of Missing Validation<a hidden class="anchor" aria-hidden="true" href="#example-of-missing-validation">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">verifyToken</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">async</span> (<span style="color:#a6e22e">token</span>) =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">decodedToken</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">JWT</span>.<span style="color:#a6e22e">decode</span>(<span style="color:#a6e22e">token</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">decodedToken</span>;
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">catch</span> (<span style="color:#a6e22e">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">error</span>(<span style="color:#e6db74">&#39;Token verification failed:&#39;</span>, <span style="color:#a6e22e">error</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><h3 id="solution-validating-audience-and-issuer">Solution: Validating Audience and Issuer<a hidden class="anchor" aria-hidden="true" href="#solution-validating-audience-and-issuer">#</a></h3>
+<p>Always validate the <code>aud</code> and <code>iss</code> claims to ensure the token is intended for your application and was issued by a trusted source.</p>
+<h4 id="example-of-proper-validation">Example of Proper Validation<a hidden class="anchor" aria-hidden="true" href="#example-of-proper-validation">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">verifyToken</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">async</span> (<span style="color:#a6e22e">token</span>) =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">decodedToken</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">JWT</span>.<span style="color:#a6e22e">decode</span>(<span style="color:#a6e22e">token</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Validate issuer
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">decodedToken</span>.<span style="color:#a6e22e">iss</span> <span style="color:#f92672">!==</span> <span style="color:#e6db74">&#39;https://api.example.com&#39;</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> Error(<span style="color:#e6db74">&#39;Invalid issuer&#39;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Validate audience
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">decodedToken</span>.<span style="color:#a6e22e">aud</span> <span style="color:#f92672">!==</span> <span style="color:#e6db74">&#39;mobile-app&#39;</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> Error(<span style="color:#e6db74">&#39;Invalid audience&#39;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">decodedToken</span>;
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">catch</span> (<span style="color:#a6e22e">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">error</span>(<span style="color:#e6db74">&#39;Token verification failed:&#39;</span>, <span style="color:#a6e22e">error</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><hr>
+<h2 id="4-not-using-https">4. <strong>Not Using HTTPS</strong><a hidden class="anchor" aria-hidden="true" href="#4-not-using-https">#</a></h2>
+<p>JWT tokens are typically transmitted over the network. If your application doesn’t use HTTPS, tokens can be intercepted by attackers.</p>
+<h3 id="pitfall-using-http-instead-of-https">Pitfall: Using HTTP Instead of HTTPS<a hidden class="anchor" aria-hidden="true" href="#pitfall-using-http-instead-of-https">#</a></h3>
+<p>HTTP doesn’t encrypt data, making it easy for attackers to capture tokens in transit.</p>
+<h4 id="example-of-insecure-network-request">Example of Insecure Network Request<a hidden class="anchor" aria-hidden="true" href="#example-of-insecure-network-request">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">fetchUserData</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">async</span> () =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">response</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">fetch</span>(<span style="color:#e6db74">&#39;http://api.example.com/user&#39;</span>, {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">headers</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;Authorization&#39;</span><span style="color:#f92672">:</span> <span style="color:#e6db74">`Bearer </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">token</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>,
+</span></span><span style="display:flex;"><span>      },
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">json</span>();
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">catch</span> (<span style="color:#a6e22e">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">error</span>(<span style="color:#e6db74">&#39;Error fetching user data:&#39;</span>, <span style="color:#a6e22e">error</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><h3 id="solution-enforce-https">Solution: Enforce HTTPS<a hidden class="anchor" aria-hidden="true" href="#solution-enforce-https">#</a></h3>
+<p>Always use HTTPS to encrypt network requests and protect JWTs from interception.</p>
+<h4 id="example-of-secure-network-request">Example of Secure Network Request<a hidden class="anchor" aria-hidden="true" href="#example-of-secure-network-request">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">fetchUserData</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">async</span> () =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">response</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">fetch</span>(<span style="color:#e6db74">&#39;https://api.example.com/user&#39;</span>, {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">headers</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;Authorization&#39;</span><span style="color:#f92672">:</span> <span style="color:#e6db74">`Bearer </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">token</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>,
+</span></span><span style="display:flex;"><span>      },
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">json</span>();
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">catch</span> (<span style="color:#a6e22e">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">error</span>(<span style="color:#e6db74">&#39;Error fetching user data:&#39;</span>, <span style="color:#a6e22e">error</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><hr>
+<h2 id="5-session-fixation">5. <strong>Session Fixation</strong><a hidden class="anchor" aria-hidden="true" href="#5-session-fixation">#</a></h2>
+<p>Session fixation occurs when an attacker forces a user to use a specific token, allowing the attacker to hijack the session.</p>
+<h3 id="pitfall-reusing-tokens-without-invalidating-old-ones">Pitfall: Reusing Tokens Without Invalidating Old Ones<a hidden class="anchor" aria-hidden="true" href="#pitfall-reusing-tokens-without-invalidating-old-ones">#</a></h3>
+<p>If your application doesn’t invalidate old tokens when issuing new ones, attackers can reuse old tokens to gain access.</p>
+<h3 id="solution-implementing-token-blacklists">Solution: Implementing Token Blacklists<a hidden class="anchor" aria-hidden="true" href="#solution-implementing-token-blacklists">#</a></h3>
+<p>Maintain a blacklist of invalidated tokens. When a new token is issued, add the old token to the blacklist and check against it during authentication.</p>
+<h4 id="example-of-token-blacklist-implementation">Example of Token Blacklist Implementation<a hidden class="anchor" aria-hidden="true" href="#example-of-token-blacklist-implementation">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">blacklist</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Set</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">invalidateToken</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">token</span>) =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">blacklist</span>.<span style="color:#a6e22e">add</span>(<span style="color:#a6e22e">token</span>);
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">verifyToken</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">async</span> (<span style="color:#a6e22e">token</span>) =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">blacklist</span>.<span style="color:#a6e22e">has</span>(<span style="color:#a6e22e">token</span>)) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> Error(<span style="color:#e6db74">&#39;Token has been invalidated&#39;</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Proceed with token verification
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>};
+</span></span></code></pre></div><hr>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>Implementing JWT in React Native applications requires careful consideration of security best practices. By addressing common pitfalls such as insecure storage, improper expiration handling, lack of claim validation, unencrypted network requests, and session fixation, you can significantly enhance the security of your authentication flow. Always prioritize secure storage, implement refresh tokens, validate JWT claims, use HTTPS, and maintain token blacklists to protect user sessions.</p>
+<hr>
+<h2 id="text-based-diagram-secure-jwt-storage-process">Text-Based Diagram: Secure JWT Storage Process<a hidden class="anchor" aria-hidden="true" href="#text-based-diagram-secure-jwt-storage-process">#</a></h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>+-------------------+        +-------------------+        +-------------------+
+</span></span><span style="display:flex;"><span>| User Authenticates |  -&gt;   | Encrypt JWT Token |  -&gt;   | Store Encrypted   |
+</span></span><span style="display:flex;"><span>| and Receives JWT  |       | with Secure Key    |       | Token in AsyncStorage|
+</span></span><span style="display:flex;"><span>+-------------------+        +-------------------+        +-------------------+
+</span></span></code></pre></div><hr>
+<h2 id="faq">FAQ<a hidden class="anchor" aria-hidden="true" href="#faq">#</a></h2>
+<ol>
+<li><strong>What are the best practices for storing JWT tokens in React Native?</strong></li>
+<li><strong>How can I handle token expiration without disrupting the user experience?</strong></li>
+<li><strong>Why is it important to validate the &lsquo;aud&rsquo; and &lsquo;iss&rsquo; claims in JWT?</strong></li>
+<li><strong>What are the risks of not using HTTPS when transmitting JWT tokens?</strong></li>
+<li><strong>How can I prevent session fixation attacks in my React Native application?</strong></li>
+</ol>
+<hr>
+<h2 id="meta-description">Meta Description<a hidden class="anchor" aria-hidden="true" href="#meta-description">#</a></h2>
+<p>Learn about common JWT pitfalls in React Native applications and how to implement secure authentication practices to protect user sessions.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/react-native/">React Native</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/jwt/">JWT</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/authentication/">Authentication</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/security/">Security</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/best-practices/">Best Practices</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/how-online-jwt-decode-tools-work-build-one-yourself-step-by-step/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>How Online JWT Decode Tools Work: Build One Yourself Step-by-Step</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/best-practices-for-safely-using-jwt-decode-in-react-projects/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Best Practices for Safely Using jwt-decode in React Projects</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/what-is-a-jwt-and-how-does-it-work-a-developer-friendly-introduction/" class="custom-link">
+              What Is a JWT and How Does It Work? A Developer-Friendly Introduction
+            </a>
+            <small class="custom-date">2025-08-26</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/build-your-own-jwt-decode-online-tool-with-firebase-functions-and-react/" class="custom-link">
+              Build Your Own JWT Decode Online Tool with Firebase Functions and React
+            </a>
+            <small class="custom-date">2025-08-25</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/how-online-jwt-decode-tools-work-build-one-yourself-step-by-step/" class="custom-link">
+              How Online JWT Decode Tools Work: Build One Yourself Step-by-Step
+            </a>
+            <small class="custom-date">2025-08-07</small>
+          </li>
+          
+        
+      
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/best-practices-for-safely-using-jwt-decode-in-react-projects/" class="custom-link">
+              Best Practices for Safely Using jwt-decode in React Projects
+            </a>
+            <small class="custom-date">2025-07-31</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/kubernetes-rbac-role-based-access-control-best-practices/" class="custom-link">
+              Kubernetes RBAC: Role-Based Access Control Best Practices
+            </a>
+            <small class="custom-date">2025-07-15</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/is-jwt-decoding-safe-on-the-frontend-security-risks-you-should-know/" class="custom-link">
+                Is JWT Decoding Safe on the Frontend? Security Risks You Should Know
+              </a>
+              <small class="custom-date">2025-08-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/what-is-a-jwt-and-how-does-it-work-a-developer-friendly-introduction/" class="custom-link">
+                What Is a JWT and How Does It Work? A Developer-Friendly Introduction
+              </a>
+              <small class="custom-date">2025-08-26</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/build-your-own-jwt-decode-online-tool-with-firebase-functions-and-react/" class="custom-link">
+                Build Your Own JWT Decode Online Tool with Firebase Functions and React
+              </a>
+              <small class="custom-date">2025-08-25</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/comparing-the-top-jwt-decode-tools-online-services-vs-local-libraries/" class="custom-link">
+                Comparing the Top JWT Decode Tools: Online Services vs Local Libraries
+              </a>
+              <small class="custom-date">2025-08-14</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/how-online-jwt-decode-tools-work-build-one-yourself-step-by-step/" class="custom-link">
+                How Online JWT Decode Tools Work: Build One Yourself Step-by-Step
+              </a>
+              <small class="custom-date">2025-08-07</small>
+            </li>
+            
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

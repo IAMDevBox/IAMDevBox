@@ -1,0 +1,1568 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"><title>Best Practices for Safely Using jwt-decode in React Projects | IAMDevBox</title><meta name="description" content="Learn how to safely use the jwt-decode library in your React projects while maintaining security best practices for JWT token handling."><meta name="keywords" content="React, JWT, Security, Best Practices, Authentication"><meta name="author" content="IAMDevBox"><meta name="language" content="en-US">
+<meta property="og:locale" content="en_US"><link rel="canonical" href="https://www.iamdevbox.com/posts/best-practices-for-safely-using-jwt-decode-in-react-projects/"><meta property="og:title" content="Best Practices for Safely Using jwt-decode in React Projects | IAMDevBox">
+<meta property="og:description" content="Learn how to safely use the jwt-decode library in your React projects while maintaining security best practices for JWT token handling.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/best-practices-for-safely-using-jwt-decode-in-react-projects/">
+<meta property="og:site_name" content="IAMDevBox">
+<meta property="og:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="IAMDevBox - Identity and Access Management Blog"><meta property="article:published_time" content="2025-07-31T14:58:58Z">
+<meta property="article:modified_time" content="2025-07-31T14:59:10Z">
+<meta property="article:author" content="IAMDevBox">
+<meta property="article:section" content="Posts"><meta property="article:tag" content="React"><meta property="article:tag" content="JWT"><meta property="article:tag" content="Security"><meta property="article:tag" content="Best Practices"><meta property="article:tag" content="Authentication"><meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Best Practices for Safely Using jwt-decode in React Projects | IAMDevBox">
+<meta name="twitter:description" content="Learn how to safely use the jwt-decode library in your React projects while maintaining security best practices for JWT token handling.">
+<meta name="twitter:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg"><meta name="twitter:site" content="@iamdevbox"><meta name="twitter:creator" content="@iamdevbox"><meta name="format-detection" content="telephone=no">
+<meta name="theme-color" content="#2e2e33"><link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="dns-prefetch" href="//fonts.googleapis.com">
+<link rel="dns-prefetch" href="//fonts.gstatic.com"><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Best Practices for Safely Using jwt-decode in React Projects",
+  "description": "Learn how to safely use the jwt-decode library in your React projects while maintaining security best practices for JWT token handling.",
+  "image": "https:\/\/www.iamdevbox.com\/IAMDevBox.com.jpg",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https:\/\/www.iamdevbox.com\/IAMDevBox.com.png"
+    }
+  },
+  "datePublished": "2025-07-31T14:58:58Z",
+  "dateModified": "2025-07-31T14:59:10Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/best-practices-for-safely-using-jwt-decode-in-react-projects\/"
+  },
+  "wordCount":  896 ,
+  "keywords": "[\"React\",\"JWT\",\"Security\",\"Best Practices\",\"Authentication\"]"
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "Best Practices for Safely Using jwt-decode in React Projects",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/best-practices-for-safely-using-jwt-decode-in-react-projects\/"
+    }]
+}
+</script>
+<link crossorigin="anonymous" href="/assets/css/stylesheet.93f625d739f1d6a5c6f20c146bc6a8d26b233492b34b2220c54b12fd46a04ded.css" integrity="sha256-k/Yl1znx1qXG8gwUa8ao0msjNJKzSyIgxUsS/UagTe0=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/best-practices-for-safely-using-jwt-decode-in-react-projects/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.f87e4df74f4f070695effe5d49ae4914eb9228356e4300800036f51859f72d47.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.f87e4df74f4f070695effe5d49ae4914eb9228356e4300800036f51859f72d47.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/best-practices-for-safely-using-jwt-decode-in-react-projects/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Best Practices for Safely Using jwt-decode in React Projects">
+  <meta property="og:description" content="Learn how to safely use the jwt-decode library in your React projects while maintaining security best practices for JWT token handling.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-07-31T14:58:58+00:00">
+    <meta property="article:modified_time" content="2025-07-31T14:59:10+00:00">
+    <meta property="article:tag" content="React">
+    <meta property="article:tag" content="JWT">
+    <meta property="article:tag" content="Security">
+    <meta property="article:tag" content="Best Practices">
+    <meta property="article:tag" content="Authentication">
+      <meta property="og:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:title" content="Best Practices for Safely Using jwt-decode in React Projects">
+<meta name="twitter:description" content="Learn how to safely use the jwt-decode library in your React projects while maintaining security best practices for JWT token handling.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Best Practices for Safely Using jwt-decode in React Projects",
+      "item": "https://www.iamdevbox.com/posts/best-practices-for-safely-using-jwt-decode-in-react-projects/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Best Practices for Safely Using jwt-decode in React Projects",
+  "name": "Best Practices for Safely Using jwt-decode in React Projects",
+  "description": "Learn how to safely use the jwt-decode library in your React projects while maintaining security best practices for JWT token handling.",
+  "keywords": [
+    "React", "JWT", "Security", "Best Practices", "Authentication"
+  ],
+  "articleBody": "JSON Web Tokens (JWT) have become a cornerstone of modern web applications, especially in React projects where state management and authentication are critical. The jwt-decode library is a popular choice for decoding JWT tokens in client-side applications. However, using this library requires careful consideration to ensure security and prevent vulnerabilities.\nIn this article, we’ll explore best practices for safely using jwt-decode in React projects, including proper validation, secure storage, and alternatives for sensitive operations.\nWhy Use jwt-decode in React? JWT tokens are often used for user authentication and authorization in React applications. These tokens contain payload data that can be decoded and used to manage user sessions. The jwt-decode library simplifies this process by providing a straightforward way to parse and extract data from JWT tokens.\nimport decode from 'jwt-decode'; const token = 'your.jwt.token'; const decodedToken = decode(token); console.log(decodedToken); // Outputs the decoded payload While jwt-decode is useful for decoding tokens, it’s important to remember that it does not validate tokens. This means you should never rely solely on jwt-decode for security-critical operations.\nBest Practices for Using jwt-decode Safely 1. Always Validate Tokens on the Server Side One of the most critical security practices is to validate JWT tokens on the server side, not just in the client-side React application. Client-side validation can be bypassed or tampered with, making it an unreliable method of ensuring token integrity.\nServer-side validation involves checking the token’s signature, expiration time, and other claims to ensure it’s valid and hasn’t been altered. This is typically done using libraries like jsonwebtoken in Node.js.\n// Server-side token validation example const jwt = require('jsonwebtoken'); function validateToken(token) { try { const decoded = jwt.verify(token, process.env.JWT_SECRET); return { isValid: true, decoded }; } catch (error) { return { isValid: false, error }; } } 2. Use HttpOnly Cookies for Token Storage Storing JWT tokens in cookies with the HttpOnly and Secure flags is a best practice for preventing token theft via cross-site scripting (XSS) attacks. This ensures that the token is only accessible to the server and not exposed to client-side JavaScript.\n// Setting an HttpOnly cookie in a Node.js server res.cookie('jwt', token, { httpOnly: true, secure: true, sameSite: 'lax', maxAge: 3600000 // 1 hour }); On the client side, you can retrieve the token using document.cookie and decode it for use in your React application.\n3. Implement Proper Error Handling When working with JWT tokens, it’s essential to handle errors gracefully. This includes invalid tokens, expired tokens, and network errors that may occur when fetching or decoding tokens.\ntry { const token = localStorage.getItem('jwt'); if (!token) { throw new Error('No token found'); } const decodedToken = decode(token); console.log('Decoded token:', decodedToken); } catch (error) { console.error('Token decoding failed:', error); // Handle error, e.g., redirect to login or show an error message } 4. Avoid Storing Tokens in LocalStorage While localStorage is a convenient way to store tokens, it’s not the most secure option. Tokens stored in localStorage can be accessed by any JavaScript running in the browser, making them vulnerable to XSS attacks.\nInstead, consider using sessionStorage for short-lived tokens or secure HTTP-only cookies for longer-lived tokens.\n5. Use Environment Variables for Secrets Never hardcode sensitive information like JWT secrets or private keys in your React application. Instead, use environment variables to store these values and load them securely on the server side.\n// Example of using environment variables in a Node.js server const jwt = require('jsonwebtoken'); function generateToken(userId) { const token = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '1h' }); return token; } Common Mistakes to Avoid 1. Relying on Client-Side Validation As mentioned earlier, client-side validation is not sufficient for securing JWT tokens. Always validate tokens on the server side to ensure they’re legitimate and haven’t been tampered with.\n2. Exposing JWT Secrets Never expose your JWT secret or private key in client-side code. This would allow malicious users to generate valid tokens and impersonate other users.\n3. Ignoring Token Expiration JWT tokens have an expiration time, and it’s crucial to handle expired tokens properly. Failing to do so can lead to security vulnerabilities or user friction.\nconst decodedToken = decode(token); if (decodedToken.exp \u003c Date.now() / 1000) { console.error('Token has expired'); // Handle expiration, e.g., redirect to login or refresh the token } Text-Based Diagram: JWT Token Flow in a React Application User Authenticates -\u003e Server Issues JWT Token -\u003e Token Stored in HttpOnly Cookie | | |--------------------------------------| | | | Token Retrieved from Cookie | | Token Decoded in React App | | Display User Data or Permissions | |--------------------------------------| | Token Validation on Server | | Error Handling and Session Management Conclusion Using the jwt-decode library in React projects can be a powerful way to work with JWT tokens, but it requires careful implementation to ensure security. By following best practices like server-side validation, secure token storage, and proper error handling, you can build robust and secure authentication systems in your React applications.\nRemember, security is a layered approach. Combining multiple best practices will help protect your application from potential vulnerabilities and ensure a better user experience.\nFAQs What are the security risks of using jwt-decode in React? How can I properly validate JWT tokens in a React application? What are the alternatives to using jwt-decode for decoding tokens? Meta Description Learn how to safely use the jwt-decode library in your React projects while maintaining security best practices for JWT token handling.\n",
+  "wordCount" : "896",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/IAMDevBox.com.jpg","datePublished": "2025-07-31T14:58:58Z",
+  "dateModified": "2025-07-31T14:59:10Z",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/best-practices-for-safely-using-jwt-decode-in-react-projects/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script><meta name="description" content="Learn how to safely use the jwt-decode library in your React projects while maintaining security best practices for JWT token handling.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/is-jwt-decoding-safe-on-the-frontend-security-risks-you-should-know\/"
+            },
+            "headline": "\"Is JWT Decoding Safe on the Frontend? Security Risks You Should Know\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-08-28T14:53:37Z",
+            "dateModified": "2025-08-28T14:53:52Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/what-is-a-jwt-and-how-does-it-work-a-developer-friendly-introduction\/"
+            },
+            "headline": "\"What Is a JWT and How Does It Work? A Developer-Friendly Introduction\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-08-26T15:13:56Z",
+            "dateModified": "2025-08-26T15:14:09Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/build-your-own-jwt-decode-online-tool-with-firebase-functions-and-react\/"
+            },
+            "headline": "\"Build Your Own JWT Decode Online Tool with Firebase Functions and React\"",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "\"https://www.iamdevbox.com/favicon-96x96.png\""
+            },
+            "datePublished": "2025-08-25T19:38:05Z",
+            "dateModified": "2025-08-25T19:38:19Z"
+          }
+  ]
+}
+</script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "\"What are the security risks of using jwt-decode in React?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Please refer to the article for detailed explanation.\""
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "\"How can I properly validate JWT tokens in a React application?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Please refer to the article for detailed explanation.\""
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "\"What are the alternatives to using jwt-decode for decoding tokens?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Please refer to the article for detailed explanation.\""
+      }
+    }
+  ]
+}
+</script>
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    if (document.querySelector('.mermaid')) {
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+        mermaid.initialize({ startOnLoad: true, theme: "default" });
+        };
+        document.head.appendChild(script);
+    }
+    });
+    </script>
+
+    
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-B6QCH29975');
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Best Practices for Safely Using jwt-decode in React Projects
+    </h1>
+    
+    <div class="post-meta">5 min&nbsp;·&nbsp;896 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#why-use-jwt-decode-in-react" aria-label="Why Use jwt-decode in React?">Why Use jwt-decode in React?</a></li>
+                <li>
+                    <a href="#best-practices-for-using-jwt-decode-safely" aria-label="Best Practices for Using jwt-decode Safely">Best Practices for Using jwt-decode Safely</a><ul>
+                        
+                <li>
+                    <a href="#1-always-validate-tokens-on-the-server-side" aria-label="1. Always Validate Tokens on the Server Side">1. Always Validate Tokens on the Server Side</a></li>
+                <li>
+                    <a href="#2-use-httponly-cookies-for-token-storage" aria-label="2. Use HttpOnly Cookies for Token Storage">2. Use HttpOnly Cookies for Token Storage</a></li>
+                <li>
+                    <a href="#3-implement-proper-error-handling" aria-label="3. Implement Proper Error Handling">3. Implement Proper Error Handling</a></li>
+                <li>
+                    <a href="#4-avoid-storing-tokens-in-localstorage" aria-label="4. Avoid Storing Tokens in LocalStorage">4. Avoid Storing Tokens in LocalStorage</a></li>
+                <li>
+                    <a href="#5-use-environment-variables-for-secrets" aria-label="5. Use Environment Variables for Secrets">5. Use Environment Variables for Secrets</a></li></ul>
+                </li>
+                <li>
+                    <a href="#common-mistakes-to-avoid" aria-label="Common Mistakes to Avoid">Common Mistakes to Avoid</a><ul>
+                        
+                <li>
+                    <a href="#1-relying-on-client-side-validation" aria-label="1. Relying on Client-Side Validation">1. Relying on Client-Side Validation</a></li>
+                <li>
+                    <a href="#2-exposing-jwt-secrets" aria-label="2. Exposing JWT Secrets">2. Exposing JWT Secrets</a></li>
+                <li>
+                    <a href="#3-ignoring-token-expiration" aria-label="3. Ignoring Token Expiration">3. Ignoring Token Expiration</a></li></ul>
+                </li>
+                <li>
+                    <a href="#text-based-diagram-jwt-token-flow-in-a-react-application" aria-label="Text-Based Diagram: JWT Token Flow in a React Application">Text-Based Diagram: JWT Token Flow in a React Application</a></li>
+                <li>
+                    <a href="#conclusion" aria-label="Conclusion">Conclusion</a></li>
+                <li>
+                    <a href="#faqs" aria-label="FAQs">FAQs</a></li>
+                <li>
+                    <a href="#meta-description" aria-label="Meta Description">Meta Description</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>JSON Web Tokens (JWT) have become a cornerstone of modern web applications, especially in React projects where state management and authentication are critical. The <code>jwt-decode</code> library is a popular choice for decoding JWT tokens in client-side applications. However, using this library requires careful consideration to ensure security and prevent vulnerabilities.</p>
+<p>In this article, we’ll explore best practices for safely using <code>jwt-decode</code> in React projects, including proper validation, secure storage, and alternatives for sensitive operations.</p>
+<hr>
+<h2 id="why-use-jwt-decode-in-react">Why Use jwt-decode in React?<a hidden class="anchor" aria-hidden="true" href="#why-use-jwt-decode-in-react">#</a></h2>
+<p>JWT tokens are often used for user authentication and authorization in React applications. These tokens contain payload data that can be decoded and used to manage user sessions. The <code>jwt-decode</code> library simplifies this process by providing a straightforward way to parse and extract data from JWT tokens.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">import</span> <span style="color:#a6e22e">decode</span> <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;jwt-decode&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">token</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;your.jwt.token&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">decodedToken</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">decode</span>(<span style="color:#a6e22e">token</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">decodedToken</span>); <span style="color:#75715e">// Outputs the decoded payload
+</span></span></span></code></pre></div><p>While <code>jwt-decode</code> is useful for decoding tokens, it’s important to remember that it does not validate tokens. This means you should never rely solely on <code>jwt-decode</code> for security-critical operations.</p>
+<hr>
+<h2 id="best-practices-for-using-jwt-decode-safely">Best Practices for Using jwt-decode Safely<a hidden class="anchor" aria-hidden="true" href="#best-practices-for-using-jwt-decode-safely">#</a></h2>
+<h3 id="1-always-validate-tokens-on-the-server-side">1. Always Validate Tokens on the Server Side<a hidden class="anchor" aria-hidden="true" href="#1-always-validate-tokens-on-the-server-side">#</a></h3>
+<p>One of the most critical security practices is to validate JWT tokens on the server side, not just in the client-side React application. Client-side validation can be bypassed or tampered with, making it an unreliable method of ensuring token integrity.</p>
+<p>Server-side validation involves checking the token’s signature, expiration time, and other claims to ensure it’s valid and hasn’t been altered. This is typically done using libraries like <code>jsonwebtoken</code> in Node.js.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// Server-side token validation example
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">jwt</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;jsonwebtoken&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">validateToken</span>(<span style="color:#a6e22e">token</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">decoded</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">jwt</span>.<span style="color:#a6e22e">verify</span>(<span style="color:#a6e22e">token</span>, <span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">env</span>.<span style="color:#a6e22e">JWT_SECRET</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> { <span style="color:#a6e22e">isValid</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">true</span>, <span style="color:#a6e22e">decoded</span> };
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">catch</span> (<span style="color:#a6e22e">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> { <span style="color:#a6e22e">isValid</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">false</span>, <span style="color:#a6e22e">error</span> };
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="2-use-httponly-cookies-for-token-storage">2. Use HttpOnly Cookies for Token Storage<a hidden class="anchor" aria-hidden="true" href="#2-use-httponly-cookies-for-token-storage">#</a></h3>
+<p>Storing JWT tokens in cookies with the <code>HttpOnly</code> and <code>Secure</code> flags is a best practice for preventing token theft via cross-site scripting (XSS) attacks. This ensures that the token is only accessible to the server and not exposed to client-side JavaScript.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// Setting an HttpOnly cookie in a Node.js server
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">cookie</span>(<span style="color:#e6db74">&#39;jwt&#39;</span>, <span style="color:#a6e22e">token</span>, {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">httpOnly</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">true</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">secure</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">true</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">sameSite</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;lax&#39;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">maxAge</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">3600000</span> <span style="color:#75715e">// 1 hour
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>});
+</span></span></code></pre></div><p>On the client side, you can retrieve the token using <code>document.cookie</code> and decode it for use in your React application.</p>
+<h3 id="3-implement-proper-error-handling">3. Implement Proper Error Handling<a hidden class="anchor" aria-hidden="true" href="#3-implement-proper-error-handling">#</a></h3>
+<p>When working with JWT tokens, it’s essential to handle errors gracefully. This includes invalid tokens, expired tokens, and network errors that may occur when fetching or decoding tokens.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">token</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">localStorage</span>.<span style="color:#a6e22e">getItem</span>(<span style="color:#e6db74">&#39;jwt&#39;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">token</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> Error(<span style="color:#e6db74">&#39;No token found&#39;</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">decodedToken</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">decode</span>(<span style="color:#a6e22e">token</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;Decoded token:&#39;</span>, <span style="color:#a6e22e">decodedToken</span>);
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">catch</span> (<span style="color:#a6e22e">error</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">error</span>(<span style="color:#e6db74">&#39;Token decoding failed:&#39;</span>, <span style="color:#a6e22e">error</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Handle error, e.g., redirect to login or show an error message
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span></code></pre></div><h3 id="4-avoid-storing-tokens-in-localstorage">4. Avoid Storing Tokens in LocalStorage<a hidden class="anchor" aria-hidden="true" href="#4-avoid-storing-tokens-in-localstorage">#</a></h3>
+<p>While <code>localStorage</code> is a convenient way to store tokens, it’s not the most secure option. Tokens stored in <code>localStorage</code> can be accessed by any JavaScript running in the browser, making them vulnerable to XSS attacks.</p>
+<p>Instead, consider using <code> sessionStorage</code> for short-lived tokens or secure HTTP-only cookies for longer-lived tokens.</p>
+<h3 id="5-use-environment-variables-for-secrets">5. Use Environment Variables for Secrets<a hidden class="anchor" aria-hidden="true" href="#5-use-environment-variables-for-secrets">#</a></h3>
+<p>Never hardcode sensitive information like JWT secrets or private keys in your React application. Instead, use environment variables to store these values and load them securely on the server side.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// Example of using environment variables in a Node.js server
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">jwt</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;jsonwebtoken&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">generateToken</span>(<span style="color:#a6e22e">userId</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">token</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">jwt</span>.<span style="color:#a6e22e">sign</span>({ <span style="color:#a6e22e">userId</span> }, <span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">env</span>.<span style="color:#a6e22e">JWT_SECRET</span>, {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">expiresIn</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;1h&#39;</span>
+</span></span><span style="display:flex;"><span>  });
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">token</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><hr>
+<h2 id="common-mistakes-to-avoid">Common Mistakes to Avoid<a hidden class="anchor" aria-hidden="true" href="#common-mistakes-to-avoid">#</a></h2>
+<h3 id="1-relying-on-client-side-validation">1. Relying on Client-Side Validation<a hidden class="anchor" aria-hidden="true" href="#1-relying-on-client-side-validation">#</a></h3>
+<p>As mentioned earlier, client-side validation is not sufficient for securing JWT tokens. Always validate tokens on the server side to ensure they’re legitimate and haven’t been tampered with.</p>
+<h3 id="2-exposing-jwt-secrets">2. Exposing JWT Secrets<a hidden class="anchor" aria-hidden="true" href="#2-exposing-jwt-secrets">#</a></h3>
+<p>Never expose your JWT secret or private key in client-side code. This would allow malicious users to generate valid tokens and impersonate other users.</p>
+<h3 id="3-ignoring-token-expiration">3. Ignoring Token Expiration<a hidden class="anchor" aria-hidden="true" href="#3-ignoring-token-expiration">#</a></h3>
+<p>JWT tokens have an expiration time, and it’s crucial to handle expired tokens properly. Failing to do so can lead to security vulnerabilities or user friction.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">decodedToken</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">decode</span>(<span style="color:#a6e22e">token</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">decodedToken</span>.<span style="color:#a6e22e">exp</span> <span style="color:#f92672">&lt;</span> Date.<span style="color:#a6e22e">now</span>() <span style="color:#f92672">/</span> <span style="color:#ae81ff">1000</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">error</span>(<span style="color:#e6db74">&#39;Token has expired&#39;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Handle expiration, e.g., redirect to login or refresh the token
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span></code></pre></div><hr>
+<h2 id="text-based-diagram-jwt-token-flow-in-a-react-application">Text-Based Diagram: JWT Token Flow in a React Application<a hidden class="anchor" aria-hidden="true" href="#text-based-diagram-jwt-token-flow-in-a-react-application">#</a></h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>User Authenticates -&gt; Server Issues JWT Token -&gt; Token Stored in HttpOnly Cookie
+</span></span><span style="display:flex;"><span>         |                                      |
+</span></span><span style="display:flex;"><span>         |--------------------------------------|
+</span></span><span style="display:flex;"><span>         |                                      |
+</span></span><span style="display:flex;"><span>         | Token Retrieved from Cookie          |
+</span></span><span style="display:flex;"><span>         | Token Decoded in React App           |
+</span></span><span style="display:flex;"><span>         | Display User Data or Permissions     |
+</span></span><span style="display:flex;"><span>         |--------------------------------------|
+</span></span><span style="display:flex;"><span>         | Token Validation on Server           |
+</span></span><span style="display:flex;"><span>         | Error Handling and Session Management
+</span></span></code></pre></div><hr>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>Using the <code>jwt-decode</code> library in React projects can be a powerful way to work with JWT tokens, but it requires careful implementation to ensure security. By following best practices like server-side validation, secure token storage, and proper error handling, you can build robust and secure authentication systems in your React applications.</p>
+<p>Remember, security is a layered approach. Combining multiple best practices will help protect your application from potential vulnerabilities and ensure a better user experience.</p>
+<hr>
+<h2 id="faqs">FAQs<a hidden class="anchor" aria-hidden="true" href="#faqs">#</a></h2>
+<ol>
+<li>What are the security risks of using jwt-decode in React?</li>
+<li>How can I properly validate JWT tokens in a React application?</li>
+<li>What are the alternatives to using jwt-decode for decoding tokens?</li>
+</ol>
+<hr>
+<h2 id="meta-description">Meta Description<a hidden class="anchor" aria-hidden="true" href="#meta-description">#</a></h2>
+<p>Learn how to safely use the jwt-decode library in your React projects while maintaining security best practices for JWT token handling.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/react/">React</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/jwt/">JWT</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/security/">Security</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/best-practices/">Best Practices</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/authentication/">Authentication</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/common-jwt-pitfalls-in-react-native-and-how-to-avoid-them/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Common JWT Pitfalls in React Native and How to Avoid Them</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/decoding-jwts-in-python-three-practical-methods-with-code-examples/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Decoding JWTs in Python: Three Practical Methods with Code Examples</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/what-is-a-jwt-and-how-does-it-work-a-developer-friendly-introduction/" class="custom-link">
+              What Is a JWT and How Does It Work? A Developer-Friendly Introduction
+            </a>
+            <small class="custom-date">2025-08-26</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/build-your-own-jwt-decode-online-tool-with-firebase-functions-and-react/" class="custom-link">
+              Build Your Own JWT Decode Online Tool with Firebase Functions and React
+            </a>
+            <small class="custom-date">2025-08-25</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/how-online-jwt-decode-tools-work-build-one-yourself-step-by-step/" class="custom-link">
+              How Online JWT Decode Tools Work: Build One Yourself Step-by-Step
+            </a>
+            <small class="custom-date">2025-08-07</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/common-jwt-pitfalls-in-react-native-and-how-to-avoid-them/" class="custom-link">
+              Common JWT Pitfalls in React Native and How to Avoid Them
+            </a>
+            <small class="custom-date">2025-08-05</small>
+          </li>
+          
+        
+      
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/kubernetes-rbac-role-based-access-control-best-practices/" class="custom-link">
+              Kubernetes RBAC: Role-Based Access Control Best Practices
+            </a>
+            <small class="custom-date">2025-07-15</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/is-jwt-decoding-safe-on-the-frontend-security-risks-you-should-know/" class="custom-link">
+                Is JWT Decoding Safe on the Frontend? Security Risks You Should Know
+              </a>
+              <small class="custom-date">2025-08-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/what-is-a-jwt-and-how-does-it-work-a-developer-friendly-introduction/" class="custom-link">
+                What Is a JWT and How Does It Work? A Developer-Friendly Introduction
+              </a>
+              <small class="custom-date">2025-08-26</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/build-your-own-jwt-decode-online-tool-with-firebase-functions-and-react/" class="custom-link">
+                Build Your Own JWT Decode Online Tool with Firebase Functions and React
+              </a>
+              <small class="custom-date">2025-08-25</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/comparing-the-top-jwt-decode-tools-online-services-vs-local-libraries/" class="custom-link">
+                Comparing the Top JWT Decode Tools: Online Services vs Local Libraries
+              </a>
+              <small class="custom-date">2025-08-14</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/how-online-jwt-decode-tools-work-build-one-yourself-step-by-step/" class="custom-link">
+                How Online JWT Decode Tools Work: Build One Yourself Step-by-Step
+              </a>
+              <small class="custom-date">2025-08-07</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
