@@ -1184,8 +1184,15 @@ function parseUrl(urlStr) {
     try {
         const url = new URL(urlStr);
         request.host = url.hostname;
-        // Query string: keep encoded (IG keeps it encoded)
-        request.query = url.search ? url.search.slice(1) : '';
+        // Query string: decode it so conditions can match actual values
+        // e.g., %3CAdvices%3E becomes <Advices>
+        const rawQuery = url.search ? url.search.slice(1) : '';
+        try {
+            request.query = decodeURIComponent(rawQuery);
+        } catch (e) {
+            // If decoding fails (malformed %), keep original
+            request.query = rawQuery;
+        }
         // Path: decode it (IG's request.uri.path is decoded)
         // url.pathname is already decoded by the URL parser
         request.path = url.pathname || '/';
