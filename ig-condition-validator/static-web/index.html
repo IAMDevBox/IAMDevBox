@@ -1011,11 +1011,11 @@ function analyzeConditions(node, context, depth = 0) {
     const results = [];
 
     if (node.type === 'BinaryOp' && node.operator === 'and') {
-        // AND: 展开为独立条件
+        // AND: expand as independent conditions
         results.push(...analyzeConditions(node.left, context, depth));
         results.push(...analyzeConditions(node.right, context, depth));
     } else if (node.type === 'BinaryOp' && node.operator === 'or') {
-        // OR: 作为一个整体，显示各分支
+        // OR: treat as a group, show each branch
         const evaluator = new Evaluator(context);
         const value = evaluator.visit(node);
         const branches = collectOrBranches(node);
@@ -1303,7 +1303,7 @@ document.getElementById('diagnose-btn').addEventListener('click', () => {
     const condition = document.getElementById('condition').value;
     if (!condition) { alert('Please enter a condition'); return; }
 
-    // 检查当前是否在 cURL tab，如果是且有内容，先解析
+    // Check if currently on cURL tab, if so and has content, parse first
     const curlTab = document.querySelector('[data-tab="curl"]');
     if (curlTab.classList.contains('active')) {
         const curl = document.getElementById('curl-input').value;
@@ -1416,7 +1416,7 @@ function createConditionItem(c) {
             div.appendChild(details);
         }
 
-        // 显示 OR 分支
+        // Display OR branches
         if (c.branches && c.branches.length > 0) {
             const branchList = document.createElement('div');
             branchList.style.cssText = 'margin-top: 0.5rem; padding-left: 1rem; border-left: 2px solid #475569;';
@@ -1618,14 +1618,14 @@ function updateHighlight() {
 
 // ============== Format Expression ==============
 function formatExpression(text) {
-    // 提取 ${...} 或 #{...} 的内容
+    // Extract content from ${...} or #{...}
     const match = text.match(/^(\$\{|\#\{)([\s\S]*)\}$/);
     if (!match) return text;
 
     const prefix = match[1];
     const inner = match[2].trim();
 
-    // 格式化内部表达式
+    // Format inner expression
     const formatted = formatInner(inner, 0);
     return prefix + '\n' + formatted + '\n}';
 }
@@ -1634,7 +1634,7 @@ function formatInner(expr, indent) {
     const pad = '  '.repeat(indent);
     const tokens = tokenizeForFormat(expr);
 
-    // 找到顶层的 and/or
+    // Find top-level and/or
     let depth = 0;
     let splitPoints = [];
 
@@ -1648,11 +1648,11 @@ function formatInner(expr, indent) {
     }
 
     if (splitPoints.length === 0) {
-        // 没有顶层 and/or，直接返回
+        // No top-level and/or, return as-is
         return pad + '  ' + expr.trim();
     }
 
-    // 按 and/or 分割
+    // Split by and/or
     let result = [];
     let start = 0;
     for (const sp of splitPoints) {
@@ -1672,14 +1672,14 @@ function tokenizeForFormat(expr) {
     let i = 0;
 
     while (i < expr.length) {
-        // 跳过空白
+        // Skip whitespace
         if (/\s/.test(expr[i])) {
             tokens.push(expr[i]);
             i++;
             continue;
         }
 
-        // 字符串
+        // String
         if (expr[i] === '"' || expr[i] === "'") {
             const quote = expr[i];
             let str = quote;
@@ -1693,7 +1693,7 @@ function tokenizeForFormat(expr) {
             continue;
         }
 
-        // 标识符
+        // Identifier
         if (/[a-zA-Z_]/.test(expr[i])) {
             let ident = '';
             while (i < expr.length && /[a-zA-Z0-9_]/.test(expr[i])) {
@@ -1703,7 +1703,7 @@ function tokenizeForFormat(expr) {
             continue;
         }
 
-        // 其他字符
+        // Other characters
         tokens.push(expr[i]);
         i++;
     }
