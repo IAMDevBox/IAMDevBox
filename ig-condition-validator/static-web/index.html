@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IG Condition Validator</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { text-align: center; margin-bottom: 0.5rem; color: #f8fafc; }
+        .subtitle { text-align: center; color: #94a3b8; margin-bottom: 2rem; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+        .card {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #334155;
+        }
+        .card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: #f1f5f9; }
+        .tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+        .tab {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: #334155;
+            color: #94a3b8;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .tab:hover { background: #475569; }
+        .tab.active { background: #3b82f6; color: white; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.5rem; }
+        input, textarea, select {
+            width: 100%;
+            padding: 0.75rem;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: #e2e8f0;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9rem;
+        }
+        input:focus, textarea:focus { outline: none; border-color: #3b82f6; }
+        textarea { resize: vertical; min-height: 100px; }
+        .condition-input { min-height: 120px; font-size: 1rem; }
+        .inline-group { display: grid; grid-template-columns: 120px 1fr; gap: 0.75rem; }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-primary:hover { background: #2563eb; }
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        .result-passed { background: #064e3b; border: 1px solid #10b981; }
+        .result-failed { background: #450a0a; border: 1px solid #ef4444; }
+        .result-error { background: #451a03; border: 1px solid #f59e0b; }
+        .result-icon { font-size: 1.5rem; }
+        .condition-list { display: flex; flex-direction: column; gap: 0.75rem; }
+        .condition-item {
+            padding: 1rem;
+            background: #0f172a;
+            border-radius: 8px;
+            border-left: 4px solid #334155;
+        }
+        .condition-item.passed { border-left-color: #10b981; }
+        .condition-item.failed { border-left-color: #ef4444; }
+        .condition-expr { font-family: 'Monaco', 'Menlo', monospace; font-size: 0.9rem; color: #f8fafc; margin-bottom: 0.5rem; }
+        .condition-details { font-size: 0.85rem; color: #94a3b8; }
+        .condition-suggestion { font-size: 0.85rem; color: #fbbf24; margin-top: 0.5rem; }
+        .status-icon { margin-right: 0.5rem; }
+        .hidden { display: none; }
+        .headers-list { display: flex; flex-direction: column; gap: 0.5rem; }
+        .header-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.5rem; }
+        .btn-icon {
+            padding: 0.5rem 0.75rem;
+            background: #334155;
+            border: none;
+            border-radius: 6px;
+            color: #94a3b8;
+            cursor: pointer;
+        }
+        .btn-icon:hover { background: #475569; color: #e2e8f0; }
+        .add-btn {
+            margin-top: 0.5rem;
+            background: transparent;
+            border: 1px dashed #475569;
+            color: #94a3b8;
+            padding: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+        }
+        .add-btn:hover { border-color: #3b82f6; color: #3b82f6; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>IG Condition Validator</h1>
+        <p class="subtitle">Debug ForgeRock Identity Gateway condition expressions (Static Version)</p>
+
+        <div class="grid">
+            <div>
+                <div class="card">
+                    <h3 class="card-title">Request</h3>
+                    <div class="tabs">
+                        <button class="tab active" data-tab="manual">Manual</button>
+                        <button class="tab" data-tab="curl">cURL</button>
+                    </div>
+
+                    <div id="tab-manual" class="tab-content">
+                        <div class="form-group inline-group">
+                            <div>
+                                <label>Method</label>
+                                <select id="method">
+                                    <option value="GET">GET</option>
+                                    <option value="POST">POST</option>
+                                    <option value="PUT">PUT</option>
+                                    <option value="DELETE">DELETE</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Path</label>
+                                <input type="text" id="path" value="/" placeholder="/api/users">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Query String</label>
+                            <input type="text" id="query" placeholder="param1=value1&param2=value2">
+                        </div>
+                        <div class="form-group">
+                            <label>Host</label>
+                            <input type="text" id="host" placeholder="api.example.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Headers</label>
+                            <div id="headers-list" class="headers-list">
+                                <div class="header-row">
+                                    <input type="text" placeholder="Header name" class="header-name">
+                                    <input type="text" placeholder="Header value" class="header-value">
+                                    <button class="btn-icon remove-header">×</button>
+                                </div>
+                            </div>
+                            <button class="add-btn" id="add-header">+ Add Header</button>
+                        </div>
+                        <div class="form-group">
+                            <label>Body</label>
+                            <textarea id="body" placeholder='{"key": "value"}'></textarea>
+                        </div>
+                    </div>
+
+                    <div id="tab-curl" class="tab-content hidden">
+                        <div class="form-group">
+                            <label>Paste cURL command</label>
+                            <textarea id="curl-input" placeholder='curl -X GET "https://api.example.com/users" -H "Authorization: Bearer token"'></textarea>
+                        </div>
+                        <button class="btn btn-primary" id="parse-curl">Parse cURL</button>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 1.5rem;">
+                    <h3 class="card-title">Condition Expression</h3>
+                    <div class="form-group">
+                        <textarea id="condition" class="condition-input" placeholder='${request.method == "GET" and contains(request.uri.path, "/api/")}'></textarea>
+                    </div>
+                    <button class="btn btn-primary" id="diagnose-btn">Diagnose</button>
+                </div>
+            </div>
+
+            <div>
+                <div class="card">
+                    <h3 class="card-title">Diagnosis Result</h3>
+                    <div id="result-container">
+                        <p style="color: #64748b; text-align: center; padding: 2rem;">
+                            Enter a condition and click "Diagnose" to see results
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+// ============== Lexer ==============
+const TokenType = {
+    STRING: 'STRING', NUMBER: 'NUMBER', BOOLEAN: 'BOOLEAN', NULL: 'NULL',
+    IDENTIFIER: 'IDENTIFIER', EQ: 'EQ', NE: 'NE', LT: 'LT', LE: 'LE', GT: 'GT', GE: 'GE',
+    AND: 'AND', OR: 'OR', NOT: 'NOT', PLUS: 'PLUS', MINUS: 'MINUS',
+    MULTIPLY: 'MULTIPLY', DIVIDE: 'DIVIDE', MODULO: 'MODULO', EMPTY: 'EMPTY',
+    TERNARY_IF: 'TERNARY_IF', TERNARY_ELSE: 'TERNARY_ELSE',
+    DOT: 'DOT', COMMA: 'COMMA', LPAREN: 'LPAREN', RPAREN: 'RPAREN',
+    LBRACKET: 'LBRACKET', RBRACKET: 'RBRACKET',
+    EXPR_START: 'EXPR_START', EXPR_END: 'EXPR_END', EOF: 'EOF', ERROR: 'ERROR'
+};
+
+const KEYWORDS = {
+    'true': TokenType.BOOLEAN, 'false': TokenType.BOOLEAN, 'null': TokenType.NULL,
+    'and': TokenType.AND, 'or': TokenType.OR, 'not': TokenType.NOT,
+    'div': TokenType.DIVIDE, 'mod': TokenType.MODULO, 'empty': TokenType.EMPTY,
+    'eq': TokenType.EQ, 'ne': TokenType.NE, 'lt': TokenType.LT,
+    'le': TokenType.LE, 'gt': TokenType.GT, 'ge': TokenType.GE,
+};
+
+class Lexer {
+    constructor(source) {
+        this.source = source;
+        this.pos = 0;
+        this.line = 1;
+        this.column = 1;
+    }
+
+    get current() { return this.pos < this.source.length ? this.source[this.pos] : null; }
+    peek(offset = 1) { return this.pos + offset < this.source.length ? this.source[this.pos + offset] : null; }
+
+    advance() {
+        const char = this.current;
+        this.pos++;
+        if (char === '\n') { this.line++; this.column = 1; } else { this.column++; }
+        return char;
+    }
+
+    skipWhitespace() { while (this.current && /\s/.test(this.current)) this.advance(); }
+
+    readString(quote) {
+        const line = this.line, column = this.column;
+        this.advance();
+        let result = '';
+        while (this.current && this.current !== quote) {
+            if (this.current === '\\') {
+                this.advance();
+                const c = this.current;
+                if (c === 'n') result += '\n';
+                else if (c === 't') result += '\t';
+                else if (c === '\\') result += '\\';
+                else if (c === quote) result += quote;
+                else result += c || '';
+                this.advance();
+            } else {
+                result += this.current;
+                this.advance();
+            }
+        }
+        if (this.current !== quote) throw new Error(`Unterminated string at ${line}:${column}`);
+        this.advance();
+        return { type: TokenType.STRING, value: result, line, column };
+    }
+
+    readNumber() {
+        const line = this.line, column = this.column;
+        let result = '';
+        while (this.current && /\d/.test(this.current)) { result += this.current; this.advance(); }
+        if (this.current === '.' && this.peek() && /\d/.test(this.peek())) {
+            result += this.current; this.advance();
+            while (this.current && /\d/.test(this.current)) { result += this.current; this.advance(); }
+        }
+        return { type: TokenType.NUMBER, value: result, line, column };
+    }
+
+    readIdentifier() {
+        const line = this.line, column = this.column;
+        let result = '';
+        while (this.current && /[\w]/.test(this.current)) { result += this.current; this.advance(); }
+        const lower = result.toLowerCase();
+        const type = KEYWORDS[lower] || TokenType.IDENTIFIER;
+        return { type, value: type === TokenType.IDENTIFIER ? result : lower, line, column };
+    }
+
+    tokenize() {
+        const tokens = [];
+        while (this.current) {
+            const line = this.line, column = this.column;
+            if (/\s/.test(this.current)) { this.skipWhitespace(); continue; }
+            if ((this.current === '$' || this.current === '#') && this.peek() === '{') {
+                const start = this.current; this.advance(); this.advance();
+                tokens.push({ type: TokenType.EXPR_START, value: start + '{', line, column });
+                continue;
+            }
+            if (this.current === '}') { this.advance(); tokens.push({ type: TokenType.EXPR_END, value: '}', line, column }); continue; }
+            if (this.current === '"' || this.current === "'") { tokens.push(this.readString(this.current)); continue; }
+            if (/\d/.test(this.current)) { tokens.push(this.readNumber()); continue; }
+            if (/[a-zA-Z_]/.test(this.current)) { tokens.push(this.readIdentifier()); continue; }
+
+            const two = this.current + (this.peek() || '');
+            if (two === '==') { this.advance(); this.advance(); tokens.push({ type: TokenType.EQ, value: '==', line, column }); continue; }
+            if (two === '!=') { this.advance(); this.advance(); tokens.push({ type: TokenType.NE, value: '!=', line, column }); continue; }
+            if (two === '<=') { this.advance(); this.advance(); tokens.push({ type: TokenType.LE, value: '<=', line, column }); continue; }
+            if (two === '>=') { this.advance(); this.advance(); tokens.push({ type: TokenType.GE, value: '>=', line, column }); continue; }
+            if (two === '&&') { this.advance(); this.advance(); tokens.push({ type: TokenType.AND, value: '&&', line, column }); continue; }
+            if (two === '||') { this.advance(); this.advance(); tokens.push({ type: TokenType.OR, value: '||', line, column }); continue; }
+
+            const ops = { '<': TokenType.LT, '>': TokenType.GT, '+': TokenType.PLUS, '-': TokenType.MINUS,
+                '*': TokenType.MULTIPLY, '/': TokenType.DIVIDE, '%': TokenType.MODULO, '!': TokenType.NOT,
+                '?': TokenType.TERNARY_IF, ':': TokenType.TERNARY_ELSE, '.': TokenType.DOT, ',': TokenType.COMMA,
+                '(': TokenType.LPAREN, ')': TokenType.RPAREN, '[': TokenType.LBRACKET, ']': TokenType.RBRACKET };
+            if (ops[this.current]) {
+                const c = this.current; this.advance();
+                tokens.push({ type: ops[c], value: c, line, column });
+                continue;
+            }
+            this.advance();
+            tokens.push({ type: TokenType.ERROR, value: this.source[this.pos - 1], line, column });
+        }
+        tokens.push({ type: TokenType.EOF, value: '', line: this.line, column: this.column });
+        return tokens;
+    }
+}
+
+// ============== Parser ==============
+class Parser {
+    constructor(source) {
+        this.tokens = new Lexer(source).tokenize();
+        this.pos = 0;
+    }
+
+    get current() { return this.tokens[Math.min(this.pos, this.tokens.length - 1)]; }
+    advance() { const t = this.current; if (this.pos < this.tokens.length - 1) this.pos++; return t; }
+    match(...types) { return types.includes(this.current.type); }
+    expect(type, msg) {
+        if (this.current.type === type) return this.advance();
+        throw new Error(`${msg}, got '${this.current.value}' at ${this.current.line}:${this.current.column}`);
+    }
+
+    parse() {
+        if (!this.match(TokenType.EXPR_START)) throw new Error("Expression must start with '${' or '#{'");
+        const start = this.advance();
+        const body = this.parseTernary();
+        this.expect(TokenType.EXPR_END, "Expected '}'");
+        return { type: 'Expression', body, deferred: start.value.startsWith('#') };
+    }
+
+    parseTernary() {
+        let cond = this.parseOr();
+        if (this.match(TokenType.TERNARY_IF)) {
+            this.advance();
+            const thenExpr = this.parseTernary();
+            this.expect(TokenType.TERNARY_ELSE, "Expected ':' in ternary");
+            const elseExpr = this.parseTernary();
+            return { type: 'TernaryOp', condition: cond, thenExpr, elseExpr };
+        }
+        return cond;
+    }
+
+    parseOr() {
+        let left = this.parseAnd();
+        while (this.match(TokenType.OR)) { this.advance(); left = { type: 'BinaryOp', operator: 'or', left, right: this.parseAnd() }; }
+        return left;
+    }
+
+    parseAnd() {
+        let left = this.parseEquality();
+        while (this.match(TokenType.AND)) { this.advance(); left = { type: 'BinaryOp', operator: 'and', left, right: this.parseEquality() }; }
+        return left;
+    }
+
+    parseEquality() {
+        let left = this.parseComparison();
+        while (this.match(TokenType.EQ, TokenType.NE)) {
+            const op = this.advance();
+            left = { type: 'BinaryOp', operator: op.type === TokenType.EQ ? '==' : '!=', left, right: this.parseComparison() };
+        }
+        return left;
+    }
+
+    parseComparison() {
+        let left = this.parseAdditive();
+        while (this.match(TokenType.LT, TokenType.GT, TokenType.LE, TokenType.GE)) {
+            const op = this.advance();
+            const opMap = { [TokenType.LT]: '<', [TokenType.GT]: '>', [TokenType.LE]: '<=', [TokenType.GE]: '>=' };
+            left = { type: 'BinaryOp', operator: opMap[op.type], left, right: this.parseAdditive() };
+        }
+        return left;
+    }
+
+    parseAdditive() {
+        let left = this.parseMultiplicative();
+        while (this.match(TokenType.PLUS, TokenType.MINUS)) {
+            const op = this.advance();
+            left = { type: 'BinaryOp', operator: op.type === TokenType.PLUS ? '+' : '-', left, right: this.parseMultiplicative() };
+        }
+        return left;
+    }
+
+    parseMultiplicative() {
+        let left = this.parseUnary();
+        while (this.match(TokenType.MULTIPLY, TokenType.DIVIDE, TokenType.MODULO)) {
+            const op = this.advance();
+            const opMap = { [TokenType.MULTIPLY]: '*', [TokenType.DIVIDE]: '/', [TokenType.MODULO]: '%' };
+            left = { type: 'BinaryOp', operator: opMap[op.type], left, right: this.parseUnary() };
+        }
+        return left;
+    }
+
+    parseUnary() {
+        if (this.match(TokenType.NOT, TokenType.MINUS, TokenType.EMPTY)) {
+            const op = this.advance();
+            const opMap = { [TokenType.NOT]: 'not', [TokenType.MINUS]: '-', [TokenType.EMPTY]: 'empty' };
+            return { type: 'UnaryOp', operator: opMap[op.type], operand: this.parseUnary() };
+        }
+        return this.parsePostfix();
+    }
+
+    parsePostfix() {
+        let node = this.parsePrimary();
+        while (true) {
+            if (this.match(TokenType.DOT)) {
+                this.advance();
+                const prop = this.expect(TokenType.IDENTIFIER, "Expected property name");
+                node = { type: 'PropertyAccess', object: node, property: prop.value };
+            } else if (this.match(TokenType.LBRACKET)) {
+                this.advance();
+                const index = this.parseTernary();
+                this.expect(TokenType.RBRACKET, "Expected ']'");
+                node = { type: 'IndexAccess', object: node, index };
+            } else if (this.match(TokenType.LPAREN)) {
+                if (node.type !== 'Identifier') throw new Error("Cannot call non-identifier");
+                this.advance();
+                const args = [];
+                if (!this.match(TokenType.RPAREN)) {
+                    args.push(this.parseTernary());
+                    while (this.match(TokenType.COMMA)) { this.advance(); args.push(this.parseTernary()); }
+                }
+                this.expect(TokenType.RPAREN, "Expected ')'");
+                node = { type: 'FunctionCall', name: node.name, arguments: args };
+            } else break;
+        }
+        return node;
+    }
+
+    parsePrimary() {
+        const t = this.current;
+        if (this.match(TokenType.STRING)) { this.advance(); return { type: 'Literal', value: t.value, litType: 'string' }; }
+        if (this.match(TokenType.NUMBER)) { this.advance(); return { type: 'Literal', value: t.value.includes('.') ? parseFloat(t.value) : parseInt(t.value), litType: 'number' }; }
+        if (this.match(TokenType.BOOLEAN)) { this.advance(); return { type: 'Literal', value: t.value === 'true', litType: 'boolean' }; }
+        if (this.match(TokenType.NULL)) { this.advance(); return { type: 'Literal', value: null, litType: 'null' }; }
+        if (this.match(TokenType.IDENTIFIER)) { this.advance(); return { type: 'Identifier', name: t.value }; }
+        if (this.match(TokenType.LPAREN)) { this.advance(); const expr = this.parseTernary(); this.expect(TokenType.RPAREN, "Expected ')'"); return expr; }
+        throw new Error(`Unexpected token: '${t.value}' at ${t.line}:${t.column}`);
+    }
+}
+
+// ============== Built-in Functions ==============
+const FUNCTIONS = {
+    contains: (obj, val) => {
+        if (obj == null) return false;
+        if (typeof obj === 'string') return obj.includes(String(val));
+        if (Array.isArray(obj)) return obj.includes(val);
+        return false;
+    },
+    find: (str, pattern) => { if (str == null) return false; try { return new RegExp(pattern).test(str); } catch { return false; } },
+    findGroups: (str, pattern) => {
+        if (str == null) return null;
+        try { const m = str.match(new RegExp(pattern)); return m ? [m[0], ...(m.slice(1))] : null; } catch { return null; }
+    },
+    matches: (str, pattern) => { if (str == null) return false; try { return new RegExp(pattern).test(str); } catch { return false; } },
+    matchesWithRegex: (str, pattern) => { if (str == null) return false; try { return new RegExp('^' + pattern + '$').test(str); } catch { return false; } },
+    bool: (val) => val != null && String(val).toLowerCase() === 'true',
+    boolean: (val) => val != null && String(val).toLowerCase() === 'true',
+    integer: (val, radix = 10) => { const n = parseInt(val, radix); return isNaN(n) ? null : n; },
+    split: (str, pattern) => { if (str == null) return []; try { return str.split(new RegExp(pattern)); } catch { return [str]; } },
+    join: (vals, sep) => vals == null ? '' : vals.join(sep),
+    length: (obj) => obj == null ? 0 : (obj.length !== undefined ? obj.length : 0),
+    indexOf: (str, sub) => str == null || sub == null ? -1 : str.indexOf(sub),
+    toLowerCase: (str) => str == null ? '' : String(str).toLowerCase(),
+    toUpperCase: (str) => str == null ? '' : String(str).toUpperCase(),
+    trim: (str) => str == null ? '' : String(str).trim(),
+    toString: (val) => val == null ? '' : String(val),
+    encodeBase64: (str) => str == null ? '' : btoa(str),
+    decodeBase64: (str) => { try { return atob(str); } catch { return ''; } },
+    urlEncode: (str) => str == null ? '' : encodeURIComponent(str),
+    urlDecode: (str) => str == null ? '' : decodeURIComponent(str),
+    empty: (val) => val == null || (val.length !== undefined && val.length === 0),
+};
+
+// ============== Evaluator ==============
+class Evaluator {
+    constructor(context) { this.context = context; this.traces = []; }
+
+    evaluate(ast) {
+        try {
+            const value = this.visit(ast);
+            return { success: true, value, traces: this.traces };
+        } catch (e) {
+            return { success: false, error: e.message, traces: this.traces };
+        }
+    }
+
+    visit(node) {
+        switch (node.type) {
+            case 'Expression': return this.visit(node.body);
+            case 'BinaryOp': return this.visitBinaryOp(node);
+            case 'UnaryOp': return this.visitUnaryOp(node);
+            case 'TernaryOp': return this.visitTernaryOp(node);
+            case 'FunctionCall': return this.visitFunctionCall(node);
+            case 'PropertyAccess': return this.visitPropertyAccess(node);
+            case 'IndexAccess': return this.visitIndexAccess(node);
+            case 'Identifier': return this.visitIdentifier(node);
+            case 'Literal': return node.value;
+            default: throw new Error(`Unknown node type: ${node.type}`);
+        }
+    }
+
+    visitBinaryOp(node) {
+        const left = this.visit(node.left);
+        const right = this.visit(node.right);
+        let result;
+        switch (node.operator) {
+            case 'and': result = Boolean(left) && Boolean(right); break;
+            case 'or': result = Boolean(left) || Boolean(right); break;
+            case '==': result = left === right; break;
+            case '!=': result = left !== right; break;
+            case '<': result = left < right; break;
+            case '<=': result = left <= right; break;
+            case '>': result = left > right; break;
+            case '>=': result = left >= right; break;
+            case '+': result = (typeof left === 'string' || typeof right === 'string') ? String(left ?? '') + String(right ?? '') : (left ?? 0) + (right ?? 0); break;
+            case '-': result = (left ?? 0) - (right ?? 0); break;
+            case '*': result = (left ?? 0) * (right ?? 0); break;
+            case '/': result = (left ?? 0) / right; break;
+            case '%': result = (left ?? 0) % right; break;
+            default: throw new Error(`Unknown operator: ${node.operator}`);
+        }
+        this.traces.push({ node, left, right, result, operator: node.operator });
+        return result;
+    }
+
+    visitUnaryOp(node) {
+        const operand = this.visit(node.operand);
+        let result;
+        switch (node.operator) {
+            case 'not': result = !Boolean(operand); break;
+            case '-': result = -(operand ?? 0); break;
+            case 'empty': result = operand == null || (operand.length !== undefined && operand.length === 0); break;
+            default: throw new Error(`Unknown unary operator: ${node.operator}`);
+        }
+        this.traces.push({ node, operand, result, operator: node.operator });
+        return result;
+    }
+
+    visitTernaryOp(node) {
+        const cond = this.visit(node.condition);
+        return cond ? this.visit(node.thenExpr) : this.visit(node.elseExpr);
+    }
+
+    visitFunctionCall(node) {
+        const fn = FUNCTIONS[node.name];
+        if (!fn) throw new Error(`Unknown function: ${node.name}`);
+        const args = node.arguments.map(a => this.visit(a));
+        const result = fn(...args);
+        this.traces.push({ node, name: node.name, args, result });
+        return result;
+    }
+
+    visitPropertyAccess(node) {
+        const obj = this.visit(node.object);
+        if (obj == null) return null;
+        return obj[node.property];
+    }
+
+    visitIndexAccess(node) {
+        const obj = this.visit(node.object);
+        const index = this.visit(node.index);
+        if (obj == null) return null;
+        return obj[index];
+    }
+
+    visitIdentifier(node) {
+        return this.context[node.name];
+    }
+}
+
+// ============== Diagnoser ==============
+function diagnose(condition, request) {
+    const context = {
+        request: {
+            method: request.method,
+            uri: { scheme: 'https', host: request.host, path: request.path, query: request.query },
+            headers: request.headers,
+            cookies: request.cookies,
+            entity: { string: request.body, json: (() => { try { return JSON.parse(request.body); } catch { return null; } })() },
+            queryParams: parseQueryParams(request.query),
+        },
+        session: {},
+        attributes: {},
+        contexts: {},
+        env: {},
+    };
+
+    let ast;
+    try {
+        ast = new Parser(condition).parse();
+    } catch (e) {
+        return { success: false, error: e.message, conditions: [] };
+    }
+
+    const evaluator = new Evaluator(context);
+    const result = evaluator.evaluate(ast);
+
+    if (!result.success) {
+        return { success: false, error: result.error, conditions: [] };
+    }
+
+    const conditions = analyzeConditions(ast.body, context);
+    const passed = conditions.filter(c => c.passed).length;
+
+    return {
+        success: true,
+        overall: Boolean(result.value),
+        conditions,
+        summary: `${passed}/${conditions.length} conditions passed`
+    };
+}
+
+function analyzeConditions(node, context) {
+    const results = [];
+
+    if (node.type === 'BinaryOp' && (node.operator === 'and' || node.operator === 'or')) {
+        results.push(...analyzeConditions(node.left, context));
+        results.push(...analyzeConditions(node.right, context));
+    } else {
+        const evaluator = new Evaluator(context);
+        const value = evaluator.visit(node);
+        const exprStr = nodeToString(node);
+        const details = generateDetails(node, value, context);
+
+        results.push({
+            expression: exprStr,
+            passed: Boolean(value),
+            value,
+            details: details.details,
+            suggestion: details.suggestion
+        });
+    }
+
+    return results;
+}
+
+function nodeToString(node) {
+    switch (node.type) {
+        case 'BinaryOp': return `(${nodeToString(node.left)} ${node.operator} ${nodeToString(node.right)})`;
+        case 'UnaryOp': return `(${node.operator} ${nodeToString(node.operand)})`;
+        case 'FunctionCall': return `${node.name}(${node.arguments.map(nodeToString).join(', ')})`;
+        case 'PropertyAccess': return `${nodeToString(node.object)}.${node.property}`;
+        case 'IndexAccess': return `${nodeToString(node.object)}[${nodeToString(node.index)}]`;
+        case 'Identifier': return node.name;
+        case 'Literal': return node.litType === 'string' ? `'${node.value}'` : String(node.value);
+        default: return '?';
+    }
+}
+
+function generateDetails(node, value, context) {
+    let details = '', suggestion = '';
+
+    if (node.type === 'BinaryOp') {
+        const leftVal = new Evaluator(context).visit(node.left);
+        const rightVal = new Evaluator(context).visit(node.right);
+        details = `Comparing ${repr(leftVal)} ${node.operator} ${repr(rightVal)}`;
+        if (node.operator === '==' && leftVal !== rightVal) {
+            suggestion = `Expected ${repr(rightVal)}, but got ${repr(leftVal)}`;
+        }
+    } else if (node.type === 'FunctionCall') {
+        const args = node.arguments.map(a => new Evaluator(context).visit(a));
+        details = `Called ${node.name}(${args.map(repr).join(', ')}) = ${repr(value)}`;
+        if (node.name === 'contains' && !value && args.length >= 2) {
+            suggestion = `'${args[1]}' not found in ${repr(args[0])}`;
+        } else if (node.name === 'find' && !value && args.length >= 2) {
+            suggestion = `Pattern '${args[1]}' not found in '${args[0]}'`;
+        }
+    } else if (node.type === 'UnaryOp') {
+        const operand = new Evaluator(context).visit(node.operand);
+        details = `${node.operator} ${repr(operand)} = ${repr(value)}`;
+    }
+
+    return { details, suggestion };
+}
+
+function repr(val) {
+    if (val === null || val === undefined) return 'null';
+    if (typeof val === 'string') return `"${val.length > 50 ? val.slice(0, 50) + '...' : val}"`;
+    if (typeof val === 'boolean') return val ? 'true' : 'false';
+    if (Array.isArray(val)) return `[${val.length} items]`;
+    return String(val);
+}
+
+function parseQueryParams(query) {
+    if (!query) return {};
+    const params = {};
+    query.split('&').forEach(pair => {
+        const [key, value] = pair.split('=');
+        if (key) {
+            if (!params[key]) params[key] = [];
+            params[key].push(decodeURIComponent(value || ''));
+        }
+    });
+    return params;
+}
+
+function parseCurl(curlCmd) {
+    const request = { method: 'GET', path: '/', query: '', host: '', headers: {}, cookies: {}, body: null };
+    const cleaned = curlCmd.replace(/\\\n/g, ' ').replace(/\s+/g, ' ').trim();
+    const args = [];
+    let current = '', inQuote = null;
+
+    for (let i = 0; i < cleaned.length; i++) {
+        const c = cleaned[i];
+        if (inQuote) {
+            if (c === inQuote) inQuote = null;
+            else current += c;
+        } else if (c === '"' || c === "'") {
+            inQuote = c;
+        } else if (c === ' ') {
+            if (current) { args.push(current); current = ''; }
+        } else {
+            current += c;
+        }
+    }
+    if (current) args.push(current);
+
+    for (let i = 0; i < args.length; i++) {
+        const arg = args[i];
+        if (arg === '-X' || arg === '--request') { request.method = args[++i]?.toUpperCase() || 'GET'; }
+        else if (arg === '-H' || arg === '--header') {
+            const header = args[++i] || '';
+            const idx = header.indexOf(':');
+            if (idx > 0) {
+                const name = header.slice(0, idx).trim();
+                const value = header.slice(idx + 1).trim();
+                if (!request.headers[name]) request.headers[name] = [];
+                request.headers[name].push(value);
+            }
+        }
+        else if (arg === '-d' || arg === '--data' || arg === '--data-raw') {
+            request.body = args[++i] || '';
+            if (request.method === 'GET') request.method = 'POST';
+        }
+        else if (arg.startsWith('http://') || arg.startsWith('https://')) {
+            try {
+                const url = new URL(arg);
+                request.host = url.hostname;
+                request.path = url.pathname || '/';
+                request.query = url.search ? url.search.slice(1) : '';
+            } catch {}
+        }
+    }
+    return request;
+}
+
+// ============== UI ==============
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+        tab.classList.add('active');
+        document.getElementById('tab-' + tab.dataset.tab).classList.remove('hidden');
+    });
+});
+
+document.getElementById('add-header').addEventListener('click', () => {
+    const list = document.getElementById('headers-list');
+    const row = document.createElement('div');
+    row.className = 'header-row';
+
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.placeholder = 'Header name';
+    nameInput.className = 'header-name';
+
+    const valueInput = document.createElement('input');
+    valueInput.type = 'text';
+    valueInput.placeholder = 'Header value';
+    valueInput.className = 'header-value';
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'btn-icon remove-header';
+    removeBtn.textContent = '×';
+
+    row.appendChild(nameInput);
+    row.appendChild(valueInput);
+    row.appendChild(removeBtn);
+    list.appendChild(row);
+});
+
+document.getElementById('headers-list').addEventListener('click', e => {
+    if (e.target.classList.contains('remove-header')) {
+        if (document.querySelectorAll('.header-row').length > 1) e.target.parentElement.remove();
+    }
+});
+
+document.getElementById('parse-curl').addEventListener('click', () => {
+    const curl = document.getElementById('curl-input').value;
+    if (!curl) return;
+    const req = parseCurl(curl);
+    document.getElementById('method').value = req.method;
+    document.getElementById('path').value = req.path;
+    document.getElementById('query').value = req.query;
+    document.getElementById('host').value = req.host;
+    document.getElementById('body').value = req.body || '';
+
+    const list = document.getElementById('headers-list');
+    list.textContent = '';
+    const entries = Object.entries(req.headers);
+    if (entries.length === 0) {
+        addHeaderRow('', '');
+    } else {
+        entries.forEach(([name, values]) => addHeaderRow(name, values[0]));
+    }
+    document.querySelector('[data-tab="manual"]').click();
+});
+
+function addHeaderRow(name, value) {
+    const list = document.getElementById('headers-list');
+    const row = document.createElement('div');
+    row.className = 'header-row';
+
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.placeholder = 'Header name';
+    nameInput.className = 'header-name';
+    nameInput.value = name;
+
+    const valueInput = document.createElement('input');
+    valueInput.type = 'text';
+    valueInput.placeholder = 'Header value';
+    valueInput.className = 'header-value';
+    valueInput.value = value;
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'btn-icon remove-header';
+    removeBtn.textContent = '×';
+
+    row.appendChild(nameInput);
+    row.appendChild(valueInput);
+    row.appendChild(removeBtn);
+    list.appendChild(row);
+}
+
+document.getElementById('diagnose-btn').addEventListener('click', () => {
+    const condition = document.getElementById('condition').value;
+    if (!condition) { alert('Please enter a condition'); return; }
+
+    const headers = {};
+    document.querySelectorAll('.header-row').forEach(row => {
+        const name = row.querySelector('.header-name').value.trim();
+        const value = row.querySelector('.header-value').value;
+        if (name) {
+            if (!headers[name]) headers[name] = [];
+            headers[name].push(value);
+        }
+    });
+
+    const request = {
+        method: document.getElementById('method').value,
+        path: document.getElementById('path').value,
+        query: document.getElementById('query').value,
+        host: document.getElementById('host').value,
+        headers,
+        cookies: {},
+        body: document.getElementById('body').value || null
+    };
+
+    const result = diagnose(condition, request);
+    displayResult(result);
+});
+
+function displayResult(result) {
+    const container = document.getElementById('result-container');
+    container.textContent = '';
+
+    if (!result.success) {
+        container.appendChild(createHeader('error', '⚠️', 'Error', result.error));
+        return;
+    }
+
+    const type = result.overall ? 'passed' : 'failed';
+    const icon = result.overall ? '✓' : '✗';
+    const status = result.overall ? 'PASSED' : 'FAILED';
+    container.appendChild(createHeader(type, icon, status, result.summary));
+
+    if (result.conditions.length > 0) {
+        const list = document.createElement('div');
+        list.className = 'condition-list';
+        result.conditions.forEach(c => list.appendChild(createConditionItem(c)));
+        container.appendChild(list);
+    }
+}
+
+function createHeader(type, icon, title, msg) {
+    const div = document.createElement('div');
+    div.className = 'result-header result-' + type;
+
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'result-icon';
+    iconSpan.textContent = icon;
+
+    const content = document.createElement('div');
+    const titleEl = document.createElement('strong');
+    titleEl.textContent = title;
+    const msgEl = document.createElement('div');
+    msgEl.style.cssText = 'font-size:0.9rem;margin-top:0.25rem';
+    msgEl.textContent = msg;
+
+    content.appendChild(titleEl);
+    content.appendChild(msgEl);
+    div.appendChild(iconSpan);
+    div.appendChild(content);
+    return div;
+}
+
+function createConditionItem(c) {
+    const div = document.createElement('div');
+    div.className = 'condition-item ' + (c.passed ? 'passed' : 'failed');
+
+    const expr = document.createElement('div');
+    expr.className = 'condition-expr';
+    const statusIcon = document.createElement('span');
+    statusIcon.className = 'status-icon';
+    statusIcon.textContent = c.passed ? '✓' : '✗';
+    expr.appendChild(statusIcon);
+    expr.appendChild(document.createTextNode(c.expression));
+    div.appendChild(expr);
+
+    if (c.details) {
+        const details = document.createElement('div');
+        details.className = 'condition-details';
+        details.textContent = c.details;
+        div.appendChild(details);
+    }
+
+    if (c.suggestion && !c.passed) {
+        const suggestion = document.createElement('div');
+        suggestion.className = 'condition-suggestion';
+        suggestion.textContent = '💡 ' + c.suggestion;
+        div.appendChild(suggestion);
+    }
+
+    return div;
+}
+</script>
+</body>
+</html>
