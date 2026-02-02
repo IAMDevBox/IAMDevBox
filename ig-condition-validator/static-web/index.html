@@ -237,10 +237,17 @@
 
                     <div id="tab-curl" class="tab-content">
                         <div class="form-group">
-                            <label>Paste cURL command</label>
-                            <textarea id="curl-input" placeholder='curl -X GET "https://api.example.com/users" -H "Authorization: Bearer token"'></textarea>
+                            <label>Paste cURL command or URL</label>
+                            <textarea id="curl-input" placeholder='curl -X GET "https://api.example.com/users?status=active" -H "Authorization: Bearer token"
+
+Or just paste a URL:
+https://api.example.com/path%2Fencoded?query=value%26other'></textarea>
                         </div>
-                        <button class="btn btn-primary" id="parse-curl">Parse cURL</button>
+                        <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" id="keep-encoded" style="width: auto;">
+                            <label for="keep-encoded" style="margin: 0; cursor: pointer;">Keep URL encoding (preserve %XX in path)</label>
+                        </div>
+                        <button class="btn btn-primary" id="parse-curl">Parse cURL / URL</button>
                     </div>
                 </div>
 
@@ -318,6 +325,7 @@ class Lexer {
         this.advance();
         let result = '';
         while (this.current && this.current !== quote) {
+            // Handle escape sequences
             if (this.current === '\\') {
                 this.advance();
                 const c = this.current;
@@ -327,7 +335,25 @@ class Lexer {
                 else if (c === quote) result += quote;
                 else result += c || '';
                 this.advance();
-            } else {
+            }
+            // Handle URL-encoded quotes: %27 (') and %22 (")
+            // These should be kept as-is in the string, not treated as string terminators
+            else if (this.current === '%') {
+                const next2 = (this.peek(1) || '') + (this.peek(2) || '');
+                if (next2.toLowerCase() === '27' || next2.toLowerCase() === '22') {
+                    // Include %27 or %22 as literal characters in the string
+                    result += this.current; // %
+                    this.advance();
+                    result += this.current; // 2
+                    this.advance();
+                    result += this.current; // 7 or 2
+                    this.advance();
+                } else {
+                    result += this.current;
+                    this.advance();
+                }
+            }
+            else {
                 result += this.current;
                 this.advance();
             }
@@ -1103,9 +1129,15 @@ function parseQueryParams(query) {
     return params;
 }
 
-function parseCurl(curlCmd) {
+function parseCurl(curlCmd, keepEncoded = false) {
     const request = { method: 'GET', path: '/', query: '', host: '', headers: {}, cookies: {}, body: null };
     const cleaned = curlCmd.replace(/\\\n/g, ' ').replace(/\s+/g, ' ').trim();
+
+    // Check if input is just a URL (not a curl command)
+    if (cleaned.match(/^https?:\/\/[^\s]+$/) && !cleaned.startsWith('curl')) {
+        return parseUrl(cleaned, keepEncoded);
+    }
+
     const args = [];
     let current = '', inQuote = null;
 
@@ -1142,13 +1174,42 @@ function parseCurl(curlCmd) {
             if (request.method === 'GET') request.method = 'POST';
         }
         else if (arg.startsWith('http://') || arg.startsWith('https://')) {
-            try {
-                const url = new URL(arg);
-                request.host = url.hostname;
-                request.path = url.pathname || '/';
-                request.query = url.search ? url.search.slice(1) : '';
-            } catch {}
+            const parsed = parseUrl(arg, keepEncoded);
+            request.host = parsed.host;
+            request.path = parsed.path;
+            request.query = parsed.query;
         }
+    }
+    return request;
+}
+
+function parseUrl(urlStr, keepEncoded = false) {
+    const request = { method: 'GET', path: '/', query: '', host: '', headers: {}, cookies: {}, body: null };
+    try {
+        const url = new URL(urlStr);
+        request.host = url.hostname;
+        request.query = url.search ? url.search.slice(1) : '';
+
+        if (keepEncoded) {
+            // Extract path from URL string manually to preserve encoding
+            const protocolEnd = urlStr.indexOf('://') + 3;
+            const hostEnd = urlStr.indexOf('/', protocolEnd);
+            const queryStart = urlStr.indexOf('?');
+            const hashStart = urlStr.indexOf('#');
+
+            if (hostEnd > 0) {
+                let pathEnd = urlStr.length;
+                if (queryStart > 0) pathEnd = Math.min(pathEnd, queryStart);
+                if (hashStart > 0) pathEnd = Math.min(pathEnd, hashStart);
+                request.path = urlStr.slice(hostEnd, pathEnd);
+            } else {
+                request.path = '/';
+            }
+        } else {
+            request.path = url.pathname || '/';
+        }
+    } catch (e) {
+        console.error('Failed to parse URL:', e);
     }
     return request;
 }
@@ -1197,7 +1258,8 @@ document.getElementById('headers-list').addEventListener('click', e => {
 document.getElementById('parse-curl').addEventListener('click', () => {
     const curl = document.getElementById('curl-input').value;
     if (!curl) return;
-    const req = parseCurl(curl);
+    const keepEncoded = document.getElementById('keep-encoded').checked;
+    const req = parseCurl(curl, keepEncoded);
     document.getElementById('method').value = req.method;
     document.getElementById('path').value = req.path;
     document.getElementById('query').value = req.query;
@@ -1251,7 +1313,8 @@ document.getElementById('diagnose-btn').addEventListener('click', () => {
     if (curlTab.classList.contains('active')) {
         const curl = document.getElementById('curl-input').value;
         if (curl) {
-            const req = parseCurl(curl);
+            const keepEncoded = document.getElementById('keep-encoded').checked;
+            const req = parseCurl(curl, keepEncoded);
             document.getElementById('method').value = req.method;
             document.getElementById('path').value = req.path;
             document.getElementById('query').value = req.query;
