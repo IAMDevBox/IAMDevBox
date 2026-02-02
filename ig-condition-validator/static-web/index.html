@@ -497,7 +497,19 @@ class Parser {
             if (this.match(TokenType.DOT)) {
                 this.advance();
                 const prop = this.expect(TokenType.IDENTIFIER, "Expected property name");
-                node = { type: 'PropertyAccess', object: node, property: prop.value };
+                // Check if this is a method call: obj.method()
+                if (this.match(TokenType.LPAREN)) {
+                    this.advance();
+                    const args = [];
+                    if (!this.match(TokenType.RPAREN)) {
+                        args.push(this.parseTernary());
+                        while (this.match(TokenType.COMMA)) { this.advance(); args.push(this.parseTernary()); }
+                    }
+                    this.expect(TokenType.RPAREN, "Expected ')'");
+                    node = { type: 'MethodCall', object: node, method: prop.value, arguments: args };
+                } else {
+                    node = { type: 'PropertyAccess', object: node, property: prop.value };
+                }
             } else if (this.match(TokenType.LBRACKET)) {
                 this.advance();
                 const index = this.parseTernary();
@@ -532,10 +544,12 @@ class Parser {
 
 // ============== Built-in Functions ==============
 const FUNCTIONS = {
+    // String matching
     contains: (obj, val) => {
         if (obj == null) return false;
         if (typeof obj === 'string') return obj.includes(String(val));
         if (Array.isArray(obj)) return obj.includes(val);
+        if (typeof obj === 'object') return val in obj;
         return false;
     },
     find: (str, pattern) => { if (str == null) return false; try { return new RegExp(pattern).test(str); } catch { return false; } },
@@ -545,22 +559,113 @@ const FUNCTIONS = {
     },
     matches: (str, pattern) => { if (str == null) return false; try { return new RegExp(pattern).test(str); } catch { return false; } },
     matchesWithRegex: (str, pattern) => { if (str == null) return false; try { return new RegExp('^' + pattern + '$').test(str); } catch { return false; } },
-    bool: (val) => val != null && String(val).toLowerCase() === 'true',
-    boolean: (val) => val != null && String(val).toLowerCase() === 'true',
-    integer: (val, radix = 10) => { const n = parseInt(val, radix); return isNaN(n) ? null : n; },
-    split: (str, pattern) => { if (str == null) return []; try { return str.split(new RegExp(pattern)); } catch { return [str]; } },
-    join: (vals, sep) => vals == null ? '' : vals.join(sep),
-    length: (obj) => obj == null ? 0 : (obj.length !== undefined ? obj.length : 0),
-    indexOf: (str, sub) => str == null || sub == null ? -1 : str.indexOf(sub),
+
+    // String manipulation
+    substring: (str, start, end) => {
+        if (str == null) return '';
+        str = String(str);
+        if (end === undefined) return str.substring(start);
+        return str.substring(start, end);
+    },
+    startsWith: (str, prefix) => str == null ? false : String(str).startsWith(String(prefix)),
+    endsWith: (str, suffix) => str == null ? false : String(str).endsWith(String(suffix)),
     toLowerCase: (str) => str == null ? '' : String(str).toLowerCase(),
     toUpperCase: (str) => str == null ? '' : String(str).toUpperCase(),
     trim: (str) => str == null ? '' : String(str).trim(),
+    trimStart: (str) => str == null ? '' : String(str).trimStart(),
+    trimEnd: (str) => str == null ? '' : String(str).trimEnd(),
+    replace: (str, search, replacement) => str == null ? '' : String(str).replace(search, replacement),
+    replaceAll: (str, search, replacement) => str == null ? '' : String(str).replaceAll(search, replacement),
+    concat: (...args) => args.map(a => a == null ? '' : String(a)).join(''),
+    charAt: (str, index) => str == null ? '' : String(str).charAt(index),
+    charCodeAt: (str, index) => str == null ? 0 : String(str).charCodeAt(index),
+    repeat: (str, count) => str == null ? '' : String(str).repeat(count),
+    padStart: (str, len, pad) => str == null ? '' : String(str).padStart(len, pad),
+    padEnd: (str, len, pad) => str == null ? '' : String(str).padEnd(len, pad),
+
+    // Type conversion
+    bool: (val) => val != null && String(val).toLowerCase() === 'true',
+    boolean: (val) => val != null && String(val).toLowerCase() === 'true',
+    integer: (val, radix = 10) => { const n = parseInt(val, radix); return isNaN(n) ? null : n; },
+    number: (val) => { const n = parseFloat(val); return isNaN(n) ? null : n; },
     toString: (val) => val == null ? '' : String(val),
-    encodeBase64: (str) => str == null ? '' : btoa(str),
-    decodeBase64: (str) => { try { return atob(str); } catch { return ''; } },
+
+    // Array/Collection functions
+    split: (str, pattern, limit) => {
+        if (str == null) return [];
+        try {
+            const regex = new RegExp(pattern);
+            return limit !== undefined ? str.split(regex, limit) : str.split(regex);
+        } catch { return [str]; }
+    },
+    join: (vals, sep = '') => vals == null ? '' : Array.isArray(vals) ? vals.join(sep) : String(vals),
+    array: (...args) => args,
+    first: (arr) => Array.isArray(arr) && arr.length > 0 ? arr[0] : null,
+    last: (arr) => Array.isArray(arr) && arr.length > 0 ? arr[arr.length - 1] : null,
+    reverse: (arr) => Array.isArray(arr) ? [...arr].reverse() : arr,
+    sort: (arr) => Array.isArray(arr) ? [...arr].sort() : arr,
+    slice: (arr, start, end) => {
+        if (arr == null) return [];
+        if (typeof arr === 'string') return end !== undefined ? arr.slice(start, end) : arr.slice(start);
+        if (Array.isArray(arr)) return end !== undefined ? arr.slice(start, end) : arr.slice(start);
+        return [];
+    },
+
+    // Object functions
+    keys: (obj) => obj == null ? [] : Object.keys(obj),
+    keySet: (obj) => obj == null ? [] : Object.keys(obj),
+    values: (obj) => obj == null ? [] : Object.values(obj),
+    entries: (obj) => obj == null ? [] : Object.entries(obj),
+
+    // Utility functions
+    length: (obj) => {
+        if (obj == null) return 0;
+        if (typeof obj === 'string' || Array.isArray(obj)) return obj.length;
+        if (typeof obj === 'object') return Object.keys(obj).length;
+        return 0;
+    },
+    size: (obj) => FUNCTIONS.length(obj),
+    indexOf: (str, sub, fromIndex = 0) => str == null || sub == null ? -1 : String(str).indexOf(sub, fromIndex),
+    lastIndexOf: (str, sub, fromIndex) => str == null || sub == null ? -1 : (fromIndex !== undefined ? String(str).lastIndexOf(sub, fromIndex) : String(str).lastIndexOf(sub)),
+    empty: (val) => val == null || (typeof val === 'string' && val.length === 0) || (Array.isArray(val) && val.length === 0) || (typeof val === 'object' && Object.keys(val).length === 0),
+    isEmpty: (val) => FUNCTIONS.empty(val),
+    isNull: (val) => val === null || val === undefined,
+    isNotNull: (val) => val !== null && val !== undefined,
+    defaultTo: (val, defaultVal) => val == null ? defaultVal : val,
+    coalesce: (...args) => args.find(a => a != null) ?? null,
+
+    // Encoding functions
+    encodeBase64: (str) => str == null ? '' : btoa(unescape(encodeURIComponent(str))),
+    decodeBase64: (str) => { try { return decodeURIComponent(escape(atob(str))); } catch { return ''; } },
     urlEncode: (str) => str == null ? '' : encodeURIComponent(str),
-    urlDecode: (str) => str == null ? '' : decodeURIComponent(str),
-    empty: (val) => val == null || (val.length !== undefined && val.length === 0),
+    urlDecode: (str) => { try { return decodeURIComponent(str); } catch { return str; } },
+    jsonParse: (str) => { try { return JSON.parse(str); } catch { return null; } },
+    jsonStringify: (obj) => { try { return JSON.stringify(obj); } catch { return ''; } },
+
+    // Math functions
+    abs: (n) => Math.abs(n),
+    ceil: (n) => Math.ceil(n),
+    floor: (n) => Math.floor(n),
+    round: (n) => Math.round(n),
+    min: (...args) => Math.min(...args),
+    max: (...args) => Math.max(...args),
+    random: () => Math.random(),
+
+    // Date/Time functions (simplified)
+    now: () => Date.now(),
+    timestamp: () => Math.floor(Date.now() / 1000),
+
+    // Type checking
+    typeof: (val) => {
+        if (val === null || val === undefined) return 'null';
+        if (Array.isArray(val)) return 'array';
+        return typeof val;
+    },
+    isString: (val) => typeof val === 'string',
+    isNumber: (val) => typeof val === 'number' && !isNaN(val),
+    isBoolean: (val) => typeof val === 'boolean',
+    isArray: (val) => Array.isArray(val),
+    isObject: (val) => val !== null && typeof val === 'object' && !Array.isArray(val),
 };
 
 // ============== Evaluator ==============
@@ -583,6 +688,7 @@ class Evaluator {
             case 'UnaryOp': return this.visitUnaryOp(node);
             case 'TernaryOp': return this.visitTernaryOp(node);
             case 'FunctionCall': return this.visitFunctionCall(node);
+            case 'MethodCall': return this.visitMethodCall(node);
             case 'PropertyAccess': return this.visitPropertyAccess(node);
             case 'IndexAccess': return this.visitIndexAccess(node);
             case 'Identifier': return this.visitIdentifier(node);
@@ -642,9 +748,99 @@ class Evaluator {
         return result;
     }
 
+    visitMethodCall(node) {
+        const obj = this.visit(node.object);
+        const args = node.arguments.map(a => this.visit(a));
+        const method = node.method;
+        let result;
+
+        // String methods
+        const STRING_METHODS = {
+            length: (s) => s == null ? 0 : String(s).length,
+            toLowerCase: (s) => s == null ? '' : String(s).toLowerCase(),
+            toUpperCase: (s) => s == null ? '' : String(s).toUpperCase(),
+            trim: (s) => s == null ? '' : String(s).trim(),
+            trimStart: (s) => s == null ? '' : String(s).trimStart(),
+            trimEnd: (s) => s == null ? '' : String(s).trimEnd(),
+            substring: (s, start, end) => s == null ? '' : (end !== undefined ? String(s).substring(start, end) : String(s).substring(start)),
+            substr: (s, start, len) => s == null ? '' : (len !== undefined ? String(s).substr(start, len) : String(s).substr(start)),
+            charAt: (s, i) => s == null ? '' : String(s).charAt(i),
+            charCodeAt: (s, i) => s == null ? 0 : String(s).charCodeAt(i),
+            indexOf: (s, sub, from) => s == null ? -1 : (from !== undefined ? String(s).indexOf(sub, from) : String(s).indexOf(sub)),
+            lastIndexOf: (s, sub, from) => s == null ? -1 : (from !== undefined ? String(s).lastIndexOf(sub, from) : String(s).lastIndexOf(sub)),
+            startsWith: (s, prefix) => s == null ? false : String(s).startsWith(prefix),
+            endsWith: (s, suffix) => s == null ? false : String(s).endsWith(suffix),
+            includes: (s, sub) => s == null ? false : String(s).includes(sub),
+            contains: (s, sub) => s == null ? false : String(s).includes(sub),
+            split: (s, sep, limit) => s == null ? [] : (limit !== undefined ? String(s).split(sep, limit) : String(s).split(sep)),
+            replace: (s, search, repl) => s == null ? '' : String(s).replace(search, repl),
+            replaceAll: (s, search, repl) => s == null ? '' : String(s).replaceAll(search, repl),
+            repeat: (s, count) => s == null ? '' : String(s).repeat(count),
+            padStart: (s, len, pad) => s == null ? '' : String(s).padStart(len, pad || ' '),
+            padEnd: (s, len, pad) => s == null ? '' : String(s).padEnd(len, pad || ' '),
+            concat: (s, ...more) => s == null ? '' : String(s).concat(...more),
+            match: (s, pattern) => { try { return s == null ? null : String(s).match(new RegExp(pattern)); } catch { return null; } },
+            toString: (s) => s == null ? '' : String(s),
+        };
+
+        // Array methods
+        const ARRAY_METHODS = {
+            length: (a) => a == null ? 0 : a.length,
+            size: (a) => a == null ? 0 : a.length,
+            first: (a) => a == null || a.length === 0 ? null : a[0],
+            last: (a) => a == null || a.length === 0 ? null : a[a.length - 1],
+            get: (a, i) => a == null ? null : a[i],
+            indexOf: (a, val) => a == null ? -1 : a.indexOf(val),
+            contains: (a, val) => a == null ? false : a.includes(val),
+            includes: (a, val) => a == null ? false : a.includes(val),
+            join: (a, sep) => a == null ? '' : a.join(sep ?? ''),
+            slice: (a, start, end) => a == null ? [] : (end !== undefined ? a.slice(start, end) : a.slice(start)),
+            reverse: (a) => a == null ? [] : [...a].reverse(),
+            sort: (a) => a == null ? [] : [...a].sort(),
+            isEmpty: (a) => a == null || a.length === 0,
+        };
+
+        // Object/Map methods
+        const OBJECT_METHODS = {
+            keys: (o) => o == null ? [] : Object.keys(o),
+            keySet: (o) => o == null ? [] : Object.keys(o),
+            values: (o) => o == null ? [] : Object.values(o),
+            entries: (o) => o == null ? [] : Object.entries(o),
+            size: (o) => o == null ? 0 : Object.keys(o).length,
+            get: (o, key) => o == null ? null : o[key],
+            containsKey: (o, key) => o == null ? false : key in o,
+            containsValue: (o, val) => o == null ? false : Object.values(o).includes(val),
+            isEmpty: (o) => o == null || Object.keys(o).length === 0,
+        };
+
+        // Try to find and execute the method
+        if (typeof obj === 'string' && STRING_METHODS[method]) {
+            result = STRING_METHODS[method](obj, ...args);
+        } else if (Array.isArray(obj) && ARRAY_METHODS[method]) {
+            result = ARRAY_METHODS[method](obj, ...args);
+        } else if (obj !== null && typeof obj === 'object' && OBJECT_METHODS[method]) {
+            result = OBJECT_METHODS[method](obj, ...args);
+        } else if (obj != null && typeof obj[method] === 'function') {
+            // Try native method
+            result = obj[method](...args);
+        } else if (FUNCTIONS[method]) {
+            // Fall back to global function with obj as first argument
+            result = FUNCTIONS[method](obj, ...args);
+        } else {
+            throw new Error(`Unknown method: ${method}`);
+        }
+
+        this.traces.push({ node, object: obj, method, args, result });
+        return result;
+    }
+
     visitPropertyAccess(node) {
         const obj = this.visit(node.object);
         if (obj == null) return null;
+        // Special handling for .length property on strings/arrays
+        if (node.property === 'length' && (typeof obj === 'string' || Array.isArray(obj))) {
+            return obj.length;
+        }
         return obj[node.property];
     }
 
@@ -662,19 +858,106 @@ class Evaluator {
 
 // ============== Diagnoser ==============
 function diagnose(condition, request) {
+    // Parse form data if content-type is application/x-www-form-urlencoded
+    const parseFormData = (body, contentType) => {
+        if (!body || !contentType) return {};
+        if (contentType.includes('application/x-www-form-urlencoded')) {
+            return parseQueryParams(body);
+        }
+        return {};
+    };
+
+    const contentType = request.headers['Content-Type']?.[0] || request.headers['content-type']?.[0] || '';
+    const formData = parseFormData(request.body, contentType);
+
+    // Build comprehensive context matching IG's runtime
     const context = {
+        // Main request object
         request: {
             method: request.method,
-            uri: { scheme: 'https', host: request.host, path: request.path, query: request.query },
+            uri: {
+                scheme: 'https',
+                host: request.host,
+                port: 443,
+                path: request.path,
+                query: request.query,
+                fragment: '',
+                // Full URL reconstruction
+                toString: () => `https://${request.host}${request.path}${request.query ? '?' + request.query : ''}`,
+            },
             headers: request.headers,
             cookies: request.cookies,
-            entity: { string: request.body, json: (() => { try { return JSON.parse(request.body); } catch { return null; } })() },
+            form: formData,
+            entity: {
+                string: request.body,
+                json: (() => { try { return JSON.parse(request.body); } catch { return null; } })(),
+                bytes: request.body ? new TextEncoder().encode(request.body) : null,
+            },
             queryParams: parseQueryParams(request.query),
         },
-        session: {},
-        attributes: {},
-        contexts: {},
-        env: {},
+
+        // Session object (simulated)
+        session: {
+            // Common session properties
+            sessionId: 'simulated-session-id',
+            // Session can store arbitrary properties
+        },
+
+        // Attributes (request-scoped storage)
+        attributes: {
+            // Attributes can store arbitrary properties
+        },
+
+        // Contexts object (IG-specific)
+        contexts: {
+            // Router context
+            router: {
+                name: 'default',
+                baseUri: '/',
+            },
+            // Client context (info about client connection)
+            client: {
+                remoteAddress: '127.0.0.1',
+                remotePort: 12345,
+                localAddress: '127.0.0.1',
+                localPort: 443,
+                isSecure: true,
+                certificates: [],
+            },
+            // OAuth2 context (if present)
+            oauth2: {
+                accessToken: null,
+                tokenInfo: {},
+            },
+            // AM (Access Management) context
+            amSession: {
+                sessionId: null,
+                realm: '/',
+                username: null,
+            },
+            // JWT context
+            jwtSession: {
+                claims: {},
+            },
+        },
+
+        // Environment variables
+        env: {
+            // System environment variables can be accessed here
+        },
+
+        // System properties
+        system: {
+            // Java system properties (simulated)
+        },
+
+        // Heap storage (cross-request)
+        heap: {},
+
+        // True/false/null literals for convenience
+        true: true,
+        false: false,
+        null: null,
     };
 
     let ast;
@@ -1129,7 +1412,30 @@ function createConditionItem(c) {
 
 // ============== Syntax Highlighting ==============
 const HIGHLIGHT_KEYWORDS = new Set(['and', 'or', 'not', 'true', 'false', 'null', 'empty', 'eq', 'ne', 'lt', 'le', 'gt', 'ge', 'div', 'mod']);
-const HIGHLIGHT_FUNCTIONS = new Set(['contains', 'matches', 'find', 'indexOf', 'length', 'split', 'join', 'toString', 'toLowerCase', 'toUpperCase', 'trim', 'substring', 'startsWith', 'endsWith', 'isEmpty', 'decodeBase64', 'encodeBase64']);
+const HIGHLIGHT_FUNCTIONS = new Set([
+    // String functions
+    'contains', 'matches', 'find', 'findGroups', 'matchesWithRegex',
+    'substring', 'startsWith', 'endsWith', 'toLowerCase', 'toUpperCase',
+    'trim', 'trimStart', 'trimEnd', 'replace', 'replaceAll', 'concat',
+    'charAt', 'charCodeAt', 'repeat', 'padStart', 'padEnd',
+    // Array functions
+    'split', 'join', 'array', 'first', 'last', 'reverse', 'sort', 'slice',
+    // Object functions
+    'keys', 'keySet', 'values', 'entries',
+    // Utility functions
+    'length', 'size', 'indexOf', 'lastIndexOf', 'empty', 'isEmpty',
+    'isNull', 'isNotNull', 'defaultTo', 'coalesce',
+    // Type conversion
+    'bool', 'boolean', 'integer', 'number', 'toString',
+    // Encoding
+    'encodeBase64', 'decodeBase64', 'urlEncode', 'urlDecode', 'jsonParse', 'jsonStringify',
+    // Math
+    'abs', 'ceil', 'floor', 'round', 'min', 'max', 'random',
+    // Date/Time
+    'now', 'timestamp',
+    // Type checking
+    'typeof', 'isString', 'isNumber', 'isBoolean', 'isArray', 'isObject',
+]);
 
 function highlightExpression(text) {
     if (!text) return '';
