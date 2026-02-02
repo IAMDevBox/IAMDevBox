@@ -1617,46 +1617,14 @@ function formatExpression(text) {
     const prefix = match[1];
     const inner = match[2].trim();
 
-    // Format inner expression
-    const formatted = formatInner(inner, 0);
-    return prefix + '\n' + formatted + '\n}';
-}
-
-function formatInner(expr, indent) {
-    const pad = '  '.repeat(indent);
-    const tokens = tokenizeForFormat(expr);
-
-    // Find top-level and/or
-    let depth = 0;
-    let splitPoints = [];
-
-    for (let i = 0; i < tokens.length; i++) {
-        const tok = tokens[i];
-        if (tok === '(' || tok === '[') depth++;
-        else if (tok === ')' || tok === ']') depth--;
-        else if (depth === 0 && (tok.toLowerCase() === 'and' || tok.toLowerCase() === 'or')) {
-            splitPoints.push({ index: i, op: tok });
-        }
+    // Parse into AST-like structure and format
+    try {
+        const formatted = formatExpr(inner, 1);
+        return prefix + '\n' + formatted + '\n}';
+    } catch (e) {
+        // If parsing fails, return original
+        return text;
     }
-
-    if (splitPoints.length === 0) {
-        // No top-level and/or, return as-is
-        return pad + '  ' + expr.trim();
-    }
-
-    // Split by and/or
-    let result = [];
-    let start = 0;
-    for (const sp of splitPoints) {
-        const part = tokens.slice(start, sp.index).join('').trim();
-        result.push(pad + '  ' + part);
-        result.push(pad + '  ' + sp.op);
-        start = sp.index + 1;
-    }
-    const lastPart = tokens.slice(start).join('').trim();
-    result.push(pad + '  ' + lastPart);
-
-    return result.join('\n');
 }
 
 function tokenizeForFormat(expr) {
@@ -1666,7 +1634,6 @@ function tokenizeForFormat(expr) {
     while (i < expr.length) {
         // Skip whitespace
         if (/\s/.test(expr[i])) {
-            tokens.push(expr[i]);
             i++;
             continue;
         }
@@ -1677,30 +1644,205 @@ function tokenizeForFormat(expr) {
             let str = quote;
             i++;
             while (i < expr.length && expr[i] !== quote) {
-                if (expr[i] === '\\') str += expr[i++];
-                if (i < expr.length) str += expr[i++];
+                if (expr[i] === '\\') { str += expr[i++]; }
+                if (i < expr.length) { str += expr[i++]; }
             }
-            if (i < expr.length) str += expr[i++];
-            tokens.push(str);
+            if (i < expr.length) { str += expr[i++]; }
+            tokens.push({ type: 'string', value: str });
             continue;
         }
 
-        // Identifier
+        // Identifier or keyword
         if (/[a-zA-Z_]/.test(expr[i])) {
             let ident = '';
             while (i < expr.length && /[a-zA-Z0-9_]/.test(expr[i])) {
                 ident += expr[i++];
             }
-            tokens.push(ident);
+            const lower = ident.toLowerCase();
+            if (lower === 'and' || lower === 'or' || lower === 'not') {
+                tokens.push({ type: 'keyword', value: lower });
+            } else {
+                tokens.push({ type: 'ident', value: ident });
+            }
             continue;
         }
 
-        // Other characters
-        tokens.push(expr[i]);
+        // Numbers
+        if (/\d/.test(expr[i])) {
+            let num = '';
+            while (i < expr.length && /[\d.]/.test(expr[i])) {
+                num += expr[i++];
+            }
+            tokens.push({ type: 'number', value: num });
+            continue;
+        }
+
+        // Two-char operators
+        if (i + 1 < expr.length) {
+            const two = expr[i] + expr[i + 1];
+            if (['==', '!=', '<=', '>=', '&&', '||'].includes(two)) {
+                tokens.push({ type: 'op', value: two });
+                i += 2;
+                continue;
+            }
+        }
+
+        // Single char
+        tokens.push({ type: 'char', value: expr[i] });
         i++;
     }
 
     return tokens;
+}
+
+function formatExpr(expr, baseIndent) {
+    const tokens = tokenizeForFormat(expr);
+
+    // Find top-level OR splits (these are major branches)
+    const orBranches = splitByTopLevelOp(tokens, 'or');
+
+    if (orBranches.length > 1) {
+        // Multiple OR branches - format each on its own line
+        const indent = '  '.repeat(baseIndent);
+        const formatted = orBranches.map((branch, i) => {
+            const branchStr = formatBranch(branch, baseIndent);
+            return indent + branchStr;
+        });
+        return formatted.join('\nor\n');
+    }
+
+    // Single branch - check for AND
+    const andBranches = splitByTopLevelOp(tokens, 'and');
+
+    if (andBranches.length > 1) {
+        const indent = '  '.repeat(baseIndent);
+        const formatted = andBranches.map((branch, i) => {
+            const branchStr = formatBranch(branch, baseIndent);
+            return indent + branchStr;
+        });
+        return formatted.join('\n' + indent + 'and ');
+    }
+
+    // No top-level operators, return as-is
+    return '  '.repeat(baseIndent) + tokensToString(tokens);
+}
+
+function splitByTopLevelOp(tokens, op) {
+    const branches = [];
+    let current = [];
+    let depth = 0;
+
+    for (const tok of tokens) {
+        if (tok.value === '(' || tok.value === '[') {
+            depth++;
+            current.push(tok);
+        } else if (tok.value === ')' || tok.value === ']') {
+            depth--;
+            current.push(tok);
+        } else if (depth === 0 && tok.type === 'keyword' && tok.value === op) {
+            if (current.length > 0) {
+                branches.push(current);
+            }
+            current = [];
+        } else {
+            current.push(tok);
+        }
+    }
+
+    if (current.length > 0) {
+        branches.push(current);
+    }
+
+    return branches;
+}
+
+function formatBranch(tokens, baseIndent) {
+    // Check if this is a parenthesized group
+    if (tokens.length > 0 && tokens[0].value === '(') {
+        // Find matching close paren
+        let depth = 0;
+        let closeIdx = -1;
+        for (let i = 0; i < tokens.length; i++) {
+            if (tokens[i].value === '(') depth++;
+            else if (tokens[i].value === ')') {
+                depth--;
+                if (depth === 0) { closeIdx = i; break; }
+            }
+        }
+
+        if (closeIdx === tokens.length - 1) {
+            // Entire branch is wrapped in parens
+            const inner = tokens.slice(1, closeIdx);
+
+            // Check if inner has OR chains (the common case for long lists)
+            const innerOrs = splitByTopLevelOp(inner, 'or');
+            if (innerOrs.length > 3) {
+                // Many OR branches inside - format as block
+                const indent = '  '.repeat(baseIndent + 1);
+                const lines = innerOrs.map(branch => indent + tokensToString(branch));
+                return '(\n' + lines.join(' or\n') + '\n' + '  '.repeat(baseIndent) + ')';
+            }
+
+            // Check for AND + OR pattern like (A and (B or C or D...))
+            const innerAnds = splitByTopLevelOp(inner, 'and');
+            if (innerAnds.length === 2) {
+                const secondPart = innerAnds[1];
+                if (secondPart.length > 0 && secondPart[0].value === '(') {
+                    const innerInner = secondPart.slice(1, -1);
+                    const innerOrs2 = splitByTopLevelOp(innerInner, 'or');
+                    if (innerOrs2.length > 3) {
+                        // Pattern: (condition and (many or branches))
+                        const condPart = tokensToString(innerAnds[0]);
+                        const indent = '  '.repeat(baseIndent + 1);
+                        const lines = innerOrs2.map(branch => indent + '  ' + tokensToString(branch));
+                        return '(' + condPart + ' and (\n' + lines.join(' or\n') + '\n' + indent + ')' + '\n' + '  '.repeat(baseIndent) + ')';
+                    }
+                }
+                // Pattern: (A and B or C or D...) - AND followed by OR chain without parens
+                const secondOrs = splitByTopLevelOp(secondPart, 'or');
+                if (secondOrs.length > 3) {
+                    const condPart = tokensToString(innerAnds[0]);
+                    const indent = '  '.repeat(baseIndent + 1);
+                    const lines = secondOrs.map(branch => indent + '  ' + tokensToString(branch));
+                    return '(' + condPart + ' and\n' + lines.join(' or\n') + '\n' + '  '.repeat(baseIndent) + ')';
+                }
+            }
+
+            // Recursive: check if inner is itself wrapped in parens (((...)))
+            if (inner.length > 0 && inner[0].value === '(') {
+                const innerFormatted = formatBranch(inner, baseIndent);
+                if (innerFormatted.includes('\n')) {
+                    return '(\n' + '  '.repeat(baseIndent + 1) + innerFormatted + '\n' + '  '.repeat(baseIndent) + ')';
+                }
+            }
+        }
+    }
+
+    return tokensToString(tokens);
+}
+
+function tokensToString(tokens) {
+    let result = '';
+    let prevType = null;
+
+    for (const tok of tokens) {
+        // Add space before keywords and after certain tokens
+        if (tok.type === 'keyword' && result.length > 0 && !result.endsWith(' ') && !result.endsWith('(')) {
+            result += ' ';
+        }
+        if (prevType === 'keyword' && tok.type !== 'char') {
+            result += ' ';
+        }
+        if ((prevType === 'ident' || prevType === 'number' || prevType === 'string') &&
+            (tok.type === 'ident' || tok.type === 'number' || tok.type === 'string')) {
+            result += ' ';
+        }
+
+        result += tok.value;
+        prevType = tok.type;
+    }
+
+    return result.trim();
 }
 
 // ============== Editor Event Bindings ==============
