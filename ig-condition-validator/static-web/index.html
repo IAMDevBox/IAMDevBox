@@ -483,8 +483,8 @@ https://api.example.com/path%2Fencoded?query=value%26other'></textarea>
                             <input type="text" id="regex-test-string" placeholder="e.g., /api/v2/users/123">
                         </div>
                         <div class="form-group" style="display: flex; gap: 0.5rem;">
-                            <button class="btn btn-primary" id="regex-test-btn" style="flex: 1;">Test matches()</button>
-                            <button class="btn btn-primary" id="regex-find-btn" style="flex: 1;">Test find()</button>
+                            <button class="btn btn-primary" id="regex-test-btn" style="flex: 1;">Test find() <small style="opacity:0.7">[=matches(),deprecated]</small></button>
+                            <button class="btn btn-primary" id="regex-find-btn" style="flex: 1;">Test matchesWithRegex() <small style="opacity:0.7">[full string]</small></button>
                         </div>
                         <div id="regex-result" class="regex-result"></div>
                     </div>
@@ -3406,7 +3406,7 @@ resizeObserver.observe(conditionTextarea);
         resultDiv.innerHTML = html;
     }
 
-    // Test matches() - full string must match
+    // Test find() - partial match (returns boolean)
     testBtn.addEventListener('click', () => {
         const pattern = patternInput.value.trim();
         const testStr = testStringInput.value;
@@ -3417,12 +3417,55 @@ resizeObserver.observe(conditionTextarea);
         }
 
         try {
-            // Java regex: matches() requires full string match, so we anchor it
+            const regex = new RegExp(pattern);
+            const match = regex.exec(testStr);
+
+            if (match) {
+                let html = `<div>✓ <strong>find()</strong> returns <span class="val-true">true</span></div>`;
+
+                // Highlight match in the string
+                const before = testStr.substring(0, match.index);
+                const matched = testStr.substring(match.index, match.index + match[0].length);
+                const after = testStr.substring(match.index + match[0].length);
+                const highlighted = `${escapeHtml(before)}<span class="regex-match-highlight">${escapeHtml(matched)}</span>${escapeHtml(after)}`;
+                html += `<div style="margin-top:0.25rem;word-break:break-all">${highlighted}</div>`;
+
+                // Show captured groups if any
+                if (match.length > 1) {
+                    html += '<div class="regex-groups"><strong>Captured groups:</strong>';
+                    for (let i = 1; i < match.length; i++) {
+                        html += `<div class="regex-group-item"><span class="regex-group-name">Group ${i}:</span> <span class="regex-group-value">${escapeHtml(match[i] || '(empty)')}</span></div>`;
+                    }
+                    html += '</div>';
+                }
+                showResult('match', html);
+            } else {
+                let html = `<div>✗ <strong>find()</strong> returns <span class="val-false">false</span></div>`;
+                html += `<div style="margin-top:0.25rem;color:#94a3b8">No match found in the string</div>`;
+                showResult('no-match', html);
+            }
+        } catch (e) {
+            showResult('error', `⚠️ Invalid regex: ${escapeHtml(e.message)}`);
+        }
+    });
+
+    // Test matchesWithRegex() - full string match (returns boolean)
+    findBtn.addEventListener('click', () => {
+        const pattern = patternInput.value.trim();
+        const testStr = testStringInput.value;
+
+        if (!pattern) {
+            showResult('error', '⚠️ Please enter a regex pattern');
+            return;
+        }
+
+        try {
+            // matchesWithRegex requires full string match, so we anchor it
             const regex = new RegExp('^(?:' + pattern + ')$');
             const match = regex.exec(testStr);
 
             if (match) {
-                let html = `<div>✓ <strong>matches()</strong> returns <span class="val-true">true</span></div>`;
+                let html = `<div>✓ <strong>matchesWithRegex()</strong> returns <span class="val-true">true</span></div>`;
                 html += `<div style="margin-top:0.25rem">Full match: <span class="regex-match-highlight">${escapeHtml(match[0])}</span></div>`;
 
                 // Show captured groups if any
@@ -3435,7 +3478,7 @@ resizeObserver.observe(conditionTextarea);
                 }
                 showResult('match', html);
             } else {
-                let html = `<div>✗ <strong>matches()</strong> returns <span class="val-false">false</span></div>`;
+                let html = `<div>✗ <strong>matchesWithRegex()</strong> returns <span class="val-false">false</span></div>`;
                 html += `<div style="margin-top:0.25rem;color:#94a3b8">Pattern does not match the entire string</div>`;
 
                 // Check if find() would match
@@ -3444,60 +3487,6 @@ resizeObserver.observe(conditionTextarea);
                 if (findMatch) {
                     html += `<div style="margin-top:0.35rem;color:#fcd34d">💡 Tip: <strong>find()</strong> would match: "${escapeHtml(findMatch[0])}"</div>`;
                 }
-                showResult('no-match', html);
-            }
-        } catch (e) {
-            showResult('error', `⚠️ Invalid regex: ${escapeHtml(e.message)}`);
-        }
-    });
-
-    // Test find() - partial match
-    findBtn.addEventListener('click', () => {
-        const pattern = patternInput.value.trim();
-        const testStr = testStringInput.value;
-
-        if (!pattern) {
-            showResult('error', '⚠️ Please enter a regex pattern');
-            return;
-        }
-
-        try {
-            const regex = new RegExp(pattern, 'g');
-            const matches = [];
-            let match;
-            while ((match = regex.exec(testStr)) !== null) {
-                matches.push({ index: match.index, value: match[0], groups: match.slice(1) });
-                if (match.index === regex.lastIndex) regex.lastIndex++; // Avoid infinite loop
-            }
-
-            if (matches.length > 0) {
-                let html = `<div>✓ <strong>find()</strong> returns <span class="val-true">true</span> (${matches.length} match${matches.length > 1 ? 'es' : ''})</div>`;
-
-                // Highlight matches in the string
-                let highlighted = testStr;
-                let offset = 0;
-                matches.forEach(m => {
-                    const before = highlighted.substring(0, m.index + offset);
-                    const matched = highlighted.substring(m.index + offset, m.index + offset + m.value.length);
-                    const after = highlighted.substring(m.index + offset + m.value.length);
-                    const replacement = `<span class="regex-match-highlight">${escapeHtml(matched)}</span>`;
-                    highlighted = before + replacement + after;
-                    offset += replacement.length - m.value.length;
-                });
-                html += `<div style="margin-top:0.25rem;word-break:break-all">${highlighted}</div>`;
-
-                // Show groups for first match
-                if (matches[0].groups.length > 0) {
-                    html += '<div class="regex-groups"><strong>Captured groups (first match):</strong>';
-                    matches[0].groups.forEach((g, i) => {
-                        html += `<div class="regex-group-item"><span class="regex-group-name">Group ${i + 1}:</span> <span class="regex-group-value">${escapeHtml(g || '(empty)')}</span></div>`;
-                    });
-                    html += '</div>';
-                }
-                showResult('match', html);
-            } else {
-                let html = `<div>✗ <strong>find()</strong> returns <span class="val-false">false</span></div>`;
-                html += `<div style="margin-top:0.25rem;color:#94a3b8">No matches found in the string</div>`;
                 showResult('no-match', html);
             }
         } catch (e) {
