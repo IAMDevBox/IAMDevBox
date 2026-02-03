@@ -13,7 +13,7 @@
             min-height: 100vh;
             padding: 2rem;
         }
-        .container { max-width: 1200px; margin: 0 auto; }
+        .container { width: 100%; }
         h1 { text-align: center; margin-bottom: 0.5rem; color: #f8fafc; }
         .subtitle { text-align: center; color: #94a3b8; margin-bottom: 2rem; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
@@ -1590,7 +1590,7 @@ function displayResult(result) {
     if (result.conditions.length > 0) {
         const list = document.createElement('div');
         list.className = 'condition-list';
-        result.conditions.forEach(c => list.appendChild(createConditionItem(c)));
+        result.conditions.forEach((c, idx) => list.appendChild(createConditionItem(c, idx + 1, result.conditions.length)));
         container.appendChild(list);
     }
 }
@@ -1665,12 +1665,15 @@ function getShortDesc(expr, asHtml = false) {
     return asHtml ? escapeHtml(truncated) : truncated;
 }
 
-function createConditionItem(c) {
+function createConditionItem(c, index, total) {
     const div = document.createElement('div');
     div.className = 'condition-item ' + (c.passed ? 'passed' : 'failed');
 
     const statusIcon = c.passed ? '✓' : '✗';
     const statusColor = c.passed ? '#10b981' : '#ef4444';
+
+    // Show index if there are multiple conditions at root level
+    const indexLabel = (total && total > 1) ? `<strong style="color:#94a3b8">${index}.</strong> ` : '';
 
     if (c.isOrGroup) {
         // OR Group - show summary
@@ -1692,7 +1695,7 @@ function createConditionItem(c) {
             }
         }
 
-        const headerHtml = `<span style="color:${statusColor}">${statusIcon}</span> <strong>OR</strong> <span style="color:#94a3b8;font-size:0.85rem">${summaryText}</span>${matchedPatternsHtml}`;
+        const headerHtml = `${indexLabel}<span style="color:${statusColor}">${statusIcon}</span> <strong>OR</strong> <span style="color:#94a3b8;font-size:0.85rem">${summaryText}</span>${matchedPatternsHtml}`;
 
         // Details: list each branch simply
         const detailsDiv = document.createElement('div');
@@ -1712,7 +1715,7 @@ function createConditionItem(c) {
         const hasDetails = c.details || (c.suggestion && !c.passed);
 
         if (hasDetails) {
-            const headerHtml = `<span style="color:${statusColor}">${statusIcon}</span> <code style="font-size:0.85rem;color:#e2e8f0">${shortExprHtml}</code> → <span class="${c.passed ? 'val-true' : 'val-false'}">${c.passed}</span>`;
+            const headerHtml = `${indexLabel}<span style="color:${statusColor}">${statusIcon}</span> <code style="font-size:0.85rem;color:#e2e8f0">${shortExprHtml}</code> → <span class="${c.passed ? 'val-true' : 'val-false'}">${c.passed}</span>`;
 
             const detailsDiv = document.createElement('div');
             detailsDiv.className = 'condition-details';
@@ -1736,7 +1739,7 @@ function createConditionItem(c) {
         } else {
             const expr = document.createElement('div');
             expr.className = 'condition-expr';
-            expr.innerHTML = `<span style="color:${statusColor}">${statusIcon}</span> <code style="font-size:0.85rem">${shortExprHtml}</code> → <span class="${c.passed ? 'val-true' : 'val-false'}">${c.passed}</span>`;
+            expr.innerHTML = `${indexLabel}<span style="color:${statusColor}">${statusIcon}</span> <code style="font-size:0.85rem">${shortExprHtml}</code> → <span class="${c.passed ? 'val-true' : 'val-false'}">${c.passed}</span>`;
             div.appendChild(expr);
         }
     }
@@ -1773,13 +1776,23 @@ function createBranchItem(branch, index) {
     const hasDetails = (branch.subDetails && branch.subDetails.length > 0);
 
     if (hasDetails) {
-        const headerHtml = `<span style="color:${statusColor}">${statusIcon}</span> <strong style="color:#94a3b8">Branch ${index}</strong> → <span class="${branch.passed ? 'val-true' : 'val-false'}">${branch.passed}</span>`;
+        // Count passed sub-conditions
+        const passedCount = branch.subDetails.filter(s => s.passed).length;
+        const totalCount = branch.subDetails.length;
+
+        // Show relationship summary like "AND 2/2 conditions"
+        let headerHtml;
+        if (totalCount > 1) {
+            headerHtml = `<span style="color:${statusColor}">${statusIcon}</span> <strong style="color:#94a3b8">Branch ${index}</strong> <strong class="op">AND</strong> <span style="color:#94a3b8;font-size:0.85rem">${passedCount}/${totalCount} conditions match</span> → <span class="${branch.passed ? 'val-true' : 'val-false'}">${branch.passed}</span>`;
+        } else {
+            headerHtml = `<span style="color:${statusColor}">${statusIcon}</span> <strong style="color:#94a3b8">Branch ${index}</strong> → <span class="${branch.passed ? 'val-true' : 'val-false'}">${branch.passed}</span>`;
+        }
 
         const detailsDiv = document.createElement('div');
         detailsDiv.style.cssText = 'padding-left: 1rem; margin-top: 0.5rem;';
 
         // Show each sub-condition
-        branch.subDetails.forEach(sub => {
+        branch.subDetails.forEach((sub, idx) => {
             const subItem = createSubDetailItem(sub);
             detailsDiv.appendChild(subItem);
         });
