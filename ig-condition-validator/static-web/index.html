@@ -1774,6 +1774,49 @@ function formatBranch(tokens, baseIndent) {
             // Entire branch is wrapped in parens
             const inner = tokens.slice(1, closeIdx);
 
+            // First check if inner is double-wrapped (((...)))
+            if (inner.length > 0 && inner[0].value === '(') {
+                let innerDepth = 0;
+                let innerClose = -1;
+                for (let i = 0; i < inner.length; i++) {
+                    if (inner[i].value === '(') innerDepth++;
+                    else if (inner[i].value === ')') {
+                        innerDepth--;
+                        if (innerDepth === 0) { innerClose = i; break; }
+                    }
+                }
+                if (innerClose === inner.length - 1) {
+                    // It's ((content)) - recurse into inner
+                    const innerFormatted = formatBranch(inner, baseIndent);
+                    if (innerFormatted.includes('\n')) {
+                        const indent = '  '.repeat(baseIndent + 1);
+                        return '(\n' + indent + innerFormatted + '\n' + '  '.repeat(baseIndent) + ')';
+                    }
+                }
+            }
+
+            // Check for AND + OR pattern: (A and B or C or D...)
+            // Find the first top-level 'and'
+            const innerAnds = splitByTopLevelOp(inner, 'and');
+            if (innerAnds.length >= 2) {
+                // Combine everything after first 'and' and check for 'or' chain
+                const afterAnd = [];
+                for (let i = 1; i < innerAnds.length; i++) {
+                    if (i > 1) afterAnd.push({ type: 'keyword', value: 'and' });
+                    afterAnd.push(...innerAnds[i]);
+                }
+
+                const orParts = splitByTopLevelOp(afterAnd, 'or');
+                if (orParts.length > 3) {
+                    // Pattern: (condition and first_or_item or second_or_item or ...)
+                    const condPart = tokensToString(innerAnds[0]);
+                    const indent = '  '.repeat(baseIndent + 1);
+                    const innerIndent = '  '.repeat(baseIndent + 2);
+                    const lines = orParts.map(branch => innerIndent + tokensToString(branch));
+                    return '(' + condPart + ' and (\n' + lines.join(' or\n') + '\n' + indent + ')\n' + '  '.repeat(baseIndent) + ')';
+                }
+            }
+
             // Check if inner has OR chains (the common case for long lists)
             const innerOrs = splitByTopLevelOp(inner, 'or');
             if (innerOrs.length > 3) {
@@ -1781,39 +1824,6 @@ function formatBranch(tokens, baseIndent) {
                 const indent = '  '.repeat(baseIndent + 1);
                 const lines = innerOrs.map(branch => indent + tokensToString(branch));
                 return '(\n' + lines.join(' or\n') + '\n' + '  '.repeat(baseIndent) + ')';
-            }
-
-            // Check for AND + OR pattern like (A and (B or C or D...))
-            const innerAnds = splitByTopLevelOp(inner, 'and');
-            if (innerAnds.length === 2) {
-                const secondPart = innerAnds[1];
-                if (secondPart.length > 0 && secondPart[0].value === '(') {
-                    const innerInner = secondPart.slice(1, -1);
-                    const innerOrs2 = splitByTopLevelOp(innerInner, 'or');
-                    if (innerOrs2.length > 3) {
-                        // Pattern: (condition and (many or branches))
-                        const condPart = tokensToString(innerAnds[0]);
-                        const indent = '  '.repeat(baseIndent + 1);
-                        const lines = innerOrs2.map(branch => indent + '  ' + tokensToString(branch));
-                        return '(' + condPart + ' and (\n' + lines.join(' or\n') + '\n' + indent + ')' + '\n' + '  '.repeat(baseIndent) + ')';
-                    }
-                }
-                // Pattern: (A and B or C or D...) - AND followed by OR chain without parens
-                const secondOrs = splitByTopLevelOp(secondPart, 'or');
-                if (secondOrs.length > 3) {
-                    const condPart = tokensToString(innerAnds[0]);
-                    const indent = '  '.repeat(baseIndent + 1);
-                    const lines = secondOrs.map(branch => indent + '  ' + tokensToString(branch));
-                    return '(' + condPart + ' and\n' + lines.join(' or\n') + '\n' + '  '.repeat(baseIndent) + ')';
-                }
-            }
-
-            // Recursive: check if inner is itself wrapped in parens (((...)))
-            if (inner.length > 0 && inner[0].value === '(') {
-                const innerFormatted = formatBranch(inner, baseIndent);
-                if (innerFormatted.includes('\n')) {
-                    return '(\n' + '  '.repeat(baseIndent + 1) + innerFormatted + '\n' + '  '.repeat(baseIndent) + ')';
-                }
             }
         }
     }
