@@ -118,7 +118,7 @@
         }
         .editor-backdrop {
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
+            top: 0; left: 0; right: 0;
             padding: 0.75rem;
             background: #0f172a;
             border: 1px solid #334155;
@@ -128,8 +128,9 @@
             line-height: 1.5;
             white-space: pre-wrap;
             word-wrap: break-word;
-            overflow: auto;
+            overflow: hidden;
             pointer-events: none;
+            min-height: 120px;
         }
         .editor-textarea {
             position: relative;
@@ -146,6 +147,7 @@
             caret-color: #e2e8f0;
             resize: none;
             z-index: 1;
+            overflow: hidden;
         }
         .editor-textarea:focus { outline: none; }
         .editor-textarea:focus ~ .editor-backdrop { border-color: #3b82f6; }
@@ -1606,6 +1608,12 @@ function updateHighlight() {
     const backdrop = document.getElementById('condition-highlight');
     const text = textarea.value;
     backdrop.innerHTML = highlightExpression(text) + '\n'; // extra newline to match textarea
+
+    // Auto-resize textarea and backdrop to fit content
+    textarea.style.height = 'auto';
+    const newHeight = Math.max(120, textarea.scrollHeight) + 'px';
+    textarea.style.height = newHeight;
+    backdrop.style.height = newHeight;
 }
 
 // ============== Format Expression ==============
@@ -1898,7 +1906,12 @@ document.getElementById('format-btn').addEventListener('click', () => {
     const textarea = document.getElementById('condition');
     const text = textarea.value.trim();
     if (text) {
-        textarea.value = formatExpression(text);
+        const formatted = formatExpression(text);
+        textarea.value = formatted;
+        // Force sync scroll position
+        const backdrop = document.getElementById('condition-highlight');
+        backdrop.scrollTop = 0;
+        textarea.scrollTop = 0;
         updateHighlight();
     }
 });
