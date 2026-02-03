@@ -1687,7 +1687,14 @@ function tokenizeForFormat(expr) {
             }
         }
 
-        // Single char
+        // Single-char operators that need spacing
+        if (['>', '<', '+', '-', '*', '/', '%', '?', ':'].includes(expr[i])) {
+            tokens.push({ type: 'op', value: expr[i] });
+            i++;
+            continue;
+        }
+
+        // Single char (parens, brackets, comma, dot, etc)
         tokens.push({ type: 'char', value: expr[i] });
         i++;
     }
@@ -1701,7 +1708,8 @@ function formatExpr(expr, baseIndent) {
     // Find top-level OR splits (these are major branches)
     const orBranches = splitByTopLevelOp(tokens, 'or');
 
-    if (orBranches.length > 1) {
+    // Only split OR if there are more than 2 branches (keep simple "a or b" on one line)
+    if (orBranches.length > 2) {
         // Multiple OR branches - format each on its own line
         const indent = '  '.repeat(baseIndent);
         const formatted = orBranches.map((branch, i) => {
@@ -1711,16 +1719,16 @@ function formatExpr(expr, baseIndent) {
         return formatted.join('\nor\n');
     }
 
-    // Single branch - check for AND
+    // Single branch or simple "a or b" - check for AND
     const andBranches = splitByTopLevelOp(tokens, 'and');
 
     if (andBranches.length > 1) {
         const indent = '  '.repeat(baseIndent);
         const formatted = andBranches.map((branch, i) => {
             const branchStr = formatBranch(branch, baseIndent);
-            return indent + branchStr;
+            return branchStr;
         });
-        return formatted.join('\n' + indent + 'and ');
+        return indent + formatted.join(' and ');
     }
 
     // No top-level operators, return as-is
@@ -1786,11 +1794,10 @@ function formatBranch(tokens, baseIndent) {
                     }
                 }
                 if (innerClose === inner.length - 1) {
-                    // It's ((content)) - recurse into inner
-                    const innerFormatted = formatBranch(inner, baseIndent);
+                    // It's ((content)) - recurse into inner with increased indent
+                    const innerFormatted = formatBranch(inner, baseIndent + 1);
                     if (innerFormatted.includes('\n')) {
-                        const indent = '  '.repeat(baseIndent + 1);
-                        return '(\n' + indent + innerFormatted + '\n' + '  '.repeat(baseIndent) + ')';
+                        return '(\n  ' + '  '.repeat(baseIndent) + innerFormatted + '\n' + '  '.repeat(baseIndent) + ')';
                     }
                 }
             }
@@ -1813,7 +1820,7 @@ function formatBranch(tokens, baseIndent) {
                     const indent = '  '.repeat(baseIndent + 1);
                     const innerIndent = '  '.repeat(baseIndent + 2);
                     const lines = orParts.map(branch => innerIndent + tokensToString(branch));
-                    return '(' + condPart + ' and (\n' + lines.join(' or\n') + '\n' + indent + ')\n' + '  '.repeat(baseIndent) + ')';
+                    return '(' + condPart + ' and (\n' + lines.join(' or\n') + '\n' + indent + '))';
                 }
             }
 
@@ -1833,23 +1840,45 @@ function formatBranch(tokens, baseIndent) {
 
 function tokensToString(tokens) {
     let result = '';
-    let prevType = null;
+    let prevTok = null;
 
     for (const tok of tokens) {
-        // Add space before keywords and after certain tokens
-        if (tok.type === 'keyword' && result.length > 0 && !result.endsWith(' ') && !result.endsWith('(')) {
-            result += ' ';
+        // Determine if we need a space before this token
+        let needSpace = false;
+
+        if (prevTok) {
+            // Space before keywords (and, or, not) unless after (
+            if (tok.type === 'keyword') {
+                needSpace = prevTok.value !== '(';
+            }
+            // Space after keywords unless before )
+            else if (prevTok.type === 'keyword') {
+                needSpace = tok.value !== ')';
+            }
+            // Space between identifiers/numbers/strings
+            else if ((prevTok.type === 'ident' || prevTok.type === 'number' || prevTok.type === 'string') &&
+                     (tok.type === 'ident' || tok.type === 'number' || tok.type === 'string')) {
+                needSpace = true;
+            }
+            // Space after ) if followed by ( or ident
+            else if (prevTok.value === ')' && (tok.value === '(' || tok.type === 'ident')) {
+                needSpace = true;
+            }
+            // Space around operators like ==, !=, etc
+            else if (tok.type === 'op') {
+                needSpace = prevTok.value !== '(';
+            }
+            else if (prevTok.type === 'op') {
+                needSpace = tok.value !== ')';
+            }
         }
-        if (prevType === 'keyword' && tok.type !== 'char') {
-            result += ' ';
-        }
-        if ((prevType === 'ident' || prevType === 'number' || prevType === 'string') &&
-            (tok.type === 'ident' || tok.type === 'number' || tok.type === 'string')) {
+
+        if (needSpace && result.length > 0 && !result.endsWith(' ')) {
             result += ' ';
         }
 
         result += tok.value;
-        prevType = tok.type;
+        prevTok = tok;
     }
 
     return result.trim();
