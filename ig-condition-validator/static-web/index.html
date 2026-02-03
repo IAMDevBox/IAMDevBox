@@ -824,13 +824,20 @@ const FUNCTIONS = {
         if (typeof obj === 'object') return val in obj;
         return false;
     },
+    // find() - partial match (like Java's Matcher.find())
     find: (str, pattern) => { if (str == null) return false; try { return new RegExp(pattern).test(str); } catch { return false; } },
+    // findGroups/matchingGroups - returns array [fullMatch, group1, group2, ...] or null
     findGroups: (str, pattern) => {
         if (str == null) return null;
         try { const m = str.match(new RegExp(pattern)); return m ? [m[0], ...(m.slice(1))] : null; } catch { return null; }
     },
-    matches: (str, pattern) => { if (str == null) return false; try { return new RegExp(pattern).test(str); } catch { return false; } },
-    matchesWithRegex: (str, pattern) => { if (str == null) return false; try { return new RegExp('^' + pattern + '$').test(str); } catch { return false; } },
+    matchingGroups: (str, pattern) => {
+        // Alias for findGroups (official IG function name)
+        if (str == null) return null;
+        try { const m = str.match(new RegExp(pattern)); return m ? [m[0], ...(m.slice(1))] : null; } catch { return null; }
+    },
+    // matches() - FULL string match (like Java's Matcher.matches()) - auto-anchored with ^...$
+    matches: (str, pattern) => { if (str == null) return false; try { return new RegExp('^(?:' + pattern + ')$').test(str); } catch { return false; } },
 
     // String manipulation
     substring: (str, start, end) => {
@@ -927,17 +934,62 @@ const FUNCTIONS = {
     now: () => Date.now(),
     timestamp: () => Math.floor(Date.now() / 1000),
 
-    // Type checking
-    typeof: (val) => {
-        if (val === null || val === undefined) return 'null';
-        if (Array.isArray(val)) return 'array';
-        return typeof val;
+    // Official IG functions - URL encoding (org.forgerock.http.util.Uris)
+    urlDecodeFragment: (str) => { try { return decodeURIComponent(str); } catch { return str; } },
+    urlDecodePathElement: (str) => { try { return decodeURIComponent(str); } catch { return str; } },
+    urlDecodeQueryParameterNameOrValue: (str) => { try { return decodeURIComponent(str); } catch { return str; } },
+    urlDecodeUserInfo: (str) => { try { return decodeURIComponent(str); } catch { return str; } },
+    urlEncodeFragment: (str) => str == null ? '' : encodeURIComponent(str),
+    urlEncodePathElement: (str) => str == null ? '' : encodeURIComponent(str),
+    urlEncodeQueryParameterNameOrValue: (str) => str == null ? '' : encodeURIComponent(str),
+    urlEncodeUserInfo: (str) => str == null ? '' : encodeURIComponent(str),
+    formDecodeParameterNameOrValue: (str) => { try { return decodeURIComponent(str?.replace(/\+/g, ' ')); } catch { return str; } },
+    formEncodeParameterNameOrValue: (str) => str == null ? '' : encodeURIComponent(str).replace(/%20/g, '+'),
+
+    // Official IG functions - additional
+    decodeBase64url: (str) => {
+        if (str == null) return null;
+        try {
+            // Convert base64url to base64
+            let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+            while (base64.length % 4) base64 += '=';
+            return decodeURIComponent(escape(atob(base64)));
+        } catch { return null; }
     },
-    isString: (val) => typeof val === 'string',
-    isNumber: (val) => typeof val === 'number' && !isNaN(val),
-    isBoolean: (val) => typeof val === 'boolean',
-    isArray: (val) => Array.isArray(val),
-    isObject: (val) => val !== null && typeof val === 'object' && !Array.isArray(val),
+    encodeBase64url: (str) => {
+        if (str == null) return '';
+        try {
+            return btoa(unescape(encodeURIComponent(str))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        } catch { return ''; }
+    },
+    digestSha256: (str) => {
+        // Note: Simplified - in browser would need crypto.subtle
+        // Returns placeholder; real implementation would need async crypto
+        console.warn('digestSha256: Use browser crypto API for real SHA-256');
+        return str ? '[SHA-256 hash]' : null;
+    },
+    toJson: (obj) => { try { return JSON.stringify(obj); } catch { return ''; } },
+    keyMatch: (map, pattern) => {
+        if (map == null || pattern == null) return null;
+        try {
+            const regex = new RegExp(pattern);
+            for (const key of Object.keys(map)) {
+                if (regex.test(key)) return key;
+            }
+        } catch { }
+        return null;
+    },
+    ipMatch: (ip, cidr) => {
+        if (ip == null || cidr == null) return false;
+        try {
+            // Simple IPv4 CIDR matching
+            const [range, bits] = cidr.split('/');
+            const mask = bits ? (-1 << (32 - parseInt(bits))) >>> 0 : 0xFFFFFFFF;
+            const ipToInt = (ipStr) => ipStr.split('.').reduce((acc, oct) => (acc << 8) + parseInt(oct), 0) >>> 0;
+            return (ipToInt(ip) & mask) === (ipToInt(range) & mask);
+        } catch { return false; }
+    },
+    integerWithRadix: (val, radix) => { const n = parseInt(val, radix); return isNaN(n) ? null : n; },
 };
 
 // ============== Evaluator ==============
@@ -1891,88 +1943,118 @@ function checkSemantics(text) {
     return warnings;
 }
 
-// Check for performance issues in expressions
+// Check for performance issues and best practices in expressions
 function checkPerformance(text) {
     const tips = [];
-
-    // 1. Detect repeated property access that could be cached
-    const propAccesses = {};
-    const propPattern = /request\.[a-zA-Z_][\w\.\[\]'"\-]*/g;
     let match;
-    while ((match = propPattern.exec(text)) !== null) {
-        const path = match[0];
-        propAccesses[path] = (propAccesses[path] || 0) + 1;
+
+    // 1. Detect catastrophic backtracking patterns (CRITICAL - can hang IG)
+    const allRegexPattern = /(?:matches|find|matchesWithRegex)\s*\([^,]+,\s*['"]([^'"]+)['"]\)/g;
+    while ((match = allRegexPattern.exec(text)) !== null) {
+        const pattern = match[1];
+        // Nested quantifiers: (a+)+ or (a*)*  - can cause exponential backtracking
+        if (/\([^)]*[+*]\)[+*]/.test(pattern) || /[+*][^)]*\([^)]*[+*]\)/.test(pattern)) {
+            tips.push({
+                type: 'regex',
+                msg: `Dangerous pattern: nested quantifiers in "${pattern.substring(0, 40)}${pattern.length > 40 ? '...' : ''}" can cause catastrophic backtracking and hang the server.`,
+                severity: 'warning'
+            });
+        }
+        // Overlapping alternatives with quantifiers: (a|a)+
+        if (/\([^)]*\|[^)]*\)[+*]/.test(pattern) && /(\w)\|.*\1/.test(pattern)) {
+            tips.push({
+                type: 'regex',
+                msg: `Pattern has overlapping alternatives with quantifiers - may cause exponential time complexity.`,
+                severity: 'warning'
+            });
+        }
     }
-    for (const [path, count] of Object.entries(propAccesses)) {
-        if (count >= 3 && path.length > 15) {
+
+    // 2. Detect matches() when contains() or startsWith()/endsWith() would suffice
+    const matchesPattern = /matches\s*\([^,]+,\s*['"]([^'"]+)['"]\)/g;
+    while ((match = matchesPattern.exec(text)) !== null) {
+        const pattern = match[1];
+        // .*literal.* -> contains()
+        if (/^\.\*[^.*+?\\()\[\]{}^$|]+\.\*$/.test(pattern)) {
+            const literal = pattern.slice(2, -2);
             tips.push({
                 type: 'optimization',
-                msg: `'${path}' accessed ${count} times. Consider using a variable binding.`,
+                msg: `Use contains(..., "${literal}") instead of matches(..., ".*${literal}.*") - simpler and clearer.`,
+                severity: 'info'
+            });
+        }
+        // ^literal.* -> startsWith()
+        else if (/^\^[^.*+?\\()\[\]{}^$|]+\.\*$/.test(pattern)) {
+            const literal = pattern.slice(1, -2);
+            tips.push({
+                type: 'optimization',
+                msg: `Use startsWith(..., "${literal}") instead of matches(..., "^${literal}.*") - more readable.`,
+                severity: 'info'
+            });
+        }
+        // .*literal$ -> endsWith()
+        else if (/^\.\*[^.*+?\\()\[\]{}^$|]+\$$/.test(pattern)) {
+            const literal = pattern.slice(2, -1);
+            tips.push({
+                type: 'optimization',
+                msg: `Use endsWith(..., "${literal}") instead of matches(..., ".*${literal}$") - more readable.`,
                 severity: 'info'
             });
         }
     }
 
-    // 2. Detect complex regex patterns
-    const regexPattern = /matches\s*\([^,]+,\s*['"]([^'"]+)['"]\)/g;
-    while ((match = regexPattern.exec(text)) !== null) {
-        const pattern = match[1];
-        // Check for expensive patterns
-        if (pattern.includes('.*.*') || pattern.includes('.+.+')) {
-            tips.push({
-                type: 'regex',
-                msg: `Regex '${pattern.substring(0, 30)}...' has multiple wildcards which can be slow. Consider more specific patterns.`,
-                severity: 'warning'
-            });
-        }
-        if (pattern.length > 100) {
-            tips.push({
-                type: 'regex',
-                msg: `Very long regex pattern (${pattern.length} chars) may impact performance.`,
-                severity: 'info'
-            });
-        }
-        // Check for backtracking-prone patterns
-        if (/\([^)]*\+\)[^)]*\+|\([^)]*\*\)[^)]*\*/.test(pattern)) {
-            tips.push({
-                type: 'regex',
-                msg: `Regex pattern may cause catastrophic backtracking. Review nested quantifiers.`,
-                severity: 'warning'
-            });
-        }
-    }
-
-    // 3. Detect unnecessary string operations
-    if (/toLowerCase\(\).*toLowerCase\(\)/g.test(text)) {
+    // 3. Detect find() vs matches() confusion
+    // find() does partial match, matches() requires full string match in IG
+    const findWithAnchors = /find\s*\([^,]+,\s*['"]\^[^'"]*\$['"]\)/g;
+    if (findWithAnchors.test(text)) {
         tips.push({
-            type: 'optimization',
-            msg: `Multiple toLowerCase() calls detected. Consider normalizing once.`,
+            type: 'correctness',
+            msg: `find() with ^...$ anchors: consider using matches() instead. find() does partial match, matches() requires full string match.`,
             severity: 'info'
         });
     }
 
-    // 4. Detect deeply nested conditions
+    // 4. Detect case-insensitive comparison without toLowerCase()
+    // e.g., request.method == "get" (should be "GET" or use toLowerCase())
+    const methodCheck = /request\.method\s*==\s*['"]([^'"]+)['"]/g;
+    while ((match = methodCheck.exec(text)) !== null) {
+        const method = match[1];
+        if (method !== method.toUpperCase()) {
+            tips.push({
+                type: 'correctness',
+                msg: `HTTP method "${method}" should be uppercase "${method.toUpperCase()}". Methods are case-sensitive in IG.`,
+                severity: 'warning'
+            });
+        }
+    }
+
+    // 5. Detect deeply nested conditions (readability issue)
     const depth = countNesting(text);
-    if (depth > 5) {
+    if (depth > 6) {
         tips.push({
-            type: 'complexity',
-            msg: `Deeply nested expression (${depth} levels). Consider breaking into smaller conditions.`,
-            severity: 'warning'
+            type: 'readability',
+            msg: `Expression has ${depth} levels of nesting. Consider using Format button or breaking into route conditions.`,
+            severity: 'info'
         });
     }
 
-    // 5. Detect matches() when contains() would suffice
-    const matchesContainsPattern = /matches\s*\([^,]+,\s*['"]\.?\*([^*'"]+)\.?\*['"]\)/g;
-    while ((match = matchesContainsPattern.exec(text)) !== null) {
-        const innerPattern = match[1];
-        // If pattern is just .*literal.*, suggest contains()
-        if (!/[\\()[\]{}^$|?+]/.test(innerPattern)) {
-            tips.push({
-                type: 'optimization',
-                msg: `'matches(..., ".*${innerPattern}.*")' can be replaced with faster 'contains(..., "${innerPattern}")'.`,
-                severity: 'info'
-            });
-        }
+    // 6. Detect null check patterns that could use Elvis operator or defaultTo()
+    const nullCheckPattern = /(\w+(?:\.\w+)+)\s*!=\s*null\s*\?\s*\1/g;
+    if (nullCheckPattern.test(text)) {
+        tips.push({
+            type: 'style',
+            msg: `Pattern "x != null ? x : default" can be simplified with defaultTo(x, default) or coalesce().`,
+            severity: 'info'
+        });
+    }
+
+    // 7. Detect empty string comparisons that could use isEmpty()
+    if (/==\s*["']{2}|["']{2}\s*==/.test(text)) {
+        tips.push({
+            type: 'style',
+            msg: `Empty string comparison (== "") can be replaced with isEmpty() for clarity.`,
+            severity: 'info'
+        });
     }
 
     return tips;
@@ -2598,28 +2680,24 @@ function escapeHtml(str) {
 // ============== Syntax Highlighting ==============
 const HIGHLIGHT_KEYWORDS = new Set(['and', 'or', 'not', 'true', 'false', 'null', 'empty', 'eq', 'ne', 'lt', 'le', 'gt', 'ge', 'div', 'mod']);
 const HIGHLIGHT_FUNCTIONS = new Set([
-    // String functions
-    'contains', 'matches', 'find', 'findGroups', 'matchesWithRegex',
-    'substring', 'startsWith', 'endsWith', 'toLowerCase', 'toUpperCase',
-    'trim', 'trimStart', 'trimEnd', 'replace', 'replaceAll', 'concat',
-    'charAt', 'charCodeAt', 'repeat', 'padStart', 'padEnd',
-    // Array functions
-    'split', 'join', 'array', 'first', 'last', 'reverse', 'sort', 'slice',
-    // Object functions
-    'keys', 'keySet', 'values', 'entries',
-    // Utility functions
-    'length', 'size', 'indexOf', 'lastIndexOf', 'empty', 'isEmpty',
-    'isNull', 'isNotNull', 'defaultTo', 'coalesce',
-    // Type conversion
-    'bool', 'boolean', 'integer', 'number', 'toString',
-    // Encoding
-    'encodeBase64', 'decodeBase64', 'urlEncode', 'urlDecode', 'jsonParse', 'jsonStringify',
-    // Math
-    'abs', 'ceil', 'floor', 'round', 'min', 'max', 'random',
-    // Date/Time
-    'now', 'timestamp',
-    // Type checking
-    'typeof', 'isString', 'isNumber', 'isBoolean', 'isArray', 'isObject',
+    // Official IG functions (org.forgerock.openig.el.Functions)
+    'array', 'boolean', 'contains', 'decodeBase64', 'decodeBase64url',
+    'digestSha256', 'encodeBase64', 'encodeBase64url',
+    'find', 'findGroups', 'indexOf', 'integer', 'integerWithRadix',
+    'ipMatch', 'join', 'keyMatch', 'length', 'matches', 'matchingGroups',
+    'split', 'toJson', 'toLowerCase', 'toString', 'toUpperCase', 'trim',
+    // Official IG functions (org.forgerock.http.util.Uris)
+    'urlDecode', 'urlEncode', 'urlDecodeFragment', 'urlDecodePathElement',
+    'urlDecodeQueryParameterNameOrValue', 'urlDecodeUserInfo',
+    'urlEncodeFragment', 'urlEncodePathElement',
+    'urlEncodeQueryParameterNameOrValue', 'urlEncodeUserInfo',
+    'formDecodeParameterNameOrValue', 'formEncodeParameterNameOrValue',
+    // Additional common functions (supported in expressions)
+    'startsWith', 'endsWith', 'substring', 'replace', 'replaceAll',
+    'first', 'last', 'slice', 'keys', 'values', 'entries',
+    'empty', 'isEmpty', 'isNull', 'isNotNull', 'defaultTo', 'coalesce',
+    'abs', 'ceil', 'floor', 'round', 'min', 'max',
+    'now', 'timestamp', 'jsonParse', 'jsonStringify',
 ]);
 
 function highlightExpression(text) {
