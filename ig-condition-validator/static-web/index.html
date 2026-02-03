@@ -1561,92 +1561,166 @@ function createHeader(type, icon, title, msg) {
     return div;
 }
 
+// Helper to create a collapsible section
+function createCollapsible(headerContent, detailsContent, startExpanded = false) {
+    const wrapper = document.createElement('div');
+
+    const header = document.createElement('div');
+    header.className = 'collapsible' + (startExpanded ? ' expanded' : '');
+    if (typeof headerContent === 'string') {
+        header.innerHTML = headerContent;
+    } else {
+        header.appendChild(headerContent);
+    }
+
+    const content = document.createElement('div');
+    content.className = 'collapse-content' + (startExpanded ? ' show' : '');
+    if (typeof detailsContent === 'string') {
+        content.innerHTML = detailsContent;
+    } else {
+        content.appendChild(detailsContent);
+    }
+
+    header.addEventListener('click', () => {
+        header.classList.toggle('expanded');
+        content.classList.toggle('show');
+    });
+
+    wrapper.appendChild(header);
+    wrapper.appendChild(content);
+    return wrapper;
+}
+
 function createConditionItem(c) {
     const div = document.createElement('div');
     div.className = 'condition-item ' + (c.passed ? 'passed' : 'failed');
 
-    const expr = document.createElement('div');
-    expr.className = 'condition-expr';
-    const statusIcon = document.createElement('span');
-    statusIcon.className = 'status-icon';
-    statusIcon.textContent = c.passed ? '✓' : '✗';
-    expr.appendChild(statusIcon);
+    const statusIcon = c.passed ? '✓' : '✗';
+    const statusColor = c.passed ? '#10b981' : '#ef4444';
 
     if (c.isOrGroup) {
-        expr.appendChild(document.createTextNode('OR Group'));
-        div.appendChild(expr);
+        // OR Group header
+        const headerHtml = `<span style="color:${statusColor}">${statusIcon}</span> <strong>OR Group</strong> <span style="color:#64748b;font-size:0.85rem">(${c.branches.filter(b=>b.passed).length}/${c.branches.length} match)</span>`;
 
-        if (c.details) {
-            const details = document.createElement('div');
-            details.className = 'condition-details';
-            details.innerHTML = c.details;
-            div.appendChild(details);
-        }
+        // OR Group details content
+        const detailsDiv = document.createElement('div');
+        detailsDiv.style.cssText = 'padding-left: 1rem; border-left: 2px solid #475569;';
 
-        // Display OR branches
         if (c.branches && c.branches.length > 0) {
-            const branchList = document.createElement('div');
-            branchList.style.cssText = 'margin-top: 0.5rem; padding-left: 1rem; border-left: 2px solid #475569;';
-
             c.branches.forEach(branch => {
-                const branchDiv = document.createElement('div');
-                branchDiv.style.cssText = 'margin: 0.5rem 0; font-size: 0.85rem;';
-
-                const branchIcon = document.createElement('span');
-                branchIcon.style.marginRight = '0.5rem';
-                branchIcon.textContent = branch.passed ? '✓' : '○';
-                branchIcon.style.color = branch.passed ? '#10b981' : '#64748b';
-
-                branchDiv.appendChild(branchIcon);
-                branchDiv.appendChild(document.createTextNode(branch.expression));
-
-                // Show sub-details for each function call in this branch
-                if (branch.subDetails && branch.subDetails.length > 0) {
-                    const subList = document.createElement('div');
-                    subList.style.cssText = 'margin-left: 1.5rem; margin-top: 0.25rem;';
-
-                    branch.subDetails.forEach(sub => {
-                        const subDiv = document.createElement('div');
-                        subDiv.className = 'condition-details';
-                        subDiv.style.cssText = 'font-size: 0.8rem; margin: 0.25rem 0;';
-                        subDiv.innerHTML = sub.details;
-                        subList.appendChild(subDiv);
-                    });
-
-                    branchDiv.appendChild(subList);
-                } else if (branch.details) {
-                    const branchDetails = document.createElement('div');
-                    branchDetails.className = 'condition-details';
-                    branchDetails.style.cssText = 'margin-left: 1.5rem; font-size: 0.8rem;';
-                    branchDetails.innerHTML = branch.details;
-                    branchDiv.appendChild(branchDetails);
-                }
-
-                branchList.appendChild(branchDiv);
+                const branchItem = createBranchItem(branch);
+                detailsDiv.appendChild(branchItem);
             });
-
-            div.appendChild(branchList);
         }
+
+        const collapsible = createCollapsible(headerHtml, detailsDiv, false);
+        div.appendChild(collapsible);
+
     } else {
-        expr.appendChild(document.createTextNode(c.expression));
-        div.appendChild(expr);
+        // Single condition - check if it has details
+        const hasDetails = c.details || (c.suggestion && !c.passed);
 
-        if (c.details) {
-            const details = document.createElement('div');
-            details.className = 'condition-details';
-            details.innerHTML = c.details;
-            div.appendChild(details);
-        }
+        if (hasDetails) {
+            // Make it collapsible
+            const headerHtml = `<span style="color:${statusColor}">${statusIcon}</span> <span style="font-family:'Monaco','Menlo',monospace;font-size:0.9rem">${escapeHtml(c.expression)}</span> → <span class="${c.passed ? 'val-true' : 'val-false'}">${c.passed}</span>`;
 
-        if (c.suggestion && !c.passed) {
-            const suggestion = document.createElement('div');
-            suggestion.className = 'condition-suggestion';
-            suggestion.innerHTML = '💡 ' + c.suggestion;
-            div.appendChild(suggestion);
+            const detailsDiv = document.createElement('div');
+            detailsDiv.className = 'condition-details';
+            detailsDiv.style.cssText = 'padding-left: 1.5rem;';
+
+            if (c.details) {
+                const det = document.createElement('div');
+                det.innerHTML = c.details;
+                detailsDiv.appendChild(det);
+            }
+
+            if (c.suggestion && !c.passed) {
+                const sug = document.createElement('div');
+                sug.className = 'condition-suggestion';
+                sug.innerHTML = '💡 ' + c.suggestion;
+                detailsDiv.appendChild(sug);
+            }
+
+            const collapsible = createCollapsible(headerHtml, detailsDiv, false);
+            div.appendChild(collapsible);
+        } else {
+            // Simple display without collapse
+            const expr = document.createElement('div');
+            expr.className = 'condition-expr';
+            expr.innerHTML = `<span style="color:${statusColor}">${statusIcon}</span> ${escapeHtml(c.expression)} → <span class="${c.passed ? 'val-true' : 'val-false'}">${c.passed}</span>`;
+            div.appendChild(expr);
         }
     }
 
     return div;
+}
+
+// Create a branch item (for OR group branches)
+function createBranchItem(branch) {
+    const branchDiv = document.createElement('div');
+    branchDiv.style.cssText = 'margin: 0.5rem 0;';
+
+    const statusIcon = branch.passed ? '✓' : '○';
+    const statusColor = branch.passed ? '#10b981' : '#64748b';
+
+    // Check if branch has sub-details or details
+    const hasDetails = (branch.subDetails && branch.subDetails.length > 0) || branch.details;
+
+    if (hasDetails) {
+        const headerHtml = `<span style="color:${statusColor}">${statusIcon}</span> <span style="font-family:'Monaco','Menlo',monospace;font-size:0.85rem">${escapeHtml(branch.expression)}</span> → <span class="${branch.passed ? 'val-true' : 'val-false'}">${branch.passed}</span>`;
+
+        const detailsDiv = document.createElement('div');
+        detailsDiv.style.cssText = 'padding-left: 1.5rem;';
+
+        if (branch.subDetails && branch.subDetails.length > 0) {
+            branch.subDetails.forEach(sub => {
+                const subItem = createSubDetailItem(sub);
+                detailsDiv.appendChild(subItem);
+            });
+        } else if (branch.details) {
+            const det = document.createElement('div');
+            det.className = 'condition-details';
+            det.innerHTML = branch.details;
+            detailsDiv.appendChild(det);
+        }
+
+        const collapsible = createCollapsible(headerHtml, detailsDiv, false);
+        branchDiv.appendChild(collapsible);
+    } else {
+        branchDiv.innerHTML = `<span style="color:${statusColor}">${statusIcon}</span> <span style="font-family:'Monaco','Menlo',monospace;font-size:0.85rem">${escapeHtml(branch.expression)}</span> → <span class="${branch.passed ? 'val-true' : 'val-false'}">${branch.passed}</span>`;
+    }
+
+    return branchDiv;
+}
+
+// Create a sub-detail item (for individual function calls)
+function createSubDetailItem(sub) {
+    const subDiv = document.createElement('div');
+    subDiv.style.cssText = 'margin: 0.25rem 0;';
+
+    const statusIcon = sub.passed ? '✓' : '○';
+    const statusColor = sub.passed ? '#10b981' : '#64748b';
+
+    if (sub.details) {
+        const headerHtml = `<span style="color:${statusColor};font-size:0.8rem">${statusIcon}</span> <span style="font-family:'Monaco','Menlo',monospace;font-size:0.8rem">${escapeHtml(sub.expression)}</span> → <span class="${sub.passed ? 'val-true' : 'val-false'}" style="font-size:0.8rem">${sub.passed}</span>`;
+
+        const detailsDiv = document.createElement('div');
+        detailsDiv.className = 'condition-details';
+        detailsDiv.style.cssText = 'padding-left: 1.5rem; font-size: 0.8rem;';
+        detailsDiv.innerHTML = sub.details;
+
+        const collapsible = createCollapsible(headerHtml, detailsDiv, false);
+        subDiv.appendChild(collapsible);
+    } else {
+        subDiv.innerHTML = `<span style="color:${statusColor};font-size:0.8rem">${statusIcon}</span> <span style="font-family:'Monaco','Menlo',monospace;font-size:0.8rem">${escapeHtml(sub.expression)}</span> → <span class="${sub.passed ? 'val-true' : 'val-false'}" style="font-size:0.8rem">${sub.passed}</span>`;
+    }
+
+    return subDiv;
+}
+
+// Helper to escape HTML
+function escapeHtml(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 // ============== Syntax Highlighting ==============
