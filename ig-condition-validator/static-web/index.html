@@ -1093,9 +1093,34 @@ function generateDetails(node, value, context) {
     if (node.type === 'BinaryOp') {
         const leftVal = new Evaluator(context).visit(node.left);
         const rightVal = new Evaluator(context).visit(node.right);
-        details = `Comparing ${repr(leftVal)} ${node.operator} ${repr(rightVal)}`;
-        if (node.operator === '==' && leftVal !== rightVal) {
-            suggestion = `Expected ${repr(rightVal)}, but got ${repr(leftVal)}`;
+
+        if (node.operator === 'and' || node.operator === 'or') {
+            // For logical operators, show which side(s) failed/passed
+            const leftBool = Boolean(leftVal);
+            const rightBool = Boolean(rightVal);
+            if (node.operator === 'and') {
+                if (!leftBool && !rightBool) {
+                    details = 'Both conditions are false';
+                } else if (!leftBool) {
+                    details = 'Left condition is false';
+                } else if (!rightBool) {
+                    details = 'Right condition is false';
+                } else {
+                    details = 'Both conditions are true';
+                }
+            } else { // or
+                if (leftBool || rightBool) {
+                    details = leftBool ? 'Left condition is true' : 'Right condition is true';
+                } else {
+                    details = 'Both conditions are false';
+                }
+            }
+        } else {
+            // For comparison operators, show actual values
+            details = `${repr(leftVal)} ${node.operator} ${repr(rightVal)}`;
+            if (node.operator === '==' && leftVal !== rightVal) {
+                suggestion = `Expected ${repr(rightVal)}, but got ${repr(leftVal)}`;
+            }
         }
     } else if (node.type === 'FunctionCall') {
         const args = node.arguments.map(a => new Evaluator(context).visit(a));
@@ -1115,9 +1140,10 @@ function generateDetails(node, value, context) {
 
 function repr(val) {
     if (val === null || val === undefined) return 'null';
-    if (typeof val === 'string') return `"${val.length > 50 ? val.slice(0, 50) + '...' : val}"`;
+    if (typeof val === 'string') return `"${val}"`;
     if (typeof val === 'boolean') return val ? 'true' : 'false';
-    if (Array.isArray(val)) return `[${val.length} items]`;
+    if (Array.isArray(val)) return JSON.stringify(val);
+    if (typeof val === 'object') return JSON.stringify(val);
     return String(val);
 }
 
