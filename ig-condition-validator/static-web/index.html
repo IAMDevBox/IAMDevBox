@@ -25,17 +25,6 @@
             border: 1px solid #334155;
         }
         .card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: #f1f5f9; }
-        .tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
-        .tab {
-            padding: 0.5rem 1rem;
-            border: none;
-            background: #334155;
-            color: #94a3b8;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        .tab:hover { background: #475569; }
-        .tab.active { background: #3b82f6; color: white; }
         .form-group { margin-bottom: 1rem; }
         label { display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.5rem; }
         input, textarea, select {
@@ -106,8 +95,6 @@
         .collapse-content.show { display: block; }
         .status-icon { margin-right: 0.5rem; }
         .hidden { display: none; }
-        .headers-list { display: flex; flex-direction: column; gap: 0.5rem; }
-        .header-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.5rem; }
         .btn-icon {
             padding: 0.5rem 0.75rem;
             background: #334155;
@@ -208,61 +195,13 @@
             <div>
                 <div class="card">
                     <h3 class="card-title">Request</h3>
-                    <div class="tabs">
-                        <button class="tab" data-tab="manual">Manual</button>
-                        <button class="tab active" data-tab="curl">cURL</button>
-                    </div>
 
-                    <div id="tab-manual" class="tab-content hidden">
-                        <div class="form-group inline-group">
-                            <div>
-                                <label>Method</label>
-                                <select id="method">
-                                    <option value="GET">GET</option>
-                                    <option value="POST">POST</option>
-                                    <option value="PUT">PUT</option>
-                                    <option value="DELETE">DELETE</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label>Path</label>
-                                <input type="text" id="path" value="/" placeholder="/api/users">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Query String</label>
-                            <input type="text" id="query" placeholder="param1=value1&param2=value2">
-                        </div>
-                        <div class="form-group">
-                            <label>Host</label>
-                            <input type="text" id="host" placeholder="api.example.com">
-                        </div>
-                        <div class="form-group">
-                            <label>Headers</label>
-                            <div id="headers-list" class="headers-list">
-                                <div class="header-row">
-                                    <input type="text" placeholder="Header name" class="header-name">
-                                    <input type="text" placeholder="Header value" class="header-value">
-                                    <button class="btn-icon remove-header">×</button>
-                                </div>
-                            </div>
-                            <button class="add-btn" id="add-header">+ Add Header</button>
-                        </div>
-                        <div class="form-group">
-                            <label>Body</label>
-                            <textarea id="body" placeholder='{"key": "value"}'></textarea>
-                        </div>
-                    </div>
-
-                    <div id="tab-curl" class="tab-content">
-                        <div class="form-group">
-                            <label>Paste cURL command or URL</label>
-                            <textarea id="curl-input" placeholder='curl -X GET "https://api.example.com/users?status=active" -H "Authorization: Bearer token"
+                    <div class="form-group">
+                        <label>Paste cURL command or URL</label>
+                        <textarea id="curl-input" placeholder='curl -X GET "https://api.example.com/users?status=active" -H "Authorization: Bearer token"
 
 Or just paste a URL:
 https://api.example.com/path%2Fencoded?query=value%26other'></textarea>
-                        </div>
-                        <button class="btn btn-primary" id="parse-curl">Parse cURL / URL</button>
                     </div>
                 </div>
 
@@ -1434,142 +1373,28 @@ function parseUrl(urlStr) {
 }
 
 // ============== UI ==============
-document.querySelectorAll('.tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-        tab.classList.add('active');
-        document.getElementById('tab-' + tab.dataset.tab).classList.remove('hidden');
-    });
-});
-
-document.getElementById('add-header').addEventListener('click', () => {
-    const list = document.getElementById('headers-list');
-    const row = document.createElement('div');
-    row.className = 'header-row';
-
-    const nameInput = document.createElement('input');
-    nameInput.type = 'text';
-    nameInput.placeholder = 'Header name';
-    nameInput.className = 'header-name';
-
-    const valueInput = document.createElement('input');
-    valueInput.type = 'text';
-    valueInput.placeholder = 'Header value';
-    valueInput.className = 'header-value';
-
-    const removeBtn = document.createElement('button');
-    removeBtn.className = 'btn-icon remove-header';
-    removeBtn.textContent = '×';
-
-    row.appendChild(nameInput);
-    row.appendChild(valueInput);
-    row.appendChild(removeBtn);
-    list.appendChild(row);
-});
-
-document.getElementById('headers-list').addEventListener('click', e => {
-    if (e.target.classList.contains('remove-header')) {
-        if (document.querySelectorAll('.header-row').length > 1) e.target.parentElement.remove();
-    }
-});
-
-document.getElementById('parse-curl').addEventListener('click', () => {
-    const curl = document.getElementById('curl-input').value;
-    if (!curl) return;
-    const req = parseCurl(curl);
-    document.getElementById('method').value = req.method;
-    document.getElementById('path').value = req.path;
-    document.getElementById('query').value = req.query;
-    document.getElementById('host').value = req.host;
-    document.getElementById('body').value = req.body || '';
-
-    const list = document.getElementById('headers-list');
-    list.textContent = '';
-    const entries = Object.entries(req.headers);
-    if (entries.length === 0) {
-        addHeaderRow('', '');
-    } else {
-        entries.forEach(([name, values]) => addHeaderRow(name, values[0]));
-    }
-    document.querySelector('[data-tab="manual"]').click();
-});
-
-function addHeaderRow(name, value) {
-    const list = document.getElementById('headers-list');
-    const row = document.createElement('div');
-    row.className = 'header-row';
-
-    const nameInput = document.createElement('input');
-    nameInput.type = 'text';
-    nameInput.placeholder = 'Header name';
-    nameInput.className = 'header-name';
-    nameInput.value = name;
-
-    const valueInput = document.createElement('input');
-    valueInput.type = 'text';
-    valueInput.placeholder = 'Header value';
-    valueInput.className = 'header-value';
-    valueInput.value = value;
-
-    const removeBtn = document.createElement('button');
-    removeBtn.className = 'btn-icon remove-header';
-    removeBtn.textContent = '×';
-
-    row.appendChild(nameInput);
-    row.appendChild(valueInput);
-    row.appendChild(removeBtn);
-    list.appendChild(row);
-}
+// Store parsed request data
+let currentRequest = {
+    method: 'GET',
+    path: '/',
+    query: '',
+    host: '',
+    headers: {},
+    cookies: {},
+    body: null
+};
 
 document.getElementById('diagnose-btn').addEventListener('click', () => {
     const condition = document.getElementById('condition').value;
     if (!condition) { alert('Please enter a condition'); return; }
 
-    // Check if currently on cURL tab, if so and has content, parse first
-    const curlTab = document.querySelector('[data-tab="curl"]');
-    if (curlTab.classList.contains('active')) {
-        const curl = document.getElementById('curl-input').value;
-        if (curl) {
-            const req = parseCurl(curl);
-            document.getElementById('method').value = req.method;
-            document.getElementById('path').value = req.path;
-            document.getElementById('query').value = req.query;
-            document.getElementById('host').value = req.host;
-            document.getElementById('body').value = req.body || '';
-
-            const list = document.getElementById('headers-list');
-            list.textContent = '';
-            const entries = Object.entries(req.headers);
-            if (entries.length === 0) {
-                addHeaderRow('', '');
-            } else {
-                entries.forEach(([name, values]) => addHeaderRow(name, values[0]));
-            }
-        }
+    // Parse cURL if there's content
+    const curl = document.getElementById('curl-input').value;
+    if (curl) {
+        currentRequest = parseCurl(curl);
     }
 
-    const headers = {};
-    document.querySelectorAll('.header-row').forEach(row => {
-        const name = row.querySelector('.header-name').value.trim();
-        const value = row.querySelector('.header-value').value;
-        if (name) {
-            if (!headers[name]) headers[name] = [];
-            headers[name].push(value);
-        }
-    });
-
-    const request = {
-        method: document.getElementById('method').value,
-        path: document.getElementById('path').value,
-        query: document.getElementById('query').value,
-        host: document.getElementById('host').value,
-        headers,
-        cookies: {},
-        body: document.getElementById('body').value || null
-    };
-
-    const result = diagnose(condition, request);
+    const result = diagnose(condition, currentRequest);
     displayResult(result);
 });
 
