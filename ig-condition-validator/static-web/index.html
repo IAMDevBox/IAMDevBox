@@ -92,6 +92,11 @@
         .condition-details .val-false { color: #f14c4c; }
         .condition-details .op { color: #c586c0; font-weight: 600; }
         .condition-details .match-highlight { background: #365314; color: #a3e635; padding: 0 2px; border-radius: 2px; }
+        /* Pattern highlighting for condition display */
+        .fn-name { color: #dcdcaa; font-weight: 600; }
+        .pattern-highlight { color: #ce9178; background: rgba(206, 145, 120, 0.15); padding: 0 3px; border-radius: 3px; }
+        .val-true { color: #4ec9b0; font-weight: 600; }
+        .val-false { color: #f14c4c; font-weight: 600; }
         .condition-suggestion { font-size: 0.85rem; color: #fbbf24; margin-top: 0.5rem; }
         .collapsible { cursor: pointer; user-select: none; }
         .collapsible:hover { opacity: 0.8; }
@@ -1090,6 +1095,44 @@ function collectSubDetails(node, context) {
         if (n.type === 'BinaryOp' && n.operator === 'and') {
             collect(n.left);
             collect(n.right);
+        } else if (n.type === 'BinaryOp' && n.operator === 'or') {
+            // OR chain - collect all branches and show as a group
+            const orBranches = collectOrBranches(n);
+            const evaluator = new Evaluator(context);
+            const overallValue = evaluator.visit(n);
+
+            // Find which branch matched (if any)
+            const branchResults = orBranches.map(b => {
+                const branchEval = new Evaluator(context);
+                const value = branchEval.visit(b);
+                return {
+                    expression: nodeToString(b),
+                    passed: Boolean(value),
+                    node: b
+                };
+            });
+
+            const passedBranch = branchResults.find(b => b.passed);
+
+            // Create a summary for the OR group
+            let orSummary;
+            if (passedBranch) {
+                // Show which one matched
+                const details = generateDetails(passedBranch.node, true, context);
+                orSummary = {
+                    expression: `OR (${branchResults.length} options)`,
+                    passed: true,
+                    details: details.details,
+                    matchedPattern: getShortDescFromNode(passedBranch.node)
+                };
+            } else {
+                orSummary = {
+                    expression: `OR (${branchResults.length} options)`,
+                    passed: false,
+                    details: `None of ${branchResults.length} patterns matched`
+                };
+            }
+            results.push(orSummary);
         } else if (n.type === 'FunctionCall' || n.type === 'MethodCall') {
             const evaluator = new Evaluator(context);
             const value = evaluator.visit(n);
@@ -1114,6 +1157,19 @@ function collectSubDetails(node, context) {
 
     collect(node);
     return results;
+}
+
+// Helper to get short description from AST node
+function getShortDescFromNode(node) {
+    if (node.type === 'FunctionCall' && node.arguments.length >= 2) {
+        const arg = node.arguments[1];
+        if (arg.type === 'Literal' && arg.litType === 'string') {
+            const val = arg.value;
+            return val.length > 50 ? val.slice(0, 47) + '...' : val;
+        }
+    }
+    const expr = nodeToString(node);
+    return expr.length > 50 ? expr.slice(0, 47) + '...' : expr;
 }
 
 function nodeToString(node, parentOp = null) {
@@ -1592,16 +1648,21 @@ function createCollapsible(headerContent, detailsContent, startExpanded = false)
 }
 
 // Extract short description from expression (e.g., get the pattern from matches())
-function getShortDesc(expr) {
-    // For matches/contains, extract the pattern
-    const matchPattern = expr.match(/(?:matches|contains|find|startsWith|endsWith)\s*\([^,]+,\s*['"]([^'"]+)['"]\)/);
-    if (matchPattern) {
-        const pattern = matchPattern[1];
-        // Truncate if too long
-        return pattern.length > 50 ? pattern.slice(0, 47) + '...' : pattern;
+function getShortDesc(expr, asHtml = false) {
+    // For matches/contains, extract the function name and pattern
+    const matchResult = expr.match(/(?:(matches|matchesWithRegex|contains|find|findGroups|startsWith|endsWith))\s*\([^,]+,\s*['"]([^'"]+)['"]\)/);
+    if (matchResult) {
+        const fnName = matchResult[1];
+        const pattern = matchResult[2];
+        const truncatedPattern = pattern.length > 50 ? pattern.slice(0, 47) + '...' : pattern;
+        if (asHtml) {
+            return `<span class="fn-name">${escapeHtml(fnName)}</span>(<span class="pattern-highlight">${escapeHtml(truncatedPattern)}</span>)`;
+        }
+        return truncatedPattern;
     }
     // For other expressions, truncate
-    return expr.length > 60 ? expr.slice(0, 57) + '...' : expr;
+    const truncated = expr.length > 60 ? expr.slice(0, 57) + '...' : expr;
+    return asHtml ? escapeHtml(truncated) : truncated;
 }
 
 function createConditionItem(c) {
@@ -1619,18 +1680,19 @@ function createConditionItem(c) {
         // Find which branch passed (if any)
         const passedBranch = c.branches.find(b => b.passed);
         let summaryText = `${passedCount}/${totalCount} branches match`;
+        let matchedPatternsHtml = '';
         if (passedBranch && passedBranch.subDetails && passedBranch.subDetails.length > 0) {
-            // Show what matched
-            const matchedPatterns = passedBranch.subDetails
+            // Show what matched with highlighting
+            const matchedPatternsArr = passedBranch.subDetails
                 .filter(s => s.passed)
-                .map(s => getShortDesc(s.expression))
+                .map(s => getShortDesc(s.expression, true))
                 .slice(0, 2);
-            if (matchedPatterns.length > 0) {
-                summaryText += ` — matched: ${matchedPatterns.join(', ')}`;
+            if (matchedPatternsArr.length > 0) {
+                matchedPatternsHtml = ` — matched: ${matchedPatternsArr.join(', ')}`;
             }
         }
 
-        const headerHtml = `<span style="color:${statusColor}">${statusIcon}</span> <strong>OR</strong> <span style="color:#94a3b8;font-size:0.85rem">${summaryText}</span>`;
+        const headerHtml = `<span style="color:${statusColor}">${statusIcon}</span> <strong>OR</strong> <span style="color:#94a3b8;font-size:0.85rem">${summaryText}</span>${matchedPatternsHtml}`;
 
         // Details: list each branch simply
         const detailsDiv = document.createElement('div');
@@ -1646,11 +1708,11 @@ function createConditionItem(c) {
 
     } else {
         // Single condition
-        const shortExpr = getShortDesc(c.expression);
+        const shortExprHtml = getShortDesc(c.expression, true);
         const hasDetails = c.details || (c.suggestion && !c.passed);
 
         if (hasDetails) {
-            const headerHtml = `<span style="color:${statusColor}">${statusIcon}</span> <code style="font-size:0.85rem;color:#e2e8f0">${escapeHtml(shortExpr)}</code> → <span class="${c.passed ? 'val-true' : 'val-false'}">${c.passed}</span>`;
+            const headerHtml = `<span style="color:${statusColor}">${statusIcon}</span> <code style="font-size:0.85rem;color:#e2e8f0">${shortExprHtml}</code> → <span class="${c.passed ? 'val-true' : 'val-false'}">${c.passed}</span>`;
 
             const detailsDiv = document.createElement('div');
             detailsDiv.className = 'condition-details';
@@ -1674,7 +1736,7 @@ function createConditionItem(c) {
         } else {
             const expr = document.createElement('div');
             expr.className = 'condition-expr';
-            expr.innerHTML = `<span style="color:${statusColor}">${statusIcon}</span> <code style="font-size:0.85rem">${escapeHtml(shortExpr)}</code> → <span class="${c.passed ? 'val-true' : 'val-false'}">${c.passed}</span>`;
+            expr.innerHTML = `<span style="color:${statusColor}">${statusIcon}</span> <code style="font-size:0.85rem">${shortExprHtml}</code> → <span class="${c.passed ? 'val-true' : 'val-false'}">${c.passed}</span>`;
             div.appendChild(expr);
         }
     }
@@ -1696,16 +1758,16 @@ function createBranchItem(branch, index) {
         // AND condition with multiple parts
         const passedSubs = branch.subDetails.filter(s => s.passed);
         const patterns = branch.subDetails.map(s => ({
-            pattern: getShortDesc(s.expression),
+            patternHtml: getShortDesc(s.expression, true),
             passed: s.passed
         }));
 
         // Show patterns with their status
         branchSummary = patterns.map(p =>
-            `<span style="color:${p.passed ? '#10b981' : '#64748b'}">${p.passed ? '✓' : '✗'}</span> ${escapeHtml(p.pattern)}`
+            `<span style="color:${p.passed ? '#10b981' : '#64748b'}">${p.passed ? '✓' : '✗'}</span> ${p.patternHtml}`
         ).join('<br>');
     } else {
-        branchSummary = `<code style="font-size:0.8rem">${escapeHtml(getShortDesc(branch.expression))}</code>`;
+        branchSummary = `<code style="font-size:0.8rem">${getShortDesc(branch.expression, true)}</code>`;
     }
 
     const hasDetails = (branch.subDetails && branch.subDetails.length > 0);
@@ -1725,7 +1787,7 @@ function createBranchItem(branch, index) {
         const collapsible = createCollapsible(headerHtml, detailsDiv, false);
         branchDiv.appendChild(collapsible);
     } else {
-        branchDiv.innerHTML = `<span style="color:${statusColor}">${statusIcon}</span> <code style="font-size:0.8rem;color:#e2e8f0">${escapeHtml(getShortDesc(branch.expression))}</code> → <span class="${branch.passed ? 'val-true' : 'val-false'}">${branch.passed}</span>`;
+        branchDiv.innerHTML = `<span style="color:${statusColor}">${statusIcon}</span> <code style="font-size:0.8rem;color:#e2e8f0">${getShortDesc(branch.expression, true)}</code> → <span class="${branch.passed ? 'val-true' : 'val-false'}">${branch.passed}</span>`;
     }
 
     return branchDiv;
@@ -1738,10 +1800,10 @@ function createSubDetailItem(sub) {
 
     const statusIcon = sub.passed ? '✓' : '○';
     const statusColor = sub.passed ? '#10b981' : '#64748b';
-    const pattern = getShortDesc(sub.expression);
+    const patternHtml = getShortDesc(sub.expression, true);
 
     if (sub.details) {
-        const headerHtml = `<span style="color:${statusColor}">${statusIcon}</span> <code style="font-size:0.8rem;color:#e2e8f0">${escapeHtml(pattern)}</code> → <span class="${sub.passed ? 'val-true' : 'val-false'}">${sub.passed}</span>`;
+        const headerHtml = `<span style="color:${statusColor}">${statusIcon}</span> <code style="font-size:0.8rem;color:#e2e8f0">${patternHtml}</code> → <span class="${sub.passed ? 'val-true' : 'val-false'}">${sub.passed}</span>`;
 
         const detailsDiv = document.createElement('div');
         detailsDiv.className = 'condition-details';
@@ -1751,7 +1813,7 @@ function createSubDetailItem(sub) {
         const collapsible = createCollapsible(headerHtml, detailsDiv, false);
         subDiv.appendChild(collapsible);
     } else {
-        subDiv.innerHTML = `<span style="color:${statusColor}">${statusIcon}</span> <code style="font-size:0.8rem;color:#e2e8f0">${escapeHtml(pattern)}</code> → <span class="${sub.passed ? 'val-true' : 'val-false'}">${sub.passed}</span>`;
+        subDiv.innerHTML = `<span style="color:${statusColor}">${statusIcon}</span> <code style="font-size:0.8rem;color:#e2e8f0">${patternHtml}</code> → <span class="${sub.passed ? 'val-true' : 'val-false'}">${sub.passed}</span>`;
     }
 
     return subDiv;
