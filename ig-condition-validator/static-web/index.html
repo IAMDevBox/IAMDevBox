@@ -114,11 +114,11 @@
         /* Syntax highlighting editor */
         .editor-container {
             position: relative;
-            min-height: 120px;
+            height: 150px;
         }
         .editor-backdrop {
             position: absolute;
-            top: 0; left: 0; right: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             padding: 0.75rem;
             background: #0f172a;
             border: 1px solid #334155;
@@ -126,16 +126,14 @@
             font-family: 'Monaco', 'Menlo', monospace;
             font-size: 1rem;
             line-height: 1.5;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            overflow: hidden;
+            white-space: pre;
+            overflow: auto;
             pointer-events: none;
-            min-height: 120px;
         }
         .editor-textarea {
             position: relative;
             width: 100%;
-            min-height: 120px;
+            height: 150px;
             padding: 0.75rem;
             background: transparent;
             border: none;
@@ -145,9 +143,10 @@
             line-height: 1.5;
             color: transparent;
             caret-color: #e2e8f0;
-            resize: none;
+            resize: vertical;
             z-index: 1;
-            overflow: hidden;
+            overflow: auto;
+            white-space: pre;
         }
         .editor-textarea:focus { outline: none; }
         .editor-textarea:focus ~ .editor-backdrop { border-color: #3b82f6; }
@@ -1067,15 +1066,23 @@ function collectOrBranches(node) {
     return [node];
 }
 
-function nodeToString(node) {
+function nodeToString(node, parentOp = null) {
     switch (node.type) {
-        case 'BinaryOp': return `(${nodeToString(node.left)} ${node.operator} ${nodeToString(node.right)})`;
-        case 'UnaryOp': return `(${node.operator} ${nodeToString(node.operand)})`;
-        case 'FunctionCall': return `${node.name}(${node.arguments.map(nodeToString).join(', ')})`;
+        case 'BinaryOp': {
+            const inner = `${nodeToString(node.left, node.operator)} ${node.operator} ${nodeToString(node.right, node.operator)}`;
+            // Only add parens if parent has different precedence
+            const needsParens = parentOp && parentOp !== node.operator &&
+                ((parentOp === 'and' && node.operator === 'or') || (parentOp === 'or' && node.operator === 'and'));
+            return needsParens ? `(${inner})` : inner;
+        }
+        case 'UnaryOp': return `${node.operator} ${nodeToString(node.operand)}`;
+        case 'FunctionCall': return `${node.name}(${node.arguments.map(a => nodeToString(a)).join(', ')})`;
+        case 'MethodCall': return `${nodeToString(node.object)}.${node.method}(${node.arguments.map(a => nodeToString(a)).join(', ')})`;
         case 'PropertyAccess': return `${nodeToString(node.object)}.${node.property}`;
         case 'IndexAccess': return `${nodeToString(node.object)}[${nodeToString(node.index)}]`;
         case 'Identifier': return node.name;
         case 'Literal': return node.litType === 'string' ? `'${node.value}'` : String(node.value);
+        case 'Ternary': return `${nodeToString(node.condition)} ? ${nodeToString(node.consequent)} : ${nodeToString(node.alternate)}`;
         default: return '?';
     }
 }
@@ -1608,12 +1615,6 @@ function updateHighlight() {
     const backdrop = document.getElementById('condition-highlight');
     const text = textarea.value;
     backdrop.innerHTML = highlightExpression(text) + '\n'; // extra newline to match textarea
-
-    // Auto-resize textarea and backdrop to fit content
-    textarea.style.height = 'auto';
-    const newHeight = Math.max(120, textarea.scrollHeight) + 'px';
-    textarea.style.height = newHeight;
-    backdrop.style.height = newHeight;
 }
 
 // ============== Format Expression ==============
