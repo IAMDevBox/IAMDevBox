@@ -91,6 +91,7 @@
         .condition-details .val-true { color: #4ec9b0; }
         .condition-details .val-false { color: #f14c4c; }
         .condition-details .op { color: #c586c0; font-weight: 600; }
+        .condition-details .match-highlight { background: #365314; color: #a3e635; padding: 0 2px; border-radius: 2px; }
         .condition-suggestion { font-size: 0.85rem; color: #fbbf24; margin-top: 0.5rem; }
         .status-icon { margin-right: 0.5rem; }
         .hidden { display: none; }
@@ -1148,13 +1149,82 @@ function generateDetails(node, value, context) {
     } else if (node.type === 'FunctionCall') {
         const args = node.arguments.map(a => new Evaluator(context).visit(a));
         const fnName = `<span class="fn-name">${esc(node.name)}</span>`;
-        const argsHtml = args.map(hval).join(', ');
         const resultHtml = hval(value);
-        details = `${fnName}(${argsHtml}) → ${resultHtml}`;
-        if (node.name === 'contains' && !value && args.length >= 2) {
-            suggestion = `${hval(args[1])} not found in ${hval(args[0])}`;
-        } else if ((node.name === 'find' || node.name === 'matches') && !value && args.length >= 2) {
-            suggestion = `Pattern ${hval(args[1])} not found in ${hval(args[0])}`;
+
+        // For string matching functions, highlight the matched portion
+        const matchFuncs = ['matches', 'contains', 'find', 'matchesWithRegex', 'findGroups', 'startsWith', 'endsWith'];
+        if (matchFuncs.includes(node.name) && args.length >= 2) {
+            const haystack = String(args[0] || '');
+            const needle = String(args[1] || '');
+            const matched = value && (typeof value === 'boolean' ? value : value !== null);
+
+            if (matched && needle) {
+                // Match found - highlight the matched portion
+                let highlightedHaystack;
+                try {
+                    if (node.name === 'contains') {
+                        // Simple substring match
+                        const idx = haystack.indexOf(needle);
+                        if (idx >= 0) {
+                            const before = esc(haystack.slice(0, idx));
+                            const match = esc(haystack.slice(idx, idx + needle.length));
+                            const after = esc(haystack.slice(idx + needle.length));
+                            highlightedHaystack = `<span class="fn-arg">"${before}<span class="match-highlight">${match}</span>${after}"</span>`;
+                        } else {
+                            highlightedHaystack = hval(haystack);
+                        }
+                    } else if (node.name === 'startsWith') {
+                        // Prefix match
+                        if (haystack.startsWith(needle)) {
+                            const match = esc(needle);
+                            const after = esc(haystack.slice(needle.length));
+                            highlightedHaystack = `<span class="fn-arg">"<span class="match-highlight">${match}</span>${after}"</span>`;
+                        } else {
+                            highlightedHaystack = hval(haystack);
+                        }
+                    } else if (node.name === 'endsWith') {
+                        // Suffix match
+                        if (haystack.endsWith(needle)) {
+                            const before = esc(haystack.slice(0, -needle.length));
+                            const match = esc(needle);
+                            highlightedHaystack = `<span class="fn-arg">"${before}<span class="match-highlight">${match}</span>"</span>`;
+                        } else {
+                            highlightedHaystack = hval(haystack);
+                        }
+                    } else if (node.name === 'matchesWithRegex') {
+                        // Full regex match - the entire string should match
+                        const regex = new RegExp('^' + needle + '$');
+                        if (regex.test(haystack)) {
+                            highlightedHaystack = `<span class="fn-arg">"<span class="match-highlight">${esc(haystack)}</span>"</span>`;
+                        } else {
+                            highlightedHaystack = hval(haystack);
+                        }
+                    } else {
+                        // Regex match (matches/find/findGroups)
+                        const regex = new RegExp(needle);
+                        const match = haystack.match(regex);
+                        if (match && match[0]) {
+                            const idx = haystack.indexOf(match[0]);
+                            const before = esc(haystack.slice(0, idx));
+                            const matchStr = esc(match[0]);
+                            const after = esc(haystack.slice(idx + match[0].length));
+                            highlightedHaystack = `<span class="fn-arg">"${before}<span class="match-highlight">${matchStr}</span>${after}"</span>`;
+                        } else {
+                            highlightedHaystack = hval(haystack);
+                        }
+                    }
+                } catch (e) {
+                    highlightedHaystack = hval(haystack);
+                }
+                details = `${fnName}(${highlightedHaystack}, ${hval(needle)}) → ${resultHtml}`;
+            } else {
+                // No match
+                details = `${fnName}(${hval(haystack)}, ${hval(needle)}) → ${resultHtml}`;
+                suggestion = `Pattern ${hval(needle)} not found in ${hval(haystack)}`;
+            }
+        } else {
+            const argsHtml = args.map(hval).join(', ');
+            details = `${fnName}(${argsHtml}) → ${resultHtml}`;
         }
     } else if (node.type === 'UnaryOp') {
         const operand = new Evaluator(context).visit(node.operand);
