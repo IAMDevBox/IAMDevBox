@@ -1591,6 +1591,19 @@ function createCollapsible(headerContent, detailsContent, startExpanded = false)
     return wrapper;
 }
 
+// Extract short description from expression (e.g., get the pattern from matches())
+function getShortDesc(expr) {
+    // For matches/contains, extract the pattern
+    const matchPattern = expr.match(/(?:matches|contains|find|startsWith|endsWith)\s*\([^,]+,\s*['"]([^'"]+)['"]\)/);
+    if (matchPattern) {
+        const pattern = matchPattern[1];
+        // Truncate if too long
+        return pattern.length > 50 ? pattern.slice(0, 47) + '...' : pattern;
+    }
+    // For other expressions, truncate
+    return expr.length > 60 ? expr.slice(0, 57) + '...' : expr;
+}
+
 function createConditionItem(c) {
     const div = document.createElement('div');
     div.className = 'condition-item ' + (c.passed ? 'passed' : 'failed');
@@ -1599,34 +1612,49 @@ function createConditionItem(c) {
     const statusColor = c.passed ? '#10b981' : '#ef4444';
 
     if (c.isOrGroup) {
-        // OR Group header
-        const headerHtml = `<span style="color:${statusColor}">${statusIcon}</span> <strong>OR Group</strong> <span style="color:#64748b;font-size:0.85rem">(${c.branches.filter(b=>b.passed).length}/${c.branches.length} match)</span>`;
+        // OR Group - show summary
+        const passedCount = c.branches.filter(b => b.passed).length;
+        const totalCount = c.branches.length;
 
-        // OR Group details content
-        const detailsDiv = document.createElement('div');
-        detailsDiv.style.cssText = 'padding-left: 1rem; border-left: 2px solid #475569;';
-
-        if (c.branches && c.branches.length > 0) {
-            c.branches.forEach(branch => {
-                const branchItem = createBranchItem(branch);
-                detailsDiv.appendChild(branchItem);
-            });
+        // Find which branch passed (if any)
+        const passedBranch = c.branches.find(b => b.passed);
+        let summaryText = `${passedCount}/${totalCount} branches match`;
+        if (passedBranch && passedBranch.subDetails && passedBranch.subDetails.length > 0) {
+            // Show what matched
+            const matchedPatterns = passedBranch.subDetails
+                .filter(s => s.passed)
+                .map(s => getShortDesc(s.expression))
+                .slice(0, 2);
+            if (matchedPatterns.length > 0) {
+                summaryText += ` — matched: ${matchedPatterns.join(', ')}`;
+            }
         }
+
+        const headerHtml = `<span style="color:${statusColor}">${statusIcon}</span> <strong>OR</strong> <span style="color:#94a3b8;font-size:0.85rem">${summaryText}</span>`;
+
+        // Details: list each branch simply
+        const detailsDiv = document.createElement('div');
+        detailsDiv.style.cssText = 'padding-left: 1rem; margin-top: 0.5rem;';
+
+        c.branches.forEach((branch, idx) => {
+            const branchItem = createBranchItem(branch, idx + 1);
+            detailsDiv.appendChild(branchItem);
+        });
 
         const collapsible = createCollapsible(headerHtml, detailsDiv, false);
         div.appendChild(collapsible);
 
     } else {
-        // Single condition - check if it has details
+        // Single condition
+        const shortExpr = getShortDesc(c.expression);
         const hasDetails = c.details || (c.suggestion && !c.passed);
 
         if (hasDetails) {
-            // Make it collapsible
-            const headerHtml = `<span style="color:${statusColor}">${statusIcon}</span> <span style="font-family:'Monaco','Menlo',monospace;font-size:0.9rem">${escapeHtml(c.expression)}</span> → <span class="${c.passed ? 'val-true' : 'val-false'}">${c.passed}</span>`;
+            const headerHtml = `<span style="color:${statusColor}">${statusIcon}</span> <code style="font-size:0.85rem;color:#e2e8f0">${escapeHtml(shortExpr)}</code> → <span class="${c.passed ? 'val-true' : 'val-false'}">${c.passed}</span>`;
 
             const detailsDiv = document.createElement('div');
             detailsDiv.className = 'condition-details';
-            detailsDiv.style.cssText = 'padding-left: 1.5rem;';
+            detailsDiv.style.cssText = 'padding-left: 1.5rem; margin-top: 0.5rem;';
 
             if (c.details) {
                 const det = document.createElement('div');
@@ -1644,10 +1672,9 @@ function createConditionItem(c) {
             const collapsible = createCollapsible(headerHtml, detailsDiv, false);
             div.appendChild(collapsible);
         } else {
-            // Simple display without collapse
             const expr = document.createElement('div');
             expr.className = 'condition-expr';
-            expr.innerHTML = `<span style="color:${statusColor}">${statusIcon}</span> ${escapeHtml(c.expression)} → <span class="${c.passed ? 'val-true' : 'val-false'}">${c.passed}</span>`;
+            expr.innerHTML = `<span style="color:${statusColor}">${statusIcon}</span> <code style="font-size:0.85rem">${escapeHtml(shortExpr)}</code> → <span class="${c.passed ? 'val-true' : 'val-false'}">${c.passed}</span>`;
             div.appendChild(expr);
         }
     }
@@ -1656,38 +1683,49 @@ function createConditionItem(c) {
 }
 
 // Create a branch item (for OR group branches)
-function createBranchItem(branch) {
+function createBranchItem(branch, index) {
     const branchDiv = document.createElement('div');
-    branchDiv.style.cssText = 'margin: 0.5rem 0;';
+    branchDiv.style.cssText = 'margin: 0.25rem 0; padding: 0.5rem; background: #1e293b; border-radius: 4px;';
 
     const statusIcon = branch.passed ? '✓' : '○';
     const statusColor = branch.passed ? '#10b981' : '#64748b';
 
-    // Check if branch has sub-details or details
-    const hasDetails = (branch.subDetails && branch.subDetails.length > 0) || branch.details;
+    // Determine branch type and create concise summary
+    let branchSummary;
+    if (branch.subDetails && branch.subDetails.length > 0) {
+        // AND condition with multiple parts
+        const passedSubs = branch.subDetails.filter(s => s.passed);
+        const patterns = branch.subDetails.map(s => ({
+            pattern: getShortDesc(s.expression),
+            passed: s.passed
+        }));
+
+        // Show patterns with their status
+        branchSummary = patterns.map(p =>
+            `<span style="color:${p.passed ? '#10b981' : '#64748b'}">${p.passed ? '✓' : '✗'}</span> ${escapeHtml(p.pattern)}`
+        ).join('<br>');
+    } else {
+        branchSummary = `<code style="font-size:0.8rem">${escapeHtml(getShortDesc(branch.expression))}</code>`;
+    }
+
+    const hasDetails = (branch.subDetails && branch.subDetails.length > 0);
 
     if (hasDetails) {
-        const headerHtml = `<span style="color:${statusColor}">${statusIcon}</span> <span style="font-family:'Monaco','Menlo',monospace;font-size:0.85rem">${escapeHtml(branch.expression)}</span> → <span class="${branch.passed ? 'val-true' : 'val-false'}">${branch.passed}</span>`;
+        const headerHtml = `<span style="color:${statusColor}">${statusIcon}</span> <strong style="color:#94a3b8">Branch ${index}</strong> → <span class="${branch.passed ? 'val-true' : 'val-false'}">${branch.passed}</span>`;
 
         const detailsDiv = document.createElement('div');
-        detailsDiv.style.cssText = 'padding-left: 1.5rem;';
+        detailsDiv.style.cssText = 'padding-left: 1rem; margin-top: 0.5rem;';
 
-        if (branch.subDetails && branch.subDetails.length > 0) {
-            branch.subDetails.forEach(sub => {
-                const subItem = createSubDetailItem(sub);
-                detailsDiv.appendChild(subItem);
-            });
-        } else if (branch.details) {
-            const det = document.createElement('div');
-            det.className = 'condition-details';
-            det.innerHTML = branch.details;
-            detailsDiv.appendChild(det);
-        }
+        // Show each sub-condition
+        branch.subDetails.forEach(sub => {
+            const subItem = createSubDetailItem(sub);
+            detailsDiv.appendChild(subItem);
+        });
 
         const collapsible = createCollapsible(headerHtml, detailsDiv, false);
         branchDiv.appendChild(collapsible);
     } else {
-        branchDiv.innerHTML = `<span style="color:${statusColor}">${statusIcon}</span> <span style="font-family:'Monaco','Menlo',monospace;font-size:0.85rem">${escapeHtml(branch.expression)}</span> → <span class="${branch.passed ? 'val-true' : 'val-false'}">${branch.passed}</span>`;
+        branchDiv.innerHTML = `<span style="color:${statusColor}">${statusIcon}</span> <code style="font-size:0.8rem;color:#e2e8f0">${escapeHtml(getShortDesc(branch.expression))}</code> → <span class="${branch.passed ? 'val-true' : 'val-false'}">${branch.passed}</span>`;
     }
 
     return branchDiv;
@@ -1700,19 +1738,20 @@ function createSubDetailItem(sub) {
 
     const statusIcon = sub.passed ? '✓' : '○';
     const statusColor = sub.passed ? '#10b981' : '#64748b';
+    const pattern = getShortDesc(sub.expression);
 
     if (sub.details) {
-        const headerHtml = `<span style="color:${statusColor};font-size:0.8rem">${statusIcon}</span> <span style="font-family:'Monaco','Menlo',monospace;font-size:0.8rem">${escapeHtml(sub.expression)}</span> → <span class="${sub.passed ? 'val-true' : 'val-false'}" style="font-size:0.8rem">${sub.passed}</span>`;
+        const headerHtml = `<span style="color:${statusColor}">${statusIcon}</span> <code style="font-size:0.8rem;color:#e2e8f0">${escapeHtml(pattern)}</code> → <span class="${sub.passed ? 'val-true' : 'val-false'}">${sub.passed}</span>`;
 
         const detailsDiv = document.createElement('div');
         detailsDiv.className = 'condition-details';
-        detailsDiv.style.cssText = 'padding-left: 1.5rem; font-size: 0.8rem;';
+        detailsDiv.style.cssText = 'padding-left: 1.5rem; font-size: 0.8rem; margin-top: 0.25rem;';
         detailsDiv.innerHTML = sub.details;
 
         const collapsible = createCollapsible(headerHtml, detailsDiv, false);
         subDiv.appendChild(collapsible);
     } else {
-        subDiv.innerHTML = `<span style="color:${statusColor};font-size:0.8rem">${statusIcon}</span> <span style="font-family:'Monaco','Menlo',monospace;font-size:0.8rem">${escapeHtml(sub.expression)}</span> → <span class="${sub.passed ? 'val-true' : 'val-false'}" style="font-size:0.8rem">${sub.passed}</span>`;
+        subDiv.innerHTML = `<span style="color:${statusColor}">${statusIcon}</span> <code style="font-size:0.8rem;color:#e2e8f0">${escapeHtml(pattern)}</code> → <span class="${sub.passed ? 'val-true' : 'val-false'}">${sub.passed}</span>`;
     }
 
     return subDiv;
