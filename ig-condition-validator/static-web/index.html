@@ -1742,8 +1742,8 @@ function formatExpr(expr, baseIndent) {
     // Find top-level OR splits (these are major branches)
     const orBranches = splitByTopLevelOp(tokens, 'or');
 
-    // Only split OR if there are more than 2 branches (keep simple "a or b" on one line)
-    if (orBranches.length > 2) {
+    // Split OR if there are 2 or more branches
+    if (orBranches.length > 1) {
         // Multiple OR branches - format each on its own line
         const indent = '  '.repeat(baseIndent);
         const formatted = orBranches.map((branch, i) => {
@@ -1862,7 +1862,7 @@ function formatBranch(tokens, baseIndent) {
                         // afterAnd is entirely wrapped in parens
                         const insideParen = afterAnd.slice(1, parenClose);
                         const orParts = splitByTopLevelOp(insideParen, 'or');
-                        if (orParts.length > 2) {
+                        if (orParts.length > 1) {
                             // Pattern: (condition and (or_item1 or or_item2 or ...))
                             const condPart = tokensToString(innerAnds[0]);
                             const indent = '  '.repeat(baseIndent + 1);
@@ -1874,7 +1874,7 @@ function formatBranch(tokens, baseIndent) {
                 }
 
                 const orParts = splitByTopLevelOp(afterAnd, 'or');
-                if (orParts.length > 2) {
+                if (orParts.length > 1) {
                     // Pattern: (condition and first_or_item or second_or_item or ...)
                     const condPart = tokensToString(innerAnds[0]);
                     const indent = '  '.repeat(baseIndent + 1);
@@ -1886,7 +1886,7 @@ function formatBranch(tokens, baseIndent) {
 
             // Check if inner has OR chains (the common case for long lists)
             const innerOrs = splitByTopLevelOp(inner, 'or');
-            if (innerOrs.length > 2) {
+            if (innerOrs.length > 1) {
                 // Many OR branches inside - format as block
                 const indent = '  '.repeat(baseIndent + 1);
                 const lines = innerOrs.map(branch => indent + tokensToString(branch));
