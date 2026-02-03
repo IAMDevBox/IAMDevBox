@@ -1714,6 +1714,31 @@ function tokenizeForFormat(expr) {
 function formatExpr(expr, baseIndent) {
     const tokens = tokenizeForFormat(expr);
 
+    // If the entire expression is wrapped in parens, strip them and recurse
+    if (tokens.length > 0 && tokens[0].value === '(') {
+        let depth = 0;
+        let closeIdx = -1;
+        for (let i = 0; i < tokens.length; i++) {
+            if (tokens[i].value === '(') depth++;
+            else if (tokens[i].value === ')') {
+                depth--;
+                if (depth === 0) { closeIdx = i; break; }
+            }
+        }
+        if (closeIdx === tokens.length - 1) {
+            // Entire expression is wrapped - format inner content
+            const inner = tokens.slice(1, closeIdx);
+            const innerStr = tokensToString(inner);
+            const innerFormatted = formatExpr(innerStr.trim(), baseIndent);
+            // Check if inner was formatted with newlines
+            if (innerFormatted.includes('\n')) {
+                return '  '.repeat(baseIndent) + '(' + innerFormatted.trim() + ')';
+            }
+            // Keep it wrapped
+            return '  '.repeat(baseIndent) + '(' + innerFormatted.trim() + ')';
+        }
+    }
+
     // Find top-level OR splits (these are major branches)
     const orBranches = splitByTopLevelOp(tokens, 'or');
 
@@ -1811,7 +1836,7 @@ function formatBranch(tokens, baseIndent) {
                 }
             }
 
-            // Check for AND + OR pattern: (A and B or C or D...)
+            // Check for AND + OR pattern: (A and B or C or D...) or (A and (B or C or D...))
             // Find the first top-level 'and'
             const innerAnds = splitByTopLevelOp(inner, 'and');
             if (innerAnds.length >= 2) {
@@ -1820,6 +1845,32 @@ function formatBranch(tokens, baseIndent) {
                 for (let i = 1; i < innerAnds.length; i++) {
                     if (i > 1) afterAnd.push({ type: 'keyword', value: 'and' });
                     afterAnd.push(...innerAnds[i]);
+                }
+
+                // Check if afterAnd is a parenthesized OR chain: (B or C or D...)
+                if (afterAnd.length > 0 && afterAnd[0].value === '(') {
+                    let parenDepth = 0;
+                    let parenClose = -1;
+                    for (let i = 0; i < afterAnd.length; i++) {
+                        if (afterAnd[i].value === '(') parenDepth++;
+                        else if (afterAnd[i].value === ')') {
+                            parenDepth--;
+                            if (parenDepth === 0) { parenClose = i; break; }
+                        }
+                    }
+                    if (parenClose === afterAnd.length - 1) {
+                        // afterAnd is entirely wrapped in parens
+                        const insideParen = afterAnd.slice(1, parenClose);
+                        const orParts = splitByTopLevelOp(insideParen, 'or');
+                        if (orParts.length > 2) {
+                            // Pattern: (condition and (or_item1 or or_item2 or ...))
+                            const condPart = tokensToString(innerAnds[0]);
+                            const indent = '  '.repeat(baseIndent + 1);
+                            const innerIndent = '  '.repeat(baseIndent + 2);
+                            const lines = orParts.map(branch => innerIndent + tokensToString(branch));
+                            return '(' + condPart + ' and (\n' + lines.join(' or\n') + '\n' + indent + '))';
+                        }
+                    }
                 }
 
                 const orParts = splitByTopLevelOp(afterAnd, 'or');
