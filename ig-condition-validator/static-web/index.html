@@ -93,6 +93,12 @@
         .condition-details .op { color: #c586c0; font-weight: 600; }
         .condition-details .match-highlight { background: #365314; color: #a3e635; padding: 0 2px; border-radius: 2px; }
         .condition-suggestion { font-size: 0.85rem; color: #fbbf24; margin-top: 0.5rem; }
+        .collapsible { cursor: pointer; user-select: none; }
+        .collapsible:hover { opacity: 0.8; }
+        .collapsible::before { content: '▶'; display: inline-block; margin-right: 0.5rem; font-size: 0.7rem; transition: transform 0.2s; color: #64748b; }
+        .collapsible.expanded::before { transform: rotate(90deg); }
+        .collapse-content { display: none; margin-top: 0.5rem; }
+        .collapse-content.show { display: block; }
         .status-icon { margin-right: 0.5rem; }
         .hidden { display: none; }
         .headers-list { display: flex; flex-direction: column; gap: 0.5rem; }
@@ -1030,12 +1036,15 @@ function analyzeConditions(node, context, depth = 0) {
         const branchResults = branches.map(b => {
             const branchEval = new Evaluator(context);
             const branchValue = branchEval.visit(b);
+            // For AND expressions, collect details from sub-conditions
+            const subDetails = collectSubDetails(b, context);
             const details = generateDetails(b, branchValue, context);
             return {
                 expression: nodeToString(b),
                 passed: Boolean(branchValue),
                 details: details.details,
-                suggestion: details.suggestion
+                suggestion: details.suggestion,
+                subDetails: subDetails
             };
         });
 
@@ -1071,6 +1080,40 @@ function collectOrBranches(node) {
         return [...collectOrBranches(node.left), ...collectOrBranches(node.right)];
     }
     return [node];
+}
+
+// Collect detailed info from sub-conditions (for AND expressions)
+function collectSubDetails(node, context) {
+    const results = [];
+
+    function collect(n) {
+        if (n.type === 'BinaryOp' && n.operator === 'and') {
+            collect(n.left);
+            collect(n.right);
+        } else if (n.type === 'FunctionCall' || n.type === 'MethodCall') {
+            const evaluator = new Evaluator(context);
+            const value = evaluator.visit(n);
+            const details = generateDetails(n, value, context);
+            results.push({
+                expression: nodeToString(n),
+                passed: Boolean(value),
+                details: details.details
+            });
+        } else if (n.type === 'BinaryOp') {
+            // Comparison operators
+            const evaluator = new Evaluator(context);
+            const value = evaluator.visit(n);
+            const details = generateDetails(n, value, context);
+            results.push({
+                expression: nodeToString(n),
+                passed: Boolean(value),
+                details: details.details
+            });
+        }
+    }
+
+    collect(node);
+    return results;
 }
 
 function nodeToString(node, parentOp = null) {
@@ -1557,7 +1600,21 @@ function createConditionItem(c) {
                 branchDiv.appendChild(branchIcon);
                 branchDiv.appendChild(document.createTextNode(branch.expression));
 
-                if (branch.details) {
+                // Show sub-details for each function call in this branch
+                if (branch.subDetails && branch.subDetails.length > 0) {
+                    const subList = document.createElement('div');
+                    subList.style.cssText = 'margin-left: 1.5rem; margin-top: 0.25rem;';
+
+                    branch.subDetails.forEach(sub => {
+                        const subDiv = document.createElement('div');
+                        subDiv.className = 'condition-details';
+                        subDiv.style.cssText = 'font-size: 0.8rem; margin: 0.25rem 0;';
+                        subDiv.innerHTML = sub.details;
+                        subList.appendChild(subDiv);
+                    });
+
+                    branchDiv.appendChild(subList);
+                } else if (branch.details) {
                     const branchDetails = document.createElement('div');
                     branchDetails.className = 'condition-details';
                     branchDetails.style.cssText = 'margin-left: 1.5rem; font-size: 0.8rem;';
