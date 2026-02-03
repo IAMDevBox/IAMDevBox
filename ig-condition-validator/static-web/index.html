@@ -84,7 +84,13 @@
         .condition-item.passed { border-left-color: #10b981; }
         .condition-item.failed { border-left-color: #ef4444; }
         .condition-expr { font-family: 'Monaco', 'Menlo', monospace; font-size: 0.9rem; color: #f8fafc; margin-bottom: 0.5rem; }
-        .condition-details { font-size: 0.85rem; color: #94a3b8; }
+        .condition-details { font-size: 0.85rem; color: #94a3b8; font-family: 'Monaco', 'Menlo', monospace; }
+        .condition-details .fn-name { color: #dcdcaa; font-weight: 600; }
+        .condition-details .fn-arg { color: #ce9178; }
+        .condition-details .fn-result { color: #4ec9b0; }
+        .condition-details .val-true { color: #4ec9b0; }
+        .condition-details .val-false { color: #f14c4c; }
+        .condition-details .op { color: #c586c0; font-weight: 600; }
         .condition-suggestion { font-size: 0.85rem; color: #fbbf24; margin-top: 0.5rem; }
         .status-icon { margin-right: 0.5rem; }
         .hidden { display: none; }
@@ -1090,6 +1096,21 @@ function nodeToString(node, parentOp = null) {
 function generateDetails(node, value, context) {
     let details = '', suggestion = '';
 
+    // Helper to escape HTML
+    const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    // Helper to format value with highlighting
+    const hval = (val) => {
+        if (val === true) return '<span class="val-true">true</span>';
+        if (val === false) return '<span class="val-false">false</span>';
+        if (val === null || val === undefined) return '<span class="val-false">null</span>';
+        if (typeof val === 'string') return `<span class="fn-arg">"${esc(val)}"</span>`;
+        if (typeof val === 'number') return `<span class="fn-result">${val}</span>`;
+        if (Array.isArray(val)) return `<span class="fn-arg">${esc(JSON.stringify(val))}</span>`;
+        if (typeof val === 'object') return `<span class="fn-arg">${esc(JSON.stringify(val))}</span>`;
+        return esc(String(val));
+    };
+
     if (node.type === 'BinaryOp') {
         const leftVal = new Evaluator(context).visit(node.left);
         const rightVal = new Evaluator(context).visit(node.right);
@@ -1098,44 +1119,50 @@ function generateDetails(node, value, context) {
             // For logical operators, show which side(s) failed/passed
             const leftBool = Boolean(leftVal);
             const rightBool = Boolean(rightVal);
+            const opHtml = `<span class="op">${node.operator}</span>`;
             if (node.operator === 'and') {
                 if (!leftBool && !rightBool) {
-                    details = 'Both conditions are false';
+                    details = `${hval(false)} ${opHtml} ${hval(false)} → Both conditions are false`;
                 } else if (!leftBool) {
-                    details = 'Left condition is false';
+                    details = `${hval(false)} ${opHtml} ${hval(true)} → Left condition is false`;
                 } else if (!rightBool) {
-                    details = 'Right condition is false';
+                    details = `${hval(true)} ${opHtml} ${hval(false)} → Right condition is false`;
                 } else {
-                    details = 'Both conditions are true';
+                    details = `${hval(true)} ${opHtml} ${hval(true)} → Both conditions are true`;
                 }
             } else { // or
                 if (leftBool || rightBool) {
-                    details = leftBool ? 'Left condition is true' : 'Right condition is true';
+                    details = `${hval(leftBool)} ${opHtml} ${hval(rightBool)} → ${leftBool ? 'Left' : 'Right'} condition is true`;
                 } else {
-                    details = 'Both conditions are false';
+                    details = `${hval(false)} ${opHtml} ${hval(false)} → Both conditions are false`;
                 }
             }
         } else {
             // For comparison operators, show actual values
-            details = `${repr(leftVal)} ${node.operator} ${repr(rightVal)}`;
+            const opHtml = `<span class="op">${esc(node.operator)}</span>`;
+            details = `${hval(leftVal)} ${opHtml} ${hval(rightVal)}`;
             if (node.operator === '==' && leftVal !== rightVal) {
-                suggestion = `Expected ${repr(rightVal)}, but got ${repr(leftVal)}`;
+                suggestion = `Expected ${hval(rightVal)}, but got ${hval(leftVal)}`;
             }
         }
     } else if (node.type === 'FunctionCall') {
         const args = node.arguments.map(a => new Evaluator(context).visit(a));
-        details = `Called ${node.name}(${args.map(repr).join(', ')}) = ${repr(value)}`;
+        const fnName = `<span class="fn-name">${esc(node.name)}</span>`;
+        const argsHtml = args.map(hval).join(', ');
+        const resultHtml = hval(value);
+        details = `${fnName}(${argsHtml}) → ${resultHtml}`;
         if (node.name === 'contains' && !value && args.length >= 2) {
-            suggestion = `'${args[1]}' not found in ${repr(args[0])}`;
-        } else if (node.name === 'find' && !value && args.length >= 2) {
-            suggestion = `Pattern '${args[1]}' not found in '${args[0]}'`;
+            suggestion = `${hval(args[1])} not found in ${hval(args[0])}`;
+        } else if ((node.name === 'find' || node.name === 'matches') && !value && args.length >= 2) {
+            suggestion = `Pattern ${hval(args[1])} not found in ${hval(args[0])}`;
         }
     } else if (node.type === 'UnaryOp') {
         const operand = new Evaluator(context).visit(node.operand);
-        details = `${node.operator} ${repr(operand)} = ${repr(value)}`;
+        const opHtml = `<span class="op">${esc(node.operator)}</span>`;
+        details = `${opHtml} ${hval(operand)} → ${hval(value)}`;
     }
 
-    return { details, suggestion };
+    return { details, suggestion, isHtml: true };
 }
 
 function repr(val) {
@@ -1439,7 +1466,7 @@ function createConditionItem(c) {
         if (c.details) {
             const details = document.createElement('div');
             details.className = 'condition-details';
-            details.textContent = c.details;
+            details.innerHTML = c.details;
             div.appendChild(details);
         }
 
@@ -1462,8 +1489,9 @@ function createConditionItem(c) {
 
                 if (branch.details) {
                     const branchDetails = document.createElement('div');
-                    branchDetails.style.cssText = 'margin-left: 1.5rem; font-size: 0.8rem; color: #94a3b8;';
-                    branchDetails.textContent = branch.details;
+                    branchDetails.className = 'condition-details';
+                    branchDetails.style.cssText = 'margin-left: 1.5rem; font-size: 0.8rem;';
+                    branchDetails.innerHTML = branch.details;
                     branchDiv.appendChild(branchDetails);
                 }
 
@@ -1479,14 +1507,14 @@ function createConditionItem(c) {
         if (c.details) {
             const details = document.createElement('div');
             details.className = 'condition-details';
-            details.textContent = c.details;
+            details.innerHTML = c.details;
             div.appendChild(details);
         }
 
         if (c.suggestion && !c.passed) {
             const suggestion = document.createElement('div');
             suggestion.className = 'condition-suggestion';
-            suggestion.textContent = '💡 ' + c.suggestion;
+            suggestion.innerHTML = '💡 ' + c.suggestion;
             div.appendChild(suggestion);
         }
     }
