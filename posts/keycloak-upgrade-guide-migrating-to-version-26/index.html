@@ -1,0 +1,2748 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Keycloak Major Version Upgrade: Migration Guide from 21 to 26 | IAMDevBox</title>
+<meta name="keywords" content="keycloak upgrade guide, keycloak 26 migration, keycloak version upgrade, keycloak breaking changes, keycloak 21 to 26, keycloak database migration, keycloak infinispan protostream, keycloak theme v2 migration">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/keycloak-upgrade-guide-migrating-to-version-26/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.e24ea479df3e367781fafa20cedde21c7e043c10bed4c8c913ef9261a049a1e2.css" integrity="sha256-4k6ked8&#43;NneB&#43;vogzt3iHH4EPBC&#43;1MjJE&#43;&#43;SYaBJoeI=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/keycloak-upgrade-guide-migrating-to-version-26/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/keycloak-upgrade-guide-migrating-to-version-26/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Keycloak Major Version Upgrade: Migration Guide from 21 to 26">
+  <meta property="og:description" content="Keycloak upgrade guide from version 21 to 26 covering breaking changes, database migration, Infinispan Protostream cache switch, theme v2 migration, and step-by-step procedures for each major version.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-02-05T09:30:00+00:00">
+    <meta property="article:modified_time" content="2026-02-05T18:44:12-05:00">
+    <meta property="article:tag" content="Keycloak">
+    <meta property="article:tag" content="Upgrade-Guide">
+    <meta property="article:tag" content="Identity-Migration">
+    <meta property="article:tag" content="Iam-Operations">
+    <meta property="article:tag" content="Breaking-Changes">
+      <meta property="og:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:title" content="Keycloak Major Version Upgrade: Migration Guide from 21 to 26">
+<meta name="twitter:description" content="Keycloak upgrade guide from version 21 to 26 covering breaking changes, database migration, Infinispan Protostream cache switch, theme v2 migration, and step-by-step procedures for each major version.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Keycloak Major Version Upgrade: Migration Guide from 21 to 26",
+      "item": "https://www.iamdevbox.com/posts/keycloak-upgrade-guide-migrating-to-version-26/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Keycloak Major Version Upgrade: Migration Guide from 21 to 26",
+  "name": "Keycloak Major Version Upgrade: Migration Guide from 21 to 26",
+  "description": "Keycloak upgrade guide from version 21 to 26 covering breaking changes, database migration, Infinispan Protostream cache switch, theme v2 migration, and step-by-step procedures for each major version.",
+  "keywords": [
+    "keycloak upgrade guide", "keycloak 26 migration", "keycloak version upgrade", "keycloak breaking changes", "keycloak 21 to 26", "keycloak database migration", "keycloak infinispan protostream", "keycloak theme v2 migration"
+  ],
+  "articleBody": "Upgrading Keycloak across major versions is one of those tasks that looks simple on paper — download the new release, start it up, let Liquibase handle the database — but reliably creates production incidents when done without preparation. Between versions 21 and 26, Keycloak introduced several breaking changes that affect clustering, theming, SPIs, and configuration format.\nThis guide covers what actually breaks at each version boundary and how to handle it.\nThe Golden Rule: No Version Skipping Keycloak’s database migration uses Liquibase changesets that execute sequentially. Version 23’s schema changes assume version 22’s schema is in place. If you try to jump from 21 to 26 directly, Liquibase will either fail outright or corrupt your data.\nThe upgrade path is: 21 → 22 → 23 → 24 → 25 → 26\nEach hop requires starting Keycloak, letting the migration complete, verifying everything works, and then moving to the next version. Yes, it’s tedious. No, there’s no shortcut.\nPre-Upgrade Checklist Before touching anything:\n# 1. Back up the database pg_dump -Fc -h localhost -U keycloak keycloak \u003e keycloak-v21-backup.dump # 2. Export realm configuration (safety net) /opt/keycloak/bin/kc.sh export --dir /backup/realm-export --users realm_file # 3. Document current startup command and environment variables ps aux | grep keycloak env | grep KC_ # 4. List installed custom providers ls /opt/keycloak/providers/ Keep the backup and export for every version step. If version 24’s migration corrupts something, you want to restore to the post-23 state, not start from 21 again.\nVersion 21 → 22: Quarkus Stabilization If you’re on the WildFly distribution (Keycloak \u003c 20), you must migrate to Quarkus first. Version 22 is fully Quarkus-based and the WildFly distribution is gone.\nBreaking Changes Configuration format: standalone.xml is replaced by keycloak.conf and CLI arguments. Map your WildFly datasource and SPI configurations to KC_* environment variables. Custom SPI packaging: WildFly-style EAR/WAR deployments become simple JAR files in /opt/keycloak/providers/. Deprecated Admin Console: The old admin console still works but shows deprecation warnings. Migration Steps # Convert old standalone.xml settings to new format # Old (WildFly): datasource in standalone.xml # New (Quarkus): KC_DB=postgres KC_DB_URL=jdbc:postgresql://localhost:5432/keycloak KC_DB_USERNAME=keycloak KC_DB_PASSWORD=secret # Start with build optimization /opt/keycloak/bin/kc.sh build /opt/keycloak/bin/kc.sh start --optimized Version 22 → 23: New Admin Console Breaking Changes Admin Console v2 becomes default: The old admin console is removed. If you had custom admin console extensions or plugins, they need rewriting for the React-based v2 console. Deprecated API endpoints: Several Admin REST API endpoints for legacy features are removed. Hostname configuration: The hostname provider configuration changes. KC_HOSTNAME_STRICT behavior is tightened. Watch Out For If your monitoring or automation scripts hit the old admin console endpoints, they’ll break. Update to use the Admin REST API v2 endpoints:\n# Old endpoint (may be removed) curl https://keycloak.example.com/auth/admin/realms/master/... # New standard endpoint curl https://keycloak.example.com/admin/realms/master/... Note the path change: /auth/admin/ → /admin/. The /auth prefix was removed as default in the Quarkus distribution.\nVersion 23 → 24: Persistent User Sessions Breaking Changes Persistent user sessions: User sessions can now survive restarts by persisting to the database. This changes session behavior — sessions that previously died on restart now persist. Client policy updates: Client policies for FAPI and security profiles are restructured. User Profile enabled by default: The declarative user profile feature is enabled by default, which changes registration and profile update forms. Configuration Change # If you DON'T want persistent sessions (maintain old behavior): spi-user-sessions-infinispan-offline-session-cache-entry-lifespan-override=0 # If you DO want persistent sessions (recommended): # No change needed, it's the new default User Profile Impact With User Profile enabled by default, the registration and profile pages enforce the configured user attributes. If your custom theme relies on hardcoded form fields, they may disappear or change order. Test your registration flow thoroughly.\nVersion 24 → 25: Organizational Support Breaking Changes Organizations feature (preview): Multi-tenancy support is introduced as a preview feature. Lightweight access tokens: Access tokens are now lightweight by default — they contain minimal claims. Full user info requires the UserInfo endpoint or explicit token configuration. Deprecated features removed: Several deprecated authenticators and form actions are removed. Lightweight Access Token Impact This is the change most likely to break applications. If your APIs parse access tokens for user claims (email, name, groups), those claims are no longer present by default.\nFix: Configure client scopes to include the needed claims:\nGo to Client → Client Scopes → Assigned Scopes Ensure profile, email, and any custom scopes are assigned On each scope’s mappers, set Add to access token to ON Or configure the client to use full tokens:\n{ \"attributes\": { \"use.lightweight.access.token.enabled\": \"false\" } } Version 25 → 26: The Big One (Infinispan Protostream) Version 26 has the most impactful infrastructure change since the Quarkus migration.\nInfinispan Cache Serialization Switch Keycloak 26 switches from JBoss Marshalling to Infinispan Protostream for cache serialization. This means:\nRolling upgrades don’t work: Old nodes (v25) and new nodes (v26) cannot deserialize each other’s cache entries. You’ll get ClassCastException or MarshallingException in the logs. Solution: Do a blue-green deployment or accept a brief session flush. # Blue-green approach: # 1. Deploy v26 cluster alongside v25 cluster # 2. Point load balancer to v26 # 3. Users re-authenticate (sessions don't transfer) # 4. Shut down v25 cluster # Alternative: flush sessions before upgrade # 1. Clear the infinispan caches via JMX or CLI # 2. Stop all v25 nodes # 3. Start v26 nodes # Users will need to re-login Login Theme v2 Keycloak 26 defaults to the v2 login theme (PatternFly-based). Custom themes that extend keycloak must now extend keycloak.v2:\n# theme.properties (old) parent=keycloak import=common/keycloak # theme.properties (new) parent=keycloak.v2 Template file paths also change. If you’ve overridden individual FTL files, check that the template names haven’t changed between versions.\nBootstrap Admin Recovery Keycloak 26 adds a bootstrap admin mechanism. If all admin accounts are locked out:\nKC_BOOTSTRAP_ADMIN_USERNAME=temp-admin \\ KC_BOOTSTRAP_ADMIN_PASSWORD=temp-password \\ /opt/keycloak/bin/kc.sh start This creates a temporary admin account for recovery. Remove it after resetting the real admin credentials.\nStep-by-Step Upgrade Process For each version hop (repeat 5 times for 21→26):\n# 1. Stop current Keycloak systemctl stop keycloak # 2. Back up database pg_dump -Fc keycloak \u003e keycloak-pre-vXX-upgrade.dump # 3. Replace Keycloak binaries tar xzf keycloak-XX.0.0.tar.gz cp -r /opt/keycloak/conf/* /opt/keycloak-XX.0.0/conf/ cp /opt/keycloak/providers/*.jar /opt/keycloak-XX.0.0/providers/ ln -sfn /opt/keycloak-XX.0.0 /opt/keycloak # 4. Rebuild (Quarkus optimization) /opt/keycloak/bin/kc.sh build # 5. Start and watch the logs /opt/keycloak/bin/kc.sh start | tee /var/log/keycloak-upgrade-vXX.log # 6. Verify curl -s https://keycloak.example.com/health/ready # Should return {\"status\":\"UP\"} # 7. Smoke test # - Admin console login # - User login via SAML/OIDC client # - Check custom SPIs loaded Monitoring During Upgrade Watch these metrics during and after each version upgrade:\nLogin success rate: Drop indicates broken authentication flows or missing claims Admin API response time: Spike suggests database migration is still running Infinispan cache miss rate: High rate after v26 upgrade indicates the Protostream switch is working (cache is rebuilding) Custom SPI errors: Check for ClassNotFoundException or NoSuchMethodError in logs — indicates SPI API changes # Quick health check script while true; do HTTP_CODE=$(curl -s -o /dev/null -w \"%{http_code}\" https://keycloak.example.com/health/ready) echo \"$(date): Health status: $HTTP_CODE\" sleep 5 done Post-Upgrade Cleanup After reaching version 26 and confirming everything works:\nRemove old Keycloak distribution directories Update your CI/CD pipelines and Docker images to build from v26 Review and update custom SPIs for deprecated API usage Enable new features: Organizations (preview), improved WebAuthn, updated Infinispan configuration Update operational runbooks with the new admin console URLs and CLI commands Keycloak’s rapid release cycle means you’ll be doing this again in 6-12 months. Consider automating the upgrade process with a staging environment that runs the full sequence before production.\n",
+  "wordCount" : "1259",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/IAMDevBox.com.jpg","datePublished": "2026-02-05T09:30:00Z",
+  "dateModified": "2026-02-05T18:44:12-05:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/keycloak-upgrade-guide-migrating-to-version-26/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Can I skip Keycloak versions when upgrading (e.g., jump from 21 to 26)?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Keycloak officially supports sequential upgrades (21→22→23→24→25→26), not version jumps. Database migration scripts run sequentially and depend on the previous version's schema. Skipping versions risks data corruption. The only shortcut is Quarkus distribution since 22 — if you're still on WildFly (pre-21), you must migrate to Quarkus first."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the biggest breaking change in Keycloak 26?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The cache serialization switch from JBoss Marshalling to Infinispan Protostream is the most impactful change. During a rolling upgrade, old and new nodes cannot share cache state. Plan for a brief session invalidation window or do a blue-green deployment to avoid user disruption."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I migrate custom Keycloak themes from v1 to v2?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Keycloak 26 defaults to the v2 login theme based on PatternFly. If you have custom themes extending the v1 base, update your theme.properties to extend keycloak.v2 instead of keycloak, update resource paths from 'node_modules/patternfly' to the new bundled locations, and test all login pages including OTP and WebAuthn screens."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do I need to upgrade the database during Keycloak version upgrade?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Keycloak uses Liquibase for automatic database schema migration. On first startup of the new version, it applies pending changesets. Always back up your database before upgrade. For PostgreSQL, run pg_dump -Fc keycloak \u003e keycloak-pre-upgrade.dump before starting the new version."
+      }
+    }
+  ]
+}
+</script>
+    <meta name="description" content="Keycloak upgrade guide from version 21 to 26 covering breaking changes, database migration, Infinispan Protostream cache switch, theme v2 migration, and step-by-step procedures for each major version."><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-upgrade-guide-migrating-to-version-26\/"
+  },
+  "headline": "Keycloak Major Version Upgrade: Migration Guide from 21 to 26",
+  "description": "Keycloak upgrade guide from version 21 to 26 covering breaking changes, database migration, Infinispan Protostream cache switch, theme v2 migration, and step-by-step procedures for each major version.",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon-96x96.png",
+      "width": 96,
+      "height": 96
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://www.iamdevbox.com/IAMDevBox.com.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "datePublished": "2026-02-05T09:30:00Z",
+  "dateModified": "2026-02-05T18:44:12-05:00",
+  "wordCount":  1259 ,
+  "articleSection": "posts",
+  "keywords": ["keycloak upgrade guide","keycloak 26 migration","keycloak version upgrade","keycloak breaking changes","keycloak 21 to 26","keycloak database migration","keycloak infinispan protostream","keycloak theme v2 migration"]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Keycloak Major Version Upgrade: Migration Guide from 21 to 26",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/keycloak-upgrade-guide-migrating-to-version-26\/"
+    }
+  ]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-token-exchange-implementing-oauth-20-token-exchange\/"
+            },
+            "headline": "Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:29:55Z",
+            "dateModified": "2026-03-01T14:30:15Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/go-secretless-with-snowflake-workload-identity-federation-snowflake\/"
+            },
+            "headline": "Go Secretless with Snowflake Workload Identity Federation - Snowflake",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:24:03Z",
+            "dateModified": "2026-03-01T14:24:20Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-algorithm-confusion-attack-cve-2026-developer-guide\/"
+            },
+            "headline": "JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-02-28T18:00:00Z",
+            "dateModified": "2026-03-01T11:21:01-05:00"
+          }
+  ]
+}
+</script>
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    const mermaidBlocks = document.querySelectorAll('.mermaid, pre code.language-mermaid, code.language-mermaid');
+    if (mermaidBlocks.length > 0) {
+        
+        mermaidBlocks.forEach(block => {
+            if (block.tagName === 'CODE') {
+                const pre = block.parentElement;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = block.textContent;
+                if (pre && pre.tagName === 'PRE') {
+                    pre.parentNode.replaceChild(div, pre);
+                } else {
+                    block.parentNode.replaceChild(div, block);
+                }
+            }
+        });
+
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+            const isDark = document.body.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#5a67d8',
+                    
+                    secondaryColor: '#48bb78',
+                    secondaryTextColor: '#ffffff',
+                    secondaryBorderColor: '#38a169',
+                    
+                    tertiaryColor: '#ed8936',
+                    tertiaryTextColor: '#ffffff',
+                    tertiaryBorderColor: '#dd6b20',
+                    
+                    lineColor: '#718096',
+                    
+                    background: isDark ? '#1a202c' : '#ffffff',
+                    mainBkg: isDark ? '#2d3748' : '#f7fafc',
+                    
+                    actorBkg: '#667eea',
+                    actorBorder: '#5a67d8',
+                    actorTextColor: '#ffffff',
+                    actorLineColor: '#718096',
+                    signalColor: '#4a5568',
+                    signalTextColor: '#2d3748',
+                    labelBoxBkgColor: '#edf2f7',
+                    labelBoxBorderColor: '#cbd5e0',
+                    labelTextColor: '#2d3748',
+                    loopTextColor: '#553c9a',
+                    noteBkgColor: '#faf089',
+                    noteTextColor: '#744210',
+                    noteBorderColor: '#d69e2e',
+                    
+                    nodeBkg: '#667eea',
+                    nodeBorder: '#5a67d8',
+                    clusterBkg: '#e2e8f0',
+                    clusterBorder: '#a0aec0',
+                    defaultLinkColor: '#718096',
+                    titleColor: '#2d3748',
+                    edgeLabelBackground: 'transparent',
+                    
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                sequence: {
+                    useMaxWidth: true,
+                    boxMargin: 10,
+                    boxTextMargin: 5,
+                    noteMargin: 10,
+                    messageMargin: 35,
+                    mirrorActors: false
+                }
+            });
+            mermaid.run().then(() => {
+                
+                document.querySelectorAll('.mermaid .node').forEach(node => {
+                    const rect = node.querySelector('rect, circle, ellipse, polygon');
+                    if (rect) {
+                        const fill = rect.getAttribute('fill') || window.getComputedStyle(rect).fill;
+                        
+                        const isDarkBg = fill && (
+                            fill.includes('667eea') || fill.includes('102, 126, 234') ||
+                            fill.includes('48bb78') || fill.includes('72, 187, 120') ||
+                            fill.includes('ed8936') || fill.includes('237, 137, 54') ||
+                            fill.includes('553c9a') || fill.includes('9f7aea') ||
+                            fill.includes('e53e3e') || fill.includes('dd6b20')
+                        );
+                        const textColor = isDarkBg ? '#ffffff' : '#1a202c';
+                        node.querySelectorAll('span, .nodeLabel, text, foreignObject div').forEach(text => {
+                            text.style.color = textColor;
+                            text.style.fill = textColor;
+                        });
+                    }
+                });
+            });
+        };
+        document.head.appendChild(script);
+    }
+
+    
+    const postContent = document.querySelector('.post-content');
+    const isSinglePost = document.querySelector('.post-single');
+    const isToolsPage = window.location.pathname.startsWith('/tools/');
+    if (postContent && isSinglePost && window.innerWidth >= 1400 && !isToolsPage) {
+        const headings = postContent.querySelectorAll('h2, h3');
+        if (headings.length >= 3) {
+            const toc = document.createElement('nav');
+            toc.className = 'floating-toc';
+            toc.innerHTML = '<h4>📑 Contents</h4><ul></ul>';
+            const tocList = toc.querySelector('ul');
+
+            headings.forEach((heading, index) => {
+                const id = heading.id || `section-${index}`;
+                heading.id = id;
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2';
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            document.body.appendChild(toc);
+
+            
+            const tocLinks = toc.querySelectorAll('a');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 150) {
+                        current = heading.id;
+                    }
+                });
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+    }
+
+    
+    if (postContent && isSinglePost && window.innerWidth >= 1200) {
+        const h2s = postContent.querySelectorAll('h2');
+        if (h2s.length >= 2) {
+            const indicator = document.createElement('div');
+            indicator.className = 'section-indicator';
+
+            h2s.forEach((h2, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'section-dot';
+                dot.title = h2.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                dot.addEventListener('click', () => {
+                    h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                indicator.appendChild(dot);
+            });
+
+            document.body.appendChild(indicator);
+
+            
+            window.addEventListener('scroll', () => {
+                const dots = indicator.querySelectorAll('.section-dot');
+                let activeIndex = 0;
+                h2s.forEach((h2, index) => {
+                    if (h2.getBoundingClientRect().top <= 200) {
+                        activeIndex = index;
+                    }
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+    }
+    });
+    </script>
+
+    
+    
+    <script>
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        function loadGA() {
+            if (window.gaLoaded) return;
+            window.gaLoaded = true;
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975';
+            document.head.appendChild(script);
+
+            script.onload = () => {
+                gtag('js', new Date());
+                gtag('config', 'G-B6QCH29975');
+            };
+        }
+
+        
+        ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+            window.addEventListener(event, loadGA, { once: true, passive: true });
+        });
+
+        
+        setTimeout(loadGA, 3000);
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+    
+    <div class="reading-progress" id="reading-progress"></div>
+    <script>
+    window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / docHeight) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+    </script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+            </div>
+        </div><button id="menu-btn" aria-label="Menu" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/categories/trending/" title="Hot IAM topics">
+                    <span>🔥Trending</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+(function() {
+    var btn = document.getElementById('menu-btn');
+    var menu = document.getElementById('menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+        });
+        
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
+</script>
+<main class="main">
+
+
+
+<div class="reading-progress" id="reading-progress"></div>
+<script>
+(function() {
+  const progressBar = document.getElementById('reading-progress');
+  const article = document.querySelector('.post-content');
+
+  if (!progressBar || !article) return;
+
+  function updateProgress() {
+    const articleTop = article.offsetTop;
+    const articleHeight = article.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+
+    
+    const start = articleTop - windowHeight;
+    const end = articleTop + articleHeight;
+    const current = scrollTop - start;
+    const total = end - start;
+
+    const progress = Math.min(Math.max((current / total) * 100, 0), 100);
+    progressBar.style.width = progress + '%';
+  }
+
+  
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  
+  updateProgress();
+})();
+</script>
+
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent" data-pagefind-meta="title">
+      Keycloak Major Version Upgrade: Migration Guide from 21 to 26
+    </h1>
+    <div class="post-meta"><span title='2026-02-05 09:30:00'>Feb 05, 2026</span>&nbsp;·&nbsp;6 min&nbsp;·&nbsp;1259 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+    
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#the-golden-rule-no-version-skipping" aria-label="The Golden Rule: No Version Skipping">The Golden Rule: No Version Skipping</a></li>
+                <li>
+                    <a href="#pre-upgrade-checklist" aria-label="Pre-Upgrade Checklist">Pre-Upgrade Checklist</a></li>
+                <li>
+                    <a href="#version-21--22-quarkus-stabilization" aria-label="Version 21 → 22: Quarkus Stabilization">Version 21 → 22: Quarkus Stabilization</a><ul>
+                        
+                <li>
+                    <a href="#breaking-changes" aria-label="Breaking Changes">Breaking Changes</a></li>
+                <li>
+                    <a href="#migration-steps" aria-label="Migration Steps">Migration Steps</a></li></ul>
+                </li>
+                <li>
+                    <a href="#version-22--23-new-admin-console" aria-label="Version 22 → 23: New Admin Console">Version 22 → 23: New Admin Console</a><ul>
+                        
+                <li>
+                    <a href="#breaking-changes-1" aria-label="Breaking Changes">Breaking Changes</a></li>
+                <li>
+                    <a href="#watch-out-for" aria-label="Watch Out For">Watch Out For</a></li></ul>
+                </li>
+                <li>
+                    <a href="#version-23--24-persistent-user-sessions" aria-label="Version 23 → 24: Persistent User Sessions">Version 23 → 24: Persistent User Sessions</a><ul>
+                        
+                <li>
+                    <a href="#breaking-changes-2" aria-label="Breaking Changes">Breaking Changes</a></li>
+                <li>
+                    <a href="#configuration-change" aria-label="Configuration Change">Configuration Change</a></li>
+                <li>
+                    <a href="#user-profile-impact" aria-label="User Profile Impact">User Profile Impact</a></li></ul>
+                </li>
+                <li>
+                    <a href="#version-24--25-organizational-support" aria-label="Version 24 → 25: Organizational Support">Version 24 → 25: Organizational Support</a><ul>
+                        
+                <li>
+                    <a href="#breaking-changes-3" aria-label="Breaking Changes">Breaking Changes</a></li>
+                <li>
+                    <a href="#lightweight-access-token-impact" aria-label="Lightweight Access Token Impact">Lightweight Access Token Impact</a></li></ul>
+                </li>
+                <li>
+                    <a href="#version-25--26-the-big-one-infinispan-protostream" aria-label="Version 25 → 26: The Big One (Infinispan Protostream)">Version 25 → 26: The Big One (Infinispan Protostream)</a><ul>
+                        
+                <li>
+                    <a href="#infinispan-cache-serialization-switch" aria-label="Infinispan Cache Serialization Switch">Infinispan Cache Serialization Switch</a></li>
+                <li>
+                    <a href="#login-theme-v2" aria-label="Login Theme v2">Login Theme v2</a></li>
+                <li>
+                    <a href="#bootstrap-admin-recovery" aria-label="Bootstrap Admin Recovery">Bootstrap Admin Recovery</a></li></ul>
+                </li>
+                <li>
+                    <a href="#step-by-step-upgrade-process" aria-label="Step-by-Step Upgrade Process">Step-by-Step Upgrade Process</a></li>
+                <li>
+                    <a href="#monitoring-during-upgrade" aria-label="Monitoring During Upgrade">Monitoring During Upgrade</a></li>
+                <li>
+                    <a href="#post-upgrade-cleanup" aria-label="Post-Upgrade Cleanup">Post-Upgrade Cleanup</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content" data-pagefind-body><p>Upgrading Keycloak across major versions is one of those tasks that looks simple on paper — download the new release, start it up, let Liquibase handle the database — but reliably creates production incidents when done without preparation. Between versions 21 and 26, Keycloak introduced several breaking changes that affect clustering, theming, SPIs, and configuration format.</p>
+<p>This guide covers what actually breaks at each version boundary and how to handle it.</p>
+<h2 id="the-golden-rule-no-version-skipping">The Golden Rule: No Version Skipping<a hidden class="anchor" aria-hidden="true" href="#the-golden-rule-no-version-skipping">#</a></h2>
+<p>Keycloak&rsquo;s database migration uses Liquibase changesets that execute sequentially. Version 23&rsquo;s schema changes assume version 22&rsquo;s schema is in place. If you try to jump from 21 to 26 directly, Liquibase will either fail outright or corrupt your data.</p>
+<p>The upgrade path is: <strong>21 → 22 → 23 → 24 → 25 → 26</strong></p>
+<p>Each hop requires starting Keycloak, letting the migration complete, verifying everything works, and then moving to the next version. Yes, it&rsquo;s tedious. No, there&rsquo;s no shortcut.</p>
+<h2 id="pre-upgrade-checklist">Pre-Upgrade Checklist<a hidden class="anchor" aria-hidden="true" href="#pre-upgrade-checklist">#</a></h2>
+<p>Before touching anything:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 1. Back up the database</span>
+</span></span><span style="display:flex;"><span>pg_dump -Fc -h localhost -U keycloak keycloak &gt; keycloak-v21-backup.dump
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2. Export realm configuration (safety net)</span>
+</span></span><span style="display:flex;"><span>/opt/keycloak/bin/kc.sh export --dir /backup/realm-export --users realm_file
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 3. Document current startup command and environment variables</span>
+</span></span><span style="display:flex;"><span>ps aux | grep keycloak
+</span></span><span style="display:flex;"><span>env | grep KC_
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 4. List installed custom providers</span>
+</span></span><span style="display:flex;"><span>ls /opt/keycloak/providers/
+</span></span></code></pre></div><p>Keep the backup and export for every version step. If version 24&rsquo;s migration corrupts something, you want to restore to the post-23 state, not start from 21 again.</p>
+<h2 id="version-21--22-quarkus-stabilization">Version 21 → 22: Quarkus Stabilization<a hidden class="anchor" aria-hidden="true" href="#version-21--22-quarkus-stabilization">#</a></h2>
+<p>If you&rsquo;re on the WildFly distribution (Keycloak &lt; 20), you must migrate to Quarkus first. Version 22 is fully Quarkus-based and the WildFly distribution is gone.</p>
+<h3 id="breaking-changes">Breaking Changes<a hidden class="anchor" aria-hidden="true" href="#breaking-changes">#</a></h3>
+<ul>
+<li><strong>Configuration format</strong>: <code>standalone.xml</code> is replaced by <code>keycloak.conf</code> and CLI arguments. Map your WildFly datasource and SPI configurations to <code>KC_*</code> environment variables.</li>
+<li><strong>Custom SPI packaging</strong>: WildFly-style EAR/WAR deployments become simple JAR files in <code>/opt/keycloak/providers/</code>.</li>
+<li><strong>Deprecated Admin Console</strong>: The old admin console still works but shows deprecation warnings.</li>
+</ul>
+<h3 id="migration-steps">Migration Steps<a hidden class="anchor" aria-hidden="true" href="#migration-steps">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Convert old standalone.xml settings to new format</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Old (WildFly): datasource in standalone.xml</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># New (Quarkus):</span>
+</span></span><span style="display:flex;"><span>KC_DB<span style="color:#f92672">=</span>postgres
+</span></span><span style="display:flex;"><span>KC_DB_URL<span style="color:#f92672">=</span>jdbc:postgresql://localhost:5432/keycloak
+</span></span><span style="display:flex;"><span>KC_DB_USERNAME<span style="color:#f92672">=</span>keycloak
+</span></span><span style="display:flex;"><span>KC_DB_PASSWORD<span style="color:#f92672">=</span>secret
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Start with build optimization</span>
+</span></span><span style="display:flex;"><span>/opt/keycloak/bin/kc.sh build
+</span></span><span style="display:flex;"><span>/opt/keycloak/bin/kc.sh start --optimized
+</span></span></code></pre></div><h2 id="version-22--23-new-admin-console">Version 22 → 23: New Admin Console<a hidden class="anchor" aria-hidden="true" href="#version-22--23-new-admin-console">#</a></h2>
+<h3 id="breaking-changes-1">Breaking Changes<a hidden class="anchor" aria-hidden="true" href="#breaking-changes-1">#</a></h3>
+<ul>
+<li><strong>Admin Console v2 becomes default</strong>: The old admin console is removed. If you had custom admin console extensions or plugins, they need rewriting for the React-based v2 console.</li>
+<li><strong>Deprecated API endpoints</strong>: Several Admin REST API endpoints for legacy features are removed.</li>
+<li><strong>Hostname configuration</strong>: The hostname provider configuration changes. <code>KC_HOSTNAME_STRICT</code> behavior is tightened.</li>
+</ul>
+<h3 id="watch-out-for">Watch Out For<a hidden class="anchor" aria-hidden="true" href="#watch-out-for">#</a></h3>
+<p>If your monitoring or automation scripts hit the old admin console endpoints, they&rsquo;ll break. Update to use the Admin REST API v2 endpoints:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Old endpoint (may be removed)</span>
+</span></span><span style="display:flex;"><span>curl https://keycloak.example.com/auth/admin/realms/master/...
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># New standard endpoint</span>
+</span></span><span style="display:flex;"><span>curl https://keycloak.example.com/admin/realms/master/...
+</span></span></code></pre></div><p>Note the path change: <code>/auth/admin/</code> → <code>/admin/</code>. The <code>/auth</code> prefix was removed as default in the Quarkus distribution.</p>
+<h2 id="version-23--24-persistent-user-sessions">Version 23 → 24: Persistent User Sessions<a hidden class="anchor" aria-hidden="true" href="#version-23--24-persistent-user-sessions">#</a></h2>
+<h3 id="breaking-changes-2">Breaking Changes<a hidden class="anchor" aria-hidden="true" href="#breaking-changes-2">#</a></h3>
+<ul>
+<li><strong>Persistent user sessions</strong>: User sessions can now survive restarts by persisting to the database. This changes session behavior — sessions that previously died on restart now persist.</li>
+<li><strong>Client policy updates</strong>: Client policies for FAPI and security profiles are restructured.</li>
+<li><strong>User Profile enabled by default</strong>: The declarative user profile feature is enabled by default, which changes registration and profile update forms.</li>
+</ul>
+<h3 id="configuration-change">Configuration Change<a hidden class="anchor" aria-hidden="true" href="#configuration-change">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-properties" data-lang="properties"><span style="display:flex;"><span><span style="color:#75715e"># If you DON&#39;T want persistent sessions (maintain old behavior):</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">spi-user-sessions-infinispan-offline-session-cache-entry-lifespan-override</span><span style="color:#f92672">=</span><span style="color:#e6db74">0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># If you DO want persistent sessions (recommended):</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># No change needed, it&#39;s the new default</span>
+</span></span></code></pre></div><h3 id="user-profile-impact">User Profile Impact<a hidden class="anchor" aria-hidden="true" href="#user-profile-impact">#</a></h3>
+<p>With User Profile enabled by default, the registration and profile pages enforce the configured user attributes. If your custom theme relies on hardcoded form fields, they may disappear or change order. Test your registration flow thoroughly.</p>
+<h2 id="version-24--25-organizational-support">Version 24 → 25: Organizational Support<a hidden class="anchor" aria-hidden="true" href="#version-24--25-organizational-support">#</a></h2>
+<h3 id="breaking-changes-3">Breaking Changes<a hidden class="anchor" aria-hidden="true" href="#breaking-changes-3">#</a></h3>
+<ul>
+<li><strong>Organizations feature (preview)</strong>: Multi-tenancy support is introduced as a preview feature.</li>
+<li><strong>Lightweight access tokens</strong>: Access tokens are now lightweight by default — they contain minimal claims. Full user info requires the UserInfo endpoint or explicit token configuration.</li>
+<li><strong>Deprecated features removed</strong>: Several deprecated authenticators and form actions are removed.</li>
+</ul>
+<h3 id="lightweight-access-token-impact">Lightweight Access Token Impact<a hidden class="anchor" aria-hidden="true" href="#lightweight-access-token-impact">#</a></h3>
+<p>This is the change most likely to break applications. If your APIs parse access tokens for user claims (email, name, groups), those claims are no longer present by default.</p>
+<p>Fix: Configure client scopes to include the needed claims:</p>
+<ol>
+<li>Go to <strong>Client → Client Scopes → Assigned Scopes</strong></li>
+<li>Ensure <code>profile</code>, <code>email</code>, and any custom scopes are assigned</li>
+<li>On each scope&rsquo;s mappers, set <strong>Add to access token</strong> to ON</li>
+</ol>
+<p>Or configure the client to use full tokens:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;attributes&#34;</span>: {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;use.lightweight.access.token.enabled&#34;</span>: <span style="color:#e6db74">&#34;false&#34;</span>
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="version-25--26-the-big-one-infinispan-protostream">Version 25 → 26: The Big One (Infinispan Protostream)<a hidden class="anchor" aria-hidden="true" href="#version-25--26-the-big-one-infinispan-protostream">#</a></h2>
+<p>Version 26 has the most impactful infrastructure change since the Quarkus migration.</p>
+<h3 id="infinispan-cache-serialization-switch">Infinispan Cache Serialization Switch<a hidden class="anchor" aria-hidden="true" href="#infinispan-cache-serialization-switch">#</a></h3>
+<p>Keycloak 26 switches from JBoss Marshalling to Infinispan Protostream for cache serialization. This means:</p>
+<ul>
+<li><strong>Rolling upgrades don&rsquo;t work</strong>: Old nodes (v25) and new nodes (v26) cannot deserialize each other&rsquo;s cache entries. You&rsquo;ll get <code>ClassCastException</code> or <code>MarshallingException</code> in the logs.</li>
+<li><strong>Solution</strong>: Do a blue-green deployment or accept a brief session flush.</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Blue-green approach:</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 1. Deploy v26 cluster alongside v25 cluster</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2. Point load balancer to v26</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 3. Users re-authenticate (sessions don&#39;t transfer)</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 4. Shut down v25 cluster</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Alternative: flush sessions before upgrade</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 1. Clear the infinispan caches via JMX or CLI</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2. Stop all v25 nodes</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 3. Start v26 nodes</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Users will need to re-login</span>
+</span></span></code></pre></div><h3 id="login-theme-v2">Login Theme v2<a hidden class="anchor" aria-hidden="true" href="#login-theme-v2">#</a></h3>
+<p>Keycloak 26 defaults to the v2 login theme (PatternFly-based). Custom themes that extend <code>keycloak</code> must now extend <code>keycloak.v2</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-properties" data-lang="properties"><span style="display:flex;"><span><span style="color:#75715e"># theme.properties (old)</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">parent</span><span style="color:#f92672">=</span><span style="color:#e6db74">keycloak</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">import</span><span style="color:#f92672">=</span><span style="color:#e6db74">common/keycloak</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># theme.properties (new)</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">parent</span><span style="color:#f92672">=</span><span style="color:#e6db74">keycloak.v2</span>
+</span></span></code></pre></div><p>Template file paths also change. If you&rsquo;ve overridden individual FTL files, check that the template names haven&rsquo;t changed between versions.</p>
+<h3 id="bootstrap-admin-recovery">Bootstrap Admin Recovery<a hidden class="anchor" aria-hidden="true" href="#bootstrap-admin-recovery">#</a></h3>
+<p>Keycloak 26 adds a bootstrap admin mechanism. If all admin accounts are locked out:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>KC_BOOTSTRAP_ADMIN_USERNAME<span style="color:#f92672">=</span>temp-admin <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>KC_BOOTSTRAP_ADMIN_PASSWORD<span style="color:#f92672">=</span>temp-password <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>/opt/keycloak/bin/kc.sh start
+</span></span></code></pre></div><p>This creates a temporary admin account for recovery. Remove it after resetting the real admin credentials.</p>
+<h2 id="step-by-step-upgrade-process">Step-by-Step Upgrade Process<a hidden class="anchor" aria-hidden="true" href="#step-by-step-upgrade-process">#</a></h2>
+<p>For each version hop (repeat 5 times for 21→26):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 1. Stop current Keycloak</span>
+</span></span><span style="display:flex;"><span>systemctl stop keycloak
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2. Back up database</span>
+</span></span><span style="display:flex;"><span>pg_dump -Fc keycloak &gt; keycloak-pre-vXX-upgrade.dump
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 3. Replace Keycloak binaries</span>
+</span></span><span style="display:flex;"><span>tar xzf keycloak-XX.0.0.tar.gz
+</span></span><span style="display:flex;"><span>cp -r /opt/keycloak/conf/* /opt/keycloak-XX.0.0/conf/
+</span></span><span style="display:flex;"><span>cp /opt/keycloak/providers/*.jar /opt/keycloak-XX.0.0/providers/
+</span></span><span style="display:flex;"><span>ln -sfn /opt/keycloak-XX.0.0 /opt/keycloak
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 4. Rebuild (Quarkus optimization)</span>
+</span></span><span style="display:flex;"><span>/opt/keycloak/bin/kc.sh build
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 5. Start and watch the logs</span>
+</span></span><span style="display:flex;"><span>/opt/keycloak/bin/kc.sh start | tee /var/log/keycloak-upgrade-vXX.log
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 6. Verify</span>
+</span></span><span style="display:flex;"><span>curl -s https://keycloak.example.com/health/ready
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Should return {&#34;status&#34;:&#34;UP&#34;}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 7. Smoke test</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># - Admin console login</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># - User login via SAML/OIDC client</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># - Check custom SPIs loaded</span>
+</span></span></code></pre></div><h2 id="monitoring-during-upgrade">Monitoring During Upgrade<a hidden class="anchor" aria-hidden="true" href="#monitoring-during-upgrade">#</a></h2>
+<p>Watch these metrics during and after each version upgrade:</p>
+<ul>
+<li><strong>Login success rate</strong>: Drop indicates broken authentication flows or missing claims</li>
+<li><strong>Admin API response time</strong>: Spike suggests database migration is still running</li>
+<li><strong>Infinispan cache miss rate</strong>: High rate after v26 upgrade indicates the Protostream switch is working (cache is rebuilding)</li>
+<li><strong>Custom SPI errors</strong>: Check for <code>ClassNotFoundException</code> or <code>NoSuchMethodError</code> in logs — indicates SPI API changes</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Quick health check script</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">while</span> true; <span style="color:#66d9ef">do</span>
+</span></span><span style="display:flex;"><span>  HTTP_CODE<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>curl -s -o /dev/null -w <span style="color:#e6db74">&#34;%{http_code}&#34;</span> https://keycloak.example.com/health/ready<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>  echo <span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>date<span style="color:#66d9ef">)</span><span style="color:#e6db74">: Health status: </span>$HTTP_CODE<span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  sleep <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">done</span>
+</span></span></code></pre></div><h2 id="post-upgrade-cleanup">Post-Upgrade Cleanup<a hidden class="anchor" aria-hidden="true" href="#post-upgrade-cleanup">#</a></h2>
+<p>After reaching version 26 and confirming everything works:</p>
+<ol>
+<li>Remove old Keycloak distribution directories</li>
+<li>Update your CI/CD pipelines and Docker images to build from v26</li>
+<li>Review and update custom SPIs for deprecated API usage</li>
+<li>Enable new features: Organizations (preview), improved WebAuthn, updated Infinispan configuration</li>
+<li>Update operational runbooks with the new admin console URLs and CLI commands</li>
+</ol>
+<p>Keycloak&rsquo;s rapid release cycle means you&rsquo;ll be doing this again in 6-12 months. Consider automating the upgrade process with a staging environment that runs the full sequence before production.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/keycloak/">Keycloak</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/upgrade-guide/">Upgrade-Guide</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/identity-migration/">Identity-Migration</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/iam-operations/">Iam-Operations</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/breaking-changes/">Breaking-Changes</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/on-premise-iam-to-cloud-migration-planning-framework/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>On-Premise IAM to Cloud Migration: Planning Framework and Execution Strategy</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/adfs-to-keycloak-migration-open-source-alternative/">
+    <span class="title">Next »</span>
+    <br>
+    <span>ADFS to Keycloak Migration: Replacing Windows Federation with Open Source IAM</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+
+<section class="post-feedback">
+  <p class="feedback-question">Was this article helpful?</p>
+  <div class="feedback-buttons">
+    <button class="feedback-btn feedback-yes" onclick="trackFeedback('yes', '\/posts\/keycloak-upgrade-guide-migrating-to-version-26\/')" aria-label="Yes, helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      Yes
+    </button>
+    <button class="feedback-btn feedback-no" onclick="trackFeedback('no', '\/posts\/keycloak-upgrade-guide-migrating-to-version-26\/')" aria-label="No, not helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>
+      No
+    </button>
+  </div>
+  <p class="feedback-thanks" style="display: none;">Thanks for your feedback!</p>
+</section>
+
+
+<section class="author-bio">
+  <div class="author-avatar">
+    <img src="/IAMDevBox.com.jpg" alt="IAMDevBox Author" width="64" height="64" loading="lazy">
+  </div>
+  <div class="author-info">
+    <h4>Written by IAMDevBox</h4>
+    <p>Enterprise IAM architect with 15+ years in identity modernization. Certified across ForgeRock, Ping Identity, SailPoint, AWS, and Azure.</p>
+    <div class="author-links">
+      <a href="https://twitter.com/iamdevbox" target="_blank" rel="noopener" title="Follow on X/Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/iamdevbox" target="_blank" rel="noopener" title="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="/contact/" title="Contact">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function trackFeedback(value, page) {
+  
+  document.querySelector('.feedback-buttons').style.display = 'none';
+  document.querySelector('.feedback-question').style.display = 'none';
+  document.querySelector('.feedback-thanks').style.display = 'block';
+
+  
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'post_feedback', {
+      'feedback_value': value,
+      'page_path': page
+    });
+  }
+
+  
+  localStorage.setItem('feedback_' + page, value);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const page = '\/posts\/keycloak-upgrade-guide-migrating-to-version-26\/';
+  if (localStorage.getItem('feedback_' + page)) {
+    document.querySelector('.feedback-buttons').style.display = 'none';
+    document.querySelector('.feedback-question').textContent = 'Thanks for your feedback!';
+  }
+});
+</script>
+
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+              Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+            </a>
+            <small class="custom-date">2026-03-01</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-realm-federation-connecting-multiple-identity-sources/" class="custom-link">
+              Keycloak Realm Federation: Connecting Multiple Identity Sources
+            </a>
+            <small class="custom-date">2026-02-20</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-vs-auth0-vs-okta-2026-which-iam-platform-to-choose/" class="custom-link">
+              Keycloak vs Auth0 vs Okta in 2026: Which IAM Platform Should You Choose?
+            </a>
+            <small class="custom-date">2026-02-14</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-complete-guide-open-source-iam-platform/" class="custom-link">
+              Keycloak Complete Guide: Open Source Identity and Access Management Platform
+            </a>
+            <small class="custom-date">2026-02-14</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-admin-rest-api-automating-user-and-realm-management/" class="custom-link">
+              Keycloak Admin REST API: Automating User and Realm Management
+            </a>
+            <small class="custom-date">2026-02-09</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+                Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+                Go Secretless with Snowflake Workload Identity Federation - Snowflake
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+                JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+                OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+                Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

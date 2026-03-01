@@ -1,0 +1,3068 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide | IAMDevBox</title>
+<meta name="keywords" content="keycloak spring boot oauth2, spring boot resource server keycloak, keycloak spring security oauth2, spring security keycloak oauth2 resource server, keycloak jwt validation spring boot, keycloak spring boot 3, spring boot oauth2 resource server, keycloak realm roles spring security, spring security keycloak adapter, keycloak spring boot example">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/keycloak-spring-boot-oauth2-integration-complete-guide/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.e24ea479df3e367781fafa20cedde21c7e043c10bed4c8c913ef9261a049a1e2.css" integrity="sha256-4k6ked8&#43;NneB&#43;vogzt3iHH4EPBC&#43;1MjJE&#43;&#43;SYaBJoeI=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/keycloak-spring-boot-oauth2-integration-complete-guide/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/keycloak-spring-boot-oauth2-integration-complete-guide/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide">
+  <meta property="og:description" content="Complete guide to Keycloak Spring Boot OAuth2 integration — configure a Spring Security resource server, validate JWT tokens, map Keycloak realm roles, and handle multi-tenant token validation in production.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-02-28T10:00:00+00:00">
+    <meta property="article:modified_time" content="2026-03-01T11:21:01-05:00">
+    <meta property="article:tag" content="Keycloak">
+    <meta property="article:tag" content="Spring Boot">
+    <meta property="article:tag" content="OAuth 2.0">
+    <meta property="article:tag" content="Spring Security">
+    <meta property="article:tag" content="Java">
+    <meta property="article:tag" content="Authentication">
+    <meta property="og:image" content="https://www.iamdevbox.com/images/posts/keycloak-spring-boot-oauth2-integration--complete--0ba9f532.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/images/posts/keycloak-spring-boot-oauth2-integration--complete--0ba9f532.webp">
+<meta name="twitter:title" content="Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide">
+<meta name="twitter:description" content="Complete guide to Keycloak Spring Boot OAuth2 integration — configure a Spring Security resource server, validate JWT tokens, map Keycloak realm roles, and handle multi-tenant token validation in production.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide",
+      "item": "https://www.iamdevbox.com/posts/keycloak-spring-boot-oauth2-integration-complete-guide/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide",
+  "name": "Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide",
+  "description": "Complete guide to Keycloak Spring Boot OAuth2 integration — configure a Spring Security resource server, validate JWT tokens, map Keycloak realm roles, and handle multi-tenant token validation in production.",
+  "keywords": [
+    "keycloak spring boot oauth2", "spring boot resource server keycloak", "keycloak spring security oauth2", "spring security keycloak oauth2 resource server", "keycloak jwt validation spring boot", "keycloak spring boot 3", "spring boot oauth2 resource server", "keycloak realm roles spring security", "spring security keycloak adapter", "keycloak spring boot example"
+  ],
+  "articleBody": "Integrating Keycloak with Spring Boot for OAuth2 resource server protection is one of the most searched tasks in the IAM developer community — yet most tutorials stop at “hello world” level. This guide covers production-grade integration: JWT validation, Keycloak realm role extraction, multi-tenant setups, and integration testing strategies.\nClone the companion repo: All working code in this guide is available at github.com/IAMDevBox/keycloak-spring-boot-oauth2 — includes Docker Compose for Keycloak, complete Spring Boot 3.x application, and integration tests with Testcontainers.\nPrerequisites Keycloak 24+ (or Keycloak 26.x for latest features) Spring Boot 3.2+ with Spring Security 6.x Java 17+ A running Keycloak instance (see our Keycloak Docker Compose Production Guide for setup) Project Setup Maven Dependencies org.springframework.boot spring-boot-starter-web org.springframework.boot spring-boot-starter-oauth2-resource-server org.springframework.boot spring-boot-starter-security org.testcontainers keycloak test The spring-boot-starter-oauth2-resource-server dependency is the key addition. It includes Spring Security’s JWT support and auto-configures JWKS endpoint fetching from your issuer.\nKeycloak Realm Configuration Before configuring Spring Boot, set up your Keycloak realm:\nCreate a realm (e.g., myrealm) Create a client (e.g., my-spring-app) with: Client type: OpenID Connect Client authentication: On (for confidential clients) Valid redirect URIs: http://localhost:8081/* Add realm roles: ROLE_USER, ROLE_ADMIN Assign roles to test users Basic Spring Boot Configuration application.yml spring: security: oauth2: resourceserver: jwt: # Must match Keycloak's realm URL exactly issuer-uri: http://localhost:8080/realms/myrealm server: port: 8081 Spring Boot auto-discovers the JWKS endpoint from {issuer-uri}/.well-known/openid-configuration. This means no manual key configuration — Spring fetches and caches Keycloak’s public keys automatically.\nSecurity Configuration @Configuration @EnableWebSecurity @EnableMethodSecurity public class SecurityConfig { @Bean public SecurityFilterChain filterChain(HttpSecurity http) throws Exception { http .authorizeHttpRequests(auth -\u003e auth .requestMatchers(\"/public/**\").permitAll() .requestMatchers(\"/api/admin/**\").hasRole(\"ADMIN\") .requestMatchers(\"/api/**\").hasRole(\"USER\") .anyRequest().authenticated() ) .oauth2ResourceServer(oauth2 -\u003e oauth2 .jwt(jwt -\u003e jwt .jwtAuthenticationConverter(keycloakJwtConverter()) ) ); return http.build(); } @Bean public JwtAuthenticationConverter keycloakJwtConverter() { JwtGrantedAuthoritiesConverter converter = new JwtGrantedAuthoritiesConverter(); // Do NOT set default authority prefix here — we handle it in custom converter converter.setAuthoritiesClaimName(\"scope\"); KeycloakRoleConverter keycloakConverter = new KeycloakRoleConverter(); JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter(); jwtConverter.setJwtGrantedAuthoritiesConverter(keycloakConverter); return jwtConverter; } } Extracting Keycloak Realm Roles This is the most common pain point. Keycloak places realm roles inside realm_access.roles — a nested JSON structure that Spring Security doesn’t understand out of the box.\nKeycloak JWT Structure A Keycloak-issued JWT contains:\n{ \"realm_access\": { \"roles\": [\"ROLE_USER\", \"ROLE_ADMIN\", \"offline_access\"] }, \"resource_access\": { \"my-spring-app\": { \"roles\": [\"view-profile\"] } }, \"scope\": \"openid profile email\", \"preferred_username\": \"john.doe\" } Custom Role Converter @Component public class KeycloakRoleConverter implements Converter\u003cJwt, Collection\u003cGrantedAuthority\u003e\u003e { @Override public Collection\u003cGrantedAuthority\u003e convert(Jwt jwt) { List\u003cGrantedAuthority\u003e authorities = new ArrayList\u003c\u003e(); // Extract realm-level roles Map\u003cString, Object\u003e realmAccess = jwt.getClaim(\"realm_access\"); if (realmAccess != null \u0026\u0026 realmAccess.containsKey(\"roles\")) { List\u003cString\u003e realmRoles = (List\u003cString\u003e) realmAccess.get(\"roles\"); realmRoles.stream() .filter(role -\u003e !role.equals(\"offline_access\") \u0026\u0026 !role.equals(\"uma_authorization\")) .map(role -\u003e new SimpleGrantedAuthority(\"ROLE_\" + role.toUpperCase())) .forEach(authorities::add); } // Optionally extract client-level roles Map\u003cString, Object\u003e resourceAccess = jwt.getClaim(\"resource_access\"); if (resourceAccess != null) { resourceAccess.values().stream() .filter(v -\u003e v instanceof Map) .flatMap(v -\u003e { Map\u003cString, Object\u003e clientRoles = (Map\u003cString, Object\u003e) v; List\u003cString\u003e roles = (List\u003cString\u003e) clientRoles.getOrDefault(\"roles\", List.of()); return roles.stream(); }) .map(role -\u003e new SimpleGrantedAuthority(\"ROLE_\" + role.toUpperCase())) .forEach(authorities::add); } return authorities; } } Example REST Controller @RestController @RequestMapping(\"/api\") public class UserController { @GetMapping(\"/profile\") @PreAuthorize(\"hasRole('USER')\") public Map\u003cString, Object\u003e getProfile(@AuthenticationPrincipal Jwt jwt) { return Map.of( \"username\", jwt.getClaim(\"preferred_username\"), \"email\", jwt.getClaim(\"email\"), \"roles\", jwt.getClaim(\"realm_access\") ); } @GetMapping(\"/admin/users\") @PreAuthorize(\"hasRole('ADMIN')\") public String adminEndpoint() { return \"Admin access granted\"; } @GetMapping(\"/token-info\") public Map\u003cString, Object\u003e tokenInfo(@AuthenticationPrincipal Jwt jwt) { return Map.of( \"subject\", jwt.getSubject(), \"issuer\", jwt.getIssuer().toString(), \"expires\", jwt.getExpiresAt().toString(), \"claims\", jwt.getClaims() ); } } The @AuthenticationPrincipal Jwt injection gives you direct access to all token claims without additional boilerplate.\nToken Audience Validation Production deployments should validate the token audience to prevent token reuse across services:\nspring: security: oauth2: resourceserver: jwt: issuer-uri: http://keycloak:8080/realms/myrealm @Bean public JwtDecoder jwtDecoder(OAuth2ResourceServerProperties properties) { NimbusJwtDecoder decoder = JwtDecoders.fromIssuerLocation( properties.getJwt().getIssuerUri() ); OAuth2TokenValidator\u003cJwt\u003e audienceValidator = new JwtClaimValidator\u003cList\u003cString\u003e\u003e( JwtClaimNames.AUD, aud -\u003e aud != null \u0026\u0026 aud.contains(\"my-spring-app\") ); OAuth2TokenValidator\u003cJwt\u003e withAudience = new DelegatingOAuth2TokenValidator\u003c\u003e( JwtValidators.createDefaultWithIssuer(properties.getJwt().getIssuerUri()), audienceValidator ); decoder.setJwtValidator(withAudience); return decoder; } To configure the audience in Keycloak, go to Client → Settings → Audience and add the client ID as an audience in the access token.\nMulti-Tenant Keycloak Integration If your Spring Boot application serves multiple tenants, each with their own Keycloak realm:\n@Component public class MultiTenantJwtDecoder implements JwtDecoder { private final Map\u003cString, JwtDecoder\u003e decoders = new ConcurrentHashMap\u003c\u003e(); private final String keycloakBaseUrl; public MultiTenantJwtDecoder(@Value(\"${keycloak.base-url}\") String keycloakBaseUrl) { this.keycloakBaseUrl = keycloakBaseUrl; } @Override public Jwt decode(String token) throws JwtException { // Extract realm from token claims before full validation String realm = extractRealm(token); JwtDecoder decoder = decoders.computeIfAbsent(realm, this::createDecoder); return decoder.decode(token); } private String extractRealm(String token) { // Parse issuer claim from token without validation try { JWT jwt = JWTParser.parse(token); String issuer = (String) jwt.getJWTClaimsSet().getClaim(\"iss\"); // Expected format: http://keycloak:8080/realms/{realm} return issuer.substring(issuer.lastIndexOf(\"/\") + 1); } catch (Exception e) { throw new JwtException(\"Cannot extract realm from token\"); } } private JwtDecoder createDecoder(String realm) { String issuerUri = keycloakBaseUrl + \"/realms/\" + realm; return JwtDecoders.fromIssuerLocation(issuerUri); } } This pattern caches decoders per realm and lazily initializes them on first request.\nIntegration Testing with Testcontainers Testing with a real Keycloak instance is the most reliable approach:\n@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT) @Testcontainers class KeycloakIntegrationTest { @Container static KeycloakContainer keycloak = new KeycloakContainer(\"quay.io/keycloak/keycloak:26.0\") .withRealmImportFile(\"test-realm.json\"); @DynamicPropertySource static void keycloakProperties(DynamicPropertyRegistry registry) { registry.add(\"spring.security.oauth2.resourceserver.jwt.issuer-uri\", () -\u003e keycloak.getAuthServerUrl() + \"/realms/test\"); } @Test void testProtectedEndpoint() throws Exception { String token = obtainToken(\"testuser\", \"password\"); mockMvc.perform(get(\"/api/profile\") .header(\"Authorization\", \"Bearer \" + token)) .andExpect(status().isOk()); } private String obtainToken(String username, String password) { // Use Keycloak REST API to obtain token return given() .contentType(\"application/x-www-form-urlencoded\") .formParam(\"grant_type\", \"password\") .formParam(\"client_id\", \"test-client\") .formParam(\"client_secret\", \"test-secret\") .formParam(\"username\", username) .formParam(\"password\", password) .post(keycloak.getAuthServerUrl() + \"/realms/test/protocol/openid-connect/token\") .jsonPath().getString(\"access_token\"); } } For unit tests where you don’t need a real Keycloak:\n@Test void testWithMockedJwt() throws Exception { mockMvc.perform(get(\"/api/profile\") .with(jwt() .jwt(jwt -\u003e jwt .claim(\"preferred_username\", \"testuser\") .claim(\"realm_access\", Map.of(\"roles\", List.of(\"USER\"))) ) )) .andExpect(status().isOk()) .andExpect(jsonPath(\"$.username\").value(\"testuser\")); } Common Issues and Fixes 401 Unauthorized: Invalid Issuer Symptom: Invalid issuer. Expected http://localhost:8080/realms/myrealm\nCause: The issuer-uri in your application.yml must exactly match the iss claim in the Keycloak JWT, including the protocol (http vs https) and exact realm name.\nFix: Decode your token at iamdevbox.com/tools/jwt-decode/ and compare the iss claim with your configured issuer-uri.\n403 Forbidden: Missing Roles Symptom: Authentication succeeds but all role-protected endpoints return 403.\nCause: Without a custom JwtGrantedAuthoritiesConverter, Spring Security only reads the scope claim — not Keycloak’s realm_access.roles.\nFix: Implement the KeycloakRoleConverter shown above. Verify role names — Spring Security’s hasRole(\"USER\") checks for ROLE_USER authority.\nCORS Errors on Token Validation Symptom: Browser requests fail with CORS error when fetching JWKS.\nCause: CORS is a browser concern, not a Spring Boot one. Your backend fetches JWKS server-side (no CORS issue). If you see CORS errors, they’re from the browser calling Keycloak directly.\nFix: For browser-based OAuth flows, use the Authorization Code Flow with PKCE — the browser handles the redirect, and your backend calls Keycloak server-to-server.\nToken Expired Too Quickly Symptom: Tokens expire in 5 minutes, causing constant re-authentication.\nFix: In Keycloak Admin Console → Realm Settings → Tokens:\nAccess Token Lifespan: 15-30 minutes for development SSO Session Idle: 30 minutes Implement refresh token rotation in your client Production Security Checklist Before deploying to production:\nUse HTTPS for both Keycloak and Spring Boot — issuer-uri must use https:// Enable audience validation (prevents token reuse across services) Configure PKCE for all browser clients (see PKCE Generator) Rotate Keycloak realm keys annually (Admin → Realm Settings → Keys) Set appropriate token lifetimes (access: 5-15 min, refresh: 8h-30d) Enable Keycloak event logging for audit trails Use Keycloak Health endpoints in your Kubernetes liveness probes Test token revocation — ensure your app respects token expiry Advanced: Custom Claims Mapper Add custom data to tokens via Keycloak protocol mappers:\n// Reading a custom claim from Keycloak token @GetMapping(\"/user-data\") public Map\u003cString, Object\u003e getUserData(@AuthenticationPrincipal Jwt jwt) { // Custom claim set via Keycloak Protocol Mapper → User Attribute mapper String department = jwt.getClaim(\"department\"); String employeeId = jwt.getClaim(\"employee_id\"); return Map.of( \"department\", department != null ? department : \"unknown\", \"employeeId\", employeeId != null ? employeeId : \"unknown\" ); } Configure in Keycloak: Client → Client Scopes → Add Mapper → User Attribute. Map your user attribute to the token claim name.\nRelated Resources Keycloak Complete Guide — Full Keycloak feature overview Keycloak Docker Compose Production — Production deployment setup Keycloak High Availability — Clustering configuration OAuth 2.0 Authorization Code Flow with PKCE — Secure browser-based OAuth JWT Decode Tool — Debug your Keycloak tokens PKCE Generator — Generate PKCE code challenges online For ForgeRock/PingOne AIC integrations with Java, see the ForgeRock Deep Dive guide.\n",
+  "wordCount" : "1386",
+  "inLanguage": "en",
+  "image":"https://www.iamdevbox.com/images/posts/keycloak-spring-boot-oauth2-integration--complete--0ba9f532.webp","datePublished": "2026-02-28T10:00:00Z",
+  "dateModified": "2026-03-01T11:21:01-05:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/keycloak-spring-boot-oauth2-integration-complete-guide/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do I configure Keycloak as OAuth2 resource server in Spring Boot 3?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Add spring-boot-starter-oauth2-resource-server dependency, then set spring.security.oauth2.resourceserver.jwt.issuer-uri=http://localhost:8080/realms/myrealm in application.yml. Spring Boot auto-configures JWT validation against Keycloak's JWKS endpoint."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I extract Keycloak realm roles in Spring Security?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Implement a custom JwtAuthenticationConverter that reads the realm_access.roles claim from the Keycloak JWT token and converts them to Spring Security GrantedAuthority objects. Set this converter on the JWT decoder configuration."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why is my Spring Boot app returning 401 Unauthorized with Keycloak tokens?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Most common causes: (1) Wrong issuer-uri — must match the exact realm URL including trailing slash if Keycloak includes it. (2) Token audience mismatch — enable audience validation by adding verify-token in security config. (3) Clock skew — Keycloak tokens have short lifetimes; ensure server clocks are synchronized."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I test Keycloak-protected Spring Boot endpoints without a running Keycloak?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Use Spring Security Test's @WithMockUser for simple role-based tests, or mock the JWT with SecurityMockMvcRequestPostProcessors.jwt() to set specific claims. For integration tests, use Testcontainers with the Keycloak container to spin up a real Keycloak instance."
+      }
+    }
+  ]
+}
+</script>
+    <meta name="description" content="Complete guide to Keycloak Spring Boot OAuth2 integration — configure a Spring Security resource server, validate JWT tokens, map Keycloak realm roles, and handle multi-tenant token validation in production."><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-spring-boot-oauth2-integration-complete-guide\/"
+  },
+  "headline": "Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide",
+  "description": "Complete guide to Keycloak Spring Boot OAuth2 integration — configure a Spring Security resource server, validate JWT tokens, map Keycloak realm roles, and handle multi-tenant token validation in production.",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon-96x96.png",
+      "width": 96,
+      "height": 96
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://www.iamdevbox.com/IAMDevBox.com.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "datePublished": "2026-02-28T10:00:00Z",
+  "dateModified": "2026-03-01T11:21:01-05:00",
+  "wordCount":  1386 ,
+  "articleSection": "posts",
+  "keywords": ["keycloak spring boot oauth2","spring boot resource server keycloak","keycloak spring security oauth2","spring security keycloak oauth2 resource server","keycloak jwt validation spring boot","keycloak spring boot 3","spring boot oauth2 resource server","keycloak realm roles spring security","spring security keycloak adapter","keycloak spring boot example"]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/keycloak-spring-boot-oauth2-integration-complete-guide\/"
+    }
+  ]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-token-exchange-implementing-oauth-20-token-exchange\/"
+            },
+            "headline": "Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:29:55Z",
+            "dateModified": "2026-03-01T14:30:15Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/go-secretless-with-snowflake-workload-identity-federation-snowflake\/"
+            },
+            "headline": "Go Secretless with Snowflake Workload Identity Federation - Snowflake",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:24:03Z",
+            "dateModified": "2026-03-01T14:24:20Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-algorithm-confusion-attack-cve-2026-developer-guide\/"
+            },
+            "headline": "JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-02-28T18:00:00Z",
+            "dateModified": "2026-03-01T11:21:01-05:00"
+          }
+  ]
+}
+</script>
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    const mermaidBlocks = document.querySelectorAll('.mermaid, pre code.language-mermaid, code.language-mermaid');
+    if (mermaidBlocks.length > 0) {
+        
+        mermaidBlocks.forEach(block => {
+            if (block.tagName === 'CODE') {
+                const pre = block.parentElement;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = block.textContent;
+                if (pre && pre.tagName === 'PRE') {
+                    pre.parentNode.replaceChild(div, pre);
+                } else {
+                    block.parentNode.replaceChild(div, block);
+                }
+            }
+        });
+
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+            const isDark = document.body.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#5a67d8',
+                    
+                    secondaryColor: '#48bb78',
+                    secondaryTextColor: '#ffffff',
+                    secondaryBorderColor: '#38a169',
+                    
+                    tertiaryColor: '#ed8936',
+                    tertiaryTextColor: '#ffffff',
+                    tertiaryBorderColor: '#dd6b20',
+                    
+                    lineColor: '#718096',
+                    
+                    background: isDark ? '#1a202c' : '#ffffff',
+                    mainBkg: isDark ? '#2d3748' : '#f7fafc',
+                    
+                    actorBkg: '#667eea',
+                    actorBorder: '#5a67d8',
+                    actorTextColor: '#ffffff',
+                    actorLineColor: '#718096',
+                    signalColor: '#4a5568',
+                    signalTextColor: '#2d3748',
+                    labelBoxBkgColor: '#edf2f7',
+                    labelBoxBorderColor: '#cbd5e0',
+                    labelTextColor: '#2d3748',
+                    loopTextColor: '#553c9a',
+                    noteBkgColor: '#faf089',
+                    noteTextColor: '#744210',
+                    noteBorderColor: '#d69e2e',
+                    
+                    nodeBkg: '#667eea',
+                    nodeBorder: '#5a67d8',
+                    clusterBkg: '#e2e8f0',
+                    clusterBorder: '#a0aec0',
+                    defaultLinkColor: '#718096',
+                    titleColor: '#2d3748',
+                    edgeLabelBackground: 'transparent',
+                    
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                sequence: {
+                    useMaxWidth: true,
+                    boxMargin: 10,
+                    boxTextMargin: 5,
+                    noteMargin: 10,
+                    messageMargin: 35,
+                    mirrorActors: false
+                }
+            });
+            mermaid.run().then(() => {
+                
+                document.querySelectorAll('.mermaid .node').forEach(node => {
+                    const rect = node.querySelector('rect, circle, ellipse, polygon');
+                    if (rect) {
+                        const fill = rect.getAttribute('fill') || window.getComputedStyle(rect).fill;
+                        
+                        const isDarkBg = fill && (
+                            fill.includes('667eea') || fill.includes('102, 126, 234') ||
+                            fill.includes('48bb78') || fill.includes('72, 187, 120') ||
+                            fill.includes('ed8936') || fill.includes('237, 137, 54') ||
+                            fill.includes('553c9a') || fill.includes('9f7aea') ||
+                            fill.includes('e53e3e') || fill.includes('dd6b20')
+                        );
+                        const textColor = isDarkBg ? '#ffffff' : '#1a202c';
+                        node.querySelectorAll('span, .nodeLabel, text, foreignObject div').forEach(text => {
+                            text.style.color = textColor;
+                            text.style.fill = textColor;
+                        });
+                    }
+                });
+            });
+        };
+        document.head.appendChild(script);
+    }
+
+    
+    const postContent = document.querySelector('.post-content');
+    const isSinglePost = document.querySelector('.post-single');
+    const isToolsPage = window.location.pathname.startsWith('/tools/');
+    if (postContent && isSinglePost && window.innerWidth >= 1400 && !isToolsPage) {
+        const headings = postContent.querySelectorAll('h2, h3');
+        if (headings.length >= 3) {
+            const toc = document.createElement('nav');
+            toc.className = 'floating-toc';
+            toc.innerHTML = '<h4>📑 Contents</h4><ul></ul>';
+            const tocList = toc.querySelector('ul');
+
+            headings.forEach((heading, index) => {
+                const id = heading.id || `section-${index}`;
+                heading.id = id;
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2';
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            document.body.appendChild(toc);
+
+            
+            const tocLinks = toc.querySelectorAll('a');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 150) {
+                        current = heading.id;
+                    }
+                });
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+    }
+
+    
+    if (postContent && isSinglePost && window.innerWidth >= 1200) {
+        const h2s = postContent.querySelectorAll('h2');
+        if (h2s.length >= 2) {
+            const indicator = document.createElement('div');
+            indicator.className = 'section-indicator';
+
+            h2s.forEach((h2, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'section-dot';
+                dot.title = h2.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                dot.addEventListener('click', () => {
+                    h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                indicator.appendChild(dot);
+            });
+
+            document.body.appendChild(indicator);
+
+            
+            window.addEventListener('scroll', () => {
+                const dots = indicator.querySelectorAll('.section-dot');
+                let activeIndex = 0;
+                h2s.forEach((h2, index) => {
+                    if (h2.getBoundingClientRect().top <= 200) {
+                        activeIndex = index;
+                    }
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+    }
+    });
+    </script>
+
+    
+    
+    <script>
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        function loadGA() {
+            if (window.gaLoaded) return;
+            window.gaLoaded = true;
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975';
+            document.head.appendChild(script);
+
+            script.onload = () => {
+                gtag('js', new Date());
+                gtag('config', 'G-B6QCH29975');
+            };
+        }
+
+        
+        ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+            window.addEventListener(event, loadGA, { once: true, passive: true });
+        });
+
+        
+        setTimeout(loadGA, 3000);
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+    
+    <div class="reading-progress" id="reading-progress"></div>
+    <script>
+    window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / docHeight) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+    </script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+            </div>
+        </div><button id="menu-btn" aria-label="Menu" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/categories/trending/" title="Hot IAM topics">
+                    <span>🔥Trending</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+(function() {
+    var btn = document.getElementById('menu-btn');
+    var menu = document.getElementById('menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+        });
+        
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
+</script>
+<main class="main">
+
+
+
+<div class="reading-progress" id="reading-progress"></div>
+<script>
+(function() {
+  const progressBar = document.getElementById('reading-progress');
+  const article = document.querySelector('.post-content');
+
+  if (!progressBar || !article) return;
+
+  function updateProgress() {
+    const articleTop = article.offsetTop;
+    const articleHeight = article.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+
+    
+    const start = articleTop - windowHeight;
+    const end = articleTop + articleHeight;
+    const current = scrollTop - start;
+    const total = end - start;
+
+    const progress = Math.min(Math.max((current / total) * 100, 0), 100);
+    progressBar.style.width = progress + '%';
+  }
+
+  
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  
+  updateProgress();
+})();
+</script>
+
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent" data-pagefind-meta="title">
+      Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+    </h1>
+    <div class="post-meta"><span title='2026-02-28 10:00:00'>Feb 28, 2026</span>&nbsp;·&nbsp;7 min&nbsp;·&nbsp;1386 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+    
+      <div class="post-updated">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Updated: Mar 1, 2026
+      </div>
+  </header> 
+<figure class="entry-cover">
+        <img loading="eager" src="https://www.iamdevbox.com/images/posts/keycloak-spring-boot-oauth2-integration--complete--0ba9f532.webp" alt="Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide">
+        
+</figure><div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#prerequisites" aria-label="Prerequisites">Prerequisites</a></li>
+                <li>
+                    <a href="#project-setup" aria-label="Project Setup">Project Setup</a><ul>
+                        
+                <li>
+                    <a href="#maven-dependencies" aria-label="Maven Dependencies">Maven Dependencies</a></li>
+                <li>
+                    <a href="#keycloak-realm-configuration" aria-label="Keycloak Realm Configuration">Keycloak Realm Configuration</a></li></ul>
+                </li>
+                <li>
+                    <a href="#basic-spring-boot-configuration" aria-label="Basic Spring Boot Configuration">Basic Spring Boot Configuration</a><ul>
+                        
+                <li>
+                    <a href="#applicationyml" aria-label="application.yml">application.yml</a></li>
+                <li>
+                    <a href="#security-configuration" aria-label="Security Configuration">Security Configuration</a></li></ul>
+                </li>
+                <li>
+                    <a href="#extracting-keycloak-realm-roles" aria-label="Extracting Keycloak Realm Roles">Extracting Keycloak Realm Roles</a><ul>
+                        
+                <li>
+                    <a href="#keycloak-jwt-structure" aria-label="Keycloak JWT Structure">Keycloak JWT Structure</a></li>
+                <li>
+                    <a href="#custom-role-converter" aria-label="Custom Role Converter">Custom Role Converter</a></li></ul>
+                </li>
+                <li>
+                    <a href="#example-rest-controller" aria-label="Example REST Controller">Example REST Controller</a></li>
+                <li>
+                    <a href="#token-audience-validation" aria-label="Token Audience Validation">Token Audience Validation</a></li>
+                <li>
+                    <a href="#multi-tenant-keycloak-integration" aria-label="Multi-Tenant Keycloak Integration">Multi-Tenant Keycloak Integration</a></li>
+                <li>
+                    <a href="#integration-testing-with-testcontainers" aria-label="Integration Testing with Testcontainers">Integration Testing with Testcontainers</a></li>
+                <li>
+                    <a href="#common-issues-and-fixes" aria-label="Common Issues and Fixes">Common Issues and Fixes</a><ul>
+                        
+                <li>
+                    <a href="#401-unauthorized-invalid-issuer" aria-label="401 Unauthorized: Invalid Issuer">401 Unauthorized: Invalid Issuer</a></li>
+                <li>
+                    <a href="#403-forbidden-missing-roles" aria-label="403 Forbidden: Missing Roles">403 Forbidden: Missing Roles</a></li>
+                <li>
+                    <a href="#cors-errors-on-token-validation" aria-label="CORS Errors on Token Validation">CORS Errors on Token Validation</a></li>
+                <li>
+                    <a href="#token-expired-too-quickly" aria-label="Token Expired Too Quickly">Token Expired Too Quickly</a></li></ul>
+                </li>
+                <li>
+                    <a href="#production-security-checklist" aria-label="Production Security Checklist">Production Security Checklist</a></li>
+                <li>
+                    <a href="#advanced-custom-claims-mapper" aria-label="Advanced: Custom Claims Mapper">Advanced: Custom Claims Mapper</a></li>
+                <li>
+                    <a href="#related-resources" aria-label="Related Resources">Related Resources</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content" data-pagefind-body><p>Integrating Keycloak with Spring Boot for OAuth2 resource server protection is one of the most searched tasks in the IAM developer community — yet most tutorials stop at &ldquo;hello world&rdquo; level. This guide covers production-grade integration: JWT validation, Keycloak realm role extraction, multi-tenant setups, and integration testing strategies.</p>
+<blockquote>
+<p><strong>Clone the companion repo</strong>: All working code in this guide is available at <a href="https://github.com/IAMDevBox/keycloak-spring-boot-oauth2">github.com/IAMDevBox/keycloak-spring-boot-oauth2</a> — includes Docker Compose for Keycloak, complete Spring Boot 3.x application, and integration tests with Testcontainers.</p>
+</blockquote>
+<h2 id="prerequisites">Prerequisites<a hidden class="anchor" aria-hidden="true" href="#prerequisites">#</a></h2>
+<ul>
+<li>Keycloak 24+ (or Keycloak 26.x for latest features)</li>
+<li>Spring Boot 3.2+ with Spring Security 6.x</li>
+<li>Java 17+</li>
+<li>A running Keycloak instance (see our <a href="/posts/keycloak-docker-compose-production-deployment-guide/">Keycloak Docker Compose Production Guide</a> for setup)</li>
+</ul>
+<h2 id="project-setup">Project Setup<a hidden class="anchor" aria-hidden="true" href="#project-setup">#</a></h2>
+<h3 id="maven-dependencies">Maven Dependencies<a hidden class="anchor" aria-hidden="true" href="#maven-dependencies">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-xml" data-lang="xml"><span style="display:flex;"><span><span style="color:#f92672">&lt;dependencies&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&lt;dependency&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#f92672">&lt;/groupId&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&lt;artifactId&gt;</span>spring-boot-starter-web<span style="color:#f92672">&lt;/artifactId&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&lt;/dependency&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&lt;dependency&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#f92672">&lt;/groupId&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&lt;artifactId&gt;</span>spring-boot-starter-oauth2-resource-server<span style="color:#f92672">&lt;/artifactId&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&lt;/dependency&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&lt;dependency&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#f92672">&lt;/groupId&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&lt;artifactId&gt;</span>spring-boot-starter-security<span style="color:#f92672">&lt;/artifactId&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&lt;/dependency&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">&lt;!-- For integration testing --&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&lt;dependency&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&lt;groupId&gt;</span>org.testcontainers<span style="color:#f92672">&lt;/groupId&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&lt;artifactId&gt;</span>keycloak<span style="color:#f92672">&lt;/artifactId&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&lt;scope&gt;</span>test<span style="color:#f92672">&lt;/scope&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&lt;/dependency&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&lt;/dependencies&gt;</span>
+</span></span></code></pre></div><p>The <code>spring-boot-starter-oauth2-resource-server</code> dependency is the key addition. It includes Spring Security&rsquo;s JWT support and auto-configures JWKS endpoint fetching from your issuer.</p>
+<h3 id="keycloak-realm-configuration">Keycloak Realm Configuration<a hidden class="anchor" aria-hidden="true" href="#keycloak-realm-configuration">#</a></h3>
+<p>Before configuring Spring Boot, set up your Keycloak realm:</p>
+<ol>
+<li>Create a realm (e.g., <code>myrealm</code>)</li>
+<li>Create a client (e.g., <code>my-spring-app</code>) with:
+<ul>
+<li>Client type: <code>OpenID Connect</code></li>
+<li>Client authentication: <code>On</code> (for confidential clients)</li>
+<li>Valid redirect URIs: <code>http://localhost:8081/*</code></li>
+</ul>
+</li>
+<li>Add realm roles: <code>ROLE_USER</code>, <code>ROLE_ADMIN</code></li>
+<li>Assign roles to test users</li>
+</ol>
+<h2 id="basic-spring-boot-configuration">Basic Spring Boot Configuration<a hidden class="anchor" aria-hidden="true" href="#basic-spring-boot-configuration">#</a></h2>
+<h3 id="applicationyml">application.yml<a hidden class="anchor" aria-hidden="true" href="#applicationyml">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">spring</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">security</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">oauth2</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">resourceserver</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">jwt</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#75715e"># Must match Keycloak&#39;s realm URL exactly</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">issuer-uri</span>: <span style="color:#ae81ff">http://localhost:8080/realms/myrealm</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">server</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">port</span>: <span style="color:#ae81ff">8081</span>
+</span></span></code></pre></div><p>Spring Boot auto-discovers the JWKS endpoint from <code>{issuer-uri}/.well-known/openid-configuration</code>. This means no manual key configuration — Spring fetches and caches Keycloak&rsquo;s public keys automatically.</p>
+<h3 id="security-configuration">Security Configuration<a hidden class="anchor" aria-hidden="true" href="#security-configuration">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Configuration</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@EnableWebSecurity</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@EnableMethodSecurity</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">SecurityConfig</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@Bean</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> SecurityFilterChain <span style="color:#a6e22e">filterChain</span>(HttpSecurity http) <span style="color:#66d9ef">throws</span> Exception {
+</span></span><span style="display:flex;"><span>        http
+</span></span><span style="display:flex;"><span>            .<span style="color:#a6e22e">authorizeHttpRequests</span>(auth <span style="color:#f92672">-&gt;</span> auth
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">requestMatchers</span>(<span style="color:#e6db74">&#34;/public/**&#34;</span>).<span style="color:#a6e22e">permitAll</span>()
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">requestMatchers</span>(<span style="color:#e6db74">&#34;/api/admin/**&#34;</span>).<span style="color:#a6e22e">hasRole</span>(<span style="color:#e6db74">&#34;ADMIN&#34;</span>)
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">requestMatchers</span>(<span style="color:#e6db74">&#34;/api/**&#34;</span>).<span style="color:#a6e22e">hasRole</span>(<span style="color:#e6db74">&#34;USER&#34;</span>)
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">anyRequest</span>().<span style="color:#a6e22e">authenticated</span>()
+</span></span><span style="display:flex;"><span>            )
+</span></span><span style="display:flex;"><span>            .<span style="color:#a6e22e">oauth2ResourceServer</span>(oauth2 <span style="color:#f92672">-&gt;</span> oauth2
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">jwt</span>(jwt <span style="color:#f92672">-&gt;</span> jwt
+</span></span><span style="display:flex;"><span>                    .<span style="color:#a6e22e">jwtAuthenticationConverter</span>(keycloakJwtConverter())
+</span></span><span style="display:flex;"><span>                )
+</span></span><span style="display:flex;"><span>            );
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> http.<span style="color:#a6e22e">build</span>();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@Bean</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> JwtAuthenticationConverter <span style="color:#a6e22e">keycloakJwtConverter</span>() {
+</span></span><span style="display:flex;"><span>        JwtGrantedAuthoritiesConverter converter <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> JwtGrantedAuthoritiesConverter();
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Do NOT set default authority prefix here — we handle it in custom converter</span>
+</span></span><span style="display:flex;"><span>        converter.<span style="color:#a6e22e">setAuthoritiesClaimName</span>(<span style="color:#e6db74">&#34;scope&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        KeycloakRoleConverter keycloakConverter <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> KeycloakRoleConverter();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        JwtAuthenticationConverter jwtConverter <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> JwtAuthenticationConverter();
+</span></span><span style="display:flex;"><span>        jwtConverter.<span style="color:#a6e22e">setJwtGrantedAuthoritiesConverter</span>(keycloakConverter);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> jwtConverter;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="extracting-keycloak-realm-roles">Extracting Keycloak Realm Roles<a hidden class="anchor" aria-hidden="true" href="#extracting-keycloak-realm-roles">#</a></h2>
+<p>This is the most common pain point. Keycloak places realm roles inside <code>realm_access.roles</code> — a nested JSON structure that Spring Security doesn&rsquo;t understand out of the box.</p>
+<h3 id="keycloak-jwt-structure">Keycloak JWT Structure<a hidden class="anchor" aria-hidden="true" href="#keycloak-jwt-structure">#</a></h3>
+<p>A Keycloak-issued JWT contains:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;realm_access&#34;</span>: {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;roles&#34;</span>: [<span style="color:#e6db74">&#34;ROLE_USER&#34;</span>, <span style="color:#e6db74">&#34;ROLE_ADMIN&#34;</span>, <span style="color:#e6db74">&#34;offline_access&#34;</span>]
+</span></span><span style="display:flex;"><span>  },
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;resource_access&#34;</span>: {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;my-spring-app&#34;</span>: {
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;roles&#34;</span>: [<span style="color:#e6db74">&#34;view-profile&#34;</span>]
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  },
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;scope&#34;</span>: <span style="color:#e6db74">&#34;openid profile email&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;preferred_username&#34;</span>: <span style="color:#e6db74">&#34;john.doe&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="custom-role-converter">Custom Role Converter<a hidden class="anchor" aria-hidden="true" href="#custom-role-converter">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Component</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">KeycloakRoleConverter</span> <span style="color:#66d9ef">implements</span> Converter<span style="color:#f92672">&lt;</span>Jwt, Collection<span style="color:#f92672">&lt;</span>GrantedAuthority<span style="color:#f92672">&gt;&gt;</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> Collection<span style="color:#f92672">&lt;</span>GrantedAuthority<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">convert</span>(Jwt jwt) {
+</span></span><span style="display:flex;"><span>        List<span style="color:#f92672">&lt;</span>GrantedAuthority<span style="color:#f92672">&gt;</span> authorities <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;&gt;</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Extract realm-level roles</span>
+</span></span><span style="display:flex;"><span>        Map<span style="color:#f92672">&lt;</span>String, Object<span style="color:#f92672">&gt;</span> realmAccess <span style="color:#f92672">=</span> jwt.<span style="color:#a6e22e">getClaim</span>(<span style="color:#e6db74">&#34;realm_access&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (realmAccess <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span> realmAccess.<span style="color:#a6e22e">containsKey</span>(<span style="color:#e6db74">&#34;roles&#34;</span>)) {
+</span></span><span style="display:flex;"><span>            List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> realmRoles <span style="color:#f92672">=</span> (List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span>) realmAccess.<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#34;roles&#34;</span>);
+</span></span><span style="display:flex;"><span>            realmRoles.<span style="color:#a6e22e">stream</span>()
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">filter</span>(role <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">!</span>role.<span style="color:#a6e22e">equals</span>(<span style="color:#e6db74">&#34;offline_access&#34;</span>) <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">!</span>role.<span style="color:#a6e22e">equals</span>(<span style="color:#e6db74">&#34;uma_authorization&#34;</span>))
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">map</span>(role <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">new</span> SimpleGrantedAuthority(<span style="color:#e6db74">&#34;ROLE_&#34;</span> <span style="color:#f92672">+</span> role.<span style="color:#a6e22e">toUpperCase</span>()))
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">forEach</span>(authorities::add);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Optionally extract client-level roles</span>
+</span></span><span style="display:flex;"><span>        Map<span style="color:#f92672">&lt;</span>String, Object<span style="color:#f92672">&gt;</span> resourceAccess <span style="color:#f92672">=</span> jwt.<span style="color:#a6e22e">getClaim</span>(<span style="color:#e6db74">&#34;resource_access&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (resourceAccess <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>            resourceAccess.<span style="color:#a6e22e">values</span>().<span style="color:#a6e22e">stream</span>()
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">filter</span>(v <span style="color:#f92672">-&gt;</span> v <span style="color:#66d9ef">instanceof</span> Map)
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">flatMap</span>(v <span style="color:#f92672">-&gt;</span> {
+</span></span><span style="display:flex;"><span>                    Map<span style="color:#f92672">&lt;</span>String, Object<span style="color:#f92672">&gt;</span> clientRoles <span style="color:#f92672">=</span> (Map<span style="color:#f92672">&lt;</span>String, Object<span style="color:#f92672">&gt;</span>) v;
+</span></span><span style="display:flex;"><span>                    List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> roles <span style="color:#f92672">=</span> (List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span>) clientRoles.<span style="color:#a6e22e">getOrDefault</span>(<span style="color:#e6db74">&#34;roles&#34;</span>, List.<span style="color:#a6e22e">of</span>());
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">return</span> roles.<span style="color:#a6e22e">stream</span>();
+</span></span><span style="display:flex;"><span>                })
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">map</span>(role <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">new</span> SimpleGrantedAuthority(<span style="color:#e6db74">&#34;ROLE_&#34;</span> <span style="color:#f92672">+</span> role.<span style="color:#a6e22e">toUpperCase</span>()))
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">forEach</span>(authorities::add);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> authorities;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="example-rest-controller">Example REST Controller<a hidden class="anchor" aria-hidden="true" href="#example-rest-controller">#</a></h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@RestController</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@RequestMapping</span>(<span style="color:#e6db74">&#34;/api&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">UserController</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@GetMapping</span>(<span style="color:#e6db74">&#34;/profile&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@PreAuthorize</span>(<span style="color:#e6db74">&#34;hasRole(&#39;USER&#39;)&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> Map<span style="color:#f92672">&lt;</span>String, Object<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">getProfile</span>(<span style="color:#a6e22e">@AuthenticationPrincipal</span> Jwt jwt) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> Map.<span style="color:#a6e22e">of</span>(
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;username&#34;</span>, jwt.<span style="color:#a6e22e">getClaim</span>(<span style="color:#e6db74">&#34;preferred_username&#34;</span>),
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;email&#34;</span>, jwt.<span style="color:#a6e22e">getClaim</span>(<span style="color:#e6db74">&#34;email&#34;</span>),
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;roles&#34;</span>, jwt.<span style="color:#a6e22e">getClaim</span>(<span style="color:#e6db74">&#34;realm_access&#34;</span>)
+</span></span><span style="display:flex;"><span>        );
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@GetMapping</span>(<span style="color:#e6db74">&#34;/admin/users&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@PreAuthorize</span>(<span style="color:#e6db74">&#34;hasRole(&#39;ADMIN&#39;)&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">adminEndpoint</span>() {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;Admin access granted&#34;</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@GetMapping</span>(<span style="color:#e6db74">&#34;/token-info&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> Map<span style="color:#f92672">&lt;</span>String, Object<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">tokenInfo</span>(<span style="color:#a6e22e">@AuthenticationPrincipal</span> Jwt jwt) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> Map.<span style="color:#a6e22e">of</span>(
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;subject&#34;</span>, jwt.<span style="color:#a6e22e">getSubject</span>(),
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;issuer&#34;</span>, jwt.<span style="color:#a6e22e">getIssuer</span>().<span style="color:#a6e22e">toString</span>(),
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;expires&#34;</span>, jwt.<span style="color:#a6e22e">getExpiresAt</span>().<span style="color:#a6e22e">toString</span>(),
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;claims&#34;</span>, jwt.<span style="color:#a6e22e">getClaims</span>()
+</span></span><span style="display:flex;"><span>        );
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The <code>@AuthenticationPrincipal Jwt</code> injection gives you direct access to all token claims without additional boilerplate.</p>
+<h2 id="token-audience-validation">Token Audience Validation<a hidden class="anchor" aria-hidden="true" href="#token-audience-validation">#</a></h2>
+<p>Production deployments should validate the token audience to prevent token reuse across services:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">spring</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">security</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">oauth2</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">resourceserver</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">jwt</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">issuer-uri</span>: <span style="color:#ae81ff">http://keycloak:8080/realms/myrealm</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Bean</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> JwtDecoder <span style="color:#a6e22e">jwtDecoder</span>(OAuth2ResourceServerProperties properties) {
+</span></span><span style="display:flex;"><span>    NimbusJwtDecoder decoder <span style="color:#f92672">=</span> JwtDecoders.<span style="color:#a6e22e">fromIssuerLocation</span>(
+</span></span><span style="display:flex;"><span>        properties.<span style="color:#a6e22e">getJwt</span>().<span style="color:#a6e22e">getIssuerUri</span>()
+</span></span><span style="display:flex;"><span>    );
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    OAuth2TokenValidator<span style="color:#f92672">&lt;</span>Jwt<span style="color:#f92672">&gt;</span> audienceValidator <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> JwtClaimValidator<span style="color:#f92672">&lt;</span>List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;&gt;</span>(
+</span></span><span style="display:flex;"><span>        JwtClaimNames.<span style="color:#a6e22e">AUD</span>,
+</span></span><span style="display:flex;"><span>        aud <span style="color:#f92672">-&gt;</span> aud <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span> aud.<span style="color:#a6e22e">contains</span>(<span style="color:#e6db74">&#34;my-spring-app&#34;</span>)
+</span></span><span style="display:flex;"><span>    );
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    OAuth2TokenValidator<span style="color:#f92672">&lt;</span>Jwt<span style="color:#f92672">&gt;</span> withAudience <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> DelegatingOAuth2TokenValidator<span style="color:#f92672">&lt;&gt;</span>(
+</span></span><span style="display:flex;"><span>        JwtValidators.<span style="color:#a6e22e">createDefaultWithIssuer</span>(properties.<span style="color:#a6e22e">getJwt</span>().<span style="color:#a6e22e">getIssuerUri</span>()),
+</span></span><span style="display:flex;"><span>        audienceValidator
+</span></span><span style="display:flex;"><span>    );
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    decoder.<span style="color:#a6e22e">setJwtValidator</span>(withAudience);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> decoder;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>To configure the audience in Keycloak, go to <strong>Client → Settings → Audience</strong> and add the client ID as an audience in the access token.</p>
+<h2 id="multi-tenant-keycloak-integration">Multi-Tenant Keycloak Integration<a hidden class="anchor" aria-hidden="true" href="#multi-tenant-keycloak-integration">#</a></h2>
+<p>If your Spring Boot application serves multiple tenants, each with their own Keycloak realm:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Component</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MultiTenantJwtDecoder</span> <span style="color:#66d9ef">implements</span> JwtDecoder {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> Map<span style="color:#f92672">&lt;</span>String, JwtDecoder<span style="color:#f92672">&gt;</span> decoders <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ConcurrentHashMap<span style="color:#f92672">&lt;&gt;</span>();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> String keycloakBaseUrl;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">MultiTenantJwtDecoder</span>(<span style="color:#a6e22e">@Value</span>(<span style="color:#e6db74">&#34;${keycloak.base-url}&#34;</span>) String keycloakBaseUrl) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">keycloakBaseUrl</span> <span style="color:#f92672">=</span> keycloakBaseUrl;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> Jwt <span style="color:#a6e22e">decode</span>(String token) <span style="color:#66d9ef">throws</span> JwtException {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Extract realm from token claims before full validation</span>
+</span></span><span style="display:flex;"><span>        String realm <span style="color:#f92672">=</span> extractRealm(token);
+</span></span><span style="display:flex;"><span>        JwtDecoder decoder <span style="color:#f92672">=</span> decoders.<span style="color:#a6e22e">computeIfAbsent</span>(realm, <span style="color:#66d9ef">this</span>::createDecoder);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> decoder.<span style="color:#a6e22e">decode</span>(token);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> String <span style="color:#a6e22e">extractRealm</span>(String token) {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Parse issuer claim from token without validation</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>            JWT jwt <span style="color:#f92672">=</span> JWTParser.<span style="color:#a6e22e">parse</span>(token);
+</span></span><span style="display:flex;"><span>            String issuer <span style="color:#f92672">=</span> (String) jwt.<span style="color:#a6e22e">getJWTClaimsSet</span>().<span style="color:#a6e22e">getClaim</span>(<span style="color:#e6db74">&#34;iss&#34;</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Expected format: http://keycloak:8080/realms/{realm}</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> issuer.<span style="color:#a6e22e">substring</span>(issuer.<span style="color:#a6e22e">lastIndexOf</span>(<span style="color:#e6db74">&#34;/&#34;</span>) <span style="color:#f92672">+</span> 1);
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">catch</span> (Exception e) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> JwtException(<span style="color:#e6db74">&#34;Cannot extract realm from token&#34;</span>);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> JwtDecoder <span style="color:#a6e22e">createDecoder</span>(String realm) {
+</span></span><span style="display:flex;"><span>        String issuerUri <span style="color:#f92672">=</span> keycloakBaseUrl <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;/realms/&#34;</span> <span style="color:#f92672">+</span> realm;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> JwtDecoders.<span style="color:#a6e22e">fromIssuerLocation</span>(issuerUri);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This pattern caches decoders per realm and lazily initializes them on first request.</p>
+<h2 id="integration-testing-with-testcontainers">Integration Testing with Testcontainers<a hidden class="anchor" aria-hidden="true" href="#integration-testing-with-testcontainers">#</a></h2>
+<p>Testing with a real Keycloak instance is the most reliable approach:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@SpringBootTest</span>(webEnvironment <span style="color:#f92672">=</span> SpringBootTest.<span style="color:#a6e22e">WebEnvironment</span>.<span style="color:#a6e22e">RANDOM_PORT</span>)
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Testcontainers</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">KeycloakIntegrationTest</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@Container</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">static</span> KeycloakContainer keycloak <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> KeycloakContainer(<span style="color:#e6db74">&#34;quay.io/keycloak/keycloak:26.0&#34;</span>)
+</span></span><span style="display:flex;"><span>        .<span style="color:#a6e22e">withRealmImportFile</span>(<span style="color:#e6db74">&#34;test-realm.json&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@DynamicPropertySource</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">keycloakProperties</span>(DynamicPropertyRegistry registry) {
+</span></span><span style="display:flex;"><span>        registry.<span style="color:#a6e22e">add</span>(<span style="color:#e6db74">&#34;spring.security.oauth2.resourceserver.jwt.issuer-uri&#34;</span>,
+</span></span><span style="display:flex;"><span>            () <span style="color:#f92672">-&gt;</span> keycloak.<span style="color:#a6e22e">getAuthServerUrl</span>() <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;/realms/test&#34;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@Test</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">testProtectedEndpoint</span>() <span style="color:#66d9ef">throws</span> Exception {
+</span></span><span style="display:flex;"><span>        String token <span style="color:#f92672">=</span> obtainToken(<span style="color:#e6db74">&#34;testuser&#34;</span>, <span style="color:#e6db74">&#34;password&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        mockMvc.<span style="color:#a6e22e">perform</span>(get(<span style="color:#e6db74">&#34;/api/profile&#34;</span>)
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">header</span>(<span style="color:#e6db74">&#34;Authorization&#34;</span>, <span style="color:#e6db74">&#34;Bearer &#34;</span> <span style="color:#f92672">+</span> token))
+</span></span><span style="display:flex;"><span>            .<span style="color:#a6e22e">andExpect</span>(status().<span style="color:#a6e22e">isOk</span>());
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> String <span style="color:#a6e22e">obtainToken</span>(String username, String password) {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Use Keycloak REST API to obtain token</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> given()
+</span></span><span style="display:flex;"><span>            .<span style="color:#a6e22e">contentType</span>(<span style="color:#e6db74">&#34;application/x-www-form-urlencoded&#34;</span>)
+</span></span><span style="display:flex;"><span>            .<span style="color:#a6e22e">formParam</span>(<span style="color:#e6db74">&#34;grant_type&#34;</span>, <span style="color:#e6db74">&#34;password&#34;</span>)
+</span></span><span style="display:flex;"><span>            .<span style="color:#a6e22e">formParam</span>(<span style="color:#e6db74">&#34;client_id&#34;</span>, <span style="color:#e6db74">&#34;test-client&#34;</span>)
+</span></span><span style="display:flex;"><span>            .<span style="color:#a6e22e">formParam</span>(<span style="color:#e6db74">&#34;client_secret&#34;</span>, <span style="color:#e6db74">&#34;test-secret&#34;</span>)
+</span></span><span style="display:flex;"><span>            .<span style="color:#a6e22e">formParam</span>(<span style="color:#e6db74">&#34;username&#34;</span>, username)
+</span></span><span style="display:flex;"><span>            .<span style="color:#a6e22e">formParam</span>(<span style="color:#e6db74">&#34;password&#34;</span>, password)
+</span></span><span style="display:flex;"><span>            .<span style="color:#a6e22e">post</span>(keycloak.<span style="color:#a6e22e">getAuthServerUrl</span>() <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;/realms/test/protocol/openid-connect/token&#34;</span>)
+</span></span><span style="display:flex;"><span>            .<span style="color:#a6e22e">jsonPath</span>().<span style="color:#a6e22e">getString</span>(<span style="color:#e6db74">&#34;access_token&#34;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>For unit tests where you don&rsquo;t need a real Keycloak:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Test</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">testWithMockedJwt</span>() <span style="color:#66d9ef">throws</span> Exception {
+</span></span><span style="display:flex;"><span>    mockMvc.<span style="color:#a6e22e">perform</span>(get(<span style="color:#e6db74">&#34;/api/profile&#34;</span>)
+</span></span><span style="display:flex;"><span>            .<span style="color:#a6e22e">with</span>(jwt()
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">jwt</span>(jwt <span style="color:#f92672">-&gt;</span> jwt
+</span></span><span style="display:flex;"><span>                    .<span style="color:#a6e22e">claim</span>(<span style="color:#e6db74">&#34;preferred_username&#34;</span>, <span style="color:#e6db74">&#34;testuser&#34;</span>)
+</span></span><span style="display:flex;"><span>                    .<span style="color:#a6e22e">claim</span>(<span style="color:#e6db74">&#34;realm_access&#34;</span>, Map.<span style="color:#a6e22e">of</span>(<span style="color:#e6db74">&#34;roles&#34;</span>, List.<span style="color:#a6e22e">of</span>(<span style="color:#e6db74">&#34;USER&#34;</span>)))
+</span></span><span style="display:flex;"><span>                )
+</span></span><span style="display:flex;"><span>            ))
+</span></span><span style="display:flex;"><span>        .<span style="color:#a6e22e">andExpect</span>(status().<span style="color:#a6e22e">isOk</span>())
+</span></span><span style="display:flex;"><span>        .<span style="color:#a6e22e">andExpect</span>(jsonPath(<span style="color:#e6db74">&#34;$.username&#34;</span>).<span style="color:#a6e22e">value</span>(<span style="color:#e6db74">&#34;testuser&#34;</span>));
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="common-issues-and-fixes">Common Issues and Fixes<a hidden class="anchor" aria-hidden="true" href="#common-issues-and-fixes">#</a></h2>
+<h3 id="401-unauthorized-invalid-issuer">401 Unauthorized: Invalid Issuer<a hidden class="anchor" aria-hidden="true" href="#401-unauthorized-invalid-issuer">#</a></h3>
+<p><strong>Symptom</strong>: <code>Invalid issuer. Expected http://localhost:8080/realms/myrealm</code></p>
+<p><strong>Cause</strong>: The <code>issuer-uri</code> in your <code>application.yml</code> must exactly match the <code>iss</code> claim in the Keycloak JWT, including the protocol (http vs https) and exact realm name.</p>
+<p><strong>Fix</strong>: Decode your token at <a href="/tools/jwt-decode/">iamdevbox.com/tools/jwt-decode/</a> and compare the <code>iss</code> claim with your configured <code>issuer-uri</code>.</p>
+<h3 id="403-forbidden-missing-roles">403 Forbidden: Missing Roles<a hidden class="anchor" aria-hidden="true" href="#403-forbidden-missing-roles">#</a></h3>
+<p><strong>Symptom</strong>: Authentication succeeds but all role-protected endpoints return 403.</p>
+<p><strong>Cause</strong>: Without a custom <code>JwtGrantedAuthoritiesConverter</code>, Spring Security only reads the <code>scope</code> claim — not Keycloak&rsquo;s <code>realm_access.roles</code>.</p>
+<p><strong>Fix</strong>: Implement the <code>KeycloakRoleConverter</code> shown above. Verify role names — Spring Security&rsquo;s <code>hasRole(&quot;USER&quot;)</code> checks for <code>ROLE_USER</code> authority.</p>
+<h3 id="cors-errors-on-token-validation">CORS Errors on Token Validation<a hidden class="anchor" aria-hidden="true" href="#cors-errors-on-token-validation">#</a></h3>
+<p><strong>Symptom</strong>: Browser requests fail with CORS error when fetching JWKS.</p>
+<p><strong>Cause</strong>: CORS is a browser concern, not a Spring Boot one. Your backend fetches JWKS server-side (no CORS issue). If you see CORS errors, they&rsquo;re from the browser calling Keycloak directly.</p>
+<p><strong>Fix</strong>: For browser-based OAuth flows, use the <a href="/posts/understanding-code_verifier-in-oauth-20-pkce-implementation-security-benefits-and-practical-examples/">Authorization Code Flow with PKCE</a> — the browser handles the redirect, and your backend calls Keycloak server-to-server.</p>
+<h3 id="token-expired-too-quickly">Token Expired Too Quickly<a hidden class="anchor" aria-hidden="true" href="#token-expired-too-quickly">#</a></h3>
+<p><strong>Symptom</strong>: Tokens expire in 5 minutes, causing constant re-authentication.</p>
+<p><strong>Fix</strong>: In Keycloak Admin Console → Realm Settings → Tokens:</p>
+<ul>
+<li><code>Access Token Lifespan</code>: 15-30 minutes for development</li>
+<li><code>SSO Session Idle</code>: 30 minutes</li>
+<li>Implement refresh token rotation in your client</li>
+</ul>
+<h2 id="production-security-checklist">Production Security Checklist<a hidden class="anchor" aria-hidden="true" href="#production-security-checklist">#</a></h2>
+<p>Before deploying to production:</p>
+<ul>
+<li><input disabled="" type="checkbox"> Use HTTPS for both Keycloak and Spring Boot — <code>issuer-uri</code> must use <code>https://</code></li>
+<li><input disabled="" type="checkbox"> Enable audience validation (prevents token reuse across services)</li>
+<li><input disabled="" type="checkbox"> Configure PKCE for all browser clients (see <a href="/tools/pkce-generator/">PKCE Generator</a>)</li>
+<li><input disabled="" type="checkbox"> Rotate Keycloak realm keys annually (Admin → Realm Settings → Keys)</li>
+<li><input disabled="" type="checkbox"> Set appropriate token lifetimes (access: 5-15 min, refresh: 8h-30d)</li>
+<li><input disabled="" type="checkbox"> Enable Keycloak event logging for audit trails</li>
+<li><input disabled="" type="checkbox"> Use Keycloak Health endpoints in your Kubernetes liveness probes</li>
+<li><input disabled="" type="checkbox"> Test token revocation — ensure your app respects token expiry</li>
+</ul>
+<h2 id="advanced-custom-claims-mapper">Advanced: Custom Claims Mapper<a hidden class="anchor" aria-hidden="true" href="#advanced-custom-claims-mapper">#</a></h2>
+<p>Add custom data to tokens via Keycloak protocol mappers:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#75715e">// Reading a custom claim from Keycloak token</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@GetMapping</span>(<span style="color:#e6db74">&#34;/user-data&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> Map<span style="color:#f92672">&lt;</span>String, Object<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">getUserData</span>(<span style="color:#a6e22e">@AuthenticationPrincipal</span> Jwt jwt) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Custom claim set via Keycloak Protocol Mapper → User Attribute mapper</span>
+</span></span><span style="display:flex;"><span>    String department <span style="color:#f92672">=</span> jwt.<span style="color:#a6e22e">getClaim</span>(<span style="color:#e6db74">&#34;department&#34;</span>);
+</span></span><span style="display:flex;"><span>    String employeeId <span style="color:#f92672">=</span> jwt.<span style="color:#a6e22e">getClaim</span>(<span style="color:#e6db74">&#34;employee_id&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> Map.<span style="color:#a6e22e">of</span>(
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;department&#34;</span>, department <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">?</span> department : <span style="color:#e6db74">&#34;unknown&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;employeeId&#34;</span>, employeeId <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">?</span> employeeId : <span style="color:#e6db74">&#34;unknown&#34;</span>
+</span></span><span style="display:flex;"><span>    );
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Configure in Keycloak: Client → Client Scopes → Add Mapper → User Attribute. Map your user attribute to the token claim name.</p>
+<h2 id="related-resources">Related Resources<a hidden class="anchor" aria-hidden="true" href="#related-resources">#</a></h2>
+<ul>
+<li><a href="/posts/keycloak-complete-guide-open-source-iam-platform/">Keycloak Complete Guide</a> — Full Keycloak feature overview</li>
+<li><a href="/posts/keycloak-docker-compose-production-deployment-guide/">Keycloak Docker Compose Production</a> — Production deployment setup</li>
+<li><a href="/posts/keycloak-high-availability-clustering-and-production-deployment/">Keycloak High Availability</a> — Clustering configuration</li>
+<li><a href="/posts/understanding-code_verifier-in-oauth-20-pkce-implementation-security-benefits-and-practical-examples/">OAuth 2.0 Authorization Code Flow with PKCE</a> — Secure browser-based OAuth</li>
+<li><a href="/tools/jwt-decode/">JWT Decode Tool</a> — Debug your Keycloak tokens</li>
+<li><a href="/tools/pkce-generator/">PKCE Generator</a> — Generate PKCE code challenges online</li>
+</ul>
+<p>For ForgeRock/PingOne AIC integrations with Java, see the <a href="/posts/forgerock-deep-dive/">ForgeRock Deep Dive</a> guide.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/keycloak/">Keycloak</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/spring-boot/">Spring Boot</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/oauth-2.0/">OAuth 2.0</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/spring-security/">Spring Security</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/java/">Java</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/authentication/">Authentication</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/authorization/">Authorization</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/resource-server/">Resource Server</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/pingone-mfa-configuration-push-notifications-totp-and-fido2-setup/">
+    <span class="title">Next »</span>
+    <br>
+    <span>PingOne MFA Configuration: Push Notifications, TOTP, and FIDO2 Setup</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+
+<section class="post-feedback">
+  <p class="feedback-question">Was this article helpful?</p>
+  <div class="feedback-buttons">
+    <button class="feedback-btn feedback-yes" onclick="trackFeedback('yes', '\/posts\/keycloak-spring-boot-oauth2-integration-complete-guide\/')" aria-label="Yes, helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      Yes
+    </button>
+    <button class="feedback-btn feedback-no" onclick="trackFeedback('no', '\/posts\/keycloak-spring-boot-oauth2-integration-complete-guide\/')" aria-label="No, not helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>
+      No
+    </button>
+  </div>
+  <p class="feedback-thanks" style="display: none;">Thanks for your feedback!</p>
+</section>
+
+
+<section class="author-bio">
+  <div class="author-avatar">
+    <img src="/IAMDevBox.com.jpg" alt="IAMDevBox Author" width="64" height="64" loading="lazy">
+  </div>
+  <div class="author-info">
+    <h4>Written by IAMDevBox</h4>
+    <p>Enterprise IAM architect with 15+ years in identity modernization. Certified across ForgeRock, Ping Identity, SailPoint, AWS, and Azure.</p>
+    <div class="author-links">
+      <a href="https://twitter.com/iamdevbox" target="_blank" rel="noopener" title="Follow on X/Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/iamdevbox" target="_blank" rel="noopener" title="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="/contact/" title="Contact">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function trackFeedback(value, page) {
+  
+  document.querySelector('.feedback-buttons').style.display = 'none';
+  document.querySelector('.feedback-question').style.display = 'none';
+  document.querySelector('.feedback-thanks').style.display = 'block';
+
+  
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'post_feedback', {
+      'feedback_value': value,
+      'page_path': page
+    });
+  }
+
+  
+  localStorage.setItem('feedback_' + page, value);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const page = '\/posts\/keycloak-spring-boot-oauth2-integration-complete-guide\/';
+  if (localStorage.getItem('feedback_' + page)) {
+    document.querySelector('.feedback-buttons').style.display = 'none';
+    document.querySelector('.feedback-question').textContent = 'Thanks for your feedback!';
+  }
+});
+</script>
+
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-vs-ory-open-source-iam-comparison-2026/" class="custom-link">
+              Ory vs Keycloak: Open Source IAM Comparison 2026
+            </a>
+            <small class="custom-date">2026-02-21</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-docker-compose-production-deployment-guide/" class="custom-link">
+              Keycloak Docker Compose Production: Complete Deployment Guide for 2026
+            </a>
+            <small class="custom-date">2026-02-21</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-vs-authentik-open-source-iam-comparison-2026/" class="custom-link">
+              Keycloak vs Authentik: Open Source IAM Comparison 2026
+            </a>
+            <small class="custom-date">2026-02-21</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-vs-zitadel-open-source-iam-comparison-2026/" class="custom-link">
+              Keycloak vs Zitadel: Open Source IAM Comparison 2026
+            </a>
+            <small class="custom-date">2026-02-21</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/oauth-redirect-uri-mismatch-error-fix-guide/" class="custom-link">
+              OAuth redirect_uri Mismatch Error: Complete Fix Guide
+            </a>
+            <small class="custom-date">2026-02-21</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+                Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+                Go Secretless with Snowflake Workload Identity Federation - Snowflake
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+                JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+                OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/pingone-mfa-configuration-push-notifications-totp-and-fido2-setup/" class="custom-link">
+                PingOne MFA Configuration: Push Notifications, TOTP, and FIDO2 Setup
+              </a>
+              <small class="custom-date">2026-02-27</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

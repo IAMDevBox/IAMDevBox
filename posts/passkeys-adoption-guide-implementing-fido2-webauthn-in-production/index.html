@@ -1,0 +1,2972 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Passkeys Adoption Guide: Implementing FIDO2 WebAuthn in Production | IAMDevBox</title>
+<meta name="keywords" content="passkeys adoption guide, implementing fido2 webauthn in production, webauthn, express, passkey, fido2, passwordless, biometric, node.js, redis">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/passkeys-adoption-guide-implementing-fido2-webauthn-in-production/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.e24ea479df3e367781fafa20cedde21c7e043c10bed4c8c913ef9261a049a1e2.css" integrity="sha256-4k6ked8&#43;NneB&#43;vogzt3iHH4EPBC&#43;1MjJE&#43;&#43;SYaBJoeI=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/passkeys-adoption-guide-implementing-fido2-webauthn-in-production/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/passkeys-adoption-guide-implementing-fido2-webauthn-in-production/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Passkeys Adoption Guide: Implementing FIDO2 WebAuthn in Production">
+  <meta property="og:description" content="Discover how to implement FIDO2 WebAuthn passkeys in production for secure, passwordless authentication. Dive into our comprehensive guide today!">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-12-19T01:49:57+00:00">
+    <meta property="article:modified_time" content="2026-02-10T09:19:20-05:00">
+    <meta property="article:tag" content="Passkeys">
+    <meta property="article:tag" content="FIDO2">
+    <meta property="article:tag" content="Webauthn">
+    <meta property="article:tag" content="Iam">
+    <meta property="article:tag" content="Security">
+    <meta property="og:image" content="https://www.iamdevbox.com/images/posts/passkeys-adoption-guide--implementing-fido2-webaut-37a90538.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/images/posts/passkeys-adoption-guide--implementing-fido2-webaut-37a90538.webp">
+<meta name="twitter:title" content="Passkeys Adoption Guide: Implementing FIDO2 WebAuthn in Production">
+<meta name="twitter:description" content="Discover how to implement FIDO2 WebAuthn passkeys in production for secure, passwordless authentication. Dive into our comprehensive guide today!">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Passkeys Adoption Guide: Implementing FIDO2 WebAuthn in Production",
+      "item": "https://www.iamdevbox.com/posts/passkeys-adoption-guide-implementing-fido2-webauthn-in-production/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Passkeys Adoption Guide: Implementing FIDO2 WebAuthn in Production",
+  "name": "Passkeys Adoption Guide: Implementing FIDO2 WebAuthn in Production",
+  "description": "Discover how to implement FIDO2 WebAuthn passkeys in production for secure, passwordless authentication. Dive into our comprehensive guide today!",
+  "keywords": [
+    "passkeys adoption guide", "implementing fido2 webauthn in production", "webauthn", "express", "passkey", "fido2", "passwordless", "biometric", "node.js", "redis"
+  ],
+  "articleBody": "Passkeys have been a game-changer in the world of identity and access management (IAM). They offer a secure, passwordless method of authentication using FIDO2 standards and WebAuthn APIs. However, implementing them in a production environment can be tricky. This guide will walk you through the process, sharing insights and tips based on real-world experience.\nThe Problem Traditional password-based authentication is fraught with issues: weak passwords, phishing attacks, and credential stuffing. Passkeys aim to solve these problems by leveraging public-key cryptography and biometric verification, providing a seamless and secure login experience.\nSetting Up Your Environment Before diving into implementation, ensure your environment is ready.\nPrerequisites Node.js v18+ installed npm or yarn installed Basic understanding of JavaScript and Web APIs HTTPS server setup (required for WebAuthn) Choosing a Library Several libraries simplify WebAuthn implementation. I recommend using simplewebauthn due to its comprehensive documentation and ease of use.\n📋 Quick Reference npm install @simplewebauthn/server @simplewebauthn/browser - Install the necessary packages Server-Side Implementation The server handles passkey registration and authentication requests.\nRegistering a New Passkey Start by creating an endpoint to initiate passkey registration.\n// server.js const express = require('express'); const { generateRegistrationOptions, verifyRegistrationResponse } = require('@simplewebauthn/server'); const app = express(); app.use(express.json()); let user = { id: 'user-id', username: 'johndoe', displayName: 'John Doe', }; let registeredCredentials = []; app.post('/register/start', async (req, res) =\u003e { const options = await generateRegistrationOptions({ rpName: 'Example Corp', rpID: 'example.com', userID: user.id, userName: user.username, userDisplayName: user.displayName, attestationType: 'none', // or 'indirect'/'direct' supportedAlgorithmIDs: [-7, -257], // ES256 and RS256 }); res.json(options); }); Verifying Registration Response Handle the client’s registration response to validate and store the passkey.\napp.post('/register/finish', async (req, res) =\u003e { const { clientDataJSON, attestationObject, transports } = req.body; let verification; try { verification = await verifyRegistrationResponse({ response: { clientDataJSON, attestationObject, }, expectedChallenge: user.currentChallenge, // Store this during /register/start expectedOrigin: 'https://example.com', expectedRPID: 'example.com', requireUserVerification: true, }); } catch (error) { return res.status(400).json({ error: error.message }); } const { verified, registrationInfo } = verification; if (verified \u0026\u0026 registrationInfo) { const { credentialPublicKey, credentialID, counter } = registrationInfo; registeredCredentials.push({ id: credentialID, publicKey: credentialPublicKey, counter, transports: transports || [], }); res.status(200).json({ status: 'success' }); } else { res.status(400).json({ error: 'Registration failed' }); } }); ⚠️ Warning: Always validate the origin and RPID to prevent phishing attacks. Client-Side Implementation The client initiates the registration and authentication processes.\nInitiating Registration Create a function to start the registration process.\n// client.js async function startRegistration() { const response = await fetch('/register/start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, }); const options = await response.json(); try { const credential = await navigator.credentials.create({ publicKey: options }); const data = { clientDataJSON: Array.from(new Uint8Array(credential.response.clientDataJSON)), attestationObject: Array.from(new Uint8Array(credential.response.attestationObject)), transports: credential.response.getTransports ? credential.response.getTransports() : [], }; const finishResponse = await fetch('/register/finish', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data), }); const result = await finishResponse.json(); console.log(result); } catch (error) { console.error(error); } } document.getElementById('registerButton').addEventListener('click', startRegistration); Authenticating with a Passkey Implement the authentication flow.\nasync function startAuthentication() { const response = await fetch('/login/start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, }); const options = await response.json(); try { const credential = await navigator.credentials.get({ publicKey: options }); const data = { id: credential.id, rawId: Array.from(new Uint8Array(credential.rawId)), type: credential.type, response: { authenticatorData: Array.from(new Uint8Array(credential.response.authenticatorData)), clientDataJSON: Array.from(new Uint8Array(credential.response.clientDataJSON)), signature: Array.from(new Uint8Array(credential.response.signature)), userHandle: Array.from(new Uint8Array(credential.response.userHandle || [])), }, }; const finishResponse = await fetch('/login/finish', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data), }); const result = await finishResponse.json(); console.log(result); } catch (error) { console.error(error); } } document.getElementById('loginButton').addEventListener('click', startAuthentication); 🎯 Key Takeaways Use `generateRegistrationOptions` and `verifyRegistrationResponse` for registration. Use `navigator.credentials.create` and `navigator.credentials.get` for client-side operations. Always validate origins and RPID to enhance security. Handling Errors Common issues arise during registration and authentication. Here’s how to handle them.\nRegistration Errors Registration might fail due to various reasons, such as unsupported algorithms or invalid origins.\ntry { verification = await verifyRegistrationResponse({ response: { clientDataJSON, attestationObject, }, expectedChallenge: user.currentChallenge, expectedOrigin: 'https://example.com', expectedRPID: 'example.com', requireUserVerification: true, }); } catch (error) { console.error('Registration error:', error.message); res.status(400).json({ error: error.message }); } Authentication Errors Authentication errors could be due to incorrect credentials or mismatched challenges.\ntry { verification = await verifyAuthenticationResponse({ credential: { id: credentialID, rawId: rawIdBuffer, type: 'public-key', response: { authenticatorData: authenticatorDataBuffer, clientDataJSON: clientDataJSONBuffer, signature: signatureBuffer, userHandle: userHandleBuffer, }, }, expectedChallenge: user.currentChallenge, expectedOrigin: 'https://example.com', expectedRPID: 'example.com', signingAlgorithm: -7, // ES256 credentialPublicKey: publicKeyBuffer, prevCounter: userCredential.counter, requireUserVerification: true, }); } catch (error) { console.error('Authentication error:', error.message); res.status(400).json({ error: error.message }); } 🚨 Security Alert: Never log sensitive information like private keys or full error messages to the client. Integrating with Existing Systems Passkeys can coexist with traditional authentication methods. Here’s how to integrate them.\nDual-Stack Authentication Allow users to choose between passkeys and passwords.\napp.post('/login/start', async (req, res) =\u003e { const options = await generateAuthenticationOptions({ allowCredentials: registeredCredentials.map((cred) =\u003e ({ id: cred.id, type: 'public-key', transports: cred.transports, })), userVerification: 'preferred', rpID: 'example.com', }); res.json(options); }); Migration Strategy Gradually migrate users to passkeys by offering a seamless transition path.\n💜 Pro Tip: Educate users on the benefits of passkeys to encourage adoption. Browser Compatibility Not all browsers support WebAuthn equally. Here’s a quick overview.\nBrowserSupportNotes ChromeFullAvailable since version 67 FirefoxFullAvailable since version 60 SafariLimitedPartial support in version 13.1+ EdgeFullAvailable since version 79 OperaFullAvailable since version 54 💡 Key Point: Test thoroughly across different browsers to ensure compatibility. Performance Considerations Optimize your implementation for speed and reliability.\nMinimizing Latency Reduce latency by optimizing network requests and server responses.\napp.use(express.json({ limit: '1mb' })); // Increase limit if needed app.use(express.urlencoded({ extended: true, limit: '1mb' })); Efficient Credential Storage Store credentials efficiently to avoid performance bottlenecks.\n💜 Pro Tip: Use a database optimized for read-heavy operations, like Redis or MongoDB. Security Best Practices Follow these guidelines to ensure a secure implementation.\nSecure Key Storage Never store private keys in plaintext. Use secure vaults or hardware security modules (HSMs).\n🚨 Security Alert: Regularly rotate keys and monitor access logs. User Verification Enable user verification to prevent unauthorized access.\nconst options = await generateRegistrationOptions({ // ... userVerification: 'required', }); Challenge Management Generate unique challenges for each request to prevent replay attacks.\nfunction generateChallenge() { return Buffer.from(crypto.randomBytes(32)).toString('base64url'); } 🎯 Key Takeaways Test across different browsers to ensure compatibility. Optimize for performance to minimize latency. Follow best practices for secure key storage and user verification. Conclusion Implementing FIDO2 WebAuthn passkeys in production requires careful planning and execution. By following this guide, you can provide a secure, passwordless authentication experience for your users. Remember to test thoroughly and stay updated with the latest security practices.\nThat’s it. Simple, secure, works. Happy coding!\n",
+  "wordCount" : "1080",
+  "inLanguage": "en",
+  "image":"https://www.iamdevbox.com/images/posts/passkeys-adoption-guide--implementing-fido2-webaut-37a90538.webp","datePublished": "2025-12-19T01:49:57Z",
+  "dateModified": "2026-02-10T09:19:20-05:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/passkeys-adoption-guide-implementing-fido2-webauthn-in-production/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do I handle passkey registration errors?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Handle passkey registration errors by validating the response with `verifyRegistrationResponse` and logging any discrepancies for debugging."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use passkeys with existing authentication systems?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, passkeys can integrate with existing systems by adding WebAuthn as an additional authentication factor alongside traditional methods."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the browser compatibility issues with WebAuthn?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "WebAuthn is supported in most modern browsers but may lack support in older versions; ensure testing across target environments."
+      }
+    }
+  ]
+}
+</script>
+    <meta name="description" content="Discover how to implement FIDO2 WebAuthn passkeys in production for secure, passwordless authentication. Dive into our comprehensive guide today!"><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/passkeys-adoption-guide-implementing-fido2-webauthn-in-production\/"
+  },
+  "headline": "Passkeys Adoption Guide: Implementing FIDO2 WebAuthn in Production",
+  "description": "Discover how to implement FIDO2 WebAuthn passkeys in production for secure, passwordless authentication. Dive into our comprehensive guide today!",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon-96x96.png",
+      "width": 96,
+      "height": 96
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://www.iamdevbox.com/IAMDevBox.com.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "datePublished": "2025-12-19T01:49:57Z",
+  "dateModified": "2026-02-10T09:19:20-05:00",
+  "wordCount":  1080 ,
+  "articleSection": "posts",
+  "keywords": ["passkeys adoption guide","implementing fido2 webauthn in production","webauthn","express","passkey","fido2","passwordless","biometric","node.js","redis"]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Passkeys Adoption Guide: Implementing FIDO2 WebAuthn in Production",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/passkeys-adoption-guide-implementing-fido2-webauthn-in-production\/"
+    }
+  ]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-token-exchange-implementing-oauth-20-token-exchange\/"
+            },
+            "headline": "Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:29:55Z",
+            "dateModified": "2026-03-01T14:30:15Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/go-secretless-with-snowflake-workload-identity-federation-snowflake\/"
+            },
+            "headline": "Go Secretless with Snowflake Workload Identity Federation - Snowflake",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:24:03Z",
+            "dateModified": "2026-03-01T14:24:20Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-algorithm-confusion-attack-cve-2026-developer-guide\/"
+            },
+            "headline": "JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-02-28T18:00:00Z",
+            "dateModified": "2026-03-01T11:21:01-05:00"
+          }
+  ]
+}
+</script>
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    const mermaidBlocks = document.querySelectorAll('.mermaid, pre code.language-mermaid, code.language-mermaid');
+    if (mermaidBlocks.length > 0) {
+        
+        mermaidBlocks.forEach(block => {
+            if (block.tagName === 'CODE') {
+                const pre = block.parentElement;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = block.textContent;
+                if (pre && pre.tagName === 'PRE') {
+                    pre.parentNode.replaceChild(div, pre);
+                } else {
+                    block.parentNode.replaceChild(div, block);
+                }
+            }
+        });
+
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+            const isDark = document.body.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#5a67d8',
+                    
+                    secondaryColor: '#48bb78',
+                    secondaryTextColor: '#ffffff',
+                    secondaryBorderColor: '#38a169',
+                    
+                    tertiaryColor: '#ed8936',
+                    tertiaryTextColor: '#ffffff',
+                    tertiaryBorderColor: '#dd6b20',
+                    
+                    lineColor: '#718096',
+                    
+                    background: isDark ? '#1a202c' : '#ffffff',
+                    mainBkg: isDark ? '#2d3748' : '#f7fafc',
+                    
+                    actorBkg: '#667eea',
+                    actorBorder: '#5a67d8',
+                    actorTextColor: '#ffffff',
+                    actorLineColor: '#718096',
+                    signalColor: '#4a5568',
+                    signalTextColor: '#2d3748',
+                    labelBoxBkgColor: '#edf2f7',
+                    labelBoxBorderColor: '#cbd5e0',
+                    labelTextColor: '#2d3748',
+                    loopTextColor: '#553c9a',
+                    noteBkgColor: '#faf089',
+                    noteTextColor: '#744210',
+                    noteBorderColor: '#d69e2e',
+                    
+                    nodeBkg: '#667eea',
+                    nodeBorder: '#5a67d8',
+                    clusterBkg: '#e2e8f0',
+                    clusterBorder: '#a0aec0',
+                    defaultLinkColor: '#718096',
+                    titleColor: '#2d3748',
+                    edgeLabelBackground: 'transparent',
+                    
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                sequence: {
+                    useMaxWidth: true,
+                    boxMargin: 10,
+                    boxTextMargin: 5,
+                    noteMargin: 10,
+                    messageMargin: 35,
+                    mirrorActors: false
+                }
+            });
+            mermaid.run().then(() => {
+                
+                document.querySelectorAll('.mermaid .node').forEach(node => {
+                    const rect = node.querySelector('rect, circle, ellipse, polygon');
+                    if (rect) {
+                        const fill = rect.getAttribute('fill') || window.getComputedStyle(rect).fill;
+                        
+                        const isDarkBg = fill && (
+                            fill.includes('667eea') || fill.includes('102, 126, 234') ||
+                            fill.includes('48bb78') || fill.includes('72, 187, 120') ||
+                            fill.includes('ed8936') || fill.includes('237, 137, 54') ||
+                            fill.includes('553c9a') || fill.includes('9f7aea') ||
+                            fill.includes('e53e3e') || fill.includes('dd6b20')
+                        );
+                        const textColor = isDarkBg ? '#ffffff' : '#1a202c';
+                        node.querySelectorAll('span, .nodeLabel, text, foreignObject div').forEach(text => {
+                            text.style.color = textColor;
+                            text.style.fill = textColor;
+                        });
+                    }
+                });
+            });
+        };
+        document.head.appendChild(script);
+    }
+
+    
+    const postContent = document.querySelector('.post-content');
+    const isSinglePost = document.querySelector('.post-single');
+    const isToolsPage = window.location.pathname.startsWith('/tools/');
+    if (postContent && isSinglePost && window.innerWidth >= 1400 && !isToolsPage) {
+        const headings = postContent.querySelectorAll('h2, h3');
+        if (headings.length >= 3) {
+            const toc = document.createElement('nav');
+            toc.className = 'floating-toc';
+            toc.innerHTML = '<h4>📑 Contents</h4><ul></ul>';
+            const tocList = toc.querySelector('ul');
+
+            headings.forEach((heading, index) => {
+                const id = heading.id || `section-${index}`;
+                heading.id = id;
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2';
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            document.body.appendChild(toc);
+
+            
+            const tocLinks = toc.querySelectorAll('a');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 150) {
+                        current = heading.id;
+                    }
+                });
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+    }
+
+    
+    if (postContent && isSinglePost && window.innerWidth >= 1200) {
+        const h2s = postContent.querySelectorAll('h2');
+        if (h2s.length >= 2) {
+            const indicator = document.createElement('div');
+            indicator.className = 'section-indicator';
+
+            h2s.forEach((h2, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'section-dot';
+                dot.title = h2.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                dot.addEventListener('click', () => {
+                    h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                indicator.appendChild(dot);
+            });
+
+            document.body.appendChild(indicator);
+
+            
+            window.addEventListener('scroll', () => {
+                const dots = indicator.querySelectorAll('.section-dot');
+                let activeIndex = 0;
+                h2s.forEach((h2, index) => {
+                    if (h2.getBoundingClientRect().top <= 200) {
+                        activeIndex = index;
+                    }
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+    }
+    });
+    </script>
+
+    
+    
+    <script>
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        function loadGA() {
+            if (window.gaLoaded) return;
+            window.gaLoaded = true;
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975';
+            document.head.appendChild(script);
+
+            script.onload = () => {
+                gtag('js', new Date());
+                gtag('config', 'G-B6QCH29975');
+            };
+        }
+
+        
+        ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+            window.addEventListener(event, loadGA, { once: true, passive: true });
+        });
+
+        
+        setTimeout(loadGA, 3000);
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+    
+    <div class="reading-progress" id="reading-progress"></div>
+    <script>
+    window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / docHeight) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+    </script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+            </div>
+        </div><button id="menu-btn" aria-label="Menu" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/categories/trending/" title="Hot IAM topics">
+                    <span>🔥Trending</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+(function() {
+    var btn = document.getElementById('menu-btn');
+    var menu = document.getElementById('menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+        });
+        
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
+</script>
+<main class="main">
+
+
+
+<div class="reading-progress" id="reading-progress"></div>
+<script>
+(function() {
+  const progressBar = document.getElementById('reading-progress');
+  const article = document.querySelector('.post-content');
+
+  if (!progressBar || !article) return;
+
+  function updateProgress() {
+    const articleTop = article.offsetTop;
+    const articleHeight = article.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+
+    
+    const start = articleTop - windowHeight;
+    const end = articleTop + articleHeight;
+    const current = scrollTop - start;
+    const total = end - start;
+
+    const progress = Math.min(Math.max((current / total) * 100, 0), 100);
+    progressBar.style.width = progress + '%';
+  }
+
+  
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  
+  updateProgress();
+})();
+</script>
+
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent" data-pagefind-meta="title">
+      Passkeys Adoption Guide: Implementing FIDO2 WebAuthn in Production
+    </h1>
+    <div class="post-meta"><span title='2025-12-19 01:49:57'>Dec 19, 2025</span>&nbsp;·&nbsp;6 min&nbsp;·&nbsp;1080 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+    
+      <div class="post-updated">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Updated: Feb 10, 2026
+      </div>
+  </header> 
+<figure class="entry-cover">
+        <img loading="eager" src="https://www.iamdevbox.com/images/posts/passkeys-adoption-guide--implementing-fido2-webaut-37a90538.webp" alt="Passkeys Adoption Guide: Implementing FIDO2 WebAuthn in Production">
+        
+</figure><div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#the-problem" aria-label="The Problem">The Problem</a></li>
+                <li>
+                    <a href="#setting-up-your-environment" aria-label="Setting Up Your Environment">Setting Up Your Environment</a><ul>
+                        
+                <li>
+                    <a href="#prerequisites" aria-label="Prerequisites">Prerequisites</a></li>
+                <li>
+                    <a href="#choosing-a-library" aria-label="Choosing a Library">Choosing a Library</a><ul>
+                        
+                <li>
+                    <a href="#" aria-label="📋 Quick Reference">📋 Quick Reference</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#server-side-implementation" aria-label="Server-Side Implementation">Server-Side Implementation</a><ul>
+                        
+                <li>
+                    <a href="#registering-a-new-passkey" aria-label="Registering a New Passkey">Registering a New Passkey</a></li>
+                <li>
+                    <a href="#verifying-registration-response" aria-label="Verifying Registration Response">Verifying Registration Response</a></li></ul>
+                </li>
+                <li>
+                    <a href="#client-side-implementation" aria-label="Client-Side Implementation">Client-Side Implementation</a><ul>
+                        
+                <li>
+                    <a href="#initiating-registration" aria-label="Initiating Registration">Initiating Registration</a></li>
+                <li>
+                    <a href="#authenticating-with-a-passkey" aria-label="Authenticating with a Passkey">Authenticating with a Passkey</a><ul>
+                        
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#handling-errors" aria-label="Handling Errors">Handling Errors</a><ul>
+                        
+                <li>
+                    <a href="#registration-errors" aria-label="Registration Errors">Registration Errors</a></li>
+                <li>
+                    <a href="#authentication-errors" aria-label="Authentication Errors">Authentication Errors</a></li></ul>
+                </li>
+                <li>
+                    <a href="#integrating-with-existing-systems" aria-label="Integrating with Existing Systems">Integrating with Existing Systems</a><ul>
+                        
+                <li>
+                    <a href="#dual-stack-authentication" aria-label="Dual-Stack Authentication">Dual-Stack Authentication</a></li>
+                <li>
+                    <a href="#migration-strategy" aria-label="Migration Strategy">Migration Strategy</a></li></ul>
+                </li>
+                <li>
+                    <a href="#browser-compatibility" aria-label="Browser Compatibility">Browser Compatibility</a></li>
+                <li>
+                    <a href="#performance-considerations" aria-label="Performance Considerations">Performance Considerations</a><ul>
+                        
+                <li>
+                    <a href="#minimizing-latency" aria-label="Minimizing Latency">Minimizing Latency</a></li>
+                <li>
+                    <a href="#efficient-credential-storage" aria-label="Efficient Credential Storage">Efficient Credential Storage</a></li></ul>
+                </li>
+                <li>
+                    <a href="#security-best-practices" aria-label="Security Best Practices">Security Best Practices</a><ul>
+                        
+                <li>
+                    <a href="#secure-key-storage" aria-label="Secure Key Storage">Secure Key Storage</a></li>
+                <li>
+                    <a href="#user-verification" aria-label="User Verification">User Verification</a></li>
+                <li>
+                    <a href="#challenge-management" aria-label="Challenge Management">Challenge Management</a><ul>
+                        
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#conclusion" aria-label="Conclusion">Conclusion</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content" data-pagefind-body><p>Passkeys have been a game-changer in the world of identity and access management (IAM). They offer a secure, passwordless method of authentication using FIDO2 standards and WebAuthn APIs. However, implementing them in a production environment can be tricky. This guide will walk you through the process, sharing insights and tips based on real-world experience.</p>
+<h2 id="the-problem">The Problem<a hidden class="anchor" aria-hidden="true" href="#the-problem">#</a></h2>
+<p>Traditional password-based authentication is fraught with issues: weak passwords, phishing attacks, and credential stuffing. Passkeys aim to solve these problems by leveraging public-key cryptography and biometric verification, providing a seamless and secure login experience.</p>
+<h2 id="setting-up-your-environment">Setting Up Your Environment<a hidden class="anchor" aria-hidden="true" href="#setting-up-your-environment">#</a></h2>
+<p>Before diving into implementation, ensure your environment is ready.</p>
+<h3 id="prerequisites">Prerequisites<a hidden class="anchor" aria-hidden="true" href="#prerequisites">#</a></h3>
+<ul class="checklist">
+<li class="checked">Node.js v18+ installed</li>
+<li class="checked">npm or yarn installed</li>
+<li class="checked">Basic understanding of JavaScript and Web APIs</li>
+<li>HTTPS server setup (required for WebAuthn)</li>
+</ul>
+<h3 id="choosing-a-library">Choosing a Library<a hidden class="anchor" aria-hidden="true" href="#choosing-a-library">#</a></h3>
+<p>Several libraries simplify WebAuthn implementation. I recommend using <code>simplewebauthn</code> due to its comprehensive documentation and ease of use.</p>
+<div class="quick-ref">
+<h4>📋 Quick Reference</h4>
+<ul>
+<li><code>npm install @simplewebauthn/server @simplewebauthn/browser</code> - Install the necessary packages</li>
+</ul>
+</div>
+<h2 id="server-side-implementation">Server-Side Implementation<a hidden class="anchor" aria-hidden="true" href="#server-side-implementation">#</a></h2>
+<p>The server handles passkey registration and authentication requests.</p>
+<h3 id="registering-a-new-passkey">Registering a New Passkey<a hidden class="anchor" aria-hidden="true" href="#registering-a-new-passkey">#</a></h3>
+<p>Start by creating an endpoint to initiate passkey registration.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// server.js
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">express</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;express&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> { <span style="color:#a6e22e">generateRegistrationOptions</span>, <span style="color:#a6e22e">verifyRegistrationResponse</span> } <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;@simplewebauthn/server&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">app</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">express</span>();
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">use</span>(<span style="color:#a6e22e">express</span>.<span style="color:#a6e22e">json</span>());
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">let</span> <span style="color:#a6e22e">user</span> <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">id</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;user-id&#39;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">username</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;johndoe&#39;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">displayName</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;John Doe&#39;</span>,
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">let</span> <span style="color:#a6e22e">registeredCredentials</span> <span style="color:#f92672">=</span> [];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">post</span>(<span style="color:#e6db74">&#39;/register/start&#39;</span>, <span style="color:#66d9ef">async</span> (<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>) =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">options</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">generateRegistrationOptions</span>({
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">rpName</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;Example Corp&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">rpID</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;example.com&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">userID</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">user</span>.<span style="color:#a6e22e">id</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">userName</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">user</span>.<span style="color:#a6e22e">username</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">userDisplayName</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">user</span>.<span style="color:#a6e22e">displayName</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">attestationType</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;none&#39;</span>, <span style="color:#75715e">// or &#39;indirect&#39;/&#39;direct&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">supportedAlgorithmIDs</span><span style="color:#f92672">:</span> [<span style="color:#f92672">-</span><span style="color:#ae81ff">7</span>, <span style="color:#f92672">-</span><span style="color:#ae81ff">257</span>], <span style="color:#75715e">// ES256 and RS256
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">json</span>(<span style="color:#a6e22e">options</span>);
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><h3 id="verifying-registration-response">Verifying Registration Response<a hidden class="anchor" aria-hidden="true" href="#verifying-registration-response">#</a></h3>
+<p>Handle the client&rsquo;s registration response to validate and store the passkey.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">post</span>(<span style="color:#e6db74">&#39;/register/finish&#39;</span>, <span style="color:#66d9ef">async</span> (<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>) =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> { <span style="color:#a6e22e">clientDataJSON</span>, <span style="color:#a6e22e">attestationObject</span>, <span style="color:#a6e22e">transports</span> } <span style="color:#f92672">=</span> <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">body</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">verification</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">verification</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">verifyRegistrationResponse</span>({
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">response</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">clientDataJSON</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">attestationObject</span>,
+</span></span><span style="display:flex;"><span>      },
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">expectedChallenge</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">user</span>.<span style="color:#a6e22e">currentChallenge</span>, <span style="color:#75715e">// Store this during /register/start
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>      <span style="color:#a6e22e">expectedOrigin</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;https://example.com&#39;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">expectedRPID</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;example.com&#39;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">requireUserVerification</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">true</span>,
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">catch</span> (<span style="color:#a6e22e">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">status</span>(<span style="color:#ae81ff">400</span>).<span style="color:#a6e22e">json</span>({ <span style="color:#a6e22e">error</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">error</span>.<span style="color:#a6e22e">message</span> });
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> { <span style="color:#a6e22e">verified</span>, <span style="color:#a6e22e">registrationInfo</span> } <span style="color:#f92672">=</span> <span style="color:#a6e22e">verification</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">verified</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">registrationInfo</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> { <span style="color:#a6e22e">credentialPublicKey</span>, <span style="color:#a6e22e">credentialID</span>, <span style="color:#a6e22e">counter</span> } <span style="color:#f92672">=</span> <span style="color:#a6e22e">registrationInfo</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">registeredCredentials</span>.<span style="color:#a6e22e">push</span>({
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">id</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">credentialID</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">publicKey</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">credentialPublicKey</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">counter</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">transports</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">transports</span> <span style="color:#f92672">||</span> [],
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">status</span>(<span style="color:#ae81ff">200</span>).<span style="color:#a6e22e">json</span>({ <span style="color:#a6e22e">status</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;success&#39;</span> });
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">status</span>(<span style="color:#ae81ff">400</span>).<span style="color:#a6e22e">json</span>({ <span style="color:#a6e22e">error</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;Registration failed&#39;</span> });
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><div class="notice warning">⚠️ <strong>Warning:</strong> Always validate the origin and RPID to prevent phishing attacks.</div>
+<h2 id="client-side-implementation">Client-Side Implementation<a hidden class="anchor" aria-hidden="true" href="#client-side-implementation">#</a></h2>
+<p>The client initiates the registration and authentication processes.</p>
+<h3 id="initiating-registration">Initiating Registration<a hidden class="anchor" aria-hidden="true" href="#initiating-registration">#</a></h3>
+<p>Create a function to start the registration process.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// client.js
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">startRegistration</span>() {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">response</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">fetch</span>(<span style="color:#e6db74">&#39;/register/start&#39;</span>, {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">method</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;POST&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">headers</span><span style="color:#f92672">:</span> { <span style="color:#e6db74">&#39;Content-Type&#39;</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;application/json&#39;</span> },
+</span></span><span style="display:flex;"><span>  });
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">options</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">json</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">credential</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">navigator</span>.<span style="color:#a6e22e">credentials</span>.<span style="color:#a6e22e">create</span>({ <span style="color:#a6e22e">publicKey</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">options</span> });
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">data</span> <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">clientDataJSON</span><span style="color:#f92672">:</span> Array.<span style="color:#a6e22e">from</span>(<span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Uint8Array</span>(<span style="color:#a6e22e">credential</span>.<span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">clientDataJSON</span>)),
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">attestationObject</span><span style="color:#f92672">:</span> Array.<span style="color:#a6e22e">from</span>(<span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Uint8Array</span>(<span style="color:#a6e22e">credential</span>.<span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">attestationObject</span>)),
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">transports</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">credential</span>.<span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">getTransports</span> <span style="color:#f92672">?</span> <span style="color:#a6e22e">credential</span>.<span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">getTransports</span>() <span style="color:#f92672">:</span> [],
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">finishResponse</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">fetch</span>(<span style="color:#e6db74">&#39;/register/finish&#39;</span>, {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">method</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;POST&#39;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">headers</span><span style="color:#f92672">:</span> { <span style="color:#e6db74">&#39;Content-Type&#39;</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;application/json&#39;</span> },
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">body</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">JSON</span>.<span style="color:#a6e22e">stringify</span>(<span style="color:#a6e22e">data</span>),
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">finishResponse</span>.<span style="color:#a6e22e">json</span>();
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">result</span>);
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">catch</span> (<span style="color:#a6e22e">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">error</span>(<span style="color:#a6e22e">error</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>document.<span style="color:#a6e22e">getElementById</span>(<span style="color:#e6db74">&#39;registerButton&#39;</span>).<span style="color:#a6e22e">addEventListener</span>(<span style="color:#e6db74">&#39;click&#39;</span>, <span style="color:#a6e22e">startRegistration</span>);
+</span></span></code></pre></div><h3 id="authenticating-with-a-passkey">Authenticating with a Passkey<a hidden class="anchor" aria-hidden="true" href="#authenticating-with-a-passkey">#</a></h3>
+<p>Implement the authentication flow.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">startAuthentication</span>() {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">response</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">fetch</span>(<span style="color:#e6db74">&#39;/login/start&#39;</span>, {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">method</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;POST&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">headers</span><span style="color:#f92672">:</span> { <span style="color:#e6db74">&#39;Content-Type&#39;</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;application/json&#39;</span> },
+</span></span><span style="display:flex;"><span>  });
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">options</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">json</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">credential</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">navigator</span>.<span style="color:#a6e22e">credentials</span>.<span style="color:#a6e22e">get</span>({ <span style="color:#a6e22e">publicKey</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">options</span> });
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">data</span> <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">id</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">credential</span>.<span style="color:#a6e22e">id</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">rawId</span><span style="color:#f92672">:</span> Array.<span style="color:#a6e22e">from</span>(<span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Uint8Array</span>(<span style="color:#a6e22e">credential</span>.<span style="color:#a6e22e">rawId</span>)),
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">type</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">credential</span>.<span style="color:#a6e22e">type</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">response</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">authenticatorData</span><span style="color:#f92672">:</span> Array.<span style="color:#a6e22e">from</span>(<span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Uint8Array</span>(<span style="color:#a6e22e">credential</span>.<span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">authenticatorData</span>)),
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">clientDataJSON</span><span style="color:#f92672">:</span> Array.<span style="color:#a6e22e">from</span>(<span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Uint8Array</span>(<span style="color:#a6e22e">credential</span>.<span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">clientDataJSON</span>)),
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">signature</span><span style="color:#f92672">:</span> Array.<span style="color:#a6e22e">from</span>(<span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Uint8Array</span>(<span style="color:#a6e22e">credential</span>.<span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">signature</span>)),
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">userHandle</span><span style="color:#f92672">:</span> Array.<span style="color:#a6e22e">from</span>(<span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Uint8Array</span>(<span style="color:#a6e22e">credential</span>.<span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">userHandle</span> <span style="color:#f92672">||</span> [])),
+</span></span><span style="display:flex;"><span>      },
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">finishResponse</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">fetch</span>(<span style="color:#e6db74">&#39;/login/finish&#39;</span>, {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">method</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;POST&#39;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">headers</span><span style="color:#f92672">:</span> { <span style="color:#e6db74">&#39;Content-Type&#39;</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;application/json&#39;</span> },
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">body</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">JSON</span>.<span style="color:#a6e22e">stringify</span>(<span style="color:#a6e22e">data</span>),
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">finishResponse</span>.<span style="color:#a6e22e">json</span>();
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">result</span>);
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">catch</span> (<span style="color:#a6e22e">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">error</span>(<span style="color:#a6e22e">error</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>document.<span style="color:#a6e22e">getElementById</span>(<span style="color:#e6db74">&#39;loginButton&#39;</span>).<span style="color:#a6e22e">addEventListener</span>(<span style="color:#e6db74">&#39;click&#39;</span>, <span style="color:#a6e22e">startAuthentication</span>);
+</span></span></code></pre></div><div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>Use `generateRegistrationOptions` and `verifyRegistrationResponse` for registration.</li>
+<li>Use `navigator.credentials.create` and `navigator.credentials.get` for client-side operations.</li>
+<li>Always validate origins and RPID to enhance security.</li>
+</ul>
+</div>
+<h2 id="handling-errors">Handling Errors<a hidden class="anchor" aria-hidden="true" href="#handling-errors">#</a></h2>
+<p>Common issues arise during registration and authentication. Here’s how to handle them.</p>
+<h3 id="registration-errors">Registration Errors<a hidden class="anchor" aria-hidden="true" href="#registration-errors">#</a></h3>
+<p>Registration might fail due to various reasons, such as unsupported algorithms or invalid origins.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">verification</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">verifyRegistrationResponse</span>({
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">response</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">clientDataJSON</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">attestationObject</span>,
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">expectedChallenge</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">user</span>.<span style="color:#a6e22e">currentChallenge</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">expectedOrigin</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;https://example.com&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">expectedRPID</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;example.com&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">requireUserVerification</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">true</span>,
+</span></span><span style="display:flex;"><span>  });
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">catch</span> (<span style="color:#a6e22e">error</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">error</span>(<span style="color:#e6db74">&#39;Registration error:&#39;</span>, <span style="color:#a6e22e">error</span>.<span style="color:#a6e22e">message</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">status</span>(<span style="color:#ae81ff">400</span>).<span style="color:#a6e22e">json</span>({ <span style="color:#a6e22e">error</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">error</span>.<span style="color:#a6e22e">message</span> });
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="authentication-errors">Authentication Errors<a hidden class="anchor" aria-hidden="true" href="#authentication-errors">#</a></h3>
+<p>Authentication errors could be due to incorrect credentials or mismatched challenges.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">verification</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">verifyAuthenticationResponse</span>({
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">credential</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">id</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">credentialID</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">rawId</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">rawIdBuffer</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">type</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;public-key&#39;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">response</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">authenticatorData</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">authenticatorDataBuffer</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">clientDataJSON</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">clientDataJSONBuffer</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">signature</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">signatureBuffer</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">userHandle</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">userHandleBuffer</span>,
+</span></span><span style="display:flex;"><span>      },
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">expectedChallenge</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">user</span>.<span style="color:#a6e22e">currentChallenge</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">expectedOrigin</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;https://example.com&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">expectedRPID</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;example.com&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">signingAlgorithm</span><span style="color:#f92672">:</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">7</span>, <span style="color:#75715e">// ES256
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">credentialPublicKey</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">publicKeyBuffer</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">prevCounter</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">userCredential</span>.<span style="color:#a6e22e">counter</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">requireUserVerification</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">true</span>,
+</span></span><span style="display:flex;"><span>  });
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">catch</span> (<span style="color:#a6e22e">error</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">error</span>(<span style="color:#e6db74">&#39;Authentication error:&#39;</span>, <span style="color:#a6e22e">error</span>.<span style="color:#a6e22e">message</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">status</span>(<span style="color:#ae81ff">400</span>).<span style="color:#a6e22e">json</span>({ <span style="color:#a6e22e">error</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">error</span>.<span style="color:#a6e22e">message</span> });
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><div class="notice danger">🚨 <strong>Security Alert:</strong> Never log sensitive information like private keys or full error messages to the client.</div>
+<h2 id="integrating-with-existing-systems">Integrating with Existing Systems<a hidden class="anchor" aria-hidden="true" href="#integrating-with-existing-systems">#</a></h2>
+<p>Passkeys can coexist with traditional authentication methods. Here’s how to integrate them.</p>
+<h3 id="dual-stack-authentication">Dual-Stack Authentication<a hidden class="anchor" aria-hidden="true" href="#dual-stack-authentication">#</a></h3>
+<p>Allow users to choose between passkeys and passwords.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">post</span>(<span style="color:#e6db74">&#39;/login/start&#39;</span>, <span style="color:#66d9ef">async</span> (<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>) =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">options</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">generateAuthenticationOptions</span>({
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">allowCredentials</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">registeredCredentials</span>.<span style="color:#a6e22e">map</span>((<span style="color:#a6e22e">cred</span>) =&gt; ({
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">id</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">cred</span>.<span style="color:#a6e22e">id</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">type</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;public-key&#39;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">transports</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">cred</span>.<span style="color:#a6e22e">transports</span>,
+</span></span><span style="display:flex;"><span>    })),
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">userVerification</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;preferred&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">rpID</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;example.com&#39;</span>,
+</span></span><span style="display:flex;"><span>  });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">json</span>(<span style="color:#a6e22e">options</span>);
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><h3 id="migration-strategy">Migration Strategy<a hidden class="anchor" aria-hidden="true" href="#migration-strategy">#</a></h3>
+<p>Gradually migrate users to passkeys by offering a seamless transition path.</p>
+<div class="notice tip">💜 <strong>Pro Tip:</strong> Educate users on the benefits of passkeys to encourage adoption.</div>
+<h2 id="browser-compatibility">Browser Compatibility<a hidden class="anchor" aria-hidden="true" href="#browser-compatibility">#</a></h2>
+<p>Not all browsers support WebAuthn equally. Here’s a quick overview.</p>
+<table class="comparison-table">
+<thead><tr><th>Browser</th><th>Support</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Chrome</td><td>Full</td><td>Available since version 67</td></tr>
+<tr><td>Firefox</td><td>Full</td><td>Available since version 60</td></tr>
+<tr><td>Safari</td><td>Limited</td><td>Partial support in version 13.1+</td></tr>
+<tr><td>Edge</td><td>Full</td><td>Available since version 79</td></tr>
+<tr><td>Opera</td><td>Full</td><td>Available since version 54</td></tr>
+</tbody>
+</table>
+<div class="notice info">💡 <strong>Key Point:</strong> Test thoroughly across different browsers to ensure compatibility.</div>
+<h2 id="performance-considerations">Performance Considerations<a hidden class="anchor" aria-hidden="true" href="#performance-considerations">#</a></h2>
+<p>Optimize your implementation for speed and reliability.</p>
+<h3 id="minimizing-latency">Minimizing Latency<a hidden class="anchor" aria-hidden="true" href="#minimizing-latency">#</a></h3>
+<p>Reduce latency by optimizing network requests and server responses.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">use</span>(<span style="color:#a6e22e">express</span>.<span style="color:#a6e22e">json</span>({ <span style="color:#a6e22e">limit</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;1mb&#39;</span> })); <span style="color:#75715e">// Increase limit if needed
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">use</span>(<span style="color:#a6e22e">express</span>.<span style="color:#a6e22e">urlencoded</span>({ <span style="color:#a6e22e">extended</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">true</span>, <span style="color:#a6e22e">limit</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;1mb&#39;</span> }));
+</span></span></code></pre></div><h3 id="efficient-credential-storage">Efficient Credential Storage<a hidden class="anchor" aria-hidden="true" href="#efficient-credential-storage">#</a></h3>
+<p>Store credentials efficiently to avoid performance bottlenecks.</p>
+<div class="notice tip">💜 <strong>Pro Tip:</strong> Use a database optimized for read-heavy operations, like Redis or MongoDB.</div>
+<h2 id="security-best-practices">Security Best Practices<a hidden class="anchor" aria-hidden="true" href="#security-best-practices">#</a></h2>
+<p>Follow these guidelines to ensure a secure implementation.</p>
+<h3 id="secure-key-storage">Secure Key Storage<a hidden class="anchor" aria-hidden="true" href="#secure-key-storage">#</a></h3>
+<p>Never store private keys in plaintext. Use secure vaults or hardware security modules (HSMs).</p>
+<div class="notice danger">🚨 <strong>Security Alert:</strong> Regularly rotate keys and monitor access logs.</div>
+<h3 id="user-verification">User Verification<a hidden class="anchor" aria-hidden="true" href="#user-verification">#</a></h3>
+<p>Enable user verification to prevent unauthorized access.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">options</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">generateRegistrationOptions</span>({
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#a6e22e">userVerification</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;required&#39;</span>,
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><h3 id="challenge-management">Challenge Management<a hidden class="anchor" aria-hidden="true" href="#challenge-management">#</a></h3>
+<p>Generate unique challenges for each request to prevent replay attacks.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">generateChallenge</span>() {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Buffer</span>.<span style="color:#a6e22e">from</span>(<span style="color:#a6e22e">crypto</span>.<span style="color:#a6e22e">randomBytes</span>(<span style="color:#ae81ff">32</span>)).<span style="color:#a6e22e">toString</span>(<span style="color:#e6db74">&#39;base64url&#39;</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>Test across different browsers to ensure compatibility.</li>
+<li>Optimize for performance to minimize latency.</li>
+<li>Follow best practices for secure key storage and user verification.</li>
+</ul>
+</div>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>Implementing FIDO2 WebAuthn passkeys in production requires careful planning and execution. By following this guide, you can provide a secure, passwordless authentication experience for your users. Remember to test thoroughly and stay updated with the latest security practices.</p>
+<p>That&rsquo;s it. Simple, secure, works. Happy coding!</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/passkeys/">Passkeys</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/fido2/">FIDO2</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/webauthn/">Webauthn</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/iam/">Iam</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/security/">Security</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/mfa-bypass-attacks-understanding-threats-and-implementing-phishing-resistant-authentication/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>MFA Bypass Attacks: Understanding Threats and Implementing Phishing-Resistant Authentication</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/zero-trust-architecture-implementation-a-practical-guide-for-iam-engineers/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Zero Trust Architecture Implementation: A Practical Guide for IAM Engineers</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+
+<section class="post-feedback">
+  <p class="feedback-question">Was this article helpful?</p>
+  <div class="feedback-buttons">
+    <button class="feedback-btn feedback-yes" onclick="trackFeedback('yes', '\/posts\/passkeys-adoption-guide-implementing-fido2-webauthn-in-production\/')" aria-label="Yes, helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      Yes
+    </button>
+    <button class="feedback-btn feedback-no" onclick="trackFeedback('no', '\/posts\/passkeys-adoption-guide-implementing-fido2-webauthn-in-production\/')" aria-label="No, not helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>
+      No
+    </button>
+  </div>
+  <p class="feedback-thanks" style="display: none;">Thanks for your feedback!</p>
+</section>
+
+
+<section class="author-bio">
+  <div class="author-avatar">
+    <img src="/IAMDevBox.com.jpg" alt="IAMDevBox Author" width="64" height="64" loading="lazy">
+  </div>
+  <div class="author-info">
+    <h4>Written by IAMDevBox</h4>
+    <p>Enterprise IAM architect with 15+ years in identity modernization. Certified across ForgeRock, Ping Identity, SailPoint, AWS, and Azure.</p>
+    <div class="author-links">
+      <a href="https://twitter.com/iamdevbox" target="_blank" rel="noopener" title="Follow on X/Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/iamdevbox" target="_blank" rel="noopener" title="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="/contact/" title="Contact">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function trackFeedback(value, page) {
+  
+  document.querySelector('.feedback-buttons').style.display = 'none';
+  document.querySelector('.feedback-question').style.display = 'none';
+  document.querySelector('.feedback-thanks').style.display = 'block';
+
+  
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'post_feedback', {
+      'feedback_value': value,
+      'page_path': page
+    });
+  }
+
+  
+  localStorage.setItem('feedback_' + page, value);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const page = '\/posts\/passkeys-adoption-guide-implementing-fido2-webauthn-in-production\/';
+  if (localStorage.getItem('feedback_' + page)) {
+    document.querySelector('.feedback-buttons').style.display = 'none';
+    document.querySelector('.feedback-question').textContent = 'Thanks for your feedback!';
+  }
+});
+</script>
+
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+              Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+            </a>
+            <small class="custom-date">2026-03-01</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+              JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+            </a>
+            <small class="custom-date">2026-02-28</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/cross-device-passkey-authentication-hybrid-flow-implementation/" class="custom-link">
+              Cross-Device Passkey Authentication: Hybrid Flow Implementation
+            </a>
+            <small class="custom-date">2026-02-25</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/digital-identity-provider-v-key-secures-strategic-investment/" class="custom-link">
+              Digital Identity Provider V-Key Secures Strategic Investment
+            </a>
+            <small class="custom-date">2026-02-24</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-realm-federation-connecting-multiple-identity-sources/" class="custom-link">
+              Keycloak Realm Federation: Connecting Multiple Identity Sources
+            </a>
+            <small class="custom-date">2026-02-20</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+                Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+                Go Secretless with Snowflake Workload Identity Federation - Snowflake
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+                JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+                OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+                Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

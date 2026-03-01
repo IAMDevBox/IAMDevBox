@@ -1,0 +1,2921 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Cross-Device Passkey Authentication: Hybrid Flow Implementation | IAMDevBox</title>
+<meta name="keywords" content="cross-device passkey authentication, hybrid flow implementation, webauthn, iam engineering, secure authentication, passkey creation, device interoperability, user presence validation, phishing protection, secure storage">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/cross-device-passkey-authentication-hybrid-flow-implementation/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.e24ea479df3e367781fafa20cedde21c7e043c10bed4c8c913ef9261a049a1e2.css" integrity="sha256-4k6ked8&#43;NneB&#43;vogzt3iHH4EPBC&#43;1MjJE&#43;&#43;SYaBJoeI=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/cross-device-passkey-authentication-hybrid-flow-implementation/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/cross-device-passkey-authentication-hybrid-flow-implementation/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Cross-Device Passkey Authentication: Hybrid Flow Implementation">
+  <meta property="og:description" content="Learn how to implement cross-device passkey authentication using a hybrid flow. Complete guide with code examples and security tips.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-02-25T14:55:03+00:00">
+    <meta property="article:modified_time" content="2026-02-26T21:20:24-05:00">
+    <meta property="article:tag" content="Cross-Device-Authentication">
+    <meta property="article:tag" content="Passkey-Authentication">
+    <meta property="article:tag" content="Hybrid-Flow">
+    <meta property="article:tag" content="IAM Engineering">
+    <meta property="article:tag" content="Webauthn">
+    <meta property="og:image" content="https://www.iamdevbox.com/images/posts/cross-device-passkey-authentication--hybrid-flow-i-26f8d261.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/images/posts/cross-device-passkey-authentication--hybrid-flow-i-26f8d261.webp">
+<meta name="twitter:title" content="Cross-Device Passkey Authentication: Hybrid Flow Implementation">
+<meta name="twitter:description" content="Learn how to implement cross-device passkey authentication using a hybrid flow. Complete guide with code examples and security tips.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Cross-Device Passkey Authentication: Hybrid Flow Implementation",
+      "item": "https://www.iamdevbox.com/posts/cross-device-passkey-authentication-hybrid-flow-implementation/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Cross-Device Passkey Authentication: Hybrid Flow Implementation",
+  "name": "Cross-Device Passkey Authentication: Hybrid Flow Implementation",
+  "description": "Learn how to implement cross-device passkey authentication using a hybrid flow. Complete guide with code examples and security tips.",
+  "keywords": [
+    "cross-device passkey authentication", "hybrid flow implementation", "webauthn", "iam engineering", "secure authentication", "passkey creation", "device interoperability", "user presence validation", "phishing protection", "secure storage"
+  ],
+  "articleBody": "Cross-device passkey authentication allows users to log in to an application using a passkey created on one device on another device without needing to enter a password. This method leverages WebAuthn, a standard for strong, secure authentication, enabling seamless and secure access across multiple devices.\nWhat is Cross-Device Passkey Authentication? Cross-device passkey authentication simplifies the login process by allowing users to authenticate using a passkey generated on one device (like a smartphone) to sign in on another device (like a laptop). This eliminates the need for remembering passwords and enhances security by relying on cryptographic keys instead of passwords.\nHow does WebAuthn enable cross-device passkey authentication? WebAuthn is a W3C standard that provides a secure way to authenticate users without passwords. It supports public-key cryptography, ensuring that authentication is secure and resistant to phishing attacks. By using WebAuthn, you can create passkeys on one device and use them on another, enhancing the user experience while maintaining high security standards.\nWhat are the benefits of using cross-device passkey authentication? Using cross-device passkey authentication offers several benefits:\nEnhanced Security: Passkeys are cryptographic keys stored securely on the user’s device, making them much harder to compromise compared to passwords. Improved User Experience: Users can log in without remembering passwords, reducing friction and improving usability. Phishing Resistance: Since passkeys rely on cryptographic operations, they are immune to phishing attacks that attempt to steal passwords. What are the steps to implement cross-device passkey authentication using a hybrid flow? To implement cross-device passkey authentication using a hybrid flow, follow these steps:\nRegistering a passkey First, you need to register a passkey on the user’s primary device. This involves creating a public-private key pair and storing the private key securely on the device.\nCode example: Registering a passkey async function registerPasskey() { const publicKey = { rp: { name: \"Example Corp\", id: \"example.com\" }, user: { id: new Uint8Array([1, 2, 3, 4]), // Unique user ID name: \"johndoe@example.com\", displayName: \"John Doe\" }, pubKeyCredParams: [{ alg: -7, type: \"public-key\" }], // ES256 attestation: \"direct\", challenge: new Uint8Array([5, 6, 7, 8]), // Random challenge timeout: 60000, authenticatorSelection: { authenticatorAttachment: \"platform\", residentKey: \"required\", userVerification: \"required\" } }; try { const credential = await navigator.credentials.create({ publicKey }); console.log(\"Passkey registered:\", credential); } catch (error) { console.error(\"Registration failed:\", error); } } Authenticating with a passkey Once the passkey is registered, the user can authenticate using it on any device. The authentication process involves verifying the user’s identity using the passkey.\nCode example: Authenticating with a passkey async function authenticateWithPasskey() { const publicKey = { challenge: new Uint8Array([9, 10, 11, 12]), // Random challenge allowCredentials: [{ type: \"public-key\", id: new Uint8Array([1, 2, 3, 4]) // Registered passkey ID }], timeout: 60000, userVerification: \"required\" }; try { const assertion = await navigator.credentials.get({ publicKey }); console.log(\"Authentication successful:\", assertion); } catch (error) { console.error(\"Authentication failed:\", error); } } Handling cross-device authentication To enable cross-device authentication, you need to ensure that the passkey can be used on different devices. This typically involves storing the passkey ID and other necessary information in a secure manner and making it accessible to all devices.\nCode example: Storing passkey information function storePasskeyInfo(credential) { const passkeyInfo = { id: Array.from(new Uint8Array(credential.rawId)), publicKey: Array.from(new Uint8Array(credential.response.getPublicKey())), transports: credential.response.transports }; // Store passkeyInfo securely, e.g., in a database or secure storage console.log(\"Stored passkey info:\", passkeyInfo); } Validating user presence During authentication, it’s crucial to verify the user’s presence to prevent unauthorized access. This can be done using biometric sensors or other user verification methods supported by the device.\nCode example: Verifying user presence async function verifyUserPresence(publicKey) { try { const assertion = await navigator.credentials.get({ publicKey }); if (assertion.response.userHandle) { console.log(\"User presence verified:\", assertion); } else { console.error(\"User presence could not be verified\"); } } catch (error) { console.error(\"Verification failed:\", error); } } What are the security considerations for cross-device passkey authentication? Implementing cross-device passkey authentication requires careful attention to security to protect user data and prevent unauthorized access.\nProtecting passkeys Passkeys should be stored securely on the user’s device and never transmitted over the network in plaintext. Use secure storage mechanisms provided by the operating system to protect passkeys.\nPreventing phishing attacks Since passkeys rely on cryptographic operations, they are inherently resistant to phishing attacks. However, it’s still important to educate users about phishing attempts and encourage them to be cautious.\nValidating user presence Always validate user presence during authentication to ensure that the user is physically present and authorized to access the system. This can be done using biometric sensors or other user verification methods.\nHow do you handle errors during cross-device passkey authentication? Errors can occur during the registration and authentication processes, and it’s important to handle them gracefully to provide a good user experience.\nCommon errors and solutions Registration failed: Ensure that the device supports WebAuthn and that the user has granted permission to use biometric sensors. Authentication failed: Verify that the passkey ID and other information are correct and that the user is present. Code example: Handling registration errors async function registerPasskey() { const publicKey = { rp: { name: \"Example Corp\", id: \"example.com\" }, user: { id: new Uint8Array([1, 2, 3, 4]), name: \"johndoe@example.com\", displayName: \"John Doe\" }, pubKeyCredParams: [{ alg: -7, type: \"public-key\" }], attestation: \"direct\", challenge: new Uint8Array([5, 6, 7, 8]), timeout: 60000, authenticatorSelection: { authenticatorAttachment: \"platform\", residentKey: \"required\", userVerification: \"required\" } }; try { const credential = await navigator.credentials.create({ publicKey }); console.log(\"Passkey registered:\", credential); } catch (error) { if (error.name === \"NotAllowedError\") { console.error(\"User denied permission to use biometric sensors\"); } else { console.error(\"Registration failed:\", error); } } } Code example: Handling authentication errors async function authenticateWithPasskey() { const publicKey = { challenge: new Uint8Array([9, 10, 11, 12]), allowCredentials: [{ type: \"public-key\", id: new Uint8Array([1, 2, 3, 4]) }], timeout: 60000, userVerification: \"required\" }; try { const assertion = await navigator.credentials.get({ publicKey }); console.log(\"Authentication successful:\", assertion); } catch (error) { if (error.name === \"NotAllowedError\") { console.error(\"User denied permission to use biometric sensors\"); } else { console.error(\"Authentication failed:\", error); } } } What are the best practices for implementing cross-device passkey authentication? Following best practices ensures that your implementation is secure, efficient, and user-friendly.\nUse secure storage Store passkeys and other sensitive information securely on the user’s device. Avoid transmitting passkeys over the network in plaintext.\nValidate user presence Always validate user presence during authentication to ensure that the user is physically present and authorized to access the system.\nEducate users Educate users about phishing attempts and encourage them to be cautious. Provide clear instructions on how to use passkeys and troubleshoot common issues.\nTest thoroughly Thoroughly test your implementation to identify and fix any issues before deploying it to production. Test on multiple devices and browsers to ensure compatibility.\n💡 Key Point: Implementing cross-device passkey authentication requires careful attention to security and user experience. 🎯 Key Takeaways Passkeys enhance security by using cryptographic keys instead of passwords. Use WebAuthn to register and authenticate passkeys. Store passkeys securely and validate user presence during authentication. Test thoroughly to ensure compatibility and security. Comparison of different authentication methods MethodProsConsUse When PasswordsSimple to implementVulnerable to phishing, easy to forgetLegacy systems Multi-factor authentication (MFA)More secure than passwords aloneCan be inconvenient for usersHigh-security environments Cross-device passkey authenticationHighly secure, convenient for usersRequires modern devices and browsersUser-friendly, secure systems Quick Reference 📋 Quick Reference navigator.credentials.create({ publicKey }) - Registers a passkey. navigator.credentials.get({ publicKey }) - Authenticates using a passkey. Array.from(new Uint8Array(array)) - Converts a Uint8Array to an array of numbers. Expanding the implementation 🔍 Click to see detailed explanation Expanding the implementation involves adding support for additional devices and integrating with existing systems. This may include: Adding support for multiple devices: Allow users to register passkeys on multiple devices and use them interchangeably. Integrating with existing systems: Integrate cross-device passkey authentication with existing identity and access management (IAM) systems. Handling edge cases: Address edge cases such as device loss or passkey deletion. Step-by-step guide to implementing cross-device passkey authentication Register the passkey Create a public-private key pair and store the private key securely on the user's device. Authenticate with the passkey Verify the user's identity using the passkey on any device. Store passkey information Store the passkey ID and other necessary information securely. Validate user presence Ensure that the user is physically present and authorized to access the system. Architecture diagram graph LR A[User Device] --\u003e B[WebAuthn] B --\u003e C[Auth Server] C --\u003e D[User Verification] D --\u003e E[Access Granted] A --\u003e F[Another Device] F --\u003e B B --\u003e G[Passkey Verification] G --\u003e E Terminal output Terminal $ curl -X POST https://auth.example.com/register {\"status\": \"success\", \"message\": \"Passkey registered\"} Stat cards 99.9% Uptime \u003c 1s Latency 10x Faster Version badges v2.0 NEW v1.5 DEPRECATED\nChecklist Implement passkey registration - completed Implement passkey authentication - completed Store passkey information securely - pending Validate user presence - pending Implementing cross-device passkey authentication using a hybrid flow enhances security and improves the user experience. By following the steps outlined in this guide, you can create a secure and efficient authentication system that leverages the power of passkeys. That’s it. Simple, secure, works.\n",
+  "wordCount" : "1500",
+  "inLanguage": "en",
+  "image":"https://www.iamdevbox.com/images/posts/cross-device-passkey-authentication--hybrid-flow-i-26f8d261.webp","datePublished": "2026-02-25T14:55:03Z",
+  "dateModified": "2026-02-26T21:20:24-05:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/cross-device-passkey-authentication-hybrid-flow-implementation/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is Cross-Device Passkey Authentication?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Cross-device passkey authentication allows users to log in to an application using a passkey created on one device on another device without needing to enter a password."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do you implement Cross-Device Passkey Authentication?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Implement by creating a passkey on one device using WebAuthn and then using the same passkey on another device to authenticate."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the security considerations for Cross-Device Passkey Authentication?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Ensure passkeys are stored securely, protect against phishing attacks, and validate user presence during authentication."
+      }
+    }
+  ]
+}
+</script>
+    <meta name="description" content="Learn how to implement cross-device passkey authentication using a hybrid flow. Complete guide with code examples and security tips."><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/cross-device-passkey-authentication-hybrid-flow-implementation\/"
+  },
+  "headline": "Cross-Device Passkey Authentication: Hybrid Flow Implementation",
+  "description": "Learn how to implement cross-device passkey authentication using a hybrid flow. Complete guide with code examples and security tips.",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon-96x96.png",
+      "width": 96,
+      "height": 96
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://www.iamdevbox.com/IAMDevBox.com.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "datePublished": "2026-02-25T14:55:03Z",
+  "dateModified": "2026-02-26T21:20:24-05:00",
+  "wordCount":  1500 ,
+  "articleSection": "posts",
+  "keywords": ["cross-device passkey authentication","hybrid flow implementation","webauthn","iam engineering","secure authentication","passkey creation","device interoperability","user presence validation","phishing protection","secure storage"]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Cross-Device Passkey Authentication: Hybrid Flow Implementation",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/cross-device-passkey-authentication-hybrid-flow-implementation\/"
+    }
+  ]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-token-exchange-implementing-oauth-20-token-exchange\/"
+            },
+            "headline": "Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:29:55Z",
+            "dateModified": "2026-03-01T14:30:15Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/go-secretless-with-snowflake-workload-identity-federation-snowflake\/"
+            },
+            "headline": "Go Secretless with Snowflake Workload Identity Federation - Snowflake",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:24:03Z",
+            "dateModified": "2026-03-01T14:24:20Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-algorithm-confusion-attack-cve-2026-developer-guide\/"
+            },
+            "headline": "JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-02-28T18:00:00Z",
+            "dateModified": "2026-03-01T11:21:01-05:00"
+          }
+  ]
+}
+</script>
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    const mermaidBlocks = document.querySelectorAll('.mermaid, pre code.language-mermaid, code.language-mermaid');
+    if (mermaidBlocks.length > 0) {
+        
+        mermaidBlocks.forEach(block => {
+            if (block.tagName === 'CODE') {
+                const pre = block.parentElement;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = block.textContent;
+                if (pre && pre.tagName === 'PRE') {
+                    pre.parentNode.replaceChild(div, pre);
+                } else {
+                    block.parentNode.replaceChild(div, block);
+                }
+            }
+        });
+
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+            const isDark = document.body.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#5a67d8',
+                    
+                    secondaryColor: '#48bb78',
+                    secondaryTextColor: '#ffffff',
+                    secondaryBorderColor: '#38a169',
+                    
+                    tertiaryColor: '#ed8936',
+                    tertiaryTextColor: '#ffffff',
+                    tertiaryBorderColor: '#dd6b20',
+                    
+                    lineColor: '#718096',
+                    
+                    background: isDark ? '#1a202c' : '#ffffff',
+                    mainBkg: isDark ? '#2d3748' : '#f7fafc',
+                    
+                    actorBkg: '#667eea',
+                    actorBorder: '#5a67d8',
+                    actorTextColor: '#ffffff',
+                    actorLineColor: '#718096',
+                    signalColor: '#4a5568',
+                    signalTextColor: '#2d3748',
+                    labelBoxBkgColor: '#edf2f7',
+                    labelBoxBorderColor: '#cbd5e0',
+                    labelTextColor: '#2d3748',
+                    loopTextColor: '#553c9a',
+                    noteBkgColor: '#faf089',
+                    noteTextColor: '#744210',
+                    noteBorderColor: '#d69e2e',
+                    
+                    nodeBkg: '#667eea',
+                    nodeBorder: '#5a67d8',
+                    clusterBkg: '#e2e8f0',
+                    clusterBorder: '#a0aec0',
+                    defaultLinkColor: '#718096',
+                    titleColor: '#2d3748',
+                    edgeLabelBackground: 'transparent',
+                    
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                sequence: {
+                    useMaxWidth: true,
+                    boxMargin: 10,
+                    boxTextMargin: 5,
+                    noteMargin: 10,
+                    messageMargin: 35,
+                    mirrorActors: false
+                }
+            });
+            mermaid.run().then(() => {
+                
+                document.querySelectorAll('.mermaid .node').forEach(node => {
+                    const rect = node.querySelector('rect, circle, ellipse, polygon');
+                    if (rect) {
+                        const fill = rect.getAttribute('fill') || window.getComputedStyle(rect).fill;
+                        
+                        const isDarkBg = fill && (
+                            fill.includes('667eea') || fill.includes('102, 126, 234') ||
+                            fill.includes('48bb78') || fill.includes('72, 187, 120') ||
+                            fill.includes('ed8936') || fill.includes('237, 137, 54') ||
+                            fill.includes('553c9a') || fill.includes('9f7aea') ||
+                            fill.includes('e53e3e') || fill.includes('dd6b20')
+                        );
+                        const textColor = isDarkBg ? '#ffffff' : '#1a202c';
+                        node.querySelectorAll('span, .nodeLabel, text, foreignObject div').forEach(text => {
+                            text.style.color = textColor;
+                            text.style.fill = textColor;
+                        });
+                    }
+                });
+            });
+        };
+        document.head.appendChild(script);
+    }
+
+    
+    const postContent = document.querySelector('.post-content');
+    const isSinglePost = document.querySelector('.post-single');
+    const isToolsPage = window.location.pathname.startsWith('/tools/');
+    if (postContent && isSinglePost && window.innerWidth >= 1400 && !isToolsPage) {
+        const headings = postContent.querySelectorAll('h2, h3');
+        if (headings.length >= 3) {
+            const toc = document.createElement('nav');
+            toc.className = 'floating-toc';
+            toc.innerHTML = '<h4>📑 Contents</h4><ul></ul>';
+            const tocList = toc.querySelector('ul');
+
+            headings.forEach((heading, index) => {
+                const id = heading.id || `section-${index}`;
+                heading.id = id;
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2';
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            document.body.appendChild(toc);
+
+            
+            const tocLinks = toc.querySelectorAll('a');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 150) {
+                        current = heading.id;
+                    }
+                });
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+    }
+
+    
+    if (postContent && isSinglePost && window.innerWidth >= 1200) {
+        const h2s = postContent.querySelectorAll('h2');
+        if (h2s.length >= 2) {
+            const indicator = document.createElement('div');
+            indicator.className = 'section-indicator';
+
+            h2s.forEach((h2, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'section-dot';
+                dot.title = h2.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                dot.addEventListener('click', () => {
+                    h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                indicator.appendChild(dot);
+            });
+
+            document.body.appendChild(indicator);
+
+            
+            window.addEventListener('scroll', () => {
+                const dots = indicator.querySelectorAll('.section-dot');
+                let activeIndex = 0;
+                h2s.forEach((h2, index) => {
+                    if (h2.getBoundingClientRect().top <= 200) {
+                        activeIndex = index;
+                    }
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+    }
+    });
+    </script>
+
+    
+    
+    <script>
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        function loadGA() {
+            if (window.gaLoaded) return;
+            window.gaLoaded = true;
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975';
+            document.head.appendChild(script);
+
+            script.onload = () => {
+                gtag('js', new Date());
+                gtag('config', 'G-B6QCH29975');
+            };
+        }
+
+        
+        ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+            window.addEventListener(event, loadGA, { once: true, passive: true });
+        });
+
+        
+        setTimeout(loadGA, 3000);
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+    
+    <div class="reading-progress" id="reading-progress"></div>
+    <script>
+    window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / docHeight) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+    </script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+            </div>
+        </div><button id="menu-btn" aria-label="Menu" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/categories/trending/" title="Hot IAM topics">
+                    <span>🔥Trending</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+(function() {
+    var btn = document.getElementById('menu-btn');
+    var menu = document.getElementById('menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+        });
+        
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
+</script>
+<main class="main">
+
+
+
+<div class="reading-progress" id="reading-progress"></div>
+<script>
+(function() {
+  const progressBar = document.getElementById('reading-progress');
+  const article = document.querySelector('.post-content');
+
+  if (!progressBar || !article) return;
+
+  function updateProgress() {
+    const articleTop = article.offsetTop;
+    const articleHeight = article.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+
+    
+    const start = articleTop - windowHeight;
+    const end = articleTop + articleHeight;
+    const current = scrollTop - start;
+    const total = end - start;
+
+    const progress = Math.min(Math.max((current / total) * 100, 0), 100);
+    progressBar.style.width = progress + '%';
+  }
+
+  
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  
+  updateProgress();
+})();
+</script>
+
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent" data-pagefind-meta="title">
+      Cross-Device Passkey Authentication: Hybrid Flow Implementation
+    </h1>
+    <div class="post-meta"><span title='2026-02-25 14:55:03'>Feb 25, 2026</span>&nbsp;·&nbsp;8 min&nbsp;·&nbsp;1500 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+    
+      <div class="post-updated">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Updated: Feb 26, 2026
+      </div>
+  </header> 
+<figure class="entry-cover">
+        <img loading="eager" src="https://www.iamdevbox.com/images/posts/cross-device-passkey-authentication--hybrid-flow-i-26f8d261.webp" alt="Cross-Device Passkey Authentication: Hybrid Flow Implementation">
+        
+</figure><div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#what-is-cross-device-passkey-authentication" aria-label="What is Cross-Device Passkey Authentication?">What is Cross-Device Passkey Authentication?</a></li>
+                <li>
+                    <a href="#how-does-webauthn-enable-cross-device-passkey-authentication" aria-label="How does WebAuthn enable cross-device passkey authentication?">How does WebAuthn enable cross-device passkey authentication?</a></li>
+                <li>
+                    <a href="#what-are-the-benefits-of-using-cross-device-passkey-authentication" aria-label="What are the benefits of using cross-device passkey authentication?">What are the benefits of using cross-device passkey authentication?</a></li>
+                <li>
+                    <a href="#what-are-the-steps-to-implement-cross-device-passkey-authentication-using-a-hybrid-flow" aria-label="What are the steps to implement cross-device passkey authentication using a hybrid flow?">What are the steps to implement cross-device passkey authentication using a hybrid flow?</a><ul>
+                        
+                <li>
+                    <a href="#registering-a-passkey" aria-label="Registering a passkey">Registering a passkey</a><ul>
+                        
+                <li>
+                    <a href="#code-example-registering-a-passkey" aria-label="Code example: Registering a passkey">Code example: Registering a passkey</a></li></ul>
+                </li>
+                <li>
+                    <a href="#authenticating-with-a-passkey" aria-label="Authenticating with a passkey">Authenticating with a passkey</a><ul>
+                        
+                <li>
+                    <a href="#code-example-authenticating-with-a-passkey" aria-label="Code example: Authenticating with a passkey">Code example: Authenticating with a passkey</a></li></ul>
+                </li>
+                <li>
+                    <a href="#handling-cross-device-authentication" aria-label="Handling cross-device authentication">Handling cross-device authentication</a><ul>
+                        
+                <li>
+                    <a href="#code-example-storing-passkey-information" aria-label="Code example: Storing passkey information">Code example: Storing passkey information</a></li></ul>
+                </li>
+                <li>
+                    <a href="#validating-user-presence" aria-label="Validating user presence">Validating user presence</a><ul>
+                        
+                <li>
+                    <a href="#code-example-verifying-user-presence" aria-label="Code example: Verifying user presence">Code example: Verifying user presence</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#what-are-the-security-considerations-for-cross-device-passkey-authentication" aria-label="What are the security considerations for cross-device passkey authentication?">What are the security considerations for cross-device passkey authentication?</a><ul>
+                        
+                <li>
+                    <a href="#protecting-passkeys" aria-label="Protecting passkeys">Protecting passkeys</a></li>
+                <li>
+                    <a href="#preventing-phishing-attacks" aria-label="Preventing phishing attacks">Preventing phishing attacks</a></li>
+                <li>
+                    <a href="#validating-user-presence-1" aria-label="Validating user presence">Validating user presence</a></li></ul>
+                </li>
+                <li>
+                    <a href="#how-do-you-handle-errors-during-cross-device-passkey-authentication" aria-label="How do you handle errors during cross-device passkey authentication?">How do you handle errors during cross-device passkey authentication?</a><ul>
+                        
+                <li>
+                    <a href="#common-errors-and-solutions" aria-label="Common errors and solutions">Common errors and solutions</a><ul>
+                        
+                <li>
+                    <a href="#code-example-handling-registration-errors" aria-label="Code example: Handling registration errors">Code example: Handling registration errors</a></li>
+                <li>
+                    <a href="#code-example-handling-authentication-errors" aria-label="Code example: Handling authentication errors">Code example: Handling authentication errors</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#what-are-the-best-practices-for-implementing-cross-device-passkey-authentication" aria-label="What are the best practices for implementing cross-device passkey authentication?">What are the best practices for implementing cross-device passkey authentication?</a><ul>
+                        
+                <li>
+                    <a href="#use-secure-storage" aria-label="Use secure storage">Use secure storage</a></li>
+                <li>
+                    <a href="#validate-user-presence" aria-label="Validate user presence">Validate user presence</a></li>
+                <li>
+                    <a href="#educate-users" aria-label="Educate users">Educate users</a></li>
+                <li>
+                    <a href="#test-thoroughly" aria-label="Test thoroughly">Test thoroughly</a><ul>
+                        
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#comparison-of-different-authentication-methods" aria-label="Comparison of different authentication methods">Comparison of different authentication methods</a></li>
+                <li>
+                    <a href="#quick-reference" aria-label="Quick Reference">Quick Reference</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#" aria-label="📋 Quick Reference">📋 Quick Reference</a></li></ul>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#expanding-the-implementation" aria-label="Expanding the implementation">Expanding the implementation</a></li>
+                <li>
+                    <a href="#step-by-step-guide-to-implementing-cross-device-passkey-authentication" aria-label="Step-by-step guide to implementing cross-device passkey authentication">Step-by-step guide to implementing cross-device passkey authentication</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#" aria-label="Register the passkey">Register the passkey</a></li>
+                <li>
+                    <a href="#" aria-label="Authenticate with the passkey">Authenticate with the passkey</a></li>
+                <li>
+                    <a href="#" aria-label="Store passkey information">Store passkey information</a></li>
+                <li>
+                    <a href="#" aria-label="Validate user presence">Validate user presence</a></li></ul>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#architecture-diagram" aria-label="Architecture diagram">Architecture diagram</a></li>
+                <li>
+                    <a href="#terminal-output" aria-label="Terminal output">Terminal output</a></li>
+                <li>
+                    <a href="#stat-cards" aria-label="Stat cards">Stat cards</a></li>
+                <li>
+                    <a href="#version-badges" aria-label="Version badges">Version badges</a></li>
+                <li>
+                    <a href="#checklist" aria-label="Checklist">Checklist</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content" data-pagefind-body><p>Cross-device passkey authentication allows users to log in to an application using a passkey created on one device on another device without needing to enter a password. This method leverages WebAuthn, a standard for strong, secure authentication, enabling seamless and secure access across multiple devices.</p>
+<h2 id="what-is-cross-device-passkey-authentication">What is Cross-Device Passkey Authentication?<a hidden class="anchor" aria-hidden="true" href="#what-is-cross-device-passkey-authentication">#</a></h2>
+<p>Cross-device passkey authentication simplifies the login process by allowing users to authenticate using a passkey generated on one device (like a smartphone) to sign in on another device (like a laptop). This eliminates the need for remembering passwords and enhances security by relying on cryptographic keys instead of passwords.</p>
+<h2 id="how-does-webauthn-enable-cross-device-passkey-authentication">How does WebAuthn enable cross-device passkey authentication?<a hidden class="anchor" aria-hidden="true" href="#how-does-webauthn-enable-cross-device-passkey-authentication">#</a></h2>
+<p>WebAuthn is a W3C standard that provides a secure way to authenticate users without passwords. It supports public-key cryptography, ensuring that authentication is secure and resistant to phishing attacks. By using WebAuthn, you can create passkeys on one device and use them on another, enhancing the user experience while maintaining high security standards.</p>
+<h2 id="what-are-the-benefits-of-using-cross-device-passkey-authentication">What are the benefits of using cross-device passkey authentication?<a hidden class="anchor" aria-hidden="true" href="#what-are-the-benefits-of-using-cross-device-passkey-authentication">#</a></h2>
+<p>Using cross-device passkey authentication offers several benefits:</p>
+<ul>
+<li><strong>Enhanced Security</strong>: Passkeys are cryptographic keys stored securely on the user&rsquo;s device, making them much harder to compromise compared to passwords.</li>
+<li><strong>Improved User Experience</strong>: Users can log in without remembering passwords, reducing friction and improving usability.</li>
+<li><strong>Phishing Resistance</strong>: Since passkeys rely on cryptographic operations, they are immune to phishing attacks that attempt to steal passwords.</li>
+</ul>
+<h2 id="what-are-the-steps-to-implement-cross-device-passkey-authentication-using-a-hybrid-flow">What are the steps to implement cross-device passkey authentication using a hybrid flow?<a hidden class="anchor" aria-hidden="true" href="#what-are-the-steps-to-implement-cross-device-passkey-authentication-using-a-hybrid-flow">#</a></h2>
+<p>To implement cross-device passkey authentication using a hybrid flow, follow these steps:</p>
+<h3 id="registering-a-passkey">Registering a passkey<a hidden class="anchor" aria-hidden="true" href="#registering-a-passkey">#</a></h3>
+<p>First, you need to register a passkey on the user&rsquo;s primary device. This involves creating a public-private key pair and storing the private key securely on the device.</p>
+<h4 id="code-example-registering-a-passkey">Code example: Registering a passkey<a hidden class="anchor" aria-hidden="true" href="#code-example-registering-a-passkey">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">registerPasskey</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">publicKey</span> <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">rp</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">name</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;Example Corp&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">id</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;example.com&#34;</span>
+</span></span><span style="display:flex;"><span>        },
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">user</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">id</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Uint8Array</span>([<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>]), <span style="color:#75715e">// Unique user ID
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#a6e22e">name</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;johndoe@example.com&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">displayName</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;John Doe&#34;</span>
+</span></span><span style="display:flex;"><span>        },
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">pubKeyCredParams</span><span style="color:#f92672">:</span> [{ <span style="color:#a6e22e">alg</span><span style="color:#f92672">:</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">7</span>, <span style="color:#a6e22e">type</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;public-key&#34;</span> }], <span style="color:#75715e">// ES256
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#a6e22e">attestation</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;direct&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">challenge</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Uint8Array</span>([<span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">6</span>, <span style="color:#ae81ff">7</span>, <span style="color:#ae81ff">8</span>]), <span style="color:#75715e">// Random challenge
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#a6e22e">timeout</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">60000</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">authenticatorSelection</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">authenticatorAttachment</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;platform&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">residentKey</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;required&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">userVerification</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;required&#34;</span>
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">credential</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">navigator</span>.<span style="color:#a6e22e">credentials</span>.<span style="color:#a6e22e">create</span>({ <span style="color:#a6e22e">publicKey</span> });
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;Passkey registered:&#34;</span>, <span style="color:#a6e22e">credential</span>);
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">catch</span> (<span style="color:#a6e22e">error</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">error</span>(<span style="color:#e6db74">&#34;Registration failed:&#34;</span>, <span style="color:#a6e22e">error</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="authenticating-with-a-passkey">Authenticating with a passkey<a hidden class="anchor" aria-hidden="true" href="#authenticating-with-a-passkey">#</a></h3>
+<p>Once the passkey is registered, the user can authenticate using it on any device. The authentication process involves verifying the user&rsquo;s identity using the passkey.</p>
+<h4 id="code-example-authenticating-with-a-passkey">Code example: Authenticating with a passkey<a hidden class="anchor" aria-hidden="true" href="#code-example-authenticating-with-a-passkey">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">authenticateWithPasskey</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">publicKey</span> <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">challenge</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Uint8Array</span>([<span style="color:#ae81ff">9</span>, <span style="color:#ae81ff">10</span>, <span style="color:#ae81ff">11</span>, <span style="color:#ae81ff">12</span>]), <span style="color:#75715e">// Random challenge
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#a6e22e">allowCredentials</span><span style="color:#f92672">:</span> [{
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">type</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;public-key&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">id</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Uint8Array</span>([<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>]) <span style="color:#75715e">// Registered passkey ID
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        }],
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">timeout</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">60000</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">userVerification</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;required&#34;</span>
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">assertion</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">navigator</span>.<span style="color:#a6e22e">credentials</span>.<span style="color:#a6e22e">get</span>({ <span style="color:#a6e22e">publicKey</span> });
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;Authentication successful:&#34;</span>, <span style="color:#a6e22e">assertion</span>);
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">catch</span> (<span style="color:#a6e22e">error</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">error</span>(<span style="color:#e6db74">&#34;Authentication failed:&#34;</span>, <span style="color:#a6e22e">error</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="handling-cross-device-authentication">Handling cross-device authentication<a hidden class="anchor" aria-hidden="true" href="#handling-cross-device-authentication">#</a></h3>
+<p>To enable cross-device authentication, you need to ensure that the passkey can be used on different devices. This typically involves storing the passkey ID and other necessary information in a secure manner and making it accessible to all devices.</p>
+<h4 id="code-example-storing-passkey-information">Code example: Storing passkey information<a hidden class="anchor" aria-hidden="true" href="#code-example-storing-passkey-information">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">storePasskeyInfo</span>(<span style="color:#a6e22e">credential</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">passkeyInfo</span> <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">id</span><span style="color:#f92672">:</span> Array.<span style="color:#a6e22e">from</span>(<span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Uint8Array</span>(<span style="color:#a6e22e">credential</span>.<span style="color:#a6e22e">rawId</span>)),
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">publicKey</span><span style="color:#f92672">:</span> Array.<span style="color:#a6e22e">from</span>(<span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Uint8Array</span>(<span style="color:#a6e22e">credential</span>.<span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">getPublicKey</span>())),
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">transports</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">credential</span>.<span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">transports</span>
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Store passkeyInfo securely, e.g., in a database or secure storage
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;Stored passkey info:&#34;</span>, <span style="color:#a6e22e">passkeyInfo</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="validating-user-presence">Validating user presence<a hidden class="anchor" aria-hidden="true" href="#validating-user-presence">#</a></h3>
+<p>During authentication, it&rsquo;s crucial to verify the user&rsquo;s presence to prevent unauthorized access. This can be done using biometric sensors or other user verification methods supported by the device.</p>
+<h4 id="code-example-verifying-user-presence">Code example: Verifying user presence<a hidden class="anchor" aria-hidden="true" href="#code-example-verifying-user-presence">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">verifyUserPresence</span>(<span style="color:#a6e22e">publicKey</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">assertion</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">navigator</span>.<span style="color:#a6e22e">credentials</span>.<span style="color:#a6e22e">get</span>({ <span style="color:#a6e22e">publicKey</span> });
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">assertion</span>.<span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">userHandle</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;User presence verified:&#34;</span>, <span style="color:#a6e22e">assertion</span>);
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">error</span>(<span style="color:#e6db74">&#34;User presence could not be verified&#34;</span>);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">catch</span> (<span style="color:#a6e22e">error</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">error</span>(<span style="color:#e6db74">&#34;Verification failed:&#34;</span>, <span style="color:#a6e22e">error</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="what-are-the-security-considerations-for-cross-device-passkey-authentication">What are the security considerations for cross-device passkey authentication?<a hidden class="anchor" aria-hidden="true" href="#what-are-the-security-considerations-for-cross-device-passkey-authentication">#</a></h2>
+<p>Implementing cross-device passkey authentication requires careful attention to security to protect user data and prevent unauthorized access.</p>
+<h3 id="protecting-passkeys">Protecting passkeys<a hidden class="anchor" aria-hidden="true" href="#protecting-passkeys">#</a></h3>
+<p>Passkeys should be stored securely on the user&rsquo;s device and never transmitted over the network in plaintext. Use secure storage mechanisms provided by the operating system to protect passkeys.</p>
+<h3 id="preventing-phishing-attacks">Preventing phishing attacks<a hidden class="anchor" aria-hidden="true" href="#preventing-phishing-attacks">#</a></h3>
+<p>Since passkeys rely on cryptographic operations, they are inherently resistant to phishing attacks. However, it&rsquo;s still important to educate users about phishing attempts and encourage them to be cautious.</p>
+<h3 id="validating-user-presence-1">Validating user presence<a hidden class="anchor" aria-hidden="true" href="#validating-user-presence-1">#</a></h3>
+<p>Always validate user presence during authentication to ensure that the user is physically present and authorized to access the system. This can be done using biometric sensors or other user verification methods.</p>
+<h2 id="how-do-you-handle-errors-during-cross-device-passkey-authentication">How do you handle errors during cross-device passkey authentication?<a hidden class="anchor" aria-hidden="true" href="#how-do-you-handle-errors-during-cross-device-passkey-authentication">#</a></h2>
+<p>Errors can occur during the registration and authentication processes, and it&rsquo;s important to handle them gracefully to provide a good user experience.</p>
+<h3 id="common-errors-and-solutions">Common errors and solutions<a hidden class="anchor" aria-hidden="true" href="#common-errors-and-solutions">#</a></h3>
+<ul>
+<li><strong>Registration failed</strong>: Ensure that the device supports WebAuthn and that the user has granted permission to use biometric sensors.</li>
+<li><strong>Authentication failed</strong>: Verify that the passkey ID and other information are correct and that the user is present.</li>
+</ul>
+<h4 id="code-example-handling-registration-errors">Code example: Handling registration errors<a hidden class="anchor" aria-hidden="true" href="#code-example-handling-registration-errors">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">registerPasskey</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">publicKey</span> <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">rp</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">name</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;Example Corp&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">id</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;example.com&#34;</span>
+</span></span><span style="display:flex;"><span>        },
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">user</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">id</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Uint8Array</span>([<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>]),
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">name</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;johndoe@example.com&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">displayName</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;John Doe&#34;</span>
+</span></span><span style="display:flex;"><span>        },
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">pubKeyCredParams</span><span style="color:#f92672">:</span> [{ <span style="color:#a6e22e">alg</span><span style="color:#f92672">:</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">7</span>, <span style="color:#a6e22e">type</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;public-key&#34;</span> }],
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">attestation</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;direct&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">challenge</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Uint8Array</span>([<span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">6</span>, <span style="color:#ae81ff">7</span>, <span style="color:#ae81ff">8</span>]),
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">timeout</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">60000</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">authenticatorSelection</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">authenticatorAttachment</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;platform&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">residentKey</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;required&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">userVerification</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;required&#34;</span>
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">credential</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">navigator</span>.<span style="color:#a6e22e">credentials</span>.<span style="color:#a6e22e">create</span>({ <span style="color:#a6e22e">publicKey</span> });
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;Passkey registered:&#34;</span>, <span style="color:#a6e22e">credential</span>);
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">catch</span> (<span style="color:#a6e22e">error</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">error</span>.<span style="color:#a6e22e">name</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#34;NotAllowedError&#34;</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">error</span>(<span style="color:#e6db74">&#34;User denied permission to use biometric sensors&#34;</span>);
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">error</span>(<span style="color:#e6db74">&#34;Registration failed:&#34;</span>, <span style="color:#a6e22e">error</span>);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h4 id="code-example-handling-authentication-errors">Code example: Handling authentication errors<a hidden class="anchor" aria-hidden="true" href="#code-example-handling-authentication-errors">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">authenticateWithPasskey</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">publicKey</span> <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">challenge</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Uint8Array</span>([<span style="color:#ae81ff">9</span>, <span style="color:#ae81ff">10</span>, <span style="color:#ae81ff">11</span>, <span style="color:#ae81ff">12</span>]),
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">allowCredentials</span><span style="color:#f92672">:</span> [{
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">type</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;public-key&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">id</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Uint8Array</span>([<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>])
+</span></span><span style="display:flex;"><span>        }],
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">timeout</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">60000</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">userVerification</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;required&#34;</span>
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">assertion</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">navigator</span>.<span style="color:#a6e22e">credentials</span>.<span style="color:#a6e22e">get</span>({ <span style="color:#a6e22e">publicKey</span> });
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;Authentication successful:&#34;</span>, <span style="color:#a6e22e">assertion</span>);
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">catch</span> (<span style="color:#a6e22e">error</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">error</span>.<span style="color:#a6e22e">name</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#34;NotAllowedError&#34;</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">error</span>(<span style="color:#e6db74">&#34;User denied permission to use biometric sensors&#34;</span>);
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">error</span>(<span style="color:#e6db74">&#34;Authentication failed:&#34;</span>, <span style="color:#a6e22e">error</span>);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="what-are-the-best-practices-for-implementing-cross-device-passkey-authentication">What are the best practices for implementing cross-device passkey authentication?<a hidden class="anchor" aria-hidden="true" href="#what-are-the-best-practices-for-implementing-cross-device-passkey-authentication">#</a></h2>
+<p>Following best practices ensures that your implementation is secure, efficient, and user-friendly.</p>
+<h3 id="use-secure-storage">Use secure storage<a hidden class="anchor" aria-hidden="true" href="#use-secure-storage">#</a></h3>
+<p>Store passkeys and other sensitive information securely on the user&rsquo;s device. Avoid transmitting passkeys over the network in plaintext.</p>
+<h3 id="validate-user-presence">Validate user presence<a hidden class="anchor" aria-hidden="true" href="#validate-user-presence">#</a></h3>
+<p>Always validate user presence during authentication to ensure that the user is physically present and authorized to access the system.</p>
+<h3 id="educate-users">Educate users<a hidden class="anchor" aria-hidden="true" href="#educate-users">#</a></h3>
+<p>Educate users about phishing attempts and encourage them to be cautious. Provide clear instructions on how to use passkeys and troubleshoot common issues.</p>
+<h3 id="test-thoroughly">Test thoroughly<a hidden class="anchor" aria-hidden="true" href="#test-thoroughly">#</a></h3>
+<p>Thoroughly test your implementation to identify and fix any issues before deploying it to production. Test on multiple devices and browsers to ensure compatibility.</p>
+<div class="notice info">💡 <strong>Key Point:</strong> Implementing cross-device passkey authentication requires careful attention to security and user experience.</div>
+<div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>Passkeys enhance security by using cryptographic keys instead of passwords.</li>
+<li>Use WebAuthn to register and authenticate passkeys.</li>
+<li>Store passkeys securely and validate user presence during authentication.</li>
+<li>Test thoroughly to ensure compatibility and security.</li>
+</ul>
+</div>
+<h2 id="comparison-of-different-authentication-methods">Comparison of different authentication methods<a hidden class="anchor" aria-hidden="true" href="#comparison-of-different-authentication-methods">#</a></h2>
+<table class="comparison-table">
+<thead><tr><th>Method</th><th>Pros</th><th>Cons</th><th>Use When</th></tr></thead>
+<tbody>
+<tr><td>Passwords</td><td>Simple to implement</td><td>Vulnerable to phishing, easy to forget</td><td>Legacy systems</td></tr>
+<tr><td>Multi-factor authentication (MFA)</td><td>More secure than passwords alone</td><td>Can be inconvenient for users</td><td>High-security environments</td></tr>
+<tr><td>Cross-device passkey authentication</td><td>Highly secure, convenient for users</td><td>Requires modern devices and browsers</td><td>User-friendly, secure systems</td></tr>
+</tbody>
+</table>
+<h2 id="quick-reference">Quick Reference<a hidden class="anchor" aria-hidden="true" href="#quick-reference">#</a></h2>
+<div class="quick-ref">
+<h4>📋 Quick Reference</h4>
+<ul>
+<li><code>navigator.credentials.create({ publicKey })</code> - Registers a passkey.</li>
+<li><code>navigator.credentials.get({ publicKey })</code> - Authenticates using a passkey.</li>
+<li><code>Array.from(new Uint8Array(array))</code> - Converts a Uint8Array to an array of numbers.</li>
+</ul>
+</div>
+<h2 id="expanding-the-implementation">Expanding the implementation<a hidden class="anchor" aria-hidden="true" href="#expanding-the-implementation">#</a></h2>
+<details class="enhanced">
+<summary>🔍 Click to see detailed explanation</summary>
+<div class="details-content">
+Expanding the implementation involves adding support for additional devices and integrating with existing systems. This may include:
+<ul>
+<li><strong>Adding support for multiple devices</strong>: Allow users to register passkeys on multiple devices and use them interchangeably.</li>
+<li><strong>Integrating with existing systems</strong>: Integrate cross-device passkey authentication with existing identity and access management (IAM) systems.</li>
+<li><strong>Handling edge cases</strong>: Address edge cases such as device loss or passkey deletion.</li>
+</ul>
+</div>
+</details>
+<h2 id="step-by-step-guide-to-implementing-cross-device-passkey-authentication">Step-by-step guide to implementing cross-device passkey authentication<a hidden class="anchor" aria-hidden="true" href="#step-by-step-guide-to-implementing-cross-device-passkey-authentication">#</a></h2>
+<div class="step-guide">
+<div class="step-item"><div class="step-content">
+<h4>Register the passkey</h4>
+Create a public-private key pair and store the private key securely on the user's device.
+</div></div>
+<div class="step-item"><div class="step-content">
+<h4>Authenticate with the passkey</h4>
+Verify the user's identity using the passkey on any device.
+</div></div>
+<div class="step-item"><div class="step-content">
+<h4>Store passkey information</h4>
+Store the passkey ID and other necessary information securely.
+</div></div>
+<div class="step-item"><div class="step-content">
+<h4>Validate user presence</h4>
+Ensure that the user is physically present and authorized to access the system.
+</div></div>
+</div>
+<h2 id="architecture-diagram">Architecture diagram<a hidden class="anchor" aria-hidden="true" href="#architecture-diagram">#</a></h2>
+<div class="mermaid">
+
+graph LR
+    A[User Device] --> B[WebAuthn]
+    B --> C[Auth Server]
+    C --> D[User Verification]
+    D --> E[Access Granted]
+    A --> F[Another Device]
+    F --> B
+    B --> G[Passkey Verification]
+    G --> E
+
+</div>
+
+<h2 id="terminal-output">Terminal output<a hidden class="anchor" aria-hidden="true" href="#terminal-output">#</a></h2>
+<div class="terminal">
+<div class="terminal-header">
+<span class="terminal-dot red"></span>
+<span class="terminal-dot yellow"></span>
+<span class="terminal-dot green"></span>
+<span class="terminal-title">Terminal</span>
+</div>
+<div class="terminal-body">
+<span class="prompt">$</span> curl -X POST https://auth.example.com/register
+<span class="output">{"status": "success", "message": "Passkey registered"}</span>
+</div>
+</div>
+<h2 id="stat-cards">Stat cards<a hidden class="anchor" aria-hidden="true" href="#stat-cards">#</a></h2>
+<div class="stat-grid">
+<div class="stat-card">
+<div class="stat-value">99.9%</div>
+<div class="stat-label">Uptime</div>
+</div>
+<div class="stat-card">
+<div class="stat-value">< 1s</div>
+<div class="stat-label">Latency</div>
+</div>
+<div class="stat-card">
+<div class="stat-value">10x</div>
+<div class="stat-label">Faster</div>
+</div>
+</div>
+<h2 id="version-badges">Version badges<a hidden class="anchor" aria-hidden="true" href="#version-badges">#</a></h2>
+<p><span class="version-badge new">v2.0 NEW</span>
+<span class="version-badge">v1.5</span>
+<span class="version-badge deprecated">DEPRECATED</span></p>
+<h2 id="checklist">Checklist<a hidden class="anchor" aria-hidden="true" href="#checklist">#</a></h2>
+<ul class="checklist">
+<li class="checked">Implement passkey registration - completed</li>
+<li class="checked">Implement passkey authentication - completed</li>
+<li>Store passkey information securely - pending</li>
+<li>Validate user presence - pending</li>
+</ul>
+<p>Implementing cross-device passkey authentication using a hybrid flow enhances security and improves the user experience. By following the steps outlined in this guide, you can create a secure and efficient authentication system that leverages the power of passkeys. That&rsquo;s it. Simple, secure, works.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/cross-device-authentication/">Cross-Device-Authentication</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/passkey-authentication/">Passkey-Authentication</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/hybrid-flow/">Hybrid-Flow</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/iam-engineering/">IAM Engineering</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/webauthn/">Webauthn</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/microsoft-s-entra-oauth-tokens-could-be-exploited-what-you-need-to-know/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Microsoft’s Entra OAuth Tokens Could Be Exploited - What You Need to Know</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/restrictive-covenants-emerging-issues-judicial-trends-and-employer-strategies-for-2026/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Restrictive Covenants: Emerging Issues, Judicial Trends, and Employer Strategies for 2026</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+
+<section class="post-feedback">
+  <p class="feedback-question">Was this article helpful?</p>
+  <div class="feedback-buttons">
+    <button class="feedback-btn feedback-yes" onclick="trackFeedback('yes', '\/posts\/cross-device-passkey-authentication-hybrid-flow-implementation\/')" aria-label="Yes, helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      Yes
+    </button>
+    <button class="feedback-btn feedback-no" onclick="trackFeedback('no', '\/posts\/cross-device-passkey-authentication-hybrid-flow-implementation\/')" aria-label="No, not helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>
+      No
+    </button>
+  </div>
+  <p class="feedback-thanks" style="display: none;">Thanks for your feedback!</p>
+</section>
+
+
+<section class="author-bio">
+  <div class="author-avatar">
+    <img src="/IAMDevBox.com.jpg" alt="IAMDevBox Author" width="64" height="64" loading="lazy">
+  </div>
+  <div class="author-info">
+    <h4>Written by IAMDevBox</h4>
+    <p>Enterprise IAM architect with 15+ years in identity modernization. Certified across ForgeRock, Ping Identity, SailPoint, AWS, and Azure.</p>
+    <div class="author-links">
+      <a href="https://twitter.com/iamdevbox" target="_blank" rel="noopener" title="Follow on X/Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/iamdevbox" target="_blank" rel="noopener" title="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="/contact/" title="Contact">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function trackFeedback(value, page) {
+  
+  document.querySelector('.feedback-buttons').style.display = 'none';
+  document.querySelector('.feedback-question').style.display = 'none';
+  document.querySelector('.feedback-thanks').style.display = 'block';
+
+  
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'post_feedback', {
+      'feedback_value': value,
+      'page_path': page
+    });
+  }
+
+  
+  localStorage.setItem('feedback_' + page, value);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const page = '\/posts\/cross-device-passkey-authentication-hybrid-flow-implementation\/';
+  if (localStorage.getItem('feedback_' + page)) {
+    document.querySelector('.feedback-buttons').style.display = 'none';
+    document.querySelector('.feedback-question').textContent = 'Thanks for your feedback!';
+  }
+});
+</script>
+
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/webauthn-conditional-ui-streamlined-passwordless-login-experience/" class="custom-link">
+              WebAuthn Conditional UI: Streamlined Passwordless Login Experience
+            </a>
+            <small class="custom-date">2026-02-06</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/forgerock-infrastructure-as-code-terraform-provider-for-identity-management/" class="custom-link">
+              ForgeRock Infrastructure as Code: Terraform Provider for Identity Management
+            </a>
+            <small class="custom-date">2026-01-30</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-custom-authentication-flows-building-advanced-login-journeys/" class="custom-link">
+              Keycloak Custom Authentication Flows: Building Advanced Login Journeys
+            </a>
+            <small class="custom-date">2026-01-28</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/migrating-from-forgerock-identity-cloud-to-pingone-aic-step-by-step-guide/" class="custom-link">
+              Migrating from ForgeRock Identity Cloud to PingOne AIC: Step-by-Step Guide
+            </a>
+            <small class="custom-date">2026-01-16</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/passkey-implementation-guide-from-registration-to-authentication/" class="custom-link">
+              Passkey Implementation Guide: From Registration to Authentication
+            </a>
+            <small class="custom-date">2026-01-14</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+                Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+                Go Secretless with Snowflake Workload Identity Federation - Snowflake
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+                JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+                OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+                Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

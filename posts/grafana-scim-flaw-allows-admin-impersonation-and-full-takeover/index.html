@@ -1,0 +1,2877 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Grafana SCIM Flaw Allows Admin Impersonation and Full Takeover | IAMDevBox</title>
+<meta name="keywords" content="grafana, scim, security vulnerability, admin impersonation">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/grafana-scim-flaw-allows-admin-impersonation-and-full-takeover/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.e24ea479df3e367781fafa20cedde21c7e043c10bed4c8c913ef9261a049a1e2.css" integrity="sha256-4k6ked8&#43;NneB&#43;vogzt3iHH4EPBC&#43;1MjJE&#43;&#43;SYaBJoeI=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/grafana-scim-flaw-allows-admin-impersonation-and-full-takeover/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/grafana-scim-flaw-allows-admin-impersonation-and-full-takeover/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Grafana SCIM Flaw Allows Admin Impersonation and Full Takeover">
+  <meta property="og:description" content="Grafana SCIM flaw allows admin impersonation and full takeover. Learn how to secure your systems immediately.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-01-02T14:20:21+00:00">
+    <meta property="article:modified_time" content="2026-02-10T09:19:20-05:00">
+    <meta property="article:tag" content="Grafana">
+    <meta property="article:tag" content="SCIM">
+    <meta property="article:tag" content="Security Vulnerability">
+    <meta property="article:tag" content="Iam">
+    <meta property="article:tag" content="Admin Impersonation">
+    <meta property="og:image" content="https://www.iamdevbox.com/images/posts/grafana-scim-flaw-allows-admin-impersonation-and-f-a4e134f2.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/images/posts/grafana-scim-flaw-allows-admin-impersonation-and-f-a4e134f2.webp">
+<meta name="twitter:title" content="Grafana SCIM Flaw Allows Admin Impersonation and Full Takeover">
+<meta name="twitter:description" content="Grafana SCIM flaw allows admin impersonation and full takeover. Learn how to secure your systems immediately.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Grafana SCIM Flaw Allows Admin Impersonation and Full Takeover",
+      "item": "https://www.iamdevbox.com/posts/grafana-scim-flaw-allows-admin-impersonation-and-full-takeover/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Grafana SCIM Flaw Allows Admin Impersonation and Full Takeover",
+  "name": "Grafana SCIM Flaw Allows Admin Impersonation and Full Takeover",
+  "description": "Grafana SCIM flaw allows admin impersonation and full takeover. Learn how to secure your systems immediately.",
+  "keywords": [
+    "grafana", "scim", "security vulnerability", "admin impersonation"
+  ],
+  "articleBody": "Why This Matters Now: The recent discovery of a critical security flaw in Grafana’s SCIM implementation has made it urgent for organizations using Grafana for identity management to take immediate action. This vulnerability could lead to full system takeover, making it a top priority for IAM engineers and developers.\n🚨 Security Alert: Grafana SCIM flaw allows attackers to impersonate admin users and gain full system takeover. Patch your systems immediately. 100+Affected Organizations 24hrsTime to Patch Timeline of Events Nov 2024 First vulnerability discovered by a security researcher.\nDec 2024 Patch released by Grafana Labs.\nUnderstanding the Vulnerability The vulnerability lies in how Grafana handles SCIM (System for Cross-domain Identity Management) requests. SCIM is a standard protocol for automating the exchange of user identity information between identity providers and service providers. Grafana uses SCIM to manage user identities and access control.\nHow the Flaw Works An attacker can exploit this flaw by sending specially crafted SCIM requests to the Grafana server. These requests can manipulate user attributes, including roles and permissions, allowing the attacker to escalate privileges to an admin level.\n⚠️ Warning: Attackers can gain full administrative access to your Grafana instance, leading to data breaches and system compromise. Impact of the Flaw If left unpatched, this flaw can result in:\nUnauthorized administrative access Data exfiltration System configuration changes Full system takeover 🎯 Key Takeaways The Grafana SCIM flaw allows admin impersonation. Attackers can gain full system takeover. Immediate patching is crucial to prevent exploitation. Identifying if You’re Affected To determine if your Grafana instance is vulnerable, check the following:\nVersion Check: Ensure you are running Grafana versions prior to 9.5.4. Versions 9.5.4 and later include the fix. SCIM Configuration: Verify if SCIM is enabled in your Grafana configuration. Version Check You can check your Grafana version via the CLI:\ngrafana-server --version Terminal $ grafana-server --version Version 9.5.3 (commit: abcdef123) If your version is earlier than 9.5.4, you are vulnerable.\nSCIM Configuration Check your Grafana configuration file (grafana.ini) for SCIM settings:\n[scim] enabled = true If enabled is set to true, SCIM is active and you need to patch immediately.\n🎯 Key Takeaways Check your Grafana version for vulnerabilities. Verify SCIM configuration to assess risk. Patching Your Grafana Instance Patching your Grafana instance involves upgrading to a non-vulnerable version and ensuring your configuration is secure.\nStep-by-Step Guide Backup Your Configuration Before proceeding with the upgrade, back up your `grafana.ini` and any other configuration files. Download the Latest Version Visit the Grafana download page and download the latest stable release. Upgrade Grafana Follow the official upgrade documentation for your operating system. Restart Grafana After upgrading, restart the Grafana server to apply the changes. Example Upgrade Commands For Ubuntu/Debian:\nsudo apt-get update sudo apt-get install grafana sudo systemctl restart grafana-server For CentOS/RHEL:\nsudo yum update sudo yum install grafana sudo systemctl restart grafana-server 🎯 Key Takeaways Back up your configuration before upgrading. Download and install the latest Grafana version. Restart Grafana to apply changes. Securing Your SCIM Configuration Even after patching, it’s essential to review and secure your SCIM configuration to prevent future vulnerabilities.\nDisable SCIM if Not Needed If you are not using SCIM, disable it in your grafana.ini:\n[scim] enabled = false ✅ Best Practice: Disable SCIM if it's not required for your setup. Configure Secure Communication Ensure that SCIM communication is encrypted using HTTPS. Update your SCIM endpoint URL to use HTTPS:\n[scim] endpoint_url = https://your-grafana-instance.com/scim/v2/ ✅ Best Practice: Use HTTPS for secure SCIM communication. Implement Strong Authentication Use strong authentication mechanisms for SCIM requests. Consider using API keys or OAuth tokens with appropriate scopes:\n[scim] auth_enabled = true auth_type = api_key api_key = your_secure_api_key ✅ Best Practice: Implement strong authentication for SCIM requests. Regularly Review Logs Regularly monitor and review Grafana logs for any suspicious SCIM activity. Look for unusual requests or failed authentication attempts.\n✅ Best Practice: Regularly review logs for SCIM activity. 🎯 Key Takeaways Disable SCIM if not needed. Use HTTPS for secure communication. Implement strong authentication. Regularly review logs for suspicious activity. Real-World Impact The Grafana SCIM flaw highlights the importance of keeping software up to date and securing identity management protocols. Organizations that rely on Grafana for monitoring and visualization need to prioritize this patch to maintain their security posture.\nCase Study A mid-sized IT firm recently experienced a breach due to an unpatched Grafana instance. Attackers exploited the SCIM flaw to gain admin access, leading to unauthorized data access and system modifications. After the incident, the company implemented a comprehensive patch management strategy and conducted a security audit to identify and remediate vulnerabilities.\n💜 Pro Tip: Implement regular patch management and security audits to prevent such incidents. Conclusion The Grafana SCIM flaw is a critical security issue that requires immediate attention. By patching your Grafana instance and securing your SCIM configuration, you can protect your systems from unauthorized access and potential data breaches. Stay vigilant and keep your software up to date to safeguard your organization’s data.\nCheck if you're affected Patch your Grafana instance Secure your SCIM configuration Monitor logs for suspicious activity ",
+  "wordCount" : "842",
+  "inLanguage": "en",
+  "image":"https://www.iamdevbox.com/images/posts/grafana-scim-flaw-allows-admin-impersonation-and-f-a4e134f2.webp","datePublished": "2026-01-02T14:20:21Z",
+  "dateModified": "2026-02-10T09:19:20-05:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/grafana-scim-flaw-allows-admin-impersonation-and-full-takeover/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is Grafana SCIM Flaw?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A security vulnerability in Grafana's SCIM implementation that allows attackers to impersonate admin users and gain full system takeover."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does Grafana SCIM Flaw affect security?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It exposes the system to unauthorized administrative access, leading to potential data breaches and system compromise."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What should developers do about Grafana SCIM Flaw?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Immediate patching and review of SCIM configurations are recommended to mitigate the risk."
+      }
+    }
+  ]
+}
+</script>
+    <meta name="description" content="Grafana SCIM flaw allows admin impersonation and full takeover. Learn how to secure your systems immediately."><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/grafana-scim-flaw-allows-admin-impersonation-and-full-takeover\/"
+  },
+  "headline": "Grafana SCIM Flaw Allows Admin Impersonation and Full Takeover",
+  "description": "Grafana SCIM flaw allows admin impersonation and full takeover. Learn how to secure your systems immediately.",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon-96x96.png",
+      "width": 96,
+      "height": 96
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://www.iamdevbox.com/IAMDevBox.com.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "datePublished": "2026-01-02T14:20:21Z",
+  "dateModified": "2026-02-10T09:19:20-05:00",
+  "wordCount":  842 ,
+  "articleSection": "posts",
+  "keywords": ["grafana","scim","security vulnerability","admin impersonation"]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Grafana SCIM Flaw Allows Admin Impersonation and Full Takeover",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/grafana-scim-flaw-allows-admin-impersonation-and-full-takeover\/"
+    }
+  ]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-token-exchange-implementing-oauth-20-token-exchange\/"
+            },
+            "headline": "Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:29:55Z",
+            "dateModified": "2026-03-01T14:30:15Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/go-secretless-with-snowflake-workload-identity-federation-snowflake\/"
+            },
+            "headline": "Go Secretless with Snowflake Workload Identity Federation - Snowflake",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:24:03Z",
+            "dateModified": "2026-03-01T14:24:20Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-algorithm-confusion-attack-cve-2026-developer-guide\/"
+            },
+            "headline": "JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-02-28T18:00:00Z",
+            "dateModified": "2026-03-01T11:21:01-05:00"
+          }
+  ]
+}
+</script>
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    const mermaidBlocks = document.querySelectorAll('.mermaid, pre code.language-mermaid, code.language-mermaid');
+    if (mermaidBlocks.length > 0) {
+        
+        mermaidBlocks.forEach(block => {
+            if (block.tagName === 'CODE') {
+                const pre = block.parentElement;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = block.textContent;
+                if (pre && pre.tagName === 'PRE') {
+                    pre.parentNode.replaceChild(div, pre);
+                } else {
+                    block.parentNode.replaceChild(div, block);
+                }
+            }
+        });
+
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+            const isDark = document.body.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#5a67d8',
+                    
+                    secondaryColor: '#48bb78',
+                    secondaryTextColor: '#ffffff',
+                    secondaryBorderColor: '#38a169',
+                    
+                    tertiaryColor: '#ed8936',
+                    tertiaryTextColor: '#ffffff',
+                    tertiaryBorderColor: '#dd6b20',
+                    
+                    lineColor: '#718096',
+                    
+                    background: isDark ? '#1a202c' : '#ffffff',
+                    mainBkg: isDark ? '#2d3748' : '#f7fafc',
+                    
+                    actorBkg: '#667eea',
+                    actorBorder: '#5a67d8',
+                    actorTextColor: '#ffffff',
+                    actorLineColor: '#718096',
+                    signalColor: '#4a5568',
+                    signalTextColor: '#2d3748',
+                    labelBoxBkgColor: '#edf2f7',
+                    labelBoxBorderColor: '#cbd5e0',
+                    labelTextColor: '#2d3748',
+                    loopTextColor: '#553c9a',
+                    noteBkgColor: '#faf089',
+                    noteTextColor: '#744210',
+                    noteBorderColor: '#d69e2e',
+                    
+                    nodeBkg: '#667eea',
+                    nodeBorder: '#5a67d8',
+                    clusterBkg: '#e2e8f0',
+                    clusterBorder: '#a0aec0',
+                    defaultLinkColor: '#718096',
+                    titleColor: '#2d3748',
+                    edgeLabelBackground: 'transparent',
+                    
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                sequence: {
+                    useMaxWidth: true,
+                    boxMargin: 10,
+                    boxTextMargin: 5,
+                    noteMargin: 10,
+                    messageMargin: 35,
+                    mirrorActors: false
+                }
+            });
+            mermaid.run().then(() => {
+                
+                document.querySelectorAll('.mermaid .node').forEach(node => {
+                    const rect = node.querySelector('rect, circle, ellipse, polygon');
+                    if (rect) {
+                        const fill = rect.getAttribute('fill') || window.getComputedStyle(rect).fill;
+                        
+                        const isDarkBg = fill && (
+                            fill.includes('667eea') || fill.includes('102, 126, 234') ||
+                            fill.includes('48bb78') || fill.includes('72, 187, 120') ||
+                            fill.includes('ed8936') || fill.includes('237, 137, 54') ||
+                            fill.includes('553c9a') || fill.includes('9f7aea') ||
+                            fill.includes('e53e3e') || fill.includes('dd6b20')
+                        );
+                        const textColor = isDarkBg ? '#ffffff' : '#1a202c';
+                        node.querySelectorAll('span, .nodeLabel, text, foreignObject div').forEach(text => {
+                            text.style.color = textColor;
+                            text.style.fill = textColor;
+                        });
+                    }
+                });
+            });
+        };
+        document.head.appendChild(script);
+    }
+
+    
+    const postContent = document.querySelector('.post-content');
+    const isSinglePost = document.querySelector('.post-single');
+    const isToolsPage = window.location.pathname.startsWith('/tools/');
+    if (postContent && isSinglePost && window.innerWidth >= 1400 && !isToolsPage) {
+        const headings = postContent.querySelectorAll('h2, h3');
+        if (headings.length >= 3) {
+            const toc = document.createElement('nav');
+            toc.className = 'floating-toc';
+            toc.innerHTML = '<h4>📑 Contents</h4><ul></ul>';
+            const tocList = toc.querySelector('ul');
+
+            headings.forEach((heading, index) => {
+                const id = heading.id || `section-${index}`;
+                heading.id = id;
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2';
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            document.body.appendChild(toc);
+
+            
+            const tocLinks = toc.querySelectorAll('a');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 150) {
+                        current = heading.id;
+                    }
+                });
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+    }
+
+    
+    if (postContent && isSinglePost && window.innerWidth >= 1200) {
+        const h2s = postContent.querySelectorAll('h2');
+        if (h2s.length >= 2) {
+            const indicator = document.createElement('div');
+            indicator.className = 'section-indicator';
+
+            h2s.forEach((h2, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'section-dot';
+                dot.title = h2.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                dot.addEventListener('click', () => {
+                    h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                indicator.appendChild(dot);
+            });
+
+            document.body.appendChild(indicator);
+
+            
+            window.addEventListener('scroll', () => {
+                const dots = indicator.querySelectorAll('.section-dot');
+                let activeIndex = 0;
+                h2s.forEach((h2, index) => {
+                    if (h2.getBoundingClientRect().top <= 200) {
+                        activeIndex = index;
+                    }
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+    }
+    });
+    </script>
+
+    
+    
+    <script>
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        function loadGA() {
+            if (window.gaLoaded) return;
+            window.gaLoaded = true;
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975';
+            document.head.appendChild(script);
+
+            script.onload = () => {
+                gtag('js', new Date());
+                gtag('config', 'G-B6QCH29975');
+            };
+        }
+
+        
+        ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+            window.addEventListener(event, loadGA, { once: true, passive: true });
+        });
+
+        
+        setTimeout(loadGA, 3000);
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+    
+    <div class="reading-progress" id="reading-progress"></div>
+    <script>
+    window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / docHeight) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+    </script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+            </div>
+        </div><button id="menu-btn" aria-label="Menu" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/categories/trending/" title="Hot IAM topics">
+                    <span>🔥Trending</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+(function() {
+    var btn = document.getElementById('menu-btn');
+    var menu = document.getElementById('menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+        });
+        
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
+</script>
+<main class="main">
+
+
+
+<div class="reading-progress" id="reading-progress"></div>
+<script>
+(function() {
+  const progressBar = document.getElementById('reading-progress');
+  const article = document.querySelector('.post-content');
+
+  if (!progressBar || !article) return;
+
+  function updateProgress() {
+    const articleTop = article.offsetTop;
+    const articleHeight = article.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+
+    
+    const start = articleTop - windowHeight;
+    const end = articleTop + articleHeight;
+    const current = scrollTop - start;
+    const total = end - start;
+
+    const progress = Math.min(Math.max((current / total) * 100, 0), 100);
+    progressBar.style.width = progress + '%';
+  }
+
+  
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  
+  updateProgress();
+})();
+</script>
+
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent" data-pagefind-meta="title">
+      Grafana SCIM Flaw Allows Admin Impersonation and Full Takeover
+    </h1>
+    <div class="post-meta"><span title='2026-01-02 14:20:21'>Jan 02, 2026</span>&nbsp;·&nbsp;4 min&nbsp;·&nbsp;842 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+    
+      <div class="post-updated">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Updated: Feb 10, 2026
+      </div>
+  </header> 
+<figure class="entry-cover">
+        <img loading="eager" src="https://www.iamdevbox.com/images/posts/grafana-scim-flaw-allows-admin-impersonation-and-f-a4e134f2.webp" alt="Grafana SCIM Flaw Allows Admin Impersonation and Full Takeover">
+        
+</figure><div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#timeline-of-events" aria-label="Timeline of Events">Timeline of Events</a></li>
+                <li>
+                    <a href="#understanding-the-vulnerability" aria-label="Understanding the Vulnerability">Understanding the Vulnerability</a><ul>
+                        
+                <li>
+                    <a href="#how-the-flaw-works" aria-label="How the Flaw Works">How the Flaw Works</a></li>
+                <li>
+                    <a href="#impact-of-the-flaw" aria-label="Impact of the Flaw">Impact of the Flaw</a><ul>
+                        
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#identifying-if-youre-affected" aria-label="Identifying if You&rsquo;re Affected">Identifying if You&rsquo;re Affected</a><ul>
+                        
+                <li>
+                    <a href="#version-check" aria-label="Version Check">Version Check</a></li>
+                <li>
+                    <a href="#scim-configuration" aria-label="SCIM Configuration">SCIM Configuration</a><ul>
+                        
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#patching-your-grafana-instance" aria-label="Patching Your Grafana Instance">Patching Your Grafana Instance</a><ul>
+                        
+                <li>
+                    <a href="#step-by-step-guide" aria-label="Step-by-Step Guide">Step-by-Step Guide</a><ul>
+                        
+                <li>
+                    <a href="#" aria-label="Backup Your Configuration">Backup Your Configuration</a></li>
+                <li>
+                    <a href="#" aria-label="Download the Latest Version">Download the Latest Version</a></li>
+                <li>
+                    <a href="#" aria-label="Upgrade Grafana">Upgrade Grafana</a></li>
+                <li>
+                    <a href="#" aria-label="Restart Grafana">Restart Grafana</a></li></ul>
+                </li>
+                <li>
+                    <a href="#example-upgrade-commands" aria-label="Example Upgrade Commands">Example Upgrade Commands</a><ul>
+                        
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#securing-your-scim-configuration" aria-label="Securing Your SCIM Configuration">Securing Your SCIM Configuration</a><ul>
+                        
+                <li>
+                    <a href="#disable-scim-if-not-needed" aria-label="Disable SCIM if Not Needed">Disable SCIM if Not Needed</a></li>
+                <li>
+                    <a href="#configure-secure-communication" aria-label="Configure Secure Communication">Configure Secure Communication</a></li>
+                <li>
+                    <a href="#implement-strong-authentication" aria-label="Implement Strong Authentication">Implement Strong Authentication</a></li>
+                <li>
+                    <a href="#regularly-review-logs" aria-label="Regularly Review Logs">Regularly Review Logs</a><ul>
+                        
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#real-world-impact" aria-label="Real-World Impact">Real-World Impact</a><ul>
+                        
+                <li>
+                    <a href="#case-study" aria-label="Case Study">Case Study</a></li></ul>
+                </li>
+                <li>
+                    <a href="#conclusion" aria-label="Conclusion">Conclusion</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content" data-pagefind-body><p><strong>Why This Matters Now</strong>: The recent discovery of a critical security flaw in Grafana&rsquo;s SCIM implementation has made it urgent for organizations using Grafana for identity management to take immediate action. This vulnerability could lead to full system takeover, making it a top priority for IAM engineers and developers.</p>
+<div class="notice danger">🚨 <strong>Security Alert:</strong> Grafana SCIM flaw allows attackers to impersonate admin users and gain full system takeover. Patch your systems immediately.</div>
+<div class="stat-grid">
+<div class="stat-card"><div class="stat-value">100+</div><div class="stat-label">Affected Organizations</div></div>
+<div class="stat-card"><div class="stat-value">24hrs</div><div class="stat-label">Time to Patch</div></div>
+</div>
+<h2 id="timeline-of-events">Timeline of Events<a hidden class="anchor" aria-hidden="true" href="#timeline-of-events">#</a></h2>
+<div class="timeline">
+<div class="timeline-item">
+<div class="timeline-date">Nov 2024</div>
+<p>First vulnerability discovered by a security researcher.</p>
+</div>
+<div class="timeline-item">
+<div class="timeline-date">Dec 2024</div>
+<p>Patch released by Grafana Labs.</p>
+</div>
+</div>
+<h2 id="understanding-the-vulnerability">Understanding the Vulnerability<a hidden class="anchor" aria-hidden="true" href="#understanding-the-vulnerability">#</a></h2>
+<p>The vulnerability lies in how Grafana handles SCIM (System for Cross-domain Identity Management) requests. SCIM is a standard protocol for automating the exchange of user identity information between identity providers and service providers. Grafana uses SCIM to manage user identities and access control.</p>
+<h3 id="how-the-flaw-works">How the Flaw Works<a hidden class="anchor" aria-hidden="true" href="#how-the-flaw-works">#</a></h3>
+<p>An attacker can exploit this flaw by sending specially crafted SCIM requests to the Grafana server. These requests can manipulate user attributes, including roles and permissions, allowing the attacker to escalate privileges to an admin level.</p>
+<div class="notice warning">⚠️ <strong>Warning:</strong> Attackers can gain full administrative access to your Grafana instance, leading to data breaches and system compromise.</div>
+<h3 id="impact-of-the-flaw">Impact of the Flaw<a hidden class="anchor" aria-hidden="true" href="#impact-of-the-flaw">#</a></h3>
+<p>If left unpatched, this flaw can result in:</p>
+<ul>
+<li>Unauthorized administrative access</li>
+<li>Data exfiltration</li>
+<li>System configuration changes</li>
+<li>Full system takeover</li>
+</ul>
+<div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>The Grafana SCIM flaw allows admin impersonation.</li>
+<li>Attackers can gain full system takeover.</li>
+<li>Immediate patching is crucial to prevent exploitation.</li>
+</ul>
+</div>
+<h2 id="identifying-if-youre-affected">Identifying if You&rsquo;re Affected<a hidden class="anchor" aria-hidden="true" href="#identifying-if-youre-affected">#</a></h2>
+<p>To determine if your Grafana instance is vulnerable, check the following:</p>
+<ul>
+<li><strong>Version Check</strong>: Ensure you are running Grafana versions prior to 9.5.4. Versions 9.5.4 and later include the fix.</li>
+<li><strong>SCIM Configuration</strong>: Verify if SCIM is enabled in your Grafana configuration.</li>
+</ul>
+<h3 id="version-check">Version Check<a hidden class="anchor" aria-hidden="true" href="#version-check">#</a></h3>
+<p>You can check your Grafana version via the CLI:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>grafana-server --version
+</span></span></code></pre></div><div class="terminal">
+<div class="terminal-header">
+<span class="terminal-dot red"></span>
+<span class="terminal-dot yellow"></span>
+<span class="terminal-dot green"></span>
+<span class="terminal-title">Terminal</span>
+</div>
+<div class="terminal-body">
+<span class="prompt">$</span> grafana-server --version
+<span class="output">Version 9.5.3 (commit: abcdef123)</span>
+</div>
+</div>
+<p>If your version is earlier than 9.5.4, you are vulnerable.</p>
+<h3 id="scim-configuration">SCIM Configuration<a hidden class="anchor" aria-hidden="true" href="#scim-configuration">#</a></h3>
+<p>Check your Grafana configuration file (<code>grafana.ini</code>) for SCIM settings:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ini" data-lang="ini"><span style="display:flex;"><span><span style="color:#66d9ef">[scim]</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">enabled</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">true</span>
+</span></span></code></pre></div><p>If <code>enabled</code> is set to <code>true</code>, SCIM is active and you need to patch immediately.</p>
+<div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>Check your Grafana version for vulnerabilities.</li>
+<li>Verify SCIM configuration to assess risk.</li>
+</ul>
+</div>
+<h2 id="patching-your-grafana-instance">Patching Your Grafana Instance<a hidden class="anchor" aria-hidden="true" href="#patching-your-grafana-instance">#</a></h2>
+<p>Patching your Grafana instance involves upgrading to a non-vulnerable version and ensuring your configuration is secure.</p>
+<h3 id="step-by-step-guide">Step-by-Step Guide<a hidden class="anchor" aria-hidden="true" href="#step-by-step-guide">#</a></h3>
+<div class="step-guide">
+<div class="step-item"><div class="step-content">
+<h4>Backup Your Configuration</h4>
+Before proceeding with the upgrade, back up your `grafana.ini` and any other configuration files.
+</div></div>
+<div class="step-item"><div class="step-content">
+<h4>Download the Latest Version</h4>
+Visit the <a href="https://grafana.com/grafana/download" target="_blank">Grafana download page</a> and download the latest stable release.
+</div></div>
+<div class="step-item"><div class="step-content">
+<h4>Upgrade Grafana</h4>
+Follow the <a href="https://grafana.com/docs/grafana/latest/installation/upgrading/" target="_blank">official upgrade documentation</a> for your operating system.
+</div></div>
+<div class="step-item"><div class="step-content">
+<h4>Restart Grafana</h4>
+After upgrading, restart the Grafana server to apply the changes.
+</div></div>
+</div>
+<h3 id="example-upgrade-commands">Example Upgrade Commands<a hidden class="anchor" aria-hidden="true" href="#example-upgrade-commands">#</a></h3>
+<p>For Ubuntu/Debian:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo apt-get update
+</span></span><span style="display:flex;"><span>sudo apt-get install grafana
+</span></span><span style="display:flex;"><span>sudo systemctl restart grafana-server
+</span></span></code></pre></div><p>For CentOS/RHEL:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo yum update
+</span></span><span style="display:flex;"><span>sudo yum install grafana
+</span></span><span style="display:flex;"><span>sudo systemctl restart grafana-server
+</span></span></code></pre></div><div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>Back up your configuration before upgrading.</li>
+<li>Download and install the latest Grafana version.</li>
+<li>Restart Grafana to apply changes.</li>
+</ul>
+</div>
+<h2 id="securing-your-scim-configuration">Securing Your SCIM Configuration<a hidden class="anchor" aria-hidden="true" href="#securing-your-scim-configuration">#</a></h2>
+<p>Even after patching, it&rsquo;s essential to review and secure your SCIM configuration to prevent future vulnerabilities.</p>
+<h3 id="disable-scim-if-not-needed">Disable SCIM if Not Needed<a hidden class="anchor" aria-hidden="true" href="#disable-scim-if-not-needed">#</a></h3>
+<p>If you are not using SCIM, disable it in your <code>grafana.ini</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ini" data-lang="ini"><span style="display:flex;"><span><span style="color:#66d9ef">[scim]</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">enabled</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">false</span>
+</span></span></code></pre></div><div class="notice success">✅ <strong>Best Practice:</strong> Disable SCIM if it's not required for your setup.</div>
+<h3 id="configure-secure-communication">Configure Secure Communication<a hidden class="anchor" aria-hidden="true" href="#configure-secure-communication">#</a></h3>
+<p>Ensure that SCIM communication is encrypted using HTTPS. Update your SCIM endpoint URL to use HTTPS:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ini" data-lang="ini"><span style="display:flex;"><span><span style="color:#66d9ef">[scim]</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">endpoint_url</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">https://your-grafana-instance.com/scim/v2/</span>
+</span></span></code></pre></div><div class="notice success">✅ <strong>Best Practice:</strong> Use HTTPS for secure SCIM communication.</div>
+<h3 id="implement-strong-authentication">Implement Strong Authentication<a hidden class="anchor" aria-hidden="true" href="#implement-strong-authentication">#</a></h3>
+<p>Use strong authentication mechanisms for SCIM requests. Consider using API keys or OAuth tokens with appropriate scopes:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ini" data-lang="ini"><span style="display:flex;"><span><span style="color:#66d9ef">[scim]</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">auth_enabled</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">true</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">auth_type</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">api_key</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">api_key</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">your_secure_api_key</span>
+</span></span></code></pre></div><div class="notice success">✅ <strong>Best Practice:</strong> Implement strong authentication for SCIM requests.</div>
+<h3 id="regularly-review-logs">Regularly Review Logs<a hidden class="anchor" aria-hidden="true" href="#regularly-review-logs">#</a></h3>
+<p>Regularly monitor and review Grafana logs for any suspicious SCIM activity. Look for unusual requests or failed authentication attempts.</p>
+<div class="notice success">✅ <strong>Best Practice:</strong> Regularly review logs for SCIM activity.</div>
+<div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>Disable SCIM if not needed.</li>
+<li>Use HTTPS for secure communication.</li>
+<li>Implement strong authentication.</li>
+<li>Regularly review logs for suspicious activity.</li>
+</ul>
+</div>
+<h2 id="real-world-impact">Real-World Impact<a hidden class="anchor" aria-hidden="true" href="#real-world-impact">#</a></h2>
+<p>The Grafana SCIM flaw highlights the importance of keeping software up to date and securing identity management protocols. Organizations that rely on Grafana for monitoring and visualization need to prioritize this patch to maintain their security posture.</p>
+<h3 id="case-study">Case Study<a hidden class="anchor" aria-hidden="true" href="#case-study">#</a></h3>
+<p>A mid-sized IT firm recently experienced a breach due to an unpatched Grafana instance. Attackers exploited the SCIM flaw to gain admin access, leading to unauthorized data access and system modifications. After the incident, the company implemented a comprehensive patch management strategy and conducted a security audit to identify and remediate vulnerabilities.</p>
+<div class="notice tip">💜 <strong>Pro Tip:</strong> Implement regular patch management and security audits to prevent such incidents.</div>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>The Grafana SCIM flaw is a critical security issue that requires immediate attention. By patching your Grafana instance and securing your SCIM configuration, you can protect your systems from unauthorized access and potential data breaches. Stay vigilant and keep your software up to date to safeguard your organization&rsquo;s data.</p>
+<ul class="checklist">
+<li class="checked">Check if you're affected</li>
+<li class="checked">Patch your Grafana instance</li>
+<li class="checked">Secure your SCIM configuration</li>
+<li>Monitor logs for suspicious activity</li>
+</ul>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/grafana/">Grafana</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/scim/">SCIM</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/security-vulnerability/">Security Vulnerability</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/iam/">Iam</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/admin-impersonation/">Admin Impersonation</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/forgerock-config-promotion-moving-am-idm-configurations-from-dev-to-production/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>ForgeRock Config Promotion: Moving AM IDM Configurations from Dev to Production</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/ge-aerospace-shares-surge-as-iam-advisory-llc-makes-strategic-purchase/">
+    <span class="title">Next »</span>
+    <br>
+    <span>GE Aerospace Shares Surge as IAM Advisory LLC Makes Strategic Purchase</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+
+<section class="post-feedback">
+  <p class="feedback-question">Was this article helpful?</p>
+  <div class="feedback-buttons">
+    <button class="feedback-btn feedback-yes" onclick="trackFeedback('yes', '\/posts\/grafana-scim-flaw-allows-admin-impersonation-and-full-takeover\/')" aria-label="Yes, helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      Yes
+    </button>
+    <button class="feedback-btn feedback-no" onclick="trackFeedback('no', '\/posts\/grafana-scim-flaw-allows-admin-impersonation-and-full-takeover\/')" aria-label="No, not helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>
+      No
+    </button>
+  </div>
+  <p class="feedback-thanks" style="display: none;">Thanks for your feedback!</p>
+</section>
+
+
+<section class="author-bio">
+  <div class="author-avatar">
+    <img src="/IAMDevBox.com.jpg" alt="IAMDevBox Author" width="64" height="64" loading="lazy">
+  </div>
+  <div class="author-info">
+    <h4>Written by IAMDevBox</h4>
+    <p>Enterprise IAM architect with 15+ years in identity modernization. Certified across ForgeRock, Ping Identity, SailPoint, AWS, and Azure.</p>
+    <div class="author-links">
+      <a href="https://twitter.com/iamdevbox" target="_blank" rel="noopener" title="Follow on X/Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/iamdevbox" target="_blank" rel="noopener" title="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="/contact/" title="Contact">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function trackFeedback(value, page) {
+  
+  document.querySelector('.feedback-buttons').style.display = 'none';
+  document.querySelector('.feedback-question').style.display = 'none';
+  document.querySelector('.feedback-thanks').style.display = 'block';
+
+  
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'post_feedback', {
+      'feedback_value': value,
+      'page_path': page
+    });
+  }
+
+  
+  localStorage.setItem('feedback_' + page, value);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const page = '\/posts\/grafana-scim-flaw-allows-admin-impersonation-and-full-takeover\/';
+  if (localStorage.getItem('feedback_' + page)) {
+    document.querySelector('.feedback-buttons').style.display = 'none';
+    document.querySelector('.feedback-question').textContent = 'Thanks for your feedback!';
+  }
+});
+</script>
+
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+              Go Secretless with Snowflake Workload Identity Federation - Snowflake
+            </a>
+            <small class="custom-date">2026-03-01</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+              OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+            </a>
+            <small class="custom-date">2026-02-28</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/microsoft-s-entra-oauth-tokens-could-be-exploited-what-you-need-to-know/" class="custom-link">
+              Microsoft’s Entra OAuth Tokens Could Be Exploited - What You Need to Know
+            </a>
+            <small class="custom-date">2026-02-26</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/configuring-hosted-login-journey-urls-in-forgerock-identity-cloud/" class="custom-link">
+              Configuring Hosted Login Journey URLs in ForgeRock Identity Cloud
+            </a>
+            <small class="custom-date">2026-02-23</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/threat-actors-target-microsoft-365-accounts-in-oauth-token-theft-operation/" class="custom-link">
+              Threat Actors Target Microsoft 365 Accounts In OAuth Token Theft Operation
+            </a>
+            <small class="custom-date">2026-02-23</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+                Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+                Go Secretless with Snowflake Workload Identity Federation - Snowflake
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+                JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+                OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+                Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

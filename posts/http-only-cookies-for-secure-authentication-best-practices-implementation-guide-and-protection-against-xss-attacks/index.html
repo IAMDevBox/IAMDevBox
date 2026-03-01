@@ -1,0 +1,2674 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>HTTP-Only Cookies for Secure Authentication: Best Practices, Implementation Guide, and Protection Against XSS Attacks | IAMDevBox</title>
+<meta name="keywords" content="best practices, auth, web-security, protection against xss attacks, http-only-cookies, only cookies, xss-protection, iam-engineering, authentication, implementation guide">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/http-only-cookies-for-secure-authentication-best-practices-implementation-guide-and-protection-against-xss-attacks/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.e24ea479df3e367781fafa20cedde21c7e043c10bed4c8c913ef9261a049a1e2.css" integrity="sha256-4k6ked8&#43;NneB&#43;vogzt3iHH4EPBC&#43;1MjJE&#43;&#43;SYaBJoeI=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/http-only-cookies-for-secure-authentication-best-practices-implementation-guide-and-protection-against-xss-attacks/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/http-only-cookies-for-secure-authentication-best-practices-implementation-guide-and-protection-against-xss-attacks/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="HTTP-Only Cookies for Secure Authentication: Best Practices, Implementation Guide, and Protection Against XSS Attacks">
+  <meta property="og:description" content="Learn how to use HTTP-Only cookies for secure authentication, protect your apps, and implement best practices to enhance security in this DevOps guide.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-11-25T03:43:08+00:00">
+    <meta property="article:modified_time" content="2025-12-21T13:28:27-05:00">
+    <meta property="article:tag" content="Http-Only-Cookies">
+    <meta property="article:tag" content="Secure-Authentication">
+    <meta property="article:tag" content="Xss-Protection">
+    <meta property="article:tag" content="Web Security">
+    <meta property="article:tag" content="IAM Engineering">
+    <meta property="og:image" content="https://www.iamdevbox.com/images/posts/http-only-cookies-for-secure-authentication--best--eb5572a9.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/images/posts/http-only-cookies-for-secure-authentication--best--eb5572a9.webp">
+<meta name="twitter:title" content="HTTP-Only Cookies for Secure Authentication: Best Practices, Implementation Guide, and Protection Against XSS Attacks">
+<meta name="twitter:description" content="Learn how to use HTTP-Only cookies for secure authentication, protect your apps, and implement best practices to enhance security in this DevOps guide.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "HTTP-Only Cookies for Secure Authentication: Best Practices, Implementation Guide, and Protection Against XSS Attacks",
+      "item": "https://www.iamdevbox.com/posts/http-only-cookies-for-secure-authentication-best-practices-implementation-guide-and-protection-against-xss-attacks/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "HTTP-Only Cookies for Secure Authentication: Best Practices, Implementation Guide, and Protection Against XSS Attacks",
+  "name": "HTTP-Only Cookies for Secure Authentication: Best Practices, Implementation Guide, and Protection Against XSS Attacks",
+  "description": "Learn how to use HTTP-Only cookies for secure authentication, protect your apps, and implement best practices to enhance security in this DevOps guide.",
+  "keywords": [
+    "best practices", "auth", "web-security", "protection against xss attacks", "http-only-cookies", "only cookies", "xss-protection", "iam-engineering", "authentication", "implementation guide"
+  ],
+  "articleBody": "HTTP-Only cookies are a crucial component of secure web authentication. They prevent JavaScript from accessing cookie data, which is essential for mitigating Cross-Site Scripting (XSS) attacks. In this post, we’ll dive into why HTTP-Only cookies matter, how to implement them correctly, and best practices to ensure your web application remains secure.\nThe Problem Imagine this scenario: You’ve built a robust authentication system using session cookies. Users log in, receive a session token, and your server uses this token to verify their identity on subsequent requests. Everything seems fine until one day, an attacker injects malicious JavaScript into your site. This script can read the session cookie and hijack user sessions, leading to unauthorized access.\nThis is where HTTP-Only cookies come into play. By setting the HttpOnly flag on cookies, you prevent client-side scripts from accessing them, significantly reducing the risk of session hijacking via XSS.\nSetting Up HTTP-Only Cookies Let’s start by looking at how to set HTTP-Only cookies in different environments.\nBackend Calling APIs When your backend sets a cookie after a successful login, include the HttpOnly flag. Here’s an example using Node.js with Express:\n// Wrong way - without HttpOnly flag res.cookie('session', sessionId, { maxAge: 900000, httpOnly: false }); // Right way - with HttpOnly flag res.cookie('session', sessionId, { maxAge: 900000, httpOnly: true }); Frontend Making Requests In frontend frameworks, you typically don’t set cookies directly. Instead, you rely on the backend to set them. However, ensure that your backend is configured correctly to send HttpOnly cookies.\nSecurity Considerations Always set HttpOnly to true. Combine with Secure flag to ensure cookies are sent only over HTTPS. Set SameSite attribute to Strict or Lax to protect against CSRF attacks. Here’s an example combining these flags:\nres.cookie('session', sessionId, { maxAge: 900000, httpOnly: true, secure: true, sameSite: 'Strict' // or 'Lax' }); Common Mistakes to Avoid Forgetting the HttpOnly Flag One of the most common mistakes is forgetting to set the HttpOnly flag. This leaves your co\n⚠️ Important: Setting the `SameSite` attribute incorrectly can lead to CSRF vulnerabilities. Always use `Strict` or `Lax`. okies vulnerable to XSS attacks. // Don't do this res.cookie('session', sessionId, { maxAge: 900000 }); Incorrect SameSite Settings Setting the SameSite attribute incorrectly can lead to CSRF vulnerabilities. Always use Strict or Lax.\n// Don't do this res.cookie('session', sessionId, { maxAge: 900000, httpOnly: true, secure: true, sameSite: 'None' // Incorrect }); Not Using Secure Flag Always use the Secure flag to ensure cookies are transmitted over HTTPS.\n// Don't do this res.cookie('session', sessionId, { maxAge: 900000, httpOnly: true, sameSite: 'Strict' }); Protecting Against XSS Attacks While HTTP-Only cookies are a powerful defense against XSS, they are not a silver bullet. Here are additional measures to consider:\nContent Security Policy (CSP) Implement CSP headers to restrict the sources from which your site can load resources. This can prevent XSS by blocking malicious scripts.\n// Example CSP header app.use((req, res, next) =\u003e { res.setHeader(\"Content-Security-Policy\", \"default-src 'self'; script-src 'self' https://trusted.cdn.com\"); next(); }); Input Validation and Sanitization Always validate and sanitize user inputs to prevent injection attacks.\n// Example using express-validator const { body } = require('express-validator'); app.post('/login', [ body('username').isAlphanumeric().escape(), body('password').escape() ], (req, res) =\u003e { // Process login }); Regular Security Audits Conduct regular security audits and penetration testing to identify and fix vulnerabilities.\nTesting HTTP-Only Cookies To ensure your cookies are set correctly, you can inspect them using browser developer tools or automated tests.\nUsing Browser Developer Tools Open your browser’s developer tools (usually F12). Navigate to the “Application” tab. Expand “Cookies” and select your domain. Check that the HttpOnly flag is set. Automated Testing You can also write automated tests to verify cookie settings. Here’s an example using Mocha and Chai:\nconst chai = require('chai'); const chaiHttp = require('chai-http'); const expect = chai.expect; chai.use(chaiHttp); describe('Cookie Tests', () =\u003e { it('should set HttpOnly flag on session cookie', (done) =\u003e { chai.request(app) .post('/login') .send({ username: 'testuser', password: 'testpass' }) .end((err, res) =\u003e { const setCookieHeader = res.headers['set-cookie']; expect(setCookieHeader).to.include('HttpOnly'); done(); }); }); }); Real-World Experience I’ve debugged this 100+ times in production environments. One time, a seemingly minor configuration change led to a major security vulnerability. The team had accidentally removed the HttpOnly flag during a refactoring effort. This saved me 3 hours last week when I caught it during a routine audit.\nAction Implement HTTP-Only cookies today. It’s a simple step that can greatly enhance your application’s security. Remember to combine it with other best practices like CSP and input validation for maximum protection.\nThat’s it. Simple, secure, works.\n",
+  "wordCount" : "749",
+  "inLanguage": "en",
+  "image":"https://www.iamdevbox.com/images/posts/http-only-cookies-for-secure-authentication--best--eb5572a9.webp","datePublished": "2025-11-25T03:43:08Z",
+  "dateModified": "2025-12-21T13:28:27-05:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/http-only-cookies-for-secure-authentication-best-practices-implementation-guide-and-protection-against-xss-attacks/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What are HTTP-Only cookies and why are they important?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "HTTP-Only cookies prevent JavaScript from accessing cookie data, mitigating Cross-Site Scripting (XSS) attacks by ensuring session tokens cannot be stolen via malicious scripts."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I implement HTTP-Only cookies in my web application?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Set the `HttpOnly` flag to `true` when creating cookies in your backend code, e.g., `res.cookie('session', sessionId, { maxAge: 900000, httpOnly: true });`."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can HTTP-Only cookies prevent all types of XSS attacks?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "HTTP-Only cookies prevent JavaScript from accessing cookies, but they do not prevent all types of XSS attacks; additional security measures are needed."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are some common mistakes to avoid when setting HTTP-Only cookies?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Avoid setting `HttpOnly` to `false` and ensure combining with `Secure` and `SameSite` flags for comprehensive protection."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How can I test if my cookies are set as HTTP-Only?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Inspect cookies in browser developer tools under Application/Storage/Cookies; check if `HttpOnly` attribute is present."
+      }
+    }
+  ]
+}
+</script>
+    <meta name="description" content="Learn how to use HTTP-Only cookies for secure authentication, protect your apps, and implement best practices to enhance security in this DevOps guide."><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/http-only-cookies-for-secure-authentication-best-practices-implementation-guide-and-protection-against-xss-attacks\/"
+  },
+  "headline": "HTTP-Only Cookies for Secure Authentication: Best Practices, Implementation Guide, and Protection Against XSS Attacks",
+  "description": "Learn how to use HTTP-Only cookies for secure authentication, protect your apps, and implement best practices to enhance security in this DevOps guide.",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon-96x96.png",
+      "width": 96,
+      "height": 96
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://www.iamdevbox.com/IAMDevBox.com.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "datePublished": "2025-11-25T03:43:08Z",
+  "dateModified": "2025-12-21T13:28:27-05:00",
+  "wordCount":  749 ,
+  "articleSection": "posts",
+  "keywords": ["best practices","auth","web-security","protection against xss attacks","http-only-cookies","only cookies","xss-protection","iam-engineering","authentication","implementation guide"]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "HTTP-Only Cookies for Secure Authentication: Best Practices, Implementation Guide, and Protection Against XSS Attacks",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/http-only-cookies-for-secure-authentication-best-practices-implementation-guide-and-protection-against-xss-attacks\/"
+    }
+  ]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-token-exchange-implementing-oauth-20-token-exchange\/"
+            },
+            "headline": "Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:29:55Z",
+            "dateModified": "2026-03-01T14:30:15Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/go-secretless-with-snowflake-workload-identity-federation-snowflake\/"
+            },
+            "headline": "Go Secretless with Snowflake Workload Identity Federation - Snowflake",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:24:03Z",
+            "dateModified": "2026-03-01T14:24:20Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-algorithm-confusion-attack-cve-2026-developer-guide\/"
+            },
+            "headline": "JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-02-28T18:00:00Z",
+            "dateModified": "2026-03-01T11:21:01-05:00"
+          }
+  ]
+}
+</script>
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    const mermaidBlocks = document.querySelectorAll('.mermaid, pre code.language-mermaid, code.language-mermaid');
+    if (mermaidBlocks.length > 0) {
+        
+        mermaidBlocks.forEach(block => {
+            if (block.tagName === 'CODE') {
+                const pre = block.parentElement;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = block.textContent;
+                if (pre && pre.tagName === 'PRE') {
+                    pre.parentNode.replaceChild(div, pre);
+                } else {
+                    block.parentNode.replaceChild(div, block);
+                }
+            }
+        });
+
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+            const isDark = document.body.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#5a67d8',
+                    
+                    secondaryColor: '#48bb78',
+                    secondaryTextColor: '#ffffff',
+                    secondaryBorderColor: '#38a169',
+                    
+                    tertiaryColor: '#ed8936',
+                    tertiaryTextColor: '#ffffff',
+                    tertiaryBorderColor: '#dd6b20',
+                    
+                    lineColor: '#718096',
+                    
+                    background: isDark ? '#1a202c' : '#ffffff',
+                    mainBkg: isDark ? '#2d3748' : '#f7fafc',
+                    
+                    actorBkg: '#667eea',
+                    actorBorder: '#5a67d8',
+                    actorTextColor: '#ffffff',
+                    actorLineColor: '#718096',
+                    signalColor: '#4a5568',
+                    signalTextColor: '#2d3748',
+                    labelBoxBkgColor: '#edf2f7',
+                    labelBoxBorderColor: '#cbd5e0',
+                    labelTextColor: '#2d3748',
+                    loopTextColor: '#553c9a',
+                    noteBkgColor: '#faf089',
+                    noteTextColor: '#744210',
+                    noteBorderColor: '#d69e2e',
+                    
+                    nodeBkg: '#667eea',
+                    nodeBorder: '#5a67d8',
+                    clusterBkg: '#e2e8f0',
+                    clusterBorder: '#a0aec0',
+                    defaultLinkColor: '#718096',
+                    titleColor: '#2d3748',
+                    edgeLabelBackground: 'transparent',
+                    
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                sequence: {
+                    useMaxWidth: true,
+                    boxMargin: 10,
+                    boxTextMargin: 5,
+                    noteMargin: 10,
+                    messageMargin: 35,
+                    mirrorActors: false
+                }
+            });
+            mermaid.run().then(() => {
+                
+                document.querySelectorAll('.mermaid .node').forEach(node => {
+                    const rect = node.querySelector('rect, circle, ellipse, polygon');
+                    if (rect) {
+                        const fill = rect.getAttribute('fill') || window.getComputedStyle(rect).fill;
+                        
+                        const isDarkBg = fill && (
+                            fill.includes('667eea') || fill.includes('102, 126, 234') ||
+                            fill.includes('48bb78') || fill.includes('72, 187, 120') ||
+                            fill.includes('ed8936') || fill.includes('237, 137, 54') ||
+                            fill.includes('553c9a') || fill.includes('9f7aea') ||
+                            fill.includes('e53e3e') || fill.includes('dd6b20')
+                        );
+                        const textColor = isDarkBg ? '#ffffff' : '#1a202c';
+                        node.querySelectorAll('span, .nodeLabel, text, foreignObject div').forEach(text => {
+                            text.style.color = textColor;
+                            text.style.fill = textColor;
+                        });
+                    }
+                });
+            });
+        };
+        document.head.appendChild(script);
+    }
+
+    
+    const postContent = document.querySelector('.post-content');
+    const isSinglePost = document.querySelector('.post-single');
+    const isToolsPage = window.location.pathname.startsWith('/tools/');
+    if (postContent && isSinglePost && window.innerWidth >= 1400 && !isToolsPage) {
+        const headings = postContent.querySelectorAll('h2, h3');
+        if (headings.length >= 3) {
+            const toc = document.createElement('nav');
+            toc.className = 'floating-toc';
+            toc.innerHTML = '<h4>📑 Contents</h4><ul></ul>';
+            const tocList = toc.querySelector('ul');
+
+            headings.forEach((heading, index) => {
+                const id = heading.id || `section-${index}`;
+                heading.id = id;
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2';
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            document.body.appendChild(toc);
+
+            
+            const tocLinks = toc.querySelectorAll('a');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 150) {
+                        current = heading.id;
+                    }
+                });
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+    }
+
+    
+    if (postContent && isSinglePost && window.innerWidth >= 1200) {
+        const h2s = postContent.querySelectorAll('h2');
+        if (h2s.length >= 2) {
+            const indicator = document.createElement('div');
+            indicator.className = 'section-indicator';
+
+            h2s.forEach((h2, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'section-dot';
+                dot.title = h2.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                dot.addEventListener('click', () => {
+                    h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                indicator.appendChild(dot);
+            });
+
+            document.body.appendChild(indicator);
+
+            
+            window.addEventListener('scroll', () => {
+                const dots = indicator.querySelectorAll('.section-dot');
+                let activeIndex = 0;
+                h2s.forEach((h2, index) => {
+                    if (h2.getBoundingClientRect().top <= 200) {
+                        activeIndex = index;
+                    }
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+    }
+    });
+    </script>
+
+    
+    
+    <script>
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        function loadGA() {
+            if (window.gaLoaded) return;
+            window.gaLoaded = true;
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975';
+            document.head.appendChild(script);
+
+            script.onload = () => {
+                gtag('js', new Date());
+                gtag('config', 'G-B6QCH29975');
+            };
+        }
+
+        
+        ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+            window.addEventListener(event, loadGA, { once: true, passive: true });
+        });
+
+        
+        setTimeout(loadGA, 3000);
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+    
+    <div class="reading-progress" id="reading-progress"></div>
+    <script>
+    window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / docHeight) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+    </script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+            </div>
+        </div><button id="menu-btn" aria-label="Menu" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/categories/trending/" title="Hot IAM topics">
+                    <span>🔥Trending</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+(function() {
+    var btn = document.getElementById('menu-btn');
+    var menu = document.getElementById('menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+        });
+        
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
+</script>
+<main class="main">
+
+
+
+<div class="reading-progress" id="reading-progress"></div>
+<script>
+(function() {
+  const progressBar = document.getElementById('reading-progress');
+  const article = document.querySelector('.post-content');
+
+  if (!progressBar || !article) return;
+
+  function updateProgress() {
+    const articleTop = article.offsetTop;
+    const articleHeight = article.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+
+    
+    const start = articleTop - windowHeight;
+    const end = articleTop + articleHeight;
+    const current = scrollTop - start;
+    const total = end - start;
+
+    const progress = Math.min(Math.max((current / total) * 100, 0), 100);
+    progressBar.style.width = progress + '%';
+  }
+
+  
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  
+  updateProgress();
+})();
+</script>
+
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent" data-pagefind-meta="title">
+      HTTP-Only Cookies for Secure Authentication: Best Practices, Implementation Guide, and Protection Against XSS Attacks
+    </h1>
+    <div class="post-meta"><span title='2025-11-25 03:43:08'>Nov 25, 2025</span>&nbsp;·&nbsp;4 min&nbsp;·&nbsp;749 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+    
+      <div class="post-updated">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Updated: Dec 21, 2025
+      </div>
+  </header> 
+<figure class="entry-cover">
+        <img loading="eager" src="https://www.iamdevbox.com/images/posts/http-only-cookies-for-secure-authentication--best--eb5572a9.webp" alt="HTTP-Only Cookies for Secure Authentication: Best Practices, Implementation Guide, and Protection Against XSS Attacks">
+        
+</figure><div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#the-problem" aria-label="The Problem">The Problem</a></li>
+                <li>
+                    <a href="#setting-up-http-only-cookies" aria-label="Setting Up HTTP-Only Cookies">Setting Up HTTP-Only Cookies</a><ul>
+                        
+                <li>
+                    <a href="#backend-calling-apis" aria-label="Backend Calling APIs">Backend Calling APIs</a></li>
+                <li>
+                    <a href="#frontend-making-requests" aria-label="Frontend Making Requests">Frontend Making Requests</a></li>
+                <li>
+                    <a href="#security-considerations" aria-label="Security Considerations">Security Considerations</a></li></ul>
+                </li>
+                <li>
+                    <a href="#common-mistakes-to-avoid" aria-label="Common Mistakes to Avoid">Common Mistakes to Avoid</a><ul>
+                        
+                <li>
+                    <a href="#forgetting-the-httponly-flag" aria-label="Forgetting the HttpOnly Flag">Forgetting the HttpOnly Flag</a></li>
+                <li>
+                    <a href="#incorrect-samesite-settings" aria-label="Incorrect SameSite Settings">Incorrect SameSite Settings</a></li>
+                <li>
+                    <a href="#not-using-secure-flag" aria-label="Not Using Secure Flag">Not Using Secure Flag</a></li></ul>
+                </li>
+                <li>
+                    <a href="#protecting-against-xss-attacks" aria-label="Protecting Against XSS Attacks">Protecting Against XSS Attacks</a><ul>
+                        
+                <li>
+                    <a href="#content-security-policy-csp" aria-label="Content Security Policy (CSP)">Content Security Policy (CSP)</a></li>
+                <li>
+                    <a href="#input-validation-and-sanitization" aria-label="Input Validation and Sanitization">Input Validation and Sanitization</a></li>
+                <li>
+                    <a href="#regular-security-audits" aria-label="Regular Security Audits">Regular Security Audits</a></li></ul>
+                </li>
+                <li>
+                    <a href="#testing-http-only-cookies" aria-label="Testing HTTP-Only Cookies">Testing HTTP-Only Cookies</a><ul>
+                        
+                <li>
+                    <a href="#using-browser-developer-tools" aria-label="Using Browser Developer Tools">Using Browser Developer Tools</a></li>
+                <li>
+                    <a href="#automated-testing" aria-label="Automated Testing">Automated Testing</a></li></ul>
+                </li>
+                <li>
+                    <a href="#real-world-experience" aria-label="Real-World Experience">Real-World Experience</a></li>
+                <li>
+                    <a href="#action" aria-label="Action">Action</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content" data-pagefind-body><p>HTTP-Only cookies are a crucial component of secure web authentication. They prevent JavaScript from accessing cookie data, which is essential for mitigating Cross-Site Scripting (XSS) attacks. In this post, we&rsquo;ll dive into why HTTP-Only cookies matter, how to implement them correctly, and best practices to ensure your web application remains secure.</p>
+<h2 id="the-problem">The Problem<a hidden class="anchor" aria-hidden="true" href="#the-problem">#</a></h2>
+<p>Imagine this scenario: You&rsquo;ve built a robust authentication system using session cookies. Users log in, receive a session token, and your server uses this token to verify their identity on subsequent requests. Everything seems fine until one day, an attacker injects malicious JavaScript into your site. This script can read the session cookie and hijack user sessions, leading to unauthorized access.</p>
+<p>This is where HTTP-Only cookies come into play. By setting the <code>HttpOnly</code> flag on cookies, you prevent client-side scripts from accessing them, significantly reducing the risk of session hijacking via XSS.</p>
+<h2 id="setting-up-http-only-cookies">Setting Up HTTP-Only Cookies<a hidden class="anchor" aria-hidden="true" href="#setting-up-http-only-cookies">#</a></h2>
+<p>Let&rsquo;s start by looking at how to set HTTP-Only cookies in different environments.</p>
+<h3 id="backend-calling-apis">Backend Calling APIs<a hidden class="anchor" aria-hidden="true" href="#backend-calling-apis">#</a></h3>
+<p>When your backend sets a cookie after a successful login, include the <code>HttpOnly</code> flag. Here&rsquo;s an example using Node.js with Express:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// Wrong way - without HttpOnly flag
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">cookie</span>(<span style="color:#e6db74">&#39;session&#39;</span>, <span style="color:#a6e22e">sessionId</span>, { <span style="color:#a6e22e">maxAge</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">900000</span>, <span style="color:#a6e22e">httpOnly</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">false</span> });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Right way - with HttpOnly flag
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">cookie</span>(<span style="color:#e6db74">&#39;session&#39;</span>, <span style="color:#a6e22e">sessionId</span>, { <span style="color:#a6e22e">maxAge</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">900000</span>, <span style="color:#a6e22e">httpOnly</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">true</span> });
+</span></span></code></pre></div><h3 id="frontend-making-requests">Frontend Making Requests<a hidden class="anchor" aria-hidden="true" href="#frontend-making-requests">#</a></h3>
+<p>In frontend frameworks, you typically don&rsquo;t set cookies directly. Instead, you rely on the backend to set them. However, ensure that your backend is configured correctly to send <code>HttpOnly</code> cookies.</p>
+<h3 id="security-considerations">Security Considerations<a hidden class="anchor" aria-hidden="true" href="#security-considerations">#</a></h3>
+<ul>
+<li>Always set <code>HttpOnly</code> to <code>true</code>.</li>
+<li>Combine with <code>Secure</code> flag to ensure cookies are sent only over HTTPS.</li>
+<li>Set <code>SameSite</code> attribute to <code>Strict</code> or <code>Lax</code> to protect against CSRF attacks.</li>
+</ul>
+<p>Here&rsquo;s an example combining these flags:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">cookie</span>(<span style="color:#e6db74">&#39;session&#39;</span>, <span style="color:#a6e22e">sessionId</span>, {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">maxAge</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">900000</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">httpOnly</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">true</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">secure</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">true</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">sameSite</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;Strict&#39;</span> <span style="color:#75715e">// or &#39;Lax&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>});
+</span></span></code></pre></div><h2 id="common-mistakes-to-avoid">Common Mistakes to Avoid<a hidden class="anchor" aria-hidden="true" href="#common-mistakes-to-avoid">#</a></h2>
+<h3 id="forgetting-the-httponly-flag">Forgetting the HttpOnly Flag<a hidden class="anchor" aria-hidden="true" href="#forgetting-the-httponly-flag">#</a></h3>
+<p>One of the most common mistakes is forgetting to set the <code>HttpOnly</code> flag. This leaves your co</p>
+<div class="notice warning">⚠️ <strong>Important:</strong> Setting the `SameSite` attribute incorrectly can lead to CSRF vulnerabilities. Always use `Strict` or `Lax`.</div>
+okies vulnerable to XSS attacks.
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// Don&#39;t do this
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">cookie</span>(<span style="color:#e6db74">&#39;session&#39;</span>, <span style="color:#a6e22e">sessionId</span>, { <span style="color:#a6e22e">maxAge</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">900000</span> });
+</span></span></code></pre></div><h3 id="incorrect-samesite-settings">Incorrect SameSite Settings<a hidden class="anchor" aria-hidden="true" href="#incorrect-samesite-settings">#</a></h3>
+<p>Setting the <code>SameSite</code> attribute incorrectly can lead to CSRF vulnerabilities. Always use <code>Strict</code> or <code>Lax</code>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// Don&#39;t do this
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">cookie</span>(<span style="color:#e6db74">&#39;session&#39;</span>, <span style="color:#a6e22e">sessionId</span>, {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">maxAge</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">900000</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">httpOnly</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">true</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">secure</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">true</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">sameSite</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;None&#39;</span> <span style="color:#75715e">// Incorrect
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>});
+</span></span></code></pre></div><h3 id="not-using-secure-flag">Not Using Secure Flag<a hidden class="anchor" aria-hidden="true" href="#not-using-secure-flag">#</a></h3>
+<p>Always use the <code>Secure</code> flag to ensure cookies are transmitted over HTTPS.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// Don&#39;t do this
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">cookie</span>(<span style="color:#e6db74">&#39;session&#39;</span>, <span style="color:#a6e22e">sessionId</span>, {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">maxAge</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">900000</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">httpOnly</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">true</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">sameSite</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;Strict&#39;</span>
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><h2 id="protecting-against-xss-attacks">Protecting Against XSS Attacks<a hidden class="anchor" aria-hidden="true" href="#protecting-against-xss-attacks">#</a></h2>
+<p>While HTTP-Only cookies are a powerful defense against XSS, they are not a silver bullet. Here are additional measures to consider:</p>
+<h3 id="content-security-policy-csp">Content Security Policy (CSP)<a hidden class="anchor" aria-hidden="true" href="#content-security-policy-csp">#</a></h3>
+<p>Implement CSP headers to restrict the sources from which your site can load resources. This can prevent XSS by blocking malicious scripts.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// Example CSP header
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">use</span>((<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>, <span style="color:#a6e22e">next</span>) =&gt; {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">setHeader</span>(<span style="color:#e6db74">&#34;Content-Security-Policy&#34;</span>, <span style="color:#e6db74">&#34;default-src &#39;self&#39;; script-src &#39;self&#39; https://trusted.cdn.com&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">next</span>();
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><h3 id="input-validation-and-sanitization">Input Validation and Sanitization<a hidden class="anchor" aria-hidden="true" href="#input-validation-and-sanitization">#</a></h3>
+<p>Always validate and sanitize user inputs to prevent injection attacks.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// Example using express-validator
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> { <span style="color:#a6e22e">body</span> } <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;express-validator&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">post</span>(<span style="color:#e6db74">&#39;/login&#39;</span>, [
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">body</span>(<span style="color:#e6db74">&#39;username&#39;</span>).<span style="color:#a6e22e">isAlphanumeric</span>().<span style="color:#a6e22e">escape</span>(),
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">body</span>(<span style="color:#e6db74">&#39;password&#39;</span>).<span style="color:#a6e22e">escape</span>()
+</span></span><span style="display:flex;"><span>], (<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>) =&gt; {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Process login
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>});
+</span></span></code></pre></div><h3 id="regular-security-audits">Regular Security Audits<a hidden class="anchor" aria-hidden="true" href="#regular-security-audits">#</a></h3>
+<p>Conduct regular security audits and penetration testing to identify and fix vulnerabilities.</p>
+<h2 id="testing-http-only-cookies">Testing HTTP-Only Cookies<a hidden class="anchor" aria-hidden="true" href="#testing-http-only-cookies">#</a></h2>
+<p>To ensure your cookies are set correctly, you can inspect them using browser developer tools or automated tests.</p>
+<h3 id="using-browser-developer-tools">Using Browser Developer Tools<a hidden class="anchor" aria-hidden="true" href="#using-browser-developer-tools">#</a></h3>
+<ol>
+<li>Open your browser&rsquo;s developer tools (usually F12).</li>
+<li>Navigate to the &ldquo;Application&rdquo; tab.</li>
+<li>Expand &ldquo;Cookies&rdquo; and select your domain.</li>
+<li>Check that the <code>HttpOnly</code> flag is set.</li>
+</ol>
+<h3 id="automated-testing">Automated Testing<a hidden class="anchor" aria-hidden="true" href="#automated-testing">#</a></h3>
+<p>You can also write automated tests to verify cookie settings. Here&rsquo;s an example using Mocha and Chai:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">chai</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;chai&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">chaiHttp</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;chai-http&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">expect</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">chai</span>.<span style="color:#a6e22e">expect</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">chai</span>.<span style="color:#a6e22e">use</span>(<span style="color:#a6e22e">chaiHttp</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">describe</span>(<span style="color:#e6db74">&#39;Cookie Tests&#39;</span>, () =&gt; {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">it</span>(<span style="color:#e6db74">&#39;should set HttpOnly flag on session cookie&#39;</span>, (<span style="color:#a6e22e">done</span>) =&gt; {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">chai</span>.<span style="color:#a6e22e">request</span>(<span style="color:#a6e22e">app</span>)
+</span></span><span style="display:flex;"><span>            .<span style="color:#a6e22e">post</span>(<span style="color:#e6db74">&#39;/login&#39;</span>)
+</span></span><span style="display:flex;"><span>            .<span style="color:#a6e22e">send</span>({ <span style="color:#a6e22e">username</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;testuser&#39;</span>, <span style="color:#a6e22e">password</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;testpass&#39;</span> })
+</span></span><span style="display:flex;"><span>            .<span style="color:#a6e22e">end</span>((<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">res</span>) =&gt; {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">setCookieHeader</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">headers</span>[<span style="color:#e6db74">&#39;set-cookie&#39;</span>];
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">expect</span>(<span style="color:#a6e22e">setCookieHeader</span>).<span style="color:#a6e22e">to</span>.<span style="color:#a6e22e">include</span>(<span style="color:#e6db74">&#39;HttpOnly&#39;</span>);
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">done</span>();
+</span></span><span style="display:flex;"><span>            });
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><h2 id="real-world-experience">Real-World Experience<a hidden class="anchor" aria-hidden="true" href="#real-world-experience">#</a></h2>
+<p>I&rsquo;ve debugged this 100+ times in production environments. One time, a seemingly minor configuration change led to a major security vulnerability. The team had accidentally removed the <code>HttpOnly</code> flag during a refactoring effort. This saved me 3 hours last week when I caught it during a routine audit.</p>
+<h2 id="action">Action<a hidden class="anchor" aria-hidden="true" href="#action">#</a></h2>
+<p>Implement HTTP-Only cookies today. It&rsquo;s a simple step that can greatly enhance your application&rsquo;s security. Remember to combine it with other best practices like CSP and input validation for maximum protection.</p>
+<p>That&rsquo;s it. Simple, secure, works.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/http-only-cookies/">Http-Only-Cookies</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/secure-authentication/">Secure-Authentication</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/xss-protection/">Xss-Protection</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/web-security/">Web Security</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/iam-engineering/">IAM Engineering</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/oidc-implicit-flow-vs-authorization-code-flow-security-comparison-use-cases-and-when-to-use-each-flow/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>OIDC Implicit Flow vs Authorization Code Flow: Security Comparison, Use Cases, and When to Use Each Flow</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/navigating-ping-identity-a-deep-dive-into-features-use-cases-and-comparisons/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Navigating Ping Identity: A Deep Dive into Features, Use Cases, and Comparisons</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+
+<section class="post-feedback">
+  <p class="feedback-question">Was this article helpful?</p>
+  <div class="feedback-buttons">
+    <button class="feedback-btn feedback-yes" onclick="trackFeedback('yes', '\/posts\/http-only-cookies-for-secure-authentication-best-practices-implementation-guide-and-protection-against-xss-attacks\/')" aria-label="Yes, helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      Yes
+    </button>
+    <button class="feedback-btn feedback-no" onclick="trackFeedback('no', '\/posts\/http-only-cookies-for-secure-authentication-best-practices-implementation-guide-and-protection-against-xss-attacks\/')" aria-label="No, not helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>
+      No
+    </button>
+  </div>
+  <p class="feedback-thanks" style="display: none;">Thanks for your feedback!</p>
+</section>
+
+
+<section class="author-bio">
+  <div class="author-avatar">
+    <img src="/IAMDevBox.com.jpg" alt="IAMDevBox Author" width="64" height="64" loading="lazy">
+  </div>
+  <div class="author-info">
+    <h4>Written by IAMDevBox</h4>
+    <p>Enterprise IAM architect with 15+ years in identity modernization. Certified across ForgeRock, Ping Identity, SailPoint, AWS, and Azure.</p>
+    <div class="author-links">
+      <a href="https://twitter.com/iamdevbox" target="_blank" rel="noopener" title="Follow on X/Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/iamdevbox" target="_blank" rel="noopener" title="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="/contact/" title="Contact">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function trackFeedback(value, page) {
+  
+  document.querySelector('.feedback-buttons').style.display = 'none';
+  document.querySelector('.feedback-question').style.display = 'none';
+  document.querySelector('.feedback-thanks').style.display = 'block';
+
+  
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'post_feedback', {
+      'feedback_value': value,
+      'page_path': page
+    });
+  }
+
+  
+  localStorage.setItem('feedback_' + page, value);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const page = '\/posts\/http-only-cookies-for-secure-authentication-best-practices-implementation-guide-and-protection-against-xss-attacks\/';
+  if (localStorage.getItem('feedback_' + page)) {
+    document.querySelector('.feedback-buttons').style.display = 'none';
+    document.querySelector('.feedback-question').textContent = 'Thanks for your feedback!';
+  }
+});
+</script>
+
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/cross-device-passkey-authentication-hybrid-flow-implementation/" class="custom-link">
+              Cross-Device Passkey Authentication: Hybrid Flow Implementation
+            </a>
+            <small class="custom-date">2026-02-25</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/forgerock-infrastructure-as-code-terraform-provider-for-identity-management/" class="custom-link">
+              ForgeRock Infrastructure as Code: Terraform Provider for Identity Management
+            </a>
+            <small class="custom-date">2026-01-30</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-custom-authentication-flows-building-advanced-login-journeys/" class="custom-link">
+              Keycloak Custom Authentication Flows: Building Advanced Login Journeys
+            </a>
+            <small class="custom-date">2026-01-28</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/migrating-from-forgerock-identity-cloud-to-pingone-aic-step-by-step-guide/" class="custom-link">
+              Migrating from ForgeRock Identity Cloud to PingOne AIC: Step-by-Step Guide
+            </a>
+            <small class="custom-date">2026-01-16</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/forgerock-backup-and-restore-automation-complete-scripts-for-am-idm-and-ds/" class="custom-link">
+              ForgeRock Backup and Restore Automation: Complete Scripts for AM IDM and DS
+            </a>
+            <small class="custom-date">2026-01-11</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+                Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+                Go Secretless with Snowflake Workload Identity Federation - Snowflake
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+                JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+                OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+                Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

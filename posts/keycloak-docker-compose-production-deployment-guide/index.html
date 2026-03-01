@@ -1,0 +1,3278 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Keycloak Docker Compose Production: Complete Deployment Guide for 2026 | IAMDevBox</title>
+<meta name="keywords" content="keycloak docker compose production, keycloak docker postgres, keycloak production deployment docker, keycloak reverse proxy nginx docker, keycloak 26 docker compose, keycloak clustering docker jdbc_ping, keycloak docker compose example, keycloak traefik docker, keycloak production configuration, keycloak docker memory settings">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/keycloak-docker-compose-production-deployment-guide/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.e24ea479df3e367781fafa20cedde21c7e043c10bed4c8c913ef9261a049a1e2.css" integrity="sha256-4k6ked8&#43;NneB&#43;vogzt3iHH4EPBC&#43;1MjJE&#43;&#43;SYaBJoeI=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/keycloak-docker-compose-production-deployment-guide/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/keycloak-docker-compose-production-deployment-guide/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Keycloak Docker Compose Production: Complete Deployment Guide for 2026">
+  <meta property="og:description" content="Production-ready Keycloak 26.x Docker Compose deployment with PostgreSQL, reverse proxy, clustering, monitoring, and security hardening. Copy-paste configurations for Nginx, Traefik, and Caddy.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-02-21T23:30:00+00:00">
+    <meta property="article:modified_time" content="2026-02-26T21:20:24-05:00">
+    <meta property="article:tag" content="Keycloak">
+    <meta property="article:tag" content="Docker">
+    <meta property="article:tag" content="Production-Deployment">
+    <meta property="article:tag" content="Iam">
+    <meta property="article:tag" content="DevOps">
+      <meta property="og:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:title" content="Keycloak Docker Compose Production: Complete Deployment Guide for 2026">
+<meta name="twitter:description" content="Production-ready Keycloak 26.x Docker Compose deployment with PostgreSQL, reverse proxy, clustering, monitoring, and security hardening. Copy-paste configurations for Nginx, Traefik, and Caddy.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Keycloak Docker Compose Production: Complete Deployment Guide for 2026",
+      "item": "https://www.iamdevbox.com/posts/keycloak-docker-compose-production-deployment-guide/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Keycloak Docker Compose Production: Complete Deployment Guide for 2026",
+  "name": "Keycloak Docker Compose Production: Complete Deployment Guide for 2026",
+  "description": "Production-ready Keycloak 26.x Docker Compose deployment with PostgreSQL, reverse proxy, clustering, monitoring, and security hardening. Copy-paste configurations for Nginx, Traefik, and Caddy.",
+  "keywords": [
+    "keycloak docker compose production", "keycloak docker postgres", "keycloak production deployment docker", "keycloak reverse proxy nginx docker", "keycloak 26 docker compose", "keycloak clustering docker jdbc_ping", "keycloak docker compose example", "keycloak traefik docker", "keycloak production configuration", "keycloak docker memory settings"
+  ],
+  "articleBody": "Running Keycloak in Docker for development is straightforward. Running it in production requires careful configuration of database pooling, reverse proxy headers, JVM tuning, health checks, and security hardening. This guide provides copy-paste Docker Compose configurations for Keycloak 26.x that are production-ready.\nClone the companion repo: All configurations from this guide are available as a ready-to-run project at IAMDevBox/keycloak-docker-production. Clone it, copy .env.example to .env, set your passwords, and run docker compose up -d.\nSingle-Node Production Setup This is the recommended starting point. A single Keycloak instance with PostgreSQL handles thousands of concurrent users.\nDocker Compose services: postgres: image: postgres:16-alpine container_name: keycloak-postgres restart: unless-stopped volumes: - pgdata:/var/lib/postgresql/data environment: POSTGRES_DB: keycloak POSTGRES_USER: keycloak POSTGRES_PASSWORD: ${DB_PASSWORD} networks: - internal healthcheck: test: [\"CMD-SHELL\", \"pg_isready -U keycloak -d keycloak\"] interval: 10s timeout: 5s retries: 5 start_period: 30s deploy: resources: limits: memory: 1G cpus: \"1.0\" keycloak: image: quay.io/keycloak/keycloak:26.1 container_name: keycloak command: start --optimized restart: unless-stopped depends_on: postgres: condition: service_healthy environment: # Database KC_DB: postgres KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak KC_DB_USERNAME: keycloak KC_DB_PASSWORD: ${DB_PASSWORD} KC_DB_POOL_INITIAL_SIZE: 25 KC_DB_POOL_MIN_SIZE: 25 KC_DB_POOL_MAX_SIZE: 25 # Hostname (TLS terminates at reverse proxy) KC_HOSTNAME: https://auth.example.com KC_HTTP_ENABLED: \"true\" KC_PROXY_HEADERS: xforwarded # Observability KC_HEALTH_ENABLED: \"true\" KC_METRICS_ENABLED: \"true\" # Admin bootstrap (first run only) KC_BOOTSTRAP_ADMIN_USERNAME: admin KC_BOOTSTRAP_ADMIN_PASSWORD: ${ADMIN_PASSWORD} # Single-node cache KC_CACHE: local # Logging KC_LOG_LEVEL: info KC_LOG_CONSOLE_OUTPUT: json # JVM JAVA_OPTS_KC_HEAP: \u003e- -XX:MaxRAMPercentage=70 -XX:InitialRAMPercentage=50 -XX:MaxHeapFreeRatio=30 ports: - \"8080:8080\" networks: - frontend - internal healthcheck: test: [\"CMD-SHELL\", \"exec 3\u003c\u003e/dev/tcp/localhost/9000 \u0026\u0026 echo -e 'GET /health/ready HTTP/1.1\\\\r\\\\nHost: localhost\\\\r\\\\nConnection: close\\\\r\\\\n\\\\r\\\\n' \u003e\u00263 \u0026\u0026 cat \u003c\u00263 | grep -q '\\\"status\\\": \\\"UP\\\"'\"] interval: 30s timeout: 10s retries: 3 start_period: 60s deploy: resources: limits: memory: 2G cpus: \"2.0\" reservations: memory: 1G volumes: pgdata: networks: frontend: driver: bridge internal: driver: bridge internal: true Environment File Create a .env file (gitignored) alongside your docker-compose.yml:\nDB_PASSWORD=change-this-to-a-strong-password ADMIN_PASSWORD=change-this-to-a-strong-password Key Configuration Decisions Database connection pool: The Keycloak docs recommend setting initial, min, and max pool sizes to the same value. This avoids the overhead of creating new connections under load. 25 connections handles most single-node deployments.\nKC_CACHE: local: Disables distributed Infinispan caching. For a single node, this eliminates unnecessary cluster discovery overhead.\nKC_BOOTSTRAP_ADMIN_USERNAME: Replaces the deprecated KEYCLOAK_ADMIN in Keycloak 26.x. The admin user is created only on first boot — these variables are ignored on subsequent starts.\nHealth check on port 9000: Keycloak’s management interface runs on port 9000 (separate from the application port 8080). Health endpoints (/health/ready, /health/live) and metrics (/metrics) are served here. Never expose port 9000 publicly.\nNetwork isolation: PostgreSQL sits on an internal network with no external access. Keycloak bridges both frontend (for client traffic) and internal (for database).\nOptimized Build for Faster Startup The stock Keycloak image runs a build phase on every container start, adding 15-30 seconds to startup. Use a multi-stage Dockerfile to pre-build:\nFROM quay.io/keycloak/keycloak:26.1 AS builder ENV KC_DB=postgres ENV KC_HEALTH_ENABLED=true ENV KC_METRICS_ENABLED=true ENV KC_CACHE=ispn RUN /opt/keycloak/bin/kc.sh build FROM quay.io/keycloak/keycloak:26.1 COPY --from=builder /opt/keycloak/ /opt/keycloak/ ENTRYPOINT [\"/opt/keycloak/bin/kc.sh\"] CMD [\"start\", \"--optimized\"] Replace image: quay.io/keycloak/keycloak:26.1 in your Compose file with:\nkeycloak: build: . command: start --optimized Startup drops from ~30 seconds to under 10 seconds.\nReverse Proxy Configuration Keycloak in production runs behind a reverse proxy that terminates TLS. Three options:\nNginx upstream keycloak { server keycloak:8080; } server { listen 443 ssl http2; server_name auth.example.com; ssl_certificate /etc/nginx/ssl/fullchain.pem; ssl_certificate_key /etc/nginx/ssl/privkey.pem; ssl_protocols TLSv1.2 TLSv1.3; # OIDC/SAML endpoints location /realms/ { proxy_pass http://keycloak; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; proxy_set_header X-Forwarded-Proto $scheme; proxy_set_header X-Forwarded-Host $host; proxy_set_header X-Forwarded-Port $server_port; proxy_buffer_size 128k; proxy_buffers 4 256k; proxy_busy_buffers_size 256k; } # Static resources (cache aggressively) location /resources/ { proxy_pass http://keycloak; proxy_set_header Host $host; expires 1y; add_header Cache-Control \"public, immutable\"; } # OIDC discovery location /.well-known/ { proxy_pass http://keycloak; proxy_set_header Host $host; proxy_set_header X-Forwarded-Proto $scheme; } # Admin console — restrict to internal IPs location /admin/ { allow 10.0.0.0/8; allow 172.16.0.0/12; allow 192.168.0.0/16; deny all; proxy_pass http://keycloak; proxy_set_header Host $host; proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; proxy_set_header X-Forwarded-Proto $scheme; } # Block management endpoints location /health { deny all; } location /metrics { deny all; } } Key points:\nOnly expose /realms/, /resources/, and /.well-known/ publicly Restrict /admin/ to internal IPs Never proxy port 9000 (management interface) Large proxy_buffer_size prevents issues with SAML responses Traefik (Docker Labels) keycloak: labels: - \"traefik.enable=true\" - \"traefik.http.routers.keycloak.rule=Host(`auth.example.com`)\" - \"traefik.http.routers.keycloak.entrypoints=websecure\" - \"traefik.http.routers.keycloak.tls.certresolver=letsencrypt\" - \"traefik.http.services.keycloak.loadbalancer.server.port=8080\" - \"traefik.http.services.keycloak.loadbalancer.sticky.cookie=true\" - \"traefik.http.services.keycloak.loadbalancer.sticky.cookie.name=AUTH_SESSION_ID\" Caddy (Automatic TLS) auth.example.com { reverse_proxy keycloak:8080 { header_up X-Forwarded-For {remote_host} header_up X-Forwarded-Proto {scheme} header_up X-Forwarded-Host {host} } } Caddy automatically provisions Let’s Encrypt TLS certificates — zero manual certificate management.\nPostgreSQL Tuning Default PostgreSQL settings are conservative. Tune for Keycloak’s workload pattern (many small CRUD queries):\npostgres: image: postgres:16-alpine command: - \"postgres\" - \"-c\" - \"shared_buffers=256MB\" - \"-c\" - \"effective_cache_size=768MB\" - \"-c\" - \"work_mem=4MB\" - \"-c\" - \"maintenance_work_mem=64MB\" - \"-c\" - \"max_connections=50\" - \"-c\" - \"random_page_cost=1.1\" - \"-c\" - \"effective_io_concurrency=200\" - \"-c\" - \"log_min_duration_statement=500\" Sizing rules:\nshared_buffers: 25% of container memory (256 MB for a 1 GB container) effective_cache_size: 75% of container memory work_mem: 4 MB is sufficient — Keycloak runs simple queries, not complex joins max_connections: Must be \u003e= Keycloak pool size + monitoring/admin overhead. For single-node with pool size 25, set to 50 Automated Backups Add a backup sidecar to your Compose file:\nbackup: image: postgres:16-alpine entrypoint: /bin/sh command: \u003e -c 'while true; do pg_dump -h postgres -U keycloak -Fc keycloak \u003e /backups/keycloak_$$(date +%Y%m%d_%H%M).dump; find /backups -name \"keycloak_*.dump\" -mtime +7 -delete; sleep 86400; done' environment: PGPASSWORD: ${DB_PASSWORD} volumes: - ./backups:/backups networks: - internal depends_on: postgres: condition: service_healthy This creates daily backups and retains 7 days of history.\nMulti-Node Clustering For high availability, run multiple Keycloak instances behind a load balancer. Keycloak 26.x uses JDBC_PING2 by default — nodes discover each other through the shared PostgreSQL database. No multicast or external discovery service required.\nClustered Docker Compose services: postgres: image: postgres:16-alpine restart: unless-stopped volumes: - pgdata:/var/lib/postgresql/data environment: POSTGRES_DB: keycloak POSTGRES_USER: keycloak POSTGRES_PASSWORD: ${DB_PASSWORD} command: - \"postgres\" - \"-c\" - \"shared_buffers=256MB\" - \"-c\" - \"max_connections=80\" networks: - internal healthcheck: test: [\"CMD-SHELL\", \"pg_isready -U keycloak -d keycloak\"] interval: 10s timeout: 5s retries: 5 start_period: 30s keycloak-1: image: quay.io/keycloak/keycloak:26.1 command: start --optimized restart: unless-stopped depends_on: postgres: condition: service_healthy environment: KC_DB: postgres KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak KC_DB_USERNAME: keycloak KC_DB_PASSWORD: ${DB_PASSWORD} KC_DB_POOL_INITIAL_SIZE: 20 KC_DB_POOL_MIN_SIZE: 20 KC_DB_POOL_MAX_SIZE: 20 KC_HOSTNAME: https://auth.example.com KC_HTTP_ENABLED: \"true\" KC_PROXY_HEADERS: xforwarded KC_HEALTH_ENABLED: \"true\" KC_METRICS_ENABLED: \"true\" KC_BOOTSTRAP_ADMIN_USERNAME: admin KC_BOOTSTRAP_ADMIN_PASSWORD: ${ADMIN_PASSWORD} KC_CACHE: ispn KC_CACHE_STACK: jdbc-ping KC_LOG_LEVEL: info KC_LOG_CONSOLE_OUTPUT: json JAVA_OPTS_APPEND: \"-Djava.net.preferIPv4Stack=true\" networks: - frontend - internal healthcheck: test: [\"CMD-SHELL\", \"exec 3\u003c\u003e/dev/tcp/localhost/9000 \u0026\u0026 echo -e 'GET /health/ready HTTP/1.1\\\\r\\\\nHost: localhost\\\\r\\\\nConnection: close\\\\r\\\\n\\\\r\\\\n' \u003e\u00263 \u0026\u0026 cat \u003c\u00263 | grep -q '\\\"status\\\": \\\"UP\\\"'\"] interval: 30s timeout: 10s retries: 3 start_period: 90s keycloak-2: image: quay.io/keycloak/keycloak:26.1 command: start --optimized restart: unless-stopped depends_on: postgres: condition: service_healthy keycloak-1: condition: service_healthy environment: KC_DB: postgres KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak KC_DB_USERNAME: keycloak KC_DB_PASSWORD: ${DB_PASSWORD} KC_DB_POOL_INITIAL_SIZE: 20 KC_DB_POOL_MIN_SIZE: 20 KC_DB_POOL_MAX_SIZE: 20 KC_HOSTNAME: https://auth.example.com KC_HTTP_ENABLED: \"true\" KC_PROXY_HEADERS: xforwarded KC_HEALTH_ENABLED: \"true\" KC_METRICS_ENABLED: \"true\" KC_CACHE: ispn KC_CACHE_STACK: jdbc-ping KC_LOG_LEVEL: info KC_LOG_CONSOLE_OUTPUT: json JAVA_OPTS_APPEND: \"-Djava.net.preferIPv4Stack=true\" networks: - frontend - internal healthcheck: test: [\"CMD-SHELL\", \"exec 3\u003c\u003e/dev/tcp/localhost/9000 \u0026\u0026 echo -e 'GET /health/ready HTTP/1.1\\\\r\\\\nHost: localhost\\\\r\\\\nConnection: close\\\\r\\\\n\\\\r\\\\n' \u003e\u00263 \u0026\u0026 cat \u003c\u00263 | grep -q '\\\"status\\\": \\\"UP\\\"'\"] interval: 30s timeout: 10s retries: 3 start_period: 90s nginx: image: nginx:alpine ports: - \"443:443\" volumes: - ./nginx.conf:/etc/nginx/nginx.conf:ro - ./ssl:/etc/nginx/ssl:ro depends_on: keycloak-1: condition: service_healthy keycloak-2: condition: service_healthy networks: - frontend volumes: pgdata: networks: frontend: internal: internal: true Clustering Key Points JDBC_PING2 uses the shared database for node discovery. Nodes register themselves in a JGROUPSPING table. No multicast, no external etcd/consul, no cloud-specific discovery.\nSticky sessions are required. The AUTH_SESSION_ID cookie ensures a user’s authentication flow stays on the same node. Without sticky sessions, multi-step login flows will fail. Configure in Nginx:\nupstream keycloak_cluster { ip_hash; server keycloak-1:8080; server keycloak-2:8080; } Inter-node communication uses ports 7800 (data) and 57800 (failure detection). mTLS between nodes is enabled by default in Keycloak 26.x with auto-generated certificates.\nVerify cluster formation:\n# Check for cluster join message docker compose logs keycloak-1 | grep \"ISPN000094\" # Check cluster size via metrics curl -s http://localhost:9000/metrics | grep vendor_cluster_size Security Hardening Disable Unused Features # Add to Keycloak environment KC_FEATURES_DISABLED: impersonation,kerberos,device-flow,ciba Disable features you don’t use to reduce attack surface. Common candidates: impersonation (admin impersonating users), device-flow (IoT), ciba (client-initiated backchannel auth).\nSeparate Admin Hostname KC_HOSTNAME: https://auth.example.com KC_HOSTNAME_ADMIN: https://admin.internal.example.com Serve the admin console on a separate internal hostname, inaccessible from the public internet.\nCredential Management Keycloak does not support Docker secrets _FILE pattern natively. Options from most to least secure:\nPKCS12 Keystore (Keycloak-native): keytool -importpass -alias kc.db-password -keystore conf/keystore.p12 \\ -storepass keystorepass -storetype PKCS12 .env file (simplest, restrict file permissions to 600): chmod 600 .env Docker Swarm secrets (via custom entrypoint reading /run/secrets/) Load Shedding Prevent cascade failures under extreme load:\nKC_HTTP_MAX_QUEUED_REQUESTS: 1000 Requests exceeding the queue receive an immediate 503. At ~200 requests/second throughput, a queue of 1000 means ~5 second maximum wait.\nMonitoring Prometheus Integration Enable metrics and health endpoints:\nKC_HEALTH_ENABLED: \"true\" KC_METRICS_ENABLED: \"true\" Scrape configuration:\n# prometheus.yml scrape_configs: - job_name: keycloak metrics_path: /metrics static_configs: - targets: ['keycloak:9000'] Key Metrics to Monitor Metric Type What It Tells You keycloak_user_events_total Counter Login success/failure rates per realm http_server_requests_seconds_bucket Histogram Request latency distribution agroal_active_count Gauge Active DB connections (should match pool size under load) vendor_cluster_size Gauge Number of nodes in cluster (should match expected count) jvm_memory_usage_after_gc_percent Gauge Heap pressure (alert if consistently \u003e85%) Grafana Dashboards Keycloak provides official dashboards at keycloak/keycloak-grafana-dashboard:\nTroubleshooting Dashboard: SLI monitoring and deployment issues Capacity Planning Dashboard: Password validations, login counts, load indicators Community dashboards on Grafana.com: ID 10441 and 17878.\nTroubleshooting “Failed to initialize Liquibase” Cause: Keycloak starts before PostgreSQL accepts connections.\nFix: Use depends_on with health check condition:\nkeycloak: depends_on: postgres: condition: service_healthy Token Issuer Mismatch / Hostname Errors Cause: KC_HOSTNAME doesn’t match the URL clients see, or proxy headers aren’t being forwarded.\nFix: Set KC_HOSTNAME to the full external URL including scheme:\nKC_HOSTNAME=https://auth.example.com KC_PROXY_HEADERS=xforwarded Debug with KC_HOSTNAME_DEBUG=true, then check /realms/master/hostname-debug.\nOOM Kills / High Memory Usage Cause: Default MaxRAMPercentage=70 leaves insufficient room for non-heap memory.\nFix: Set container memory to minimum 2 GB and tune heap:\nJAVA_OPTS_KC_HEAP: \"-XX:MaxRAMPercentage=65 -XX:InitialRAMPercentage=50\" Slow Startup (30+ seconds) Cause: Build phase runs on every container start.\nFix: Use the optimized Dockerfile from the Build Optimization section. Startup drops to under 10 seconds.\nCluster Nodes Not Discovering Each Other Cause: Docker network blocks JGroups ports or IPv6 interferes with discovery.\nFix:\nEnsure nodes share the same Docker network Add JAVA_OPTS_APPEND: \"-Djava.net.preferIPv4Stack=true\" Verify with docker compose logs | grep \"ISPN000094\" For more Keycloak troubleshooting, see our Keycloak Session Expired Errors and Keycloak LDAP Connection Troubleshooting guides.\n",
+  "wordCount" : "1714",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/IAMDevBox.com.jpg","datePublished": "2026-02-21T23:30:00Z",
+  "dateModified": "2026-02-26T21:20:24-05:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/keycloak-docker-compose-production-deployment-guide/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the minimum Docker resource requirement for Keycloak in production?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Keycloak requires minimum 2 GB RAM and 2 CPU cores for production. Set container memory limits with deploy.resources.limits.memory: 2G. The JVM default uses MaxRAMPercentage=70 for heap allocation, leaving 30% for non-heap (Metaspace, threads, native memory). For PostgreSQL, allocate minimum 1 GB RAM with shared_buffers set to 25% of container memory."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I configure Keycloak behind Nginx or Traefik with Docker Compose?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Set KC_HTTP_ENABLED=true and KC_PROXY_HEADERS=xforwarded on the Keycloak container. Configure your reverse proxy (Nginx, Traefik, or Caddy) to forward X-Forwarded-For, X-Forwarded-Proto, and X-Forwarded-Host headers. Set KC_HOSTNAME to your full public URL (e.g., https://auth.example.com). The old KC_PROXY setting was removed in Keycloak 26 — use KC_PROXY_HEADERS instead."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I set up Keycloak clustering with Docker Compose?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Keycloak 26 uses JDBC_PING2 by default for cluster node discovery via the shared PostgreSQL database — no multicast or external discovery service needed. Set KC_CACHE=ispn and KC_CACHE_STACK=jdbc-ping. Ensure all Keycloak containers share a Docker network with ports 7800 (data) and 57800 (failure detection) accessible. Use a load balancer with sticky sessions on the AUTH_SESSION_ID cookie."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does Keycloak fail to start with \"Failed to initialize Liquibase\"?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "This error occurs when Keycloak starts before PostgreSQL is ready. Fix it by adding a health check to the PostgreSQL service (pg_isready -U keycloak -d keycloak) and using depends_on with condition: service_healthy in the Keycloak service definition. Set start_period: 30s on the PostgreSQL health check to allow initialization time."
+      }
+    }
+  ]
+}
+</script>
+    <meta name="description" content="Production-ready Keycloak 26.x Docker Compose deployment with PostgreSQL, reverse proxy, clustering, monitoring, and security hardening. Copy-paste configurations for Nginx, Traefik, and Caddy."><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-docker-compose-production-deployment-guide\/"
+  },
+  "headline": "Keycloak Docker Compose Production: Complete Deployment Guide for 2026",
+  "description": "Production-ready Keycloak 26.x Docker Compose deployment with PostgreSQL, reverse proxy, clustering, monitoring, and security hardening. Copy-paste configurations for Nginx, Traefik, and Caddy.",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon-96x96.png",
+      "width": 96,
+      "height": 96
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://www.iamdevbox.com/IAMDevBox.com.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "datePublished": "2026-02-21T23:30:00Z",
+  "dateModified": "2026-02-26T21:20:24-05:00",
+  "wordCount":  1714 ,
+  "articleSection": "posts",
+  "keywords": ["keycloak docker compose production","keycloak docker postgres","keycloak production deployment docker","keycloak reverse proxy nginx docker","keycloak 26 docker compose","keycloak clustering docker jdbc_ping","keycloak docker compose example","keycloak traefik docker","keycloak production configuration","keycloak docker memory settings"]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Keycloak Docker Compose Production: Complete Deployment Guide for 2026",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/keycloak-docker-compose-production-deployment-guide\/"
+    }
+  ]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-token-exchange-implementing-oauth-20-token-exchange\/"
+            },
+            "headline": "Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:29:55Z",
+            "dateModified": "2026-03-01T14:30:15Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/go-secretless-with-snowflake-workload-identity-federation-snowflake\/"
+            },
+            "headline": "Go Secretless with Snowflake Workload Identity Federation - Snowflake",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:24:03Z",
+            "dateModified": "2026-03-01T14:24:20Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-algorithm-confusion-attack-cve-2026-developer-guide\/"
+            },
+            "headline": "JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-02-28T18:00:00Z",
+            "dateModified": "2026-03-01T11:21:01-05:00"
+          }
+  ]
+}
+</script>
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    const mermaidBlocks = document.querySelectorAll('.mermaid, pre code.language-mermaid, code.language-mermaid');
+    if (mermaidBlocks.length > 0) {
+        
+        mermaidBlocks.forEach(block => {
+            if (block.tagName === 'CODE') {
+                const pre = block.parentElement;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = block.textContent;
+                if (pre && pre.tagName === 'PRE') {
+                    pre.parentNode.replaceChild(div, pre);
+                } else {
+                    block.parentNode.replaceChild(div, block);
+                }
+            }
+        });
+
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+            const isDark = document.body.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#5a67d8',
+                    
+                    secondaryColor: '#48bb78',
+                    secondaryTextColor: '#ffffff',
+                    secondaryBorderColor: '#38a169',
+                    
+                    tertiaryColor: '#ed8936',
+                    tertiaryTextColor: '#ffffff',
+                    tertiaryBorderColor: '#dd6b20',
+                    
+                    lineColor: '#718096',
+                    
+                    background: isDark ? '#1a202c' : '#ffffff',
+                    mainBkg: isDark ? '#2d3748' : '#f7fafc',
+                    
+                    actorBkg: '#667eea',
+                    actorBorder: '#5a67d8',
+                    actorTextColor: '#ffffff',
+                    actorLineColor: '#718096',
+                    signalColor: '#4a5568',
+                    signalTextColor: '#2d3748',
+                    labelBoxBkgColor: '#edf2f7',
+                    labelBoxBorderColor: '#cbd5e0',
+                    labelTextColor: '#2d3748',
+                    loopTextColor: '#553c9a',
+                    noteBkgColor: '#faf089',
+                    noteTextColor: '#744210',
+                    noteBorderColor: '#d69e2e',
+                    
+                    nodeBkg: '#667eea',
+                    nodeBorder: '#5a67d8',
+                    clusterBkg: '#e2e8f0',
+                    clusterBorder: '#a0aec0',
+                    defaultLinkColor: '#718096',
+                    titleColor: '#2d3748',
+                    edgeLabelBackground: 'transparent',
+                    
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                sequence: {
+                    useMaxWidth: true,
+                    boxMargin: 10,
+                    boxTextMargin: 5,
+                    noteMargin: 10,
+                    messageMargin: 35,
+                    mirrorActors: false
+                }
+            });
+            mermaid.run().then(() => {
+                
+                document.querySelectorAll('.mermaid .node').forEach(node => {
+                    const rect = node.querySelector('rect, circle, ellipse, polygon');
+                    if (rect) {
+                        const fill = rect.getAttribute('fill') || window.getComputedStyle(rect).fill;
+                        
+                        const isDarkBg = fill && (
+                            fill.includes('667eea') || fill.includes('102, 126, 234') ||
+                            fill.includes('48bb78') || fill.includes('72, 187, 120') ||
+                            fill.includes('ed8936') || fill.includes('237, 137, 54') ||
+                            fill.includes('553c9a') || fill.includes('9f7aea') ||
+                            fill.includes('e53e3e') || fill.includes('dd6b20')
+                        );
+                        const textColor = isDarkBg ? '#ffffff' : '#1a202c';
+                        node.querySelectorAll('span, .nodeLabel, text, foreignObject div').forEach(text => {
+                            text.style.color = textColor;
+                            text.style.fill = textColor;
+                        });
+                    }
+                });
+            });
+        };
+        document.head.appendChild(script);
+    }
+
+    
+    const postContent = document.querySelector('.post-content');
+    const isSinglePost = document.querySelector('.post-single');
+    const isToolsPage = window.location.pathname.startsWith('/tools/');
+    if (postContent && isSinglePost && window.innerWidth >= 1400 && !isToolsPage) {
+        const headings = postContent.querySelectorAll('h2, h3');
+        if (headings.length >= 3) {
+            const toc = document.createElement('nav');
+            toc.className = 'floating-toc';
+            toc.innerHTML = '<h4>📑 Contents</h4><ul></ul>';
+            const tocList = toc.querySelector('ul');
+
+            headings.forEach((heading, index) => {
+                const id = heading.id || `section-${index}`;
+                heading.id = id;
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2';
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            document.body.appendChild(toc);
+
+            
+            const tocLinks = toc.querySelectorAll('a');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 150) {
+                        current = heading.id;
+                    }
+                });
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+    }
+
+    
+    if (postContent && isSinglePost && window.innerWidth >= 1200) {
+        const h2s = postContent.querySelectorAll('h2');
+        if (h2s.length >= 2) {
+            const indicator = document.createElement('div');
+            indicator.className = 'section-indicator';
+
+            h2s.forEach((h2, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'section-dot';
+                dot.title = h2.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                dot.addEventListener('click', () => {
+                    h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                indicator.appendChild(dot);
+            });
+
+            document.body.appendChild(indicator);
+
+            
+            window.addEventListener('scroll', () => {
+                const dots = indicator.querySelectorAll('.section-dot');
+                let activeIndex = 0;
+                h2s.forEach((h2, index) => {
+                    if (h2.getBoundingClientRect().top <= 200) {
+                        activeIndex = index;
+                    }
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+    }
+    });
+    </script>
+
+    
+    
+    <script>
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        function loadGA() {
+            if (window.gaLoaded) return;
+            window.gaLoaded = true;
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975';
+            document.head.appendChild(script);
+
+            script.onload = () => {
+                gtag('js', new Date());
+                gtag('config', 'G-B6QCH29975');
+            };
+        }
+
+        
+        ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+            window.addEventListener(event, loadGA, { once: true, passive: true });
+        });
+
+        
+        setTimeout(loadGA, 3000);
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+    
+    <div class="reading-progress" id="reading-progress"></div>
+    <script>
+    window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / docHeight) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+    </script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+            </div>
+        </div><button id="menu-btn" aria-label="Menu" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/categories/trending/" title="Hot IAM topics">
+                    <span>🔥Trending</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+(function() {
+    var btn = document.getElementById('menu-btn');
+    var menu = document.getElementById('menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+        });
+        
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
+</script>
+<main class="main">
+
+
+
+<div class="reading-progress" id="reading-progress"></div>
+<script>
+(function() {
+  const progressBar = document.getElementById('reading-progress');
+  const article = document.querySelector('.post-content');
+
+  if (!progressBar || !article) return;
+
+  function updateProgress() {
+    const articleTop = article.offsetTop;
+    const articleHeight = article.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+
+    
+    const start = articleTop - windowHeight;
+    const end = articleTop + articleHeight;
+    const current = scrollTop - start;
+    const total = end - start;
+
+    const progress = Math.min(Math.max((current / total) * 100, 0), 100);
+    progressBar.style.width = progress + '%';
+  }
+
+  
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  
+  updateProgress();
+})();
+</script>
+
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent" data-pagefind-meta="title">
+      Keycloak Docker Compose Production: Complete Deployment Guide for 2026
+    </h1>
+    <div class="post-meta"><span title='2026-02-21 23:30:00'>Feb 21, 2026</span>&nbsp;·&nbsp;9 min&nbsp;·&nbsp;1714 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+    
+      <div class="post-updated">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Updated: Feb 26, 2026
+      </div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#single-node-production-setup" aria-label="Single-Node Production Setup">Single-Node Production Setup</a><ul>
+                        
+                <li>
+                    <a href="#docker-compose" aria-label="Docker Compose">Docker Compose</a></li>
+                <li>
+                    <a href="#environment-file" aria-label="Environment File">Environment File</a></li>
+                <li>
+                    <a href="#key-configuration-decisions" aria-label="Key Configuration Decisions">Key Configuration Decisions</a></li></ul>
+                </li>
+                <li>
+                    <a href="#optimized-build-for-faster-startup" aria-label="Optimized Build for Faster Startup">Optimized Build for Faster Startup</a></li>
+                <li>
+                    <a href="#reverse-proxy-configuration" aria-label="Reverse Proxy Configuration">Reverse Proxy Configuration</a><ul>
+                        
+                <li>
+                    <a href="#nginx" aria-label="Nginx">Nginx</a></li>
+                <li>
+                    <a href="#traefik-docker-labels" aria-label="Traefik (Docker Labels)">Traefik (Docker Labels)</a></li>
+                <li>
+                    <a href="#caddy-automatic-tls" aria-label="Caddy (Automatic TLS)">Caddy (Automatic TLS)</a></li></ul>
+                </li>
+                <li>
+                    <a href="#postgresql-tuning" aria-label="PostgreSQL Tuning">PostgreSQL Tuning</a><ul>
+                        
+                <li>
+                    <a href="#automated-backups" aria-label="Automated Backups">Automated Backups</a></li></ul>
+                </li>
+                <li>
+                    <a href="#multi-node-clustering" aria-label="Multi-Node Clustering">Multi-Node Clustering</a><ul>
+                        
+                <li>
+                    <a href="#clustered-docker-compose" aria-label="Clustered Docker Compose">Clustered Docker Compose</a></li>
+                <li>
+                    <a href="#clustering-key-points" aria-label="Clustering Key Points">Clustering Key Points</a></li></ul>
+                </li>
+                <li>
+                    <a href="#security-hardening" aria-label="Security Hardening">Security Hardening</a><ul>
+                        
+                <li>
+                    <a href="#disable-unused-features" aria-label="Disable Unused Features">Disable Unused Features</a></li>
+                <li>
+                    <a href="#separate-admin-hostname" aria-label="Separate Admin Hostname">Separate Admin Hostname</a></li>
+                <li>
+                    <a href="#credential-management" aria-label="Credential Management">Credential Management</a></li>
+                <li>
+                    <a href="#load-shedding" aria-label="Load Shedding">Load Shedding</a></li></ul>
+                </li>
+                <li>
+                    <a href="#monitoring" aria-label="Monitoring">Monitoring</a><ul>
+                        
+                <li>
+                    <a href="#prometheus-integration" aria-label="Prometheus Integration">Prometheus Integration</a></li>
+                <li>
+                    <a href="#key-metrics-to-monitor" aria-label="Key Metrics to Monitor">Key Metrics to Monitor</a></li>
+                <li>
+                    <a href="#grafana-dashboards" aria-label="Grafana Dashboards">Grafana Dashboards</a></li></ul>
+                </li>
+                <li>
+                    <a href="#troubleshooting" aria-label="Troubleshooting">Troubleshooting</a><ul>
+                        
+                <li>
+                    <a href="#failed-to-initialize-liquibase" aria-label="&ldquo;Failed to initialize Liquibase&rdquo;">&ldquo;Failed to initialize Liquibase&rdquo;</a></li>
+                <li>
+                    <a href="#token-issuer-mismatch--hostname-errors" aria-label="Token Issuer Mismatch / Hostname Errors">Token Issuer Mismatch / Hostname Errors</a></li>
+                <li>
+                    <a href="#oom-kills--high-memory-usage" aria-label="OOM Kills / High Memory Usage">OOM Kills / High Memory Usage</a></li>
+                <li>
+                    <a href="#slow-startup-30-seconds" aria-label="Slow Startup (30&#43; seconds)">Slow Startup (30+ seconds)</a></li>
+                <li>
+                    <a href="#cluster-nodes-not-discovering-each-other" aria-label="Cluster Nodes Not Discovering Each Other">Cluster Nodes Not Discovering Each Other</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content" data-pagefind-body><p>Running Keycloak in Docker for development is straightforward. Running it in production requires careful configuration of database pooling, reverse proxy headers, JVM tuning, health checks, and security hardening. This guide provides copy-paste Docker Compose configurations for Keycloak 26.x that are production-ready.</p>
+<blockquote>
+<p><strong>Clone the companion repo</strong>: All configurations from this guide are available as a ready-to-run project at <a href="https://github.com/IAMDevBox/keycloak-docker-production">IAMDevBox/keycloak-docker-production</a>. Clone it, copy <code>.env.example</code> to <code>.env</code>, set your passwords, and run <code>docker compose up -d</code>.</p>
+</blockquote>
+<h2 id="single-node-production-setup">Single-Node Production Setup<a hidden class="anchor" aria-hidden="true" href="#single-node-production-setup">#</a></h2>
+<p>This is the recommended starting point. A single Keycloak instance with PostgreSQL handles thousands of concurrent users.</p>
+<h3 id="docker-compose">Docker Compose<a hidden class="anchor" aria-hidden="true" href="#docker-compose">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">services</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">postgres</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">image</span>: <span style="color:#ae81ff">postgres:16-alpine</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">container_name</span>: <span style="color:#ae81ff">keycloak-postgres</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">restart</span>: <span style="color:#ae81ff">unless-stopped</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">pgdata:/var/lib/postgresql/data</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">environment</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">POSTGRES_DB</span>: <span style="color:#ae81ff">keycloak</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">POSTGRES_USER</span>: <span style="color:#ae81ff">keycloak</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">POSTGRES_PASSWORD</span>: <span style="color:#ae81ff">${DB_PASSWORD}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">networks</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">internal</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">healthcheck</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">test</span>: [<span style="color:#e6db74">&#34;CMD-SHELL&#34;</span>, <span style="color:#e6db74">&#34;pg_isready -U keycloak -d keycloak&#34;</span>]
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">interval</span>: <span style="color:#ae81ff">10s</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">timeout</span>: <span style="color:#ae81ff">5s</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">retries</span>: <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">start_period</span>: <span style="color:#ae81ff">30s</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">deploy</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">resources</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">limits</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">memory</span>: <span style="color:#ae81ff">1G</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">cpus</span>: <span style="color:#e6db74">&#34;1.0&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">keycloak</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">image</span>: <span style="color:#ae81ff">quay.io/keycloak/keycloak:26.1</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">container_name</span>: <span style="color:#ae81ff">keycloak</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">command</span>: <span style="color:#ae81ff">start --optimized</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">restart</span>: <span style="color:#ae81ff">unless-stopped</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">depends_on</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">postgres</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">condition</span>: <span style="color:#ae81ff">service_healthy</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">environment</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e"># Database</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_DB</span>: <span style="color:#ae81ff">postgres</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_DB_URL</span>: <span style="color:#ae81ff">jdbc:postgresql://postgres:5432/keycloak</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_DB_USERNAME</span>: <span style="color:#ae81ff">keycloak</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_DB_PASSWORD</span>: <span style="color:#ae81ff">${DB_PASSWORD}</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_DB_POOL_INITIAL_SIZE</span>: <span style="color:#ae81ff">25</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_DB_POOL_MIN_SIZE</span>: <span style="color:#ae81ff">25</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_DB_POOL_MAX_SIZE</span>: <span style="color:#ae81ff">25</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e"># Hostname (TLS terminates at reverse proxy)</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_HOSTNAME</span>: <span style="color:#ae81ff">https://auth.example.com</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_HTTP_ENABLED</span>: <span style="color:#e6db74">&#34;true&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_PROXY_HEADERS</span>: <span style="color:#ae81ff">xforwarded</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e"># Observability</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_HEALTH_ENABLED</span>: <span style="color:#e6db74">&#34;true&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_METRICS_ENABLED</span>: <span style="color:#e6db74">&#34;true&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e"># Admin bootstrap (first run only)</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_BOOTSTRAP_ADMIN_USERNAME</span>: <span style="color:#ae81ff">admin</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_BOOTSTRAP_ADMIN_PASSWORD</span>: <span style="color:#ae81ff">${ADMIN_PASSWORD}</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e"># Single-node cache</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_CACHE</span>: <span style="color:#ae81ff">local</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e"># Logging</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_LOG_LEVEL</span>: <span style="color:#ae81ff">info</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_LOG_CONSOLE_OUTPUT</span>: <span style="color:#ae81ff">json</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e"># JVM</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">JAVA_OPTS_KC_HEAP</span>: &gt;-<span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        -XX:MaxRAMPercentage=70
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        -XX:InitialRAMPercentage=50
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        -XX:MaxHeapFreeRatio=30</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#e6db74">&#34;8080:8080&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">networks</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">frontend</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">internal</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">healthcheck</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">test</span>: [<span style="color:#f92672">&#34;CMD-SHELL&#34;, &#34;exec 3&lt;&gt;/dev/tcp/localhost/9000 &amp;&amp; echo -e &#39;GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n&#39; &gt;&amp;3 &amp;&amp; cat &lt;&amp;3 | grep -q &#39;\&#34;status\&#34;: </span><span style="color:#ae81ff">\&#34;UP\&#34;&#39;&#34;]</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">interval</span>: <span style="color:#ae81ff">30s</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">timeout</span>: <span style="color:#ae81ff">10s</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">retries</span>: <span style="color:#ae81ff">3</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">start_period</span>: <span style="color:#ae81ff">60s</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">deploy</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">resources</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">limits</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">memory</span>: <span style="color:#ae81ff">2G</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">cpus</span>: <span style="color:#e6db74">&#34;2.0&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">reservations</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">memory</span>: <span style="color:#ae81ff">1G</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">pgdata</span>:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">networks</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">frontend</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">driver</span>: <span style="color:#ae81ff">bridge</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">internal</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">driver</span>: <span style="color:#ae81ff">bridge</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">internal</span>: <span style="color:#66d9ef">true</span>
+</span></span></code></pre></div><h3 id="environment-file">Environment File<a hidden class="anchor" aria-hidden="true" href="#environment-file">#</a></h3>
+<p>Create a <code>.env</code> file (gitignored) alongside your <code>docker-compose.yml</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>DB_PASSWORD<span style="color:#f92672">=</span>change-this-to-a-strong-password
+</span></span><span style="display:flex;"><span>ADMIN_PASSWORD<span style="color:#f92672">=</span>change-this-to-a-strong-password
+</span></span></code></pre></div><h3 id="key-configuration-decisions">Key Configuration Decisions<a hidden class="anchor" aria-hidden="true" href="#key-configuration-decisions">#</a></h3>
+<p><strong>Database connection pool</strong>: The Keycloak docs recommend setting <code>initial</code>, <code>min</code>, and <code>max</code> pool sizes to the <strong>same value</strong>. This avoids the overhead of creating new connections under load. 25 connections handles most single-node deployments.</p>
+<p><strong><code>KC_CACHE: local</code></strong>: Disables distributed Infinispan caching. For a single node, this eliminates unnecessary cluster discovery overhead.</p>
+<p><strong><code>KC_BOOTSTRAP_ADMIN_USERNAME</code></strong>: Replaces the deprecated <code>KEYCLOAK_ADMIN</code> in Keycloak 26.x. The admin user is created only on first boot — these variables are ignored on subsequent starts.</p>
+<p><strong>Health check on port 9000</strong>: Keycloak&rsquo;s management interface runs on port 9000 (separate from the application port 8080). Health endpoints (<code>/health/ready</code>, <code>/health/live</code>) and metrics (<code>/metrics</code>) are served here. Never expose port 9000 publicly.</p>
+<p><strong>Network isolation</strong>: PostgreSQL sits on an <code>internal</code> network with no external access. Keycloak bridges both <code>frontend</code> (for client traffic) and <code>internal</code> (for database).</p>
+<h2 id="optimized-build-for-faster-startup">Optimized Build for Faster Startup<a hidden class="anchor" aria-hidden="true" href="#optimized-build-for-faster-startup">#</a></h2>
+<p>The stock Keycloak image runs a build phase on every container start, adding 15-30 seconds to startup. Use a multi-stage Dockerfile to pre-build:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dockerfile" data-lang="dockerfile"><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> <span style="color:#e6db74">quay.io/keycloak/keycloak:26.1</span> <span style="color:#66d9ef">AS</span> <span style="color:#e6db74">builder</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> KC_DB<span style="color:#f92672">=</span>postgres
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ENV</span> KC_HEALTH_ENABLED<span style="color:#f92672">=</span>true
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ENV</span> KC_METRICS_ENABLED<span style="color:#f92672">=</span>true
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ENV</span> KC_CACHE<span style="color:#f92672">=</span>ispn
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">RUN</span> /opt/keycloak/bin/kc.sh build<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span> <span style="color:#e6db74">quay.io/keycloak/keycloak:26.1</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> --from<span style="color:#f92672">=</span>builder /opt/keycloak/ /opt/keycloak/<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENTRYPOINT</span> [<span style="color:#e6db74">&#34;/opt/keycloak/bin/kc.sh&#34;</span>]<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">CMD</span> [<span style="color:#e6db74">&#34;start&#34;</span>, <span style="color:#e6db74">&#34;--optimized&#34;</span>]<span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p>Replace <code>image: quay.io/keycloak/keycloak:26.1</code> in your Compose file with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">keycloak</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">build</span>: <span style="color:#ae81ff">.</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">command</span>: <span style="color:#ae81ff">start --optimized</span>
+</span></span></code></pre></div><p>Startup drops from ~30 seconds to under 10 seconds.</p>
+<h2 id="reverse-proxy-configuration">Reverse Proxy Configuration<a hidden class="anchor" aria-hidden="true" href="#reverse-proxy-configuration">#</a></h2>
+<p>Keycloak in production runs behind a reverse proxy that terminates TLS. Three options:</p>
+<h3 id="nginx">Nginx<a hidden class="anchor" aria-hidden="true" href="#nginx">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-nginx" data-lang="nginx"><span style="display:flex;"><span><span style="color:#66d9ef">upstream</span> <span style="color:#e6db74">keycloak</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">server</span> keycloak:<span style="color:#ae81ff">8080</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">server</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">listen</span> <span style="color:#ae81ff">443</span> <span style="color:#e6db74">ssl</span> <span style="color:#e6db74">http2</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">server_name</span> <span style="color:#e6db74">auth.example.com</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">ssl_certificate</span>     <span style="color:#e6db74">/etc/nginx/ssl/fullchain.pem</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">ssl_certificate_key</span> <span style="color:#e6db74">/etc/nginx/ssl/privkey.pem</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">ssl_protocols</span>       <span style="color:#e6db74">TLSv1.2</span> <span style="color:#e6db74">TLSv1.3</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># OIDC/SAML endpoints
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#f92672">location</span> <span style="color:#e6db74">/realms/</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">proxy_pass</span> <span style="color:#e6db74">http://keycloak</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">proxy_set_header</span> <span style="color:#e6db74">Host</span> $host;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">proxy_set_header</span> <span style="color:#e6db74">X-Real-IP</span> $remote_addr;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">proxy_set_header</span> <span style="color:#e6db74">X-Forwarded-For</span> $proxy_add_x_forwarded_for;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">proxy_set_header</span> <span style="color:#e6db74">X-Forwarded-Proto</span> $scheme;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">proxy_set_header</span> <span style="color:#e6db74">X-Forwarded-Host</span> $host;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">proxy_set_header</span> <span style="color:#e6db74">X-Forwarded-Port</span> $server_port;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">proxy_buffer_size</span> <span style="color:#ae81ff">128k</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">proxy_buffers</span> <span style="color:#ae81ff">4</span> <span style="color:#ae81ff">256k</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">proxy_busy_buffers_size</span> <span style="color:#ae81ff">256k</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Static resources (cache aggressively)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#f92672">location</span> <span style="color:#e6db74">/resources/</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">proxy_pass</span> <span style="color:#e6db74">http://keycloak</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">proxy_set_header</span> <span style="color:#e6db74">Host</span> $host;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">expires</span> <span style="color:#e6db74">1y</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">add_header</span> <span style="color:#e6db74">Cache-Control</span> <span style="color:#e6db74">&#34;public,</span> <span style="color:#e6db74">immutable&#34;</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># OIDC discovery
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#f92672">location</span> <span style="color:#e6db74">/.well-known/</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">proxy_pass</span> <span style="color:#e6db74">http://keycloak</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">proxy_set_header</span> <span style="color:#e6db74">Host</span> $host;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">proxy_set_header</span> <span style="color:#e6db74">X-Forwarded-Proto</span> $scheme;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Admin console — restrict to internal IPs
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#f92672">location</span> <span style="color:#e6db74">/admin/</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">allow</span> 10.0.0.0<span style="color:#e6db74">/8</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">allow</span> 172.16.0.0<span style="color:#e6db74">/12</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">allow</span> 192.168.0.0<span style="color:#e6db74">/16</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">deny</span> <span style="color:#e6db74">all</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">proxy_pass</span> <span style="color:#e6db74">http://keycloak</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">proxy_set_header</span> <span style="color:#e6db74">Host</span> $host;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">proxy_set_header</span> <span style="color:#e6db74">X-Forwarded-For</span> $proxy_add_x_forwarded_for;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">proxy_set_header</span> <span style="color:#e6db74">X-Forwarded-Proto</span> $scheme;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Block management endpoints
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#f92672">location</span> <span style="color:#e6db74">/health</span> { <span style="color:#f92672">deny</span> <span style="color:#e6db74">all</span>; }
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">location</span> <span style="color:#e6db74">/metrics</span> { <span style="color:#f92672">deny</span> <span style="color:#e6db74">all</span>; }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><strong>Key points</strong>:</p>
+<ul>
+<li>Only expose <code>/realms/</code>, <code>/resources/</code>, and <code>/.well-known/</code> publicly</li>
+<li>Restrict <code>/admin/</code> to internal IPs</li>
+<li>Never proxy port 9000 (management interface)</li>
+<li>Large <code>proxy_buffer_size</code> prevents issues with SAML responses</li>
+</ul>
+<h3 id="traefik-docker-labels">Traefik (Docker Labels)<a hidden class="anchor" aria-hidden="true" href="#traefik-docker-labels">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">keycloak</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">labels</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#e6db74">&#34;traefik.enable=true&#34;</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#e6db74">&#34;traefik.http.routers.keycloak.rule=Host(`auth.example.com`)&#34;</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#e6db74">&#34;traefik.http.routers.keycloak.entrypoints=websecure&#34;</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#e6db74">&#34;traefik.http.routers.keycloak.tls.certresolver=letsencrypt&#34;</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#e6db74">&#34;traefik.http.services.keycloak.loadbalancer.server.port=8080&#34;</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#e6db74">&#34;traefik.http.services.keycloak.loadbalancer.sticky.cookie=true&#34;</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#e6db74">&#34;traefik.http.services.keycloak.loadbalancer.sticky.cookie.name=AUTH_SESSION_ID&#34;</span>
+</span></span></code></pre></div><h3 id="caddy-automatic-tls">Caddy (Automatic TLS)<a hidden class="anchor" aria-hidden="true" href="#caddy-automatic-tls">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>auth.example.com {
+</span></span><span style="display:flex;"><span>    reverse_proxy keycloak:8080 {
+</span></span><span style="display:flex;"><span>        header_up X-Forwarded-For {remote_host}
+</span></span><span style="display:flex;"><span>        header_up X-Forwarded-Proto {scheme}
+</span></span><span style="display:flex;"><span>        header_up X-Forwarded-Host {host}
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Caddy automatically provisions Let&rsquo;s Encrypt TLS certificates — zero manual certificate management.</p>
+<h2 id="postgresql-tuning">PostgreSQL Tuning<a hidden class="anchor" aria-hidden="true" href="#postgresql-tuning">#</a></h2>
+<p>Default PostgreSQL settings are conservative. Tune for Keycloak&rsquo;s workload pattern (many small CRUD queries):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">postgres</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">image</span>: <span style="color:#ae81ff">postgres:16-alpine</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">command</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#e6db74">&#34;postgres&#34;</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#e6db74">&#34;-c&#34;</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#e6db74">&#34;shared_buffers=256MB&#34;</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#e6db74">&#34;-c&#34;</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#e6db74">&#34;effective_cache_size=768MB&#34;</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#e6db74">&#34;-c&#34;</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#e6db74">&#34;work_mem=4MB&#34;</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#e6db74">&#34;-c&#34;</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#e6db74">&#34;maintenance_work_mem=64MB&#34;</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#e6db74">&#34;-c&#34;</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#e6db74">&#34;max_connections=50&#34;</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#e6db74">&#34;-c&#34;</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#e6db74">&#34;random_page_cost=1.1&#34;</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#e6db74">&#34;-c&#34;</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#e6db74">&#34;effective_io_concurrency=200&#34;</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#e6db74">&#34;-c&#34;</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#e6db74">&#34;log_min_duration_statement=500&#34;</span>
+</span></span></code></pre></div><p><strong>Sizing rules</strong>:</p>
+<ul>
+<li><code>shared_buffers</code>: 25% of container memory (256 MB for a 1 GB container)</li>
+<li><code>effective_cache_size</code>: 75% of container memory</li>
+<li><code>work_mem</code>: 4 MB is sufficient — Keycloak runs simple queries, not complex joins</li>
+<li><code>max_connections</code>: Must be &gt;= Keycloak pool size + monitoring/admin overhead. For single-node with pool size 25, set to 50</li>
+</ul>
+<h3 id="automated-backups">Automated Backups<a hidden class="anchor" aria-hidden="true" href="#automated-backups">#</a></h3>
+<p>Add a backup sidecar to your Compose file:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">backup</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">image</span>: <span style="color:#ae81ff">postgres:16-alpine</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">entrypoint</span>: <span style="color:#ae81ff">/bin/sh</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">command</span>: &gt;<span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    -c &#39;while true; do
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      pg_dump -h postgres -U keycloak -Fc keycloak &gt; /backups/keycloak_$$(date +%Y%m%d_%H%M).dump;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      find /backups -name &#34;keycloak_*.dump&#34; -mtime +7 -delete;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      sleep 86400;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    done&#39;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">environment</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">PGPASSWORD</span>: <span style="color:#ae81ff">${DB_PASSWORD}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ae81ff">./backups:/backups</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">networks</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ae81ff">internal</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">depends_on</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">postgres</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">condition</span>: <span style="color:#ae81ff">service_healthy</span>
+</span></span></code></pre></div><p>This creates daily backups and retains 7 days of history.</p>
+<h2 id="multi-node-clustering">Multi-Node Clustering<a hidden class="anchor" aria-hidden="true" href="#multi-node-clustering">#</a></h2>
+<p>For high availability, run multiple Keycloak instances behind a load balancer. Keycloak 26.x uses <strong>JDBC_PING2</strong> by default — nodes discover each other through the shared PostgreSQL database. No multicast or external discovery service required.</p>
+<h3 id="clustered-docker-compose">Clustered Docker Compose<a hidden class="anchor" aria-hidden="true" href="#clustered-docker-compose">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">services</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">postgres</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">image</span>: <span style="color:#ae81ff">postgres:16-alpine</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">restart</span>: <span style="color:#ae81ff">unless-stopped</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">pgdata:/var/lib/postgresql/data</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">environment</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">POSTGRES_DB</span>: <span style="color:#ae81ff">keycloak</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">POSTGRES_USER</span>: <span style="color:#ae81ff">keycloak</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">POSTGRES_PASSWORD</span>: <span style="color:#ae81ff">${DB_PASSWORD}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">command</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#e6db74">&#34;postgres&#34;</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#e6db74">&#34;-c&#34;</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#e6db74">&#34;shared_buffers=256MB&#34;</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#e6db74">&#34;-c&#34;</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#e6db74">&#34;max_connections=80&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">networks</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">internal</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">healthcheck</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">test</span>: [<span style="color:#e6db74">&#34;CMD-SHELL&#34;</span>, <span style="color:#e6db74">&#34;pg_isready -U keycloak -d keycloak&#34;</span>]
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">interval</span>: <span style="color:#ae81ff">10s</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">timeout</span>: <span style="color:#ae81ff">5s</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">retries</span>: <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">start_period</span>: <span style="color:#ae81ff">30s</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">keycloak-1</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">image</span>: <span style="color:#ae81ff">quay.io/keycloak/keycloak:26.1</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">command</span>: <span style="color:#ae81ff">start --optimized</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">restart</span>: <span style="color:#ae81ff">unless-stopped</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">depends_on</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">postgres</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">condition</span>: <span style="color:#ae81ff">service_healthy</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">environment</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_DB</span>: <span style="color:#ae81ff">postgres</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_DB_URL</span>: <span style="color:#ae81ff">jdbc:postgresql://postgres:5432/keycloak</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_DB_USERNAME</span>: <span style="color:#ae81ff">keycloak</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_DB_PASSWORD</span>: <span style="color:#ae81ff">${DB_PASSWORD}</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_DB_POOL_INITIAL_SIZE</span>: <span style="color:#ae81ff">20</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_DB_POOL_MIN_SIZE</span>: <span style="color:#ae81ff">20</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_DB_POOL_MAX_SIZE</span>: <span style="color:#ae81ff">20</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_HOSTNAME</span>: <span style="color:#ae81ff">https://auth.example.com</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_HTTP_ENABLED</span>: <span style="color:#e6db74">&#34;true&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_PROXY_HEADERS</span>: <span style="color:#ae81ff">xforwarded</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_HEALTH_ENABLED</span>: <span style="color:#e6db74">&#34;true&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_METRICS_ENABLED</span>: <span style="color:#e6db74">&#34;true&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_BOOTSTRAP_ADMIN_USERNAME</span>: <span style="color:#ae81ff">admin</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_BOOTSTRAP_ADMIN_PASSWORD</span>: <span style="color:#ae81ff">${ADMIN_PASSWORD}</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_CACHE</span>: <span style="color:#ae81ff">ispn</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_CACHE_STACK</span>: <span style="color:#ae81ff">jdbc-ping</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_LOG_LEVEL</span>: <span style="color:#ae81ff">info</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_LOG_CONSOLE_OUTPUT</span>: <span style="color:#ae81ff">json</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">JAVA_OPTS_APPEND</span>: <span style="color:#e6db74">&#34;-Djava.net.preferIPv4Stack=true&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">networks</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">frontend</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">internal</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">healthcheck</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">test</span>: [<span style="color:#f92672">&#34;CMD-SHELL&#34;, &#34;exec 3&lt;&gt;/dev/tcp/localhost/9000 &amp;&amp; echo -e &#39;GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n&#39; &gt;&amp;3 &amp;&amp; cat &lt;&amp;3 | grep -q &#39;\&#34;status\&#34;: </span><span style="color:#ae81ff">\&#34;UP\&#34;&#39;&#34;]</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">interval</span>: <span style="color:#ae81ff">30s</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">timeout</span>: <span style="color:#ae81ff">10s</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">retries</span>: <span style="color:#ae81ff">3</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">start_period</span>: <span style="color:#ae81ff">90s</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">keycloak-2</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">image</span>: <span style="color:#ae81ff">quay.io/keycloak/keycloak:26.1</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">command</span>: <span style="color:#ae81ff">start --optimized</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">restart</span>: <span style="color:#ae81ff">unless-stopped</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">depends_on</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">postgres</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">condition</span>: <span style="color:#ae81ff">service_healthy</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">keycloak-1</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">condition</span>: <span style="color:#ae81ff">service_healthy</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">environment</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_DB</span>: <span style="color:#ae81ff">postgres</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_DB_URL</span>: <span style="color:#ae81ff">jdbc:postgresql://postgres:5432/keycloak</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_DB_USERNAME</span>: <span style="color:#ae81ff">keycloak</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_DB_PASSWORD</span>: <span style="color:#ae81ff">${DB_PASSWORD}</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_DB_POOL_INITIAL_SIZE</span>: <span style="color:#ae81ff">20</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_DB_POOL_MIN_SIZE</span>: <span style="color:#ae81ff">20</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_DB_POOL_MAX_SIZE</span>: <span style="color:#ae81ff">20</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_HOSTNAME</span>: <span style="color:#ae81ff">https://auth.example.com</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_HTTP_ENABLED</span>: <span style="color:#e6db74">&#34;true&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_PROXY_HEADERS</span>: <span style="color:#ae81ff">xforwarded</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_HEALTH_ENABLED</span>: <span style="color:#e6db74">&#34;true&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_METRICS_ENABLED</span>: <span style="color:#e6db74">&#34;true&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_CACHE</span>: <span style="color:#ae81ff">ispn</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_CACHE_STACK</span>: <span style="color:#ae81ff">jdbc-ping</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_LOG_LEVEL</span>: <span style="color:#ae81ff">info</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">KC_LOG_CONSOLE_OUTPUT</span>: <span style="color:#ae81ff">json</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">JAVA_OPTS_APPEND</span>: <span style="color:#e6db74">&#34;-Djava.net.preferIPv4Stack=true&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">networks</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">frontend</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">internal</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">healthcheck</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">test</span>: [<span style="color:#f92672">&#34;CMD-SHELL&#34;, &#34;exec 3&lt;&gt;/dev/tcp/localhost/9000 &amp;&amp; echo -e &#39;GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n&#39; &gt;&amp;3 &amp;&amp; cat &lt;&amp;3 | grep -q &#39;\&#34;status\&#34;: </span><span style="color:#ae81ff">\&#34;UP\&#34;&#39;&#34;]</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">interval</span>: <span style="color:#ae81ff">30s</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">timeout</span>: <span style="color:#ae81ff">10s</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">retries</span>: <span style="color:#ae81ff">3</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">start_period</span>: <span style="color:#ae81ff">90s</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">nginx</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">image</span>: <span style="color:#ae81ff">nginx:alpine</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#e6db74">&#34;443:443&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">./nginx.conf:/etc/nginx/nginx.conf:ro</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">./ssl:/etc/nginx/ssl:ro</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">depends_on</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">keycloak-1</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">condition</span>: <span style="color:#ae81ff">service_healthy</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">keycloak-2</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">condition</span>: <span style="color:#ae81ff">service_healthy</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">networks</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">frontend</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">pgdata</span>:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">networks</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">frontend</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">internal</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">internal</span>: <span style="color:#66d9ef">true</span>
+</span></span></code></pre></div><h3 id="clustering-key-points">Clustering Key Points<a hidden class="anchor" aria-hidden="true" href="#clustering-key-points">#</a></h3>
+<p><strong>JDBC_PING2</strong> uses the shared database for node discovery. Nodes register themselves in a <code>JGROUPSPING</code> table. No multicast, no external etcd/consul, no cloud-specific discovery.</p>
+<p><strong>Sticky sessions</strong> are required. The <code>AUTH_SESSION_ID</code> cookie ensures a user&rsquo;s authentication flow stays on the same node. Without sticky sessions, multi-step login flows will fail. Configure in Nginx:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-nginx" data-lang="nginx"><span style="display:flex;"><span><span style="color:#66d9ef">upstream</span> <span style="color:#e6db74">keycloak_cluster</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">ip_hash</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">server</span> keycloak-1:<span style="color:#ae81ff">8080</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">server</span> keycloak-2:<span style="color:#ae81ff">8080</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><strong>Inter-node communication</strong> uses ports 7800 (data) and 57800 (failure detection). mTLS between nodes is enabled by default in Keycloak 26.x with auto-generated certificates.</p>
+<p><strong>Verify cluster formation</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Check for cluster join message</span>
+</span></span><span style="display:flex;"><span>docker compose logs keycloak-1 | grep <span style="color:#e6db74">&#34;ISPN000094&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Check cluster size via metrics</span>
+</span></span><span style="display:flex;"><span>curl -s http://localhost:9000/metrics | grep vendor_cluster_size
+</span></span></code></pre></div><h2 id="security-hardening">Security Hardening<a hidden class="anchor" aria-hidden="true" href="#security-hardening">#</a></h2>
+<h3 id="disable-unused-features">Disable Unused Features<a hidden class="anchor" aria-hidden="true" href="#disable-unused-features">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Add to Keycloak environment</span>
+</span></span><span style="display:flex;"><span>KC_FEATURES_DISABLED: impersonation,kerberos,device-flow,ciba
+</span></span></code></pre></div><p>Disable features you don&rsquo;t use to reduce attack surface. Common candidates: <code>impersonation</code> (admin impersonating users), <code>device-flow</code> (IoT), <code>ciba</code> (client-initiated backchannel auth).</p>
+<h3 id="separate-admin-hostname">Separate Admin Hostname<a hidden class="anchor" aria-hidden="true" href="#separate-admin-hostname">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>KC_HOSTNAME: https://auth.example.com
+</span></span><span style="display:flex;"><span>KC_HOSTNAME_ADMIN: https://admin.internal.example.com
+</span></span></code></pre></div><p>Serve the admin console on a separate internal hostname, inaccessible from the public internet.</p>
+<h3 id="credential-management">Credential Management<a hidden class="anchor" aria-hidden="true" href="#credential-management">#</a></h3>
+<p>Keycloak does not support Docker secrets <code>_FILE</code> pattern natively. Options from most to least secure:</p>
+<ol>
+<li><strong>PKCS12 Keystore</strong> (Keycloak-native):</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>keytool -importpass -alias kc.db-password -keystore conf/keystore.p12 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -storepass keystorepass -storetype PKCS12
+</span></span></code></pre></div><ol start="2">
+<li><strong><code>.env</code> file</strong> (simplest, restrict file permissions to 600):</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>chmod <span style="color:#ae81ff">600</span> .env
+</span></span></code></pre></div><ol start="3">
+<li><strong>Docker Swarm secrets</strong> (via custom entrypoint reading <code>/run/secrets/</code>)</li>
+</ol>
+<h3 id="load-shedding">Load Shedding<a hidden class="anchor" aria-hidden="true" href="#load-shedding">#</a></h3>
+<p>Prevent cascade failures under extreme load:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>KC_HTTP_MAX_QUEUED_REQUESTS: <span style="color:#ae81ff">1000</span>
+</span></span></code></pre></div><p>Requests exceeding the queue receive an immediate 503. At ~200 requests/second throughput, a queue of 1000 means ~5 second maximum wait.</p>
+<h2 id="monitoring">Monitoring<a hidden class="anchor" aria-hidden="true" href="#monitoring">#</a></h2>
+<h3 id="prometheus-integration">Prometheus Integration<a hidden class="anchor" aria-hidden="true" href="#prometheus-integration">#</a></h3>
+<p>Enable metrics and health endpoints:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>KC_HEALTH_ENABLED: <span style="color:#e6db74">&#34;true&#34;</span>
+</span></span><span style="display:flex;"><span>KC_METRICS_ENABLED: <span style="color:#e6db74">&#34;true&#34;</span>
+</span></span></code></pre></div><p>Scrape configuration:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># prometheus.yml</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">scrape_configs</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">job_name</span>: <span style="color:#ae81ff">keycloak</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">metrics_path</span>: <span style="color:#ae81ff">/metrics</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">static_configs</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">targets</span>: [<span style="color:#e6db74">&#39;keycloak:9000&#39;</span>]
+</span></span></code></pre></div><h3 id="key-metrics-to-monitor">Key Metrics to Monitor<a hidden class="anchor" aria-hidden="true" href="#key-metrics-to-monitor">#</a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>Metric</th>
+          <th>Type</th>
+          <th>What It Tells You</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>keycloak_user_events_total</code></td>
+          <td>Counter</td>
+          <td>Login success/failure rates per realm</td>
+      </tr>
+      <tr>
+          <td><code>http_server_requests_seconds_bucket</code></td>
+          <td>Histogram</td>
+          <td>Request latency distribution</td>
+      </tr>
+      <tr>
+          <td><code>agroal_active_count</code></td>
+          <td>Gauge</td>
+          <td>Active DB connections (should match pool size under load)</td>
+      </tr>
+      <tr>
+          <td><code>vendor_cluster_size</code></td>
+          <td>Gauge</td>
+          <td>Number of nodes in cluster (should match expected count)</td>
+      </tr>
+      <tr>
+          <td><code>jvm_memory_usage_after_gc_percent</code></td>
+          <td>Gauge</td>
+          <td>Heap pressure (alert if consistently &gt;85%)</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="grafana-dashboards">Grafana Dashboards<a hidden class="anchor" aria-hidden="true" href="#grafana-dashboards">#</a></h3>
+<p>Keycloak provides official dashboards at <a href="https://github.com/keycloak/keycloak-grafana-dashboard">keycloak/keycloak-grafana-dashboard</a>:</p>
+<ul>
+<li><strong>Troubleshooting Dashboard</strong>: SLI monitoring and deployment issues</li>
+<li><strong>Capacity Planning Dashboard</strong>: Password validations, login counts, load indicators</li>
+</ul>
+<p>Community dashboards on Grafana.com: ID <code>10441</code> and <code>17878</code>.</p>
+<h2 id="troubleshooting">Troubleshooting<a hidden class="anchor" aria-hidden="true" href="#troubleshooting">#</a></h2>
+<h3 id="failed-to-initialize-liquibase">&ldquo;Failed to initialize Liquibase&rdquo;<a hidden class="anchor" aria-hidden="true" href="#failed-to-initialize-liquibase">#</a></h3>
+<p><strong>Cause</strong>: Keycloak starts before PostgreSQL accepts connections.</p>
+<p><strong>Fix</strong>: Use <code>depends_on</code> with health check condition:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">keycloak</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">depends_on</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">postgres</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">condition</span>: <span style="color:#ae81ff">service_healthy</span>
+</span></span></code></pre></div><h3 id="token-issuer-mismatch--hostname-errors">Token Issuer Mismatch / Hostname Errors<a hidden class="anchor" aria-hidden="true" href="#token-issuer-mismatch--hostname-errors">#</a></h3>
+<p><strong>Cause</strong>: <code>KC_HOSTNAME</code> doesn&rsquo;t match the URL clients see, or proxy headers aren&rsquo;t being forwarded.</p>
+<p><strong>Fix</strong>: Set <code>KC_HOSTNAME</code> to the full external URL including scheme:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>KC_HOSTNAME<span style="color:#f92672">=</span>https://auth.example.com
+</span></span><span style="display:flex;"><span>KC_PROXY_HEADERS<span style="color:#f92672">=</span>xforwarded
+</span></span></code></pre></div><p>Debug with <code>KC_HOSTNAME_DEBUG=true</code>, then check <code>/realms/master/hostname-debug</code>.</p>
+<h3 id="oom-kills--high-memory-usage">OOM Kills / High Memory Usage<a hidden class="anchor" aria-hidden="true" href="#oom-kills--high-memory-usage">#</a></h3>
+<p><strong>Cause</strong>: Default <code>MaxRAMPercentage=70</code> leaves insufficient room for non-heap memory.</p>
+<p><strong>Fix</strong>: Set container memory to minimum 2 GB and tune heap:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>JAVA_OPTS_KC_HEAP: <span style="color:#e6db74">&#34;-XX:MaxRAMPercentage=65 -XX:InitialRAMPercentage=50&#34;</span>
+</span></span></code></pre></div><h3 id="slow-startup-30-seconds">Slow Startup (30+ seconds)<a hidden class="anchor" aria-hidden="true" href="#slow-startup-30-seconds">#</a></h3>
+<p><strong>Cause</strong>: Build phase runs on every container start.</p>
+<p><strong>Fix</strong>: Use the optimized Dockerfile from the <a href="#optimized-build-for-faster-startup">Build Optimization</a> section. Startup drops to under 10 seconds.</p>
+<h3 id="cluster-nodes-not-discovering-each-other">Cluster Nodes Not Discovering Each Other<a hidden class="anchor" aria-hidden="true" href="#cluster-nodes-not-discovering-each-other">#</a></h3>
+<p><strong>Cause</strong>: Docker network blocks JGroups ports or IPv6 interferes with discovery.</p>
+<p><strong>Fix</strong>:</p>
+<ol>
+<li>Ensure nodes share the same Docker network</li>
+<li>Add <code>JAVA_OPTS_APPEND: &quot;-Djava.net.preferIPv4Stack=true&quot;</code></li>
+<li>Verify with <code>docker compose logs | grep &quot;ISPN000094&quot;</code></li>
+</ol>
+<p>For more Keycloak troubleshooting, see our <a href="/posts/keycloak-session-expired-errors-troubleshooting-and-timeout-configuration/">Keycloak Session Expired Errors</a> and <a href="/posts/keycloak-ldap-connection-troubleshooting-complete-guide/">Keycloak LDAP Connection Troubleshooting</a> guides.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/keycloak/">Keycloak</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/docker/">Docker</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/production-deployment/">Production-Deployment</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/iam/">Iam</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/devops/">DevOps</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/keycloak-vs-ory-open-source-iam-comparison-2026/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Ory vs Keycloak: Open Source IAM Comparison 2026</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/keycloak-vs-authentik-open-source-iam-comparison-2026/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Keycloak vs Authentik: Open Source IAM Comparison 2026</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+
+<section class="post-feedback">
+  <p class="feedback-question">Was this article helpful?</p>
+  <div class="feedback-buttons">
+    <button class="feedback-btn feedback-yes" onclick="trackFeedback('yes', '\/posts\/keycloak-docker-compose-production-deployment-guide\/')" aria-label="Yes, helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      Yes
+    </button>
+    <button class="feedback-btn feedback-no" onclick="trackFeedback('no', '\/posts\/keycloak-docker-compose-production-deployment-guide\/')" aria-label="No, not helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>
+      No
+    </button>
+  </div>
+  <p class="feedback-thanks" style="display: none;">Thanks for your feedback!</p>
+</section>
+
+
+<section class="author-bio">
+  <div class="author-avatar">
+    <img src="/IAMDevBox.com.jpg" alt="IAMDevBox Author" width="64" height="64" loading="lazy">
+  </div>
+  <div class="author-info">
+    <h4>Written by IAMDevBox</h4>
+    <p>Enterprise IAM architect with 15+ years in identity modernization. Certified across ForgeRock, Ping Identity, SailPoint, AWS, and Azure.</p>
+    <div class="author-links">
+      <a href="https://twitter.com/iamdevbox" target="_blank" rel="noopener" title="Follow on X/Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/iamdevbox" target="_blank" rel="noopener" title="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="/contact/" title="Contact">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function trackFeedback(value, page) {
+  
+  document.querySelector('.feedback-buttons').style.display = 'none';
+  document.querySelector('.feedback-question').style.display = 'none';
+  document.querySelector('.feedback-thanks').style.display = 'block';
+
+  
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'post_feedback', {
+      'feedback_value': value,
+      'page_path': page
+    });
+  }
+
+  
+  localStorage.setItem('feedback_' + page, value);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const page = '\/posts\/keycloak-docker-compose-production-deployment-guide\/';
+  if (localStorage.getItem('feedback_' + page)) {
+    document.querySelector('.feedback-buttons').style.display = 'none';
+    document.querySelector('.feedback-question').textContent = 'Thanks for your feedback!';
+  }
+});
+</script>
+
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+              Go Secretless with Snowflake Workload Identity Federation - Snowflake
+            </a>
+            <small class="custom-date">2026-03-01</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+              OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+            </a>
+            <small class="custom-date">2026-02-28</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+              Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+            </a>
+            <small class="custom-date">2026-02-28</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/microsoft-s-entra-oauth-tokens-could-be-exploited-what-you-need-to-know/" class="custom-link">
+              Microsoft’s Entra OAuth Tokens Could Be Exploited - What You Need to Know
+            </a>
+            <small class="custom-date">2026-02-26</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/configuring-hosted-login-journey-urls-in-forgerock-identity-cloud/" class="custom-link">
+              Configuring Hosted Login Journey URLs in ForgeRock Identity Cloud
+            </a>
+            <small class="custom-date">2026-02-23</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+                Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+                Go Secretless with Snowflake Workload Identity Federation - Snowflake
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+                JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+                OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+                Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

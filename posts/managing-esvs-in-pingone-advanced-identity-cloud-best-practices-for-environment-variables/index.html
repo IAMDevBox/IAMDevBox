@@ -1,0 +1,3159 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Managing ESVs in PingOne Advanced Identity Cloud: Best Practices for Environment Variables | IAMDevBox</title>
+<meta name="keywords" content="managing esvs in pingone advanced identity cloud, best practices for environment variables, pingone, python, ci/cd, environmentvariables, security, configurationmanagement">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/managing-esvs-in-pingone-advanced-identity-cloud-best-practices-for-environment-variables/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.e24ea479df3e367781fafa20cedde21c7e043c10bed4c8c913ef9261a049a1e2.css" integrity="sha256-4k6ked8&#43;NneB&#43;vogzt3iHH4EPBC&#43;1MjJE&#43;&#43;SYaBJoeI=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/managing-esvs-in-pingone-advanced-identity-cloud-best-practices-for-environment-variables/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/managing-esvs-in-pingone-advanced-identity-cloud-best-practices-for-environment-variables/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Managing ESVs in PingOne Advanced Identity Cloud: Best Practices for Environment Variables">
+  <meta property="og:description" content="Learn best practices for managing Environment-Specific Values (ESVs) in PingOne Advanced Identity Cloud to enhance security and streamline configuration management.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-01-21T14:37:07+00:00">
+    <meta property="article:modified_time" content="2026-02-10T09:19:20-05:00">
+    <meta property="article:tag" content="PingOne">
+    <meta property="article:tag" content="Iam">
+    <meta property="article:tag" content="EnvironmentVariables">
+    <meta property="article:tag" content="Security">
+    <meta property="article:tag" content="ConfigurationManagement">
+    <meta property="og:image" content="https://www.iamdevbox.com/images/posts/managing-esvs-in-pingone-advanced-identity-cloud">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/images/posts/managing-esvs-in-pingone-advanced-identity-cloud">
+<meta name="twitter:title" content="Managing ESVs in PingOne Advanced Identity Cloud: Best Practices for Environment Variables">
+<meta name="twitter:description" content="Learn best practices for managing Environment-Specific Values (ESVs) in PingOne Advanced Identity Cloud to enhance security and streamline configuration management.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Managing ESVs in PingOne Advanced Identity Cloud: Best Practices for Environment Variables",
+      "item": "https://www.iamdevbox.com/posts/managing-esvs-in-pingone-advanced-identity-cloud-best-practices-for-environment-variables/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Managing ESVs in PingOne Advanced Identity Cloud: Best Practices for Environment Variables",
+  "name": "Managing ESVs in PingOne Advanced Identity Cloud: Best Practices for Environment Variables",
+  "description": "Learn best practices for managing Environment-Specific Values (ESVs) in PingOne Advanced Identity Cloud to enhance security and streamline configuration management.",
+  "keywords": [
+    "managing esvs in pingone advanced identity cloud", "best practices for environment variables", "pingone", "python", "ci/cd", "environmentvariables", "security", "configurationmanagement"
+  ],
+  "articleBody": "2662741f.webp alt: “Managing ESVs in PingOne Advanced Identity Cloud: Best Practices for Environment Variables” relative: false Environment-Specific Values, or ESVs, are variables used in PingOne to store configuration settings that can vary across different environments such as development, testing, and production. Properly managing ESVs is crucial for maintaining security, ensuring consistency, and simplifying deployment processes.\nWhat are Environment-Specific Values in PingOne? ESVs allow you to define values that can change based on the environment your application is running in. This means you can have different configurations for development, staging, and production without changing your codebase. For example, you might have different database connection strings or API keys for each environment.\nWhy use Environment-Specific Values? Using ESVs helps in several ways:\nSecurity: Sensitive information like API keys and passwords can be stored securely and accessed only where necessary. Flexibility: Easily switch configurations between environments without modifying code. Maintainability: Centralize configuration management, reducing the risk of misconfigurations. How do you create ESVs in PingOne? Creating ESVs in PingOne involves defining the variables and their values through the PingOne admin console or API.\nThrough the Admin Console Log in to the PingOne admin console. Navigate to Environment-Specific Values under the Configuration section. Click on Add Environment-Specific Value. Enter the name, description, and initial value. Set the scope (e.g., organization, environment). Save the ESV. Through the API You can also create ESVs programmatically using the PingOne API. Here’s an example using curl:\ncurl -X POST \\ -H \"Authorization: Bearer YOUR_ACCESS_TOKEN\" \\ -H \"Content-Type: application/json\" \\ -d '{ \"name\": \"DATABASE_URL\", \"value\": \"https://dev-db.example.com\", \"scope\": \"ENVIRONMENT\", \"environmentId\": \"YOUR_ENVIRONMENT_ID\" }' \\ \"https://api.pingone.com/v1/environments/YOUR_ENVIRONMENT_ID/environmentSpecificValues\" Best Practice: Always use the latest version of the PingOne API for compatibility and security. How do you reference ESVs in your configuration? Referencing ESVs allows you to use their values in your application configuration files or scripts.\nIn Configuration Files PingOne supports referencing ESVs in JSON configuration files. Use the ${ESV_NAME} syntax to include the value of an ESV.\nExample:\n{ \"database\": { \"url\": \"${DATABASE_URL}\", \"username\": \"${DB_USERNAME}\" } } In Scripts You can also retrieve ESV values programmatically using the PingOne API. Here’s an example in Python:\nimport requests def get_esv_value(esv_name, environment_id, access_token): url = f\"https://api.ping1.com/v1/environments/{environment_id}/environmentSpecificValues/{esv_name}\" headers = { \"Authorization\": f\"Bearer {access_token}\", \"Content-Type\": \"application/json\" } response = requests.get(url, headers=headers) if response.status_code == 200: return response.json().get('value') else: raise Exception(f\"Failed to get ESV: {response.text}\") # Usage database_url = get_esv_value(\"DATABASE_URL\", \"YOUR_ENVIRONMENT_ID\", \"YOUR_ACCESS_TOKEN\") print(f\"Database URL: {database_url}\") 🎯 Key Takeaways Create ESVs through the admin console or API. Reference ESVs in configuration files using `${ESV_NAME}`. Retrieve ESV values programmatically using the API. What are the security considerations for ESVs? Security is paramount when managing ESVs. Here are some key considerations:\nEncryption: Ensure that ESVs are encrypted both in transit and at rest. Access Control: Restrict access to ESVs to authorized personnel only. Audit Logging: Enable audit logging to track changes and access to ESVs. Avoid Exposure: Never expose ESVs in logs, version control systems, or public repositories. ⚠️ Warning: Exposing ESVs can lead to security breaches. Always ensure they are stored securely. Example of Secure ESV Management Here’s an example of securely managing ESVs using the PingOne API:\n# Create an ESV securely curl -X POST \\ -H \"Authorization: Bearer YOUR_ACCESS_TOKEN\" \\ -H \"Content-Type: application/json\" \\ -d '{ \"name\": \"API_KEY\", \"value\": \"YOUR_SECURE_API_KEY\", \"scope\": \"ENVIRONMENT\", \"environmentId\": \"YOUR_ENVIRONMENT_ID\" }' \\ \"https://api.pingone.com/v1/environments/YOUR_ENVIRONMENT_ID/environmentSpecificValues\" # Retrieve an ESV securely curl -X GET \\ -H \"Authorization: Bearer YOUR_ACCESS_TOKEN\" \\ \"https://api.pingone.com/v1/environments/YOUR_ENVIRONMENT_ID/environmentSpecificValues/API_KEY\" 💜 Pro Tip: Rotate sensitive ESVs regularly to minimize the risk of exposure. How do you update ESVs? Updating ESVs is straightforward through the admin console or API.\nThrough the Admin Console Log in to the PingOne admin console. Navigate to Environment-Specific Values. Find the ESV you want to update. Click on Edit and update the value. Save the changes. Through the API To update an ESV using the API, send a PATCH request:\ncurl -X PATCH \\ -H \"Authorization: Bearer YOUR_ACCESS_TOKEN\" \\ -H \"Content-Type: application/json\" \\ -d '{ \"value\": \"NEW_DATABASE_URL\" }' \\ \"https://api.pingone.com/v1/environments/YOUR_ENVIRONMENT_ID/environmentSpecificValues/DATABASE_URL\" 🎯 Key Takeaways Update ESVs through the admin console or API. Always test changes in non-production environments before applying them to production. Monitor the impact of updates to ensure application stability. How do you delete ESVs? Deleting ESVs is necessary when they are no longer needed or have been replaced.\nThrough the Admin Console Log in to the PingOne admin console. Navigate to Environment-Specific Values. Find the ESV you want to delete. Click on Delete and confirm the action. Through the API To delete an ESV using the API, send a DELETE request:\ncurl -X DELETE \\ -H \"Authorization: Bearer YOUR_ACCESS_TOKEN\" \\ \"https://api.pingone.com/v1/environments/YOUR_ENVIRONMENT_ID/environmentSpecificValues/DATABASE_URL\" 🚨 Security Alert: Deleting ESVs cannot be undone. Ensure you no longer need the value before deleting it. How do you handle ESV conflicts? ESV conflicts can occur when multiple values are defined for the same name in different scopes. To handle conflicts:\nCheck Scopes: Ensure that ESVs with the same name are defined in different scopes (e.g., organization vs. environment). Override Values: Define a more specific ESV in a narrower scope to override a broader one. Review Configurations: Regularly review configurations to identify and resolve conflicts. Example of resolving a conflict:\n# Define a global ESV curl -X POST \\ -H \"Authorization: Bearer YOUR_ACCESS_TOKEN\" \\ -H \"Content-Type: application/json\" \\ -d '{ \"name\": \"API_KEY\", \"value\": \"GLOBAL_API_KEY\", \"scope\": \"ORGANIZATION\" }' \\ \"https://api.pingone.com/v1/organizations/YOUR_ORGANIZATION_ID/environmentSpecificValues\" # Override the global ESV in a specific environment curl -X POST \\ -H \"Authorization: Bearer YOUR_ACCESS_TOKEN\" \\ -H \"Content-Type: application/json\" \\ -d '{ \"name\": \"API_KEY\", \"value\": \"ENVIRONMENT_API_KEY\", \"scope\": \"ENVIRONMENT\", \"environmentId\": \"YOUR_ENVIRONMENT_ID\" }' \\ \"https://api.pingone.com/v1/environments/YOUR_ENVIRONMENT_ID/environmentSpecificValues\" 🎯 Key Takeaways Check scopes to avoid conflicts. Define more specific ESVs to override broader ones. Regularly review configurations to resolve conflicts. How do you monitor ESV usage? Monitoring ESV usage helps you understand how and where they are being used, which is crucial for maintaining security and performance.\nEnable Audit Logging Enable audit logging to track access and changes to ESVs:\nLog in to the PingOne admin console. Navigate to Settings \u003e Audit Logging. Enable logging for Environment-Specific Values. Review Logs Regularly review audit logs to identify any suspicious activity or unauthorized access:\n# Example log entry { \"timestamp\": \"2025-01-23T10:00:00Z\", \"event\": \"ESV_ACCESS\", \"user\": \"admin@example.com\", \"esvName\": \"API_KEY\", \"environmentId\": \"YOUR_ENVIRONMENT_ID\" } Use Monitoring Tools Integrate monitoring tools to alert you of unusual ESV usage patterns:\nSet up alerts for frequent access to sensitive ESVs. Monitor for changes in ESV values. 💜 Pro Tip: Automate monitoring and alerting to catch issues early. How do you backup ESVs? Backing up ESVs ensures you can recover them in case of accidental deletion or corruption.\nManual Backup Manually export ESVs using the admin console or API:\n# Export all ESVs in an environment curl -X GET \\ -H \"Authorization: Bearer YOUR_ACCESS_TOKEN\" \\ \"https://api.pingone.com/v1/environments/YOUR_ENVIRONMENT_ID/environmentSpecificValues\" Automated Backup Automate backups using scripts or CI/CD pipelines:\n#!/bin/bash # Backup ESVs curl -X GET \\ -H \"Authorization: Bearer YOUR_ACCESS_TOKEN\" \\ \"https://api.pingone.com/v1/environments/YOUR_ENVIRONMENT_ID/environmentSpecificValues\" \u003e esvs_backup.json # Store the backup file securely aws s3 cp esvs_backup.json s3://your-backup-bucket/esvs_backup_$(date +%Y%m%d%H%M%S).json 🎯 Key Takeaways Manually export ESVs using the admin console or API. Automate backups using scripts or CI/CD pipelines. Store backups securely to prevent unauthorized access. How do you migrate ESVs between environments? Migrating ESVs between environments is necessary during deployments or migrations.\nUsing the Admin Console Export ESVs from the source environment. Manually recreate them in the target environment. Using the API Automate migration using the API:\n# Export ESVs from the source environment source_env_esvs=$(curl -X GET \\ -H \"Authorization: Bearer YOUR_ACCESS_TOKEN\" \\ \"https://api.pingone.com/v1/environments/SOURCE_ENVIRONMENT_ID/environmentSpecificValues\") # Import ESVs into the target environment echo \"$source_env_esvs\" | jq -c '.[]' | while read -r esv; do curl -X POST \\ -H \"Authorization: Bearer YOUR_ACCESS_TOKEN\" \\ -H \"Content-Type: application/json\" \\ -d \"$esv\" \\ \"https://api.pingone.com/v1/environments/TARGET_ENVIRONMENT_ID/environmentSpecificValues\" done 💜 Pro Tip: Test migrations in a staging environment before applying them to production. How do you document ESVs? Documentation is essential for understanding and maintaining ESVs.\nCreate Documentation Document the purpose, usage, and scope of each ESV:\n# Environment-Specific Values Documentation ## DATABASE_URL - **Purpose**: Stores the database connection URL. - **Usage**: Referenced in the `database` configuration section. - **Scope**: Environment-specific. ## API_KEY - **Purpose**: Stores the API key for external services. - **Usage**: Referenced in API requests. - **Scope**: Organization-wide. Maintain Documentation Regularly update documentation to reflect changes in ESVs:\nUpdate descriptions when ESV values or usage changes. Remove outdated entries. 🎯 Key Takeaways Create comprehensive documentation for each ESV. Maintain documentation to reflect changes. Share documentation with team members for clarity. How do you troubleshoot ESV issues? Troubleshooting ESV issues is crucial for maintaining application functionality.\nCommon Issues Incorrect References: Ensure ESVs are referenced correctly in configuration files. Access Denied: Verify that the accessing user has the necessary permissions. Value Not Found: Check that the ESV exists in the correct scope and environment. Debugging Steps Check References: Verify the syntax and scope of ESV references. Verify Permissions: Ensure the user has the required access rights. Inspect Logs: Review audit logs for any errors or warnings related to ESVs. Example of troubleshooting incorrect references:\n# Incorrect reference { \"database\": { \"url\": \"${DB_URL}\" # Incorrect name } } # Correct reference { \"database\": { \"url\": \"${DATABASE_URL}\" # Correct name } } 🚨 Security Alert: Always verify permissions and inspect logs for any suspicious activity. Final Thoughts Managing Environment-Specific Values in PingOne is essential for maintaining security, flexibility, and maintainability. By following best practices, you can ensure that your configurations are secure, consistent, and easy to manage across different environments.\nStart by creating and documenting ESVs, then monitor and back them up regularly. Implement access controls and audit logging to protect sensitive information. Troubleshoot issues promptly to maintain application functionality.\nThat’s it. Simple, secure, works. Get this right and you’ll sleep better knowing your configurations are under control.\n",
+  "wordCount" : "1612",
+  "inLanguage": "en",
+  "image":"https://www.iamdevbox.com/images/posts/managing-esvs-in-pingone-advanced-identity-cloud","datePublished": "2026-01-21T14:37:07Z",
+  "dateModified": "2026-02-10T09:19:20-05:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/managing-esvs-in-pingone-advanced-identity-cloud-best-practices-for-environment-variables/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What are ESVs in PingOne?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "ESVs, or Environment-Specific Values, are variables used in PingOne to store configuration settings that can vary across different environments like development, testing, and production."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do you implement ESVs in PingOne?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Implement ESVs by creating and managing them through the PingOne admin console or API, then referencing them in your configuration files or scripts."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the security considerations for ESVs?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Ensure ESVs are encrypted, access is restricted to authorized personnel, and they are not exposed in logs or version control systems."
+      }
+    }
+  ]
+}
+</script>
+    <meta name="description" content="Learn best practices for managing Environment-Specific Values (ESVs) in PingOne Advanced Identity Cloud to enhance security and streamline configuration management."><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/managing-esvs-in-pingone-advanced-identity-cloud-best-practices-for-environment-variables\/"
+  },
+  "headline": "Managing ESVs in PingOne Advanced Identity Cloud: Best Practices for Environment Variables",
+  "description": "Learn best practices for managing Environment-Specific Values (ESVs) in PingOne Advanced Identity Cloud to enhance security and streamline configuration management.",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon-96x96.png",
+      "width": 96,
+      "height": 96
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://www.iamdevbox.com/IAMDevBox.com.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "datePublished": "2026-01-21T14:37:07Z",
+  "dateModified": "2026-02-10T09:19:20-05:00",
+  "wordCount":  1612 ,
+  "articleSection": "posts",
+  "keywords": ["managing esvs in pingone advanced identity cloud","best practices for environment variables","pingone","python","ci/cd","environmentvariables","security","configurationmanagement"]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Managing ESVs in PingOne Advanced Identity Cloud: Best Practices for Environment Variables",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/managing-esvs-in-pingone-advanced-identity-cloud-best-practices-for-environment-variables\/"
+    }
+  ]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-token-exchange-implementing-oauth-20-token-exchange\/"
+            },
+            "headline": "Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:29:55Z",
+            "dateModified": "2026-03-01T14:30:15Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/go-secretless-with-snowflake-workload-identity-federation-snowflake\/"
+            },
+            "headline": "Go Secretless with Snowflake Workload Identity Federation - Snowflake",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:24:03Z",
+            "dateModified": "2026-03-01T14:24:20Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-algorithm-confusion-attack-cve-2026-developer-guide\/"
+            },
+            "headline": "JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-02-28T18:00:00Z",
+            "dateModified": "2026-03-01T11:21:01-05:00"
+          }
+  ]
+}
+</script>
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    const mermaidBlocks = document.querySelectorAll('.mermaid, pre code.language-mermaid, code.language-mermaid');
+    if (mermaidBlocks.length > 0) {
+        
+        mermaidBlocks.forEach(block => {
+            if (block.tagName === 'CODE') {
+                const pre = block.parentElement;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = block.textContent;
+                if (pre && pre.tagName === 'PRE') {
+                    pre.parentNode.replaceChild(div, pre);
+                } else {
+                    block.parentNode.replaceChild(div, block);
+                }
+            }
+        });
+
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+            const isDark = document.body.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#5a67d8',
+                    
+                    secondaryColor: '#48bb78',
+                    secondaryTextColor: '#ffffff',
+                    secondaryBorderColor: '#38a169',
+                    
+                    tertiaryColor: '#ed8936',
+                    tertiaryTextColor: '#ffffff',
+                    tertiaryBorderColor: '#dd6b20',
+                    
+                    lineColor: '#718096',
+                    
+                    background: isDark ? '#1a202c' : '#ffffff',
+                    mainBkg: isDark ? '#2d3748' : '#f7fafc',
+                    
+                    actorBkg: '#667eea',
+                    actorBorder: '#5a67d8',
+                    actorTextColor: '#ffffff',
+                    actorLineColor: '#718096',
+                    signalColor: '#4a5568',
+                    signalTextColor: '#2d3748',
+                    labelBoxBkgColor: '#edf2f7',
+                    labelBoxBorderColor: '#cbd5e0',
+                    labelTextColor: '#2d3748',
+                    loopTextColor: '#553c9a',
+                    noteBkgColor: '#faf089',
+                    noteTextColor: '#744210',
+                    noteBorderColor: '#d69e2e',
+                    
+                    nodeBkg: '#667eea',
+                    nodeBorder: '#5a67d8',
+                    clusterBkg: '#e2e8f0',
+                    clusterBorder: '#a0aec0',
+                    defaultLinkColor: '#718096',
+                    titleColor: '#2d3748',
+                    edgeLabelBackground: 'transparent',
+                    
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                sequence: {
+                    useMaxWidth: true,
+                    boxMargin: 10,
+                    boxTextMargin: 5,
+                    noteMargin: 10,
+                    messageMargin: 35,
+                    mirrorActors: false
+                }
+            });
+            mermaid.run().then(() => {
+                
+                document.querySelectorAll('.mermaid .node').forEach(node => {
+                    const rect = node.querySelector('rect, circle, ellipse, polygon');
+                    if (rect) {
+                        const fill = rect.getAttribute('fill') || window.getComputedStyle(rect).fill;
+                        
+                        const isDarkBg = fill && (
+                            fill.includes('667eea') || fill.includes('102, 126, 234') ||
+                            fill.includes('48bb78') || fill.includes('72, 187, 120') ||
+                            fill.includes('ed8936') || fill.includes('237, 137, 54') ||
+                            fill.includes('553c9a') || fill.includes('9f7aea') ||
+                            fill.includes('e53e3e') || fill.includes('dd6b20')
+                        );
+                        const textColor = isDarkBg ? '#ffffff' : '#1a202c';
+                        node.querySelectorAll('span, .nodeLabel, text, foreignObject div').forEach(text => {
+                            text.style.color = textColor;
+                            text.style.fill = textColor;
+                        });
+                    }
+                });
+            });
+        };
+        document.head.appendChild(script);
+    }
+
+    
+    const postContent = document.querySelector('.post-content');
+    const isSinglePost = document.querySelector('.post-single');
+    const isToolsPage = window.location.pathname.startsWith('/tools/');
+    if (postContent && isSinglePost && window.innerWidth >= 1400 && !isToolsPage) {
+        const headings = postContent.querySelectorAll('h2, h3');
+        if (headings.length >= 3) {
+            const toc = document.createElement('nav');
+            toc.className = 'floating-toc';
+            toc.innerHTML = '<h4>📑 Contents</h4><ul></ul>';
+            const tocList = toc.querySelector('ul');
+
+            headings.forEach((heading, index) => {
+                const id = heading.id || `section-${index}`;
+                heading.id = id;
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2';
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            document.body.appendChild(toc);
+
+            
+            const tocLinks = toc.querySelectorAll('a');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 150) {
+                        current = heading.id;
+                    }
+                });
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+    }
+
+    
+    if (postContent && isSinglePost && window.innerWidth >= 1200) {
+        const h2s = postContent.querySelectorAll('h2');
+        if (h2s.length >= 2) {
+            const indicator = document.createElement('div');
+            indicator.className = 'section-indicator';
+
+            h2s.forEach((h2, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'section-dot';
+                dot.title = h2.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                dot.addEventListener('click', () => {
+                    h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                indicator.appendChild(dot);
+            });
+
+            document.body.appendChild(indicator);
+
+            
+            window.addEventListener('scroll', () => {
+                const dots = indicator.querySelectorAll('.section-dot');
+                let activeIndex = 0;
+                h2s.forEach((h2, index) => {
+                    if (h2.getBoundingClientRect().top <= 200) {
+                        activeIndex = index;
+                    }
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+    }
+    });
+    </script>
+
+    
+    
+    <script>
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        function loadGA() {
+            if (window.gaLoaded) return;
+            window.gaLoaded = true;
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975';
+            document.head.appendChild(script);
+
+            script.onload = () => {
+                gtag('js', new Date());
+                gtag('config', 'G-B6QCH29975');
+            };
+        }
+
+        
+        ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+            window.addEventListener(event, loadGA, { once: true, passive: true });
+        });
+
+        
+        setTimeout(loadGA, 3000);
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+    
+    <div class="reading-progress" id="reading-progress"></div>
+    <script>
+    window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / docHeight) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+    </script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+            </div>
+        </div><button id="menu-btn" aria-label="Menu" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/categories/trending/" title="Hot IAM topics">
+                    <span>🔥Trending</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+(function() {
+    var btn = document.getElementById('menu-btn');
+    var menu = document.getElementById('menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+        });
+        
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
+</script>
+<main class="main">
+
+
+
+<div class="reading-progress" id="reading-progress"></div>
+<script>
+(function() {
+  const progressBar = document.getElementById('reading-progress');
+  const article = document.querySelector('.post-content');
+
+  if (!progressBar || !article) return;
+
+  function updateProgress() {
+    const articleTop = article.offsetTop;
+    const articleHeight = article.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+
+    
+    const start = articleTop - windowHeight;
+    const end = articleTop + articleHeight;
+    const current = scrollTop - start;
+    const total = end - start;
+
+    const progress = Math.min(Math.max((current / total) * 100, 0), 100);
+    progressBar.style.width = progress + '%';
+  }
+
+  
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  
+  updateProgress();
+})();
+</script>
+
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent" data-pagefind-meta="title">
+      Managing ESVs in PingOne Advanced Identity Cloud: Best Practices for Environment Variables
+    </h1>
+    <div class="post-meta"><span title='2026-01-21 14:37:07'>Jan 21, 2026</span>&nbsp;·&nbsp;8 min&nbsp;·&nbsp;1612 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+    
+      <div class="post-updated">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Updated: Feb 10, 2026
+      </div>
+  </header> 
+<figure class="entry-cover">
+        <img loading="eager" src="https://www.iamdevbox.com/images/posts/managing-esvs-in-pingone-advanced-identity-cloud" alt="">
+        
+</figure><div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#what-are-environment-specific-values-in-pingone" aria-label="What are Environment-Specific Values in PingOne?">What are Environment-Specific Values in PingOne?</a></li>
+                <li>
+                    <a href="#why-use-environment-specific-values" aria-label="Why use Environment-Specific Values?">Why use Environment-Specific Values?</a></li>
+                <li>
+                    <a href="#how-do-you-create-esvs-in-pingone" aria-label="How do you create ESVs in PingOne?">How do you create ESVs in PingOne?</a><ul>
+                        
+                <li>
+                    <a href="#through-the-admin-console" aria-label="Through the Admin Console">Through the Admin Console</a></li>
+                <li>
+                    <a href="#through-the-api" aria-label="Through the API">Through the API</a></li></ul>
+                </li>
+                <li>
+                    <a href="#how-do-you-reference-esvs-in-your-configuration" aria-label="How do you reference ESVs in your configuration?">How do you reference ESVs in your configuration?</a><ul>
+                        
+                <li>
+                    <a href="#in-configuration-files" aria-label="In Configuration Files">In Configuration Files</a></li>
+                <li>
+                    <a href="#in-scripts" aria-label="In Scripts">In Scripts</a><ul>
+                        
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#what-are-the-security-considerations-for-esvs" aria-label="What are the security considerations for ESVs?">What are the security considerations for ESVs?</a><ul>
+                        
+                <li>
+                    <a href="#example-of-secure-esv-management" aria-label="Example of Secure ESV Management">Example of Secure ESV Management</a></li></ul>
+                </li>
+                <li>
+                    <a href="#how-do-you-update-esvs" aria-label="How do you update ESVs?">How do you update ESVs?</a><ul>
+                        
+                <li>
+                    <a href="#through-the-admin-console-1" aria-label="Through the Admin Console">Through the Admin Console</a></li>
+                <li>
+                    <a href="#through-the-api-1" aria-label="Through the API">Through the API</a><ul>
+                        
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#how-do-you-delete-esvs" aria-label="How do you delete ESVs?">How do you delete ESVs?</a><ul>
+                        
+                <li>
+                    <a href="#through-the-admin-console-2" aria-label="Through the Admin Console">Through the Admin Console</a></li>
+                <li>
+                    <a href="#through-the-api-2" aria-label="Through the API">Through the API</a></li></ul>
+                </li>
+                <li>
+                    <a href="#how-do-you-handle-esv-conflicts" aria-label="How do you handle ESV conflicts?">How do you handle ESV conflicts?</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#how-do-you-monitor-esv-usage" aria-label="How do you monitor ESV usage?">How do you monitor ESV usage?</a><ul>
+                        
+                <li>
+                    <a href="#enable-audit-logging" aria-label="Enable Audit Logging">Enable Audit Logging</a></li>
+                <li>
+                    <a href="#review-logs" aria-label="Review Logs">Review Logs</a></li>
+                <li>
+                    <a href="#use-monitoring-tools" aria-label="Use Monitoring Tools">Use Monitoring Tools</a></li></ul>
+                </li>
+                <li>
+                    <a href="#how-do-you-backup-esvs" aria-label="How do you backup ESVs?">How do you backup ESVs?</a><ul>
+                        
+                <li>
+                    <a href="#manual-backup" aria-label="Manual Backup">Manual Backup</a></li>
+                <li>
+                    <a href="#automated-backup" aria-label="Automated Backup">Automated Backup</a><ul>
+                        
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#how-do-you-migrate-esvs-between-environments" aria-label="How do you migrate ESVs between environments?">How do you migrate ESVs between environments?</a><ul>
+                        
+                <li>
+                    <a href="#using-the-admin-console" aria-label="Using the Admin Console">Using the Admin Console</a></li>
+                <li>
+                    <a href="#using-the-api" aria-label="Using the API">Using the API</a></li></ul>
+                </li>
+                <li>
+                    <a href="#how-do-you-document-esvs" aria-label="How do you document ESVs?">How do you document ESVs?</a><ul>
+                        
+                <li>
+                    <a href="#create-documentation" aria-label="Create Documentation">Create Documentation</a></li>
+                <li>
+                    <a href="#maintain-documentation" aria-label="Maintain Documentation">Maintain Documentation</a><ul>
+                        
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#how-do-you-troubleshoot-esv-issues" aria-label="How do you troubleshoot ESV issues?">How do you troubleshoot ESV issues?</a><ul>
+                        
+                <li>
+                    <a href="#common-issues" aria-label="Common Issues">Common Issues</a></li>
+                <li>
+                    <a href="#debugging-steps" aria-label="Debugging Steps">Debugging Steps</a></li></ul>
+                </li>
+                <li>
+                    <a href="#final-thoughts" aria-label="Final Thoughts">Final Thoughts</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content" data-pagefind-body><h2 id="relative-false">2662741f.webp
+alt: &ldquo;Managing ESVs in PingOne Advanced Identity Cloud: Best Practices for Environment Variables&rdquo;
+relative: false</h2>
+<p>Environment-Specific Values, or ESVs, are variables used in PingOne to store configuration settings that can vary across different environments such as development, testing, and production. Properly managing ESVs is crucial for maintaining security, ensuring consistency, and simplifying deployment processes.</p>
+<h2 id="what-are-environment-specific-values-in-pingone">What are Environment-Specific Values in PingOne?<a hidden class="anchor" aria-hidden="true" href="#what-are-environment-specific-values-in-pingone">#</a></h2>
+<p>ESVs allow you to define values that can change based on the environment your application is running in. This means you can have different configurations for development, staging, and production without changing your codebase. For example, you might have different database connection strings or API keys for each environment.</p>
+<h2 id="why-use-environment-specific-values">Why use Environment-Specific Values?<a hidden class="anchor" aria-hidden="true" href="#why-use-environment-specific-values">#</a></h2>
+<p>Using ESVs helps in several ways:</p>
+<ul>
+<li><strong>Security</strong>: Sensitive information like API keys and passwords can be stored securely and accessed only where necessary.</li>
+<li><strong>Flexibility</strong>: Easily switch configurations between environments without modifying code.</li>
+<li><strong>Maintainability</strong>: Centralize configuration management, reducing the risk of misconfigurations.</li>
+</ul>
+<h2 id="how-do-you-create-esvs-in-pingone">How do you create ESVs in PingOne?<a hidden class="anchor" aria-hidden="true" href="#how-do-you-create-esvs-in-pingone">#</a></h2>
+<p>Creating ESVs in PingOne involves defining the variables and their values through the PingOne admin console or API.</p>
+<h3 id="through-the-admin-console">Through the Admin Console<a hidden class="anchor" aria-hidden="true" href="#through-the-admin-console">#</a></h3>
+<ol>
+<li>Log in to the PingOne admin console.</li>
+<li>Navigate to <strong>Environment-Specific Values</strong> under the <strong>Configuration</strong> section.</li>
+<li>Click on <strong>Add Environment-Specific Value</strong>.</li>
+<li>Enter the name, description, and initial value.</li>
+<li>Set the scope (e.g., organization, environment).</li>
+<li>Save the ESV.</li>
+</ol>
+<h3 id="through-the-api">Through the API<a hidden class="anchor" aria-hidden="true" href="#through-the-api">#</a></h3>
+<p>You can also create ESVs programmatically using the PingOne API. Here’s an example using <code>curl</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -X POST <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Authorization: Bearer YOUR_ACCESS_TOKEN&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -d <span style="color:#e6db74">&#39;{
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;name&#34;: &#34;DATABASE_URL&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;value&#34;: &#34;https://dev-db.example.com&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;scope&#34;: &#34;ENVIRONMENT&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;environmentId&#34;: &#34;YOUR_ENVIRONMENT_ID&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  }&#39;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#e6db74">&#34;https://api.pingone.com/v1/environments/YOUR_ENVIRONMENT_ID/environmentSpecificValues&#34;</span>
+</span></span></code></pre></div><div class="notice success">Best Practice:</div> Always use the latest version of the PingOne API for compatibility and security.
+<h2 id="how-do-you-reference-esvs-in-your-configuration">How do you reference ESVs in your configuration?<a hidden class="anchor" aria-hidden="true" href="#how-do-you-reference-esvs-in-your-configuration">#</a></h2>
+<p>Referencing ESVs allows you to use their values in your application configuration files or scripts.</p>
+<h3 id="in-configuration-files">In Configuration Files<a hidden class="anchor" aria-hidden="true" href="#in-configuration-files">#</a></h3>
+<p>PingOne supports referencing ESVs in JSON configuration files. Use the <code>${ESV_NAME}</code> syntax to include the value of an ESV.</p>
+<p>Example:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;database&#34;</span>: {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;url&#34;</span>: <span style="color:#e6db74">&#34;${DATABASE_URL}&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;username&#34;</span>: <span style="color:#e6db74">&#34;${DB_USERNAME}&#34;</span>
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="in-scripts">In Scripts<a hidden class="anchor" aria-hidden="true" href="#in-scripts">#</a></h3>
+<p>You can also retrieve ESV values programmatically using the PingOne API. Here’s an example in Python:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> requests
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_esv_value</span>(esv_name, environment_id, access_token):
+</span></span><span style="display:flex;"><span>    url <span style="color:#f92672">=</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;https://api.ping1.com/v1/environments/</span><span style="color:#e6db74">{</span>environment_id<span style="color:#e6db74">}</span><span style="color:#e6db74">/environmentSpecificValues/</span><span style="color:#e6db74">{</span>esv_name<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>    headers <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;Authorization&#34;</span>: <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Bearer </span><span style="color:#e6db74">{</span>access_token<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;Content-Type&#34;</span>: <span style="color:#e6db74">&#34;application/json&#34;</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    response <span style="color:#f92672">=</span> requests<span style="color:#f92672">.</span>get(url, headers<span style="color:#f92672">=</span>headers)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> response<span style="color:#f92672">.</span>status_code <span style="color:#f92672">==</span> <span style="color:#ae81ff">200</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> response<span style="color:#f92672">.</span>json()<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#39;value&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">raise</span> <span style="color:#a6e22e">Exception</span>(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Failed to get ESV: </span><span style="color:#e6db74">{</span>response<span style="color:#f92672">.</span>text<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Usage</span>
+</span></span><span style="display:flex;"><span>database_url <span style="color:#f92672">=</span> get_esv_value(<span style="color:#e6db74">&#34;DATABASE_URL&#34;</span>, <span style="color:#e6db74">&#34;YOUR_ENVIRONMENT_ID&#34;</span>, <span style="color:#e6db74">&#34;YOUR_ACCESS_TOKEN&#34;</span>)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Database URL: </span><span style="color:#e6db74">{</span>database_url<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span></code></pre></div><div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>Create ESVs through the admin console or API.</li>
+<li>Reference ESVs in configuration files using `${ESV_NAME}`.</li>
+<li>Retrieve ESV values programmatically using the API.</li>
+</ul>
+</div>
+<h2 id="what-are-the-security-considerations-for-esvs">What are the security considerations for ESVs?<a hidden class="anchor" aria-hidden="true" href="#what-are-the-security-considerations-for-esvs">#</a></h2>
+<p>Security is paramount when managing ESVs. Here are some key considerations:</p>
+<ul>
+<li><strong>Encryption</strong>: Ensure that ESVs are encrypted both in transit and at rest.</li>
+<li><strong>Access Control</strong>: Restrict access to ESVs to authorized personnel only.</li>
+<li><strong>Audit Logging</strong>: Enable audit logging to track changes and access to ESVs.</li>
+<li><strong>Avoid Exposure</strong>: Never expose ESVs in logs, version control systems, or public repositories.</li>
+</ul>
+<div class="notice warning">⚠️ Warning:</div> Exposing ESVs can lead to security breaches. Always ensure they are stored securely.
+<h3 id="example-of-secure-esv-management">Example of Secure ESV Management<a hidden class="anchor" aria-hidden="true" href="#example-of-secure-esv-management">#</a></h3>
+<p>Here’s an example of securely managing ESVs using the PingOne API:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Create an ESV securely</span>
+</span></span><span style="display:flex;"><span>curl -X POST <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Authorization: Bearer YOUR_ACCESS_TOKEN&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -d <span style="color:#e6db74">&#39;{
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;name&#34;: &#34;API_KEY&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;value&#34;: &#34;YOUR_SECURE_API_KEY&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;scope&#34;: &#34;ENVIRONMENT&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;environmentId&#34;: &#34;YOUR_ENVIRONMENT_ID&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  }&#39;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#e6db74">&#34;https://api.pingone.com/v1/environments/YOUR_ENVIRONMENT_ID/environmentSpecificValues&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Retrieve an ESV securely</span>
+</span></span><span style="display:flex;"><span>curl -X GET <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Authorization: Bearer YOUR_ACCESS_TOKEN&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#e6db74">&#34;https://api.pingone.com/v1/environments/YOUR_ENVIRONMENT_ID/environmentSpecificValues/API_KEY&#34;</span>
+</span></span></code></pre></div><div class="notice tip">💜 Pro Tip:</div> Rotate sensitive ESVs regularly to minimize the risk of exposure.
+<h2 id="how-do-you-update-esvs">How do you update ESVs?<a hidden class="anchor" aria-hidden="true" href="#how-do-you-update-esvs">#</a></h2>
+<p>Updating ESVs is straightforward through the admin console or API.</p>
+<h3 id="through-the-admin-console-1">Through the Admin Console<a hidden class="anchor" aria-hidden="true" href="#through-the-admin-console-1">#</a></h3>
+<ol>
+<li>Log in to the PingOne admin console.</li>
+<li>Navigate to <strong>Environment-Specific Values</strong>.</li>
+<li>Find the ESV you want to update.</li>
+<li>Click on <strong>Edit</strong> and update the value.</li>
+<li>Save the changes.</li>
+</ol>
+<h3 id="through-the-api-1">Through the API<a hidden class="anchor" aria-hidden="true" href="#through-the-api-1">#</a></h3>
+<p>To update an ESV using the API, send a PATCH request:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -X PATCH <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Authorization: Bearer YOUR_ACCESS_TOKEN&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -d <span style="color:#e6db74">&#39;{
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;value&#34;: &#34;NEW_DATABASE_URL&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  }&#39;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#e6db74">&#34;https://api.pingone.com/v1/environments/YOUR_ENVIRONMENT_ID/environmentSpecificValues/DATABASE_URL&#34;</span>
+</span></span></code></pre></div><div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>Update ESVs through the admin console or API.</li>
+<li>Always test changes in non-production environments before applying them to production.</li>
+<li>Monitor the impact of updates to ensure application stability.</li>
+</ul>
+</div>
+<h2 id="how-do-you-delete-esvs">How do you delete ESVs?<a hidden class="anchor" aria-hidden="true" href="#how-do-you-delete-esvs">#</a></h2>
+<p>Deleting ESVs is necessary when they are no longer needed or have been replaced.</p>
+<h3 id="through-the-admin-console-2">Through the Admin Console<a hidden class="anchor" aria-hidden="true" href="#through-the-admin-console-2">#</a></h3>
+<ol>
+<li>Log in to the PingOne admin console.</li>
+<li>Navigate to <strong>Environment-Specific Values</strong>.</li>
+<li>Find the ESV you want to delete.</li>
+<li>Click on <strong>Delete</strong> and confirm the action.</li>
+</ol>
+<h3 id="through-the-api-2">Through the API<a hidden class="anchor" aria-hidden="true" href="#through-the-api-2">#</a></h3>
+<p>To delete an ESV using the API, send a DELETE request:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -X DELETE <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Authorization: Bearer YOUR_ACCESS_TOKEN&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#e6db74">&#34;https://api.pingone.com/v1/environments/YOUR_ENVIRONMENT_ID/environmentSpecificValues/DATABASE_URL&#34;</span>
+</span></span></code></pre></div><div class="notice danger">🚨 Security Alert:</div> Deleting ESVs cannot be undone. Ensure you no longer need the value before deleting it.
+<h2 id="how-do-you-handle-esv-conflicts">How do you handle ESV conflicts?<a hidden class="anchor" aria-hidden="true" href="#how-do-you-handle-esv-conflicts">#</a></h2>
+<p>ESV conflicts can occur when multiple values are defined for the same name in different scopes. To handle conflicts:</p>
+<ol>
+<li><strong>Check Scopes</strong>: Ensure that ESVs with the same name are defined in different scopes (e.g., organization vs. environment).</li>
+<li><strong>Override Values</strong>: Define a more specific ESV in a narrower scope to override a broader one.</li>
+<li><strong>Review Configurations</strong>: Regularly review configurations to identify and resolve conflicts.</li>
+</ol>
+<p>Example of resolving a conflict:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Define a global ESV</span>
+</span></span><span style="display:flex;"><span>curl -X POST <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Authorization: Bearer YOUR_ACCESS_TOKEN&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -d <span style="color:#e6db74">&#39;{
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;name&#34;: &#34;API_KEY&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;value&#34;: &#34;GLOBAL_API_KEY&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;scope&#34;: &#34;ORGANIZATION&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  }&#39;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#e6db74">&#34;https://api.pingone.com/v1/organizations/YOUR_ORGANIZATION_ID/environmentSpecificValues&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Override the global ESV in a specific environment</span>
+</span></span><span style="display:flex;"><span>curl -X POST <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Authorization: Bearer YOUR_ACCESS_TOKEN&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -d <span style="color:#e6db74">&#39;{
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;name&#34;: &#34;API_KEY&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;value&#34;: &#34;ENVIRONMENT_API_KEY&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;scope&#34;: &#34;ENVIRONMENT&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;environmentId&#34;: &#34;YOUR_ENVIRONMENT_ID&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  }&#39;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#e6db74">&#34;https://api.pingone.com/v1/environments/YOUR_ENVIRONMENT_ID/environmentSpecificValues&#34;</span>
+</span></span></code></pre></div><div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>Check scopes to avoid conflicts.</li>
+<li>Define more specific ESVs to override broader ones.</li>
+<li>Regularly review configurations to resolve conflicts.</li>
+</ul>
+</div>
+<h2 id="how-do-you-monitor-esv-usage">How do you monitor ESV usage?<a hidden class="anchor" aria-hidden="true" href="#how-do-you-monitor-esv-usage">#</a></h2>
+<p>Monitoring ESV usage helps you understand how and where they are being used, which is crucial for maintaining security and performance.</p>
+<h3 id="enable-audit-logging">Enable Audit Logging<a hidden class="anchor" aria-hidden="true" href="#enable-audit-logging">#</a></h3>
+<p>Enable audit logging to track access and changes to ESVs:</p>
+<ol>
+<li>Log in to the PingOne admin console.</li>
+<li>Navigate to <strong>Settings</strong> &gt; <strong>Audit Logging</strong>.</li>
+<li>Enable logging for <strong>Environment-Specific Values</strong>.</li>
+</ol>
+<h3 id="review-logs">Review Logs<a hidden class="anchor" aria-hidden="true" href="#review-logs">#</a></h3>
+<p>Regularly review audit logs to identify any suspicious activity or unauthorized access:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Example log entry</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;timestamp&#34;</span>: <span style="color:#e6db74">&#34;2025-01-23T10:00:00Z&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;event&#34;</span>: <span style="color:#e6db74">&#34;ESV_ACCESS&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;user&#34;</span>: <span style="color:#e6db74">&#34;admin@example.com&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;esvName&#34;</span>: <span style="color:#e6db74">&#34;API_KEY&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;environmentId&#34;</span>: <span style="color:#e6db74">&#34;YOUR_ENVIRONMENT_ID&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><h3 id="use-monitoring-tools">Use Monitoring Tools<a hidden class="anchor" aria-hidden="true" href="#use-monitoring-tools">#</a></h3>
+<p>Integrate monitoring tools to alert you of unusual ESV usage patterns:</p>
+<ol>
+<li>Set up alerts for frequent access to sensitive ESVs.</li>
+<li>Monitor for changes in ESV values.</li>
+</ol>
+<div class="notice tip">💜 Pro Tip:</div> Automate monitoring and alerting to catch issues early.
+<h2 id="how-do-you-backup-esvs">How do you backup ESVs?<a hidden class="anchor" aria-hidden="true" href="#how-do-you-backup-esvs">#</a></h2>
+<p>Backing up ESVs ensures you can recover them in case of accidental deletion or corruption.</p>
+<h3 id="manual-backup">Manual Backup<a hidden class="anchor" aria-hidden="true" href="#manual-backup">#</a></h3>
+<p>Manually export ESVs using the admin console or API:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Export all ESVs in an environment</span>
+</span></span><span style="display:flex;"><span>curl -X GET <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Authorization: Bearer YOUR_ACCESS_TOKEN&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#e6db74">&#34;https://api.pingone.com/v1/environments/YOUR_ENVIRONMENT_ID/environmentSpecificValues&#34;</span>
+</span></span></code></pre></div><h3 id="automated-backup">Automated Backup<a hidden class="anchor" aria-hidden="true" href="#automated-backup">#</a></h3>
+<p>Automate backups using scripts or CI/CD pipelines:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/bash
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Backup ESVs</span>
+</span></span><span style="display:flex;"><span>curl -X GET <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Authorization: Bearer YOUR_ACCESS_TOKEN&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#e6db74">&#34;https://api.pingone.com/v1/environments/YOUR_ENVIRONMENT_ID/environmentSpecificValues&#34;</span> &gt; esvs_backup.json
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Store the backup file securely</span>
+</span></span><span style="display:flex;"><span>aws s3 cp esvs_backup.json s3://your-backup-bucket/esvs_backup_<span style="color:#66d9ef">$(</span>date +%Y%m%d%H%M%S<span style="color:#66d9ef">)</span>.json
+</span></span></code></pre></div><div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>Manually export ESVs using the admin console or API.</li>
+<li>Automate backups using scripts or CI/CD pipelines.</li>
+<li>Store backups securely to prevent unauthorized access.</li>
+</ul>
+</div>
+<h2 id="how-do-you-migrate-esvs-between-environments">How do you migrate ESVs between environments?<a hidden class="anchor" aria-hidden="true" href="#how-do-you-migrate-esvs-between-environments">#</a></h2>
+<p>Migrating ESVs between environments is necessary during deployments or migrations.</p>
+<h3 id="using-the-admin-console">Using the Admin Console<a hidden class="anchor" aria-hidden="true" href="#using-the-admin-console">#</a></h3>
+<ol>
+<li>Export ESVs from the source environment.</li>
+<li>Manually recreate them in the target environment.</li>
+</ol>
+<h3 id="using-the-api">Using the API<a hidden class="anchor" aria-hidden="true" href="#using-the-api">#</a></h3>
+<p>Automate migration using the API:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Export ESVs from the source environment</span>
+</span></span><span style="display:flex;"><span>source_env_esvs<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>curl -X GET <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Authorization: Bearer YOUR_ACCESS_TOKEN&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#e6db74">&#34;https://api.pingone.com/v1/environments/SOURCE_ENVIRONMENT_ID/environmentSpecificValues&#34;</span><span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Import ESVs into the target environment</span>
+</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;</span>$source_env_esvs<span style="color:#e6db74">&#34;</span> | jq -c <span style="color:#e6db74">&#39;.[]&#39;</span> | <span style="color:#66d9ef">while</span> read -r esv; <span style="color:#66d9ef">do</span>
+</span></span><span style="display:flex;"><span>  curl -X POST <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    -H <span style="color:#e6db74">&#34;Authorization: Bearer YOUR_ACCESS_TOKEN&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    -d <span style="color:#e6db74">&#34;</span>$esv<span style="color:#e6db74">&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    <span style="color:#e6db74">&#34;https://api.pingone.com/v1/environments/TARGET_ENVIRONMENT_ID/environmentSpecificValues&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">done</span>
+</span></span></code></pre></div><div class="notice tip">💜 Pro Tip:</div> Test migrations in a staging environment before applying them to production.
+<h2 id="how-do-you-document-esvs">How do you document ESVs?<a hidden class="anchor" aria-hidden="true" href="#how-do-you-document-esvs">#</a></h2>
+<p>Documentation is essential for understanding and maintaining ESVs.</p>
+<h3 id="create-documentation">Create Documentation<a hidden class="anchor" aria-hidden="true" href="#create-documentation">#</a></h3>
+<p>Document the purpose, usage, and scope of each ESV:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-markdown" data-lang="markdown"><span style="display:flex;"><span># Environment-Specific Values Documentation
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">## DATABASE_URL
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">-</span> **Purpose**: Stores the database connection URL.
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">-</span> **Usage**: Referenced in the <span style="color:#e6db74">`database`</span> configuration section.
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">-</span> **Scope**: Environment-specific.
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">## API_KEY
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">-</span> **Purpose**: Stores the API key for external services.
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">-</span> **Usage**: Referenced in API requests.
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">-</span> **Scope**: Organization-wide.
+</span></span></code></pre></div><h3 id="maintain-documentation">Maintain Documentation<a hidden class="anchor" aria-hidden="true" href="#maintain-documentation">#</a></h3>
+<p>Regularly update documentation to reflect changes in ESVs:</p>
+<ol>
+<li>Update descriptions when ESV values or usage changes.</li>
+<li>Remove outdated entries.</li>
+</ol>
+<div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>Create comprehensive documentation for each ESV.</li>
+<li>Maintain documentation to reflect changes.</li>
+<li>Share documentation with team members for clarity.</li>
+</ul>
+</div>
+<h2 id="how-do-you-troubleshoot-esv-issues">How do you troubleshoot ESV issues?<a hidden class="anchor" aria-hidden="true" href="#how-do-you-troubleshoot-esv-issues">#</a></h2>
+<p>Troubleshooting ESV issues is crucial for maintaining application functionality.</p>
+<h3 id="common-issues">Common Issues<a hidden class="anchor" aria-hidden="true" href="#common-issues">#</a></h3>
+<ol>
+<li><strong>Incorrect References</strong>: Ensure ESVs are referenced correctly in configuration files.</li>
+<li><strong>Access Denied</strong>: Verify that the accessing user has the necessary permissions.</li>
+<li><strong>Value Not Found</strong>: Check that the ESV exists in the correct scope and environment.</li>
+</ol>
+<h3 id="debugging-steps">Debugging Steps<a hidden class="anchor" aria-hidden="true" href="#debugging-steps">#</a></h3>
+<ol>
+<li><strong>Check References</strong>: Verify the syntax and scope of ESV references.</li>
+<li><strong>Verify Permissions</strong>: Ensure the user has the required access rights.</li>
+<li><strong>Inspect Logs</strong>: Review audit logs for any errors or warnings related to ESVs.</li>
+</ol>
+<p>Example of troubleshooting incorrect references:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Incorrect reference</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;database&#34;</span>: <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;url&#34;</span>: <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>DB_URL<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>  <span style="color:#75715e"># Incorrect name</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Correct reference</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;database&#34;</span>: <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;url&#34;</span>: <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>DATABASE_URL<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>  <span style="color:#75715e"># Correct name</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><div class="notice danger">🚨 Security Alert:</div> Always verify permissions and inspect logs for any suspicious activity.
+<h2 id="final-thoughts">Final Thoughts<a hidden class="anchor" aria-hidden="true" href="#final-thoughts">#</a></h2>
+<p>Managing Environment-Specific Values in PingOne is essential for maintaining security, flexibility, and maintainability. By following best practices, you can ensure that your configurations are secure, consistent, and easy to manage across different environments.</p>
+<p>Start by creating and documenting ESVs, then monitor and back them up regularly. Implement access controls and audit logging to protect sensitive information. Troubleshoot issues promptly to maintain application functionality.</p>
+<p>That&rsquo;s it. Simple, secure, works. Get this right and you&rsquo;ll sleep better knowing your configurations are under control.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/pingone/">PingOne</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/iam/">Iam</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/environmentvariables/">EnvironmentVariables</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/security/">Security</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/configurationmanagement/">ConfigurationManagement</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/automated-fortigate-attacks-exploit-forticloud-sso-to-alter-firewall-configurations/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Automated FortiGate Attacks Exploit FortiCloud SSO to Alter Firewall Configurations</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/mandiant-releases-quick-credential-cracker-hastening-the-death-of-a-bad-protocol/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Mandiant Releases Quick Credential Cracker: Hastening the Death of a Bad Protocol</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+
+<section class="post-feedback">
+  <p class="feedback-question">Was this article helpful?</p>
+  <div class="feedback-buttons">
+    <button class="feedback-btn feedback-yes" onclick="trackFeedback('yes', '\/posts\/managing-esvs-in-pingone-advanced-identity-cloud-best-practices-for-environment-variables\/')" aria-label="Yes, helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      Yes
+    </button>
+    <button class="feedback-btn feedback-no" onclick="trackFeedback('no', '\/posts\/managing-esvs-in-pingone-advanced-identity-cloud-best-practices-for-environment-variables\/')" aria-label="No, not helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>
+      No
+    </button>
+  </div>
+  <p class="feedback-thanks" style="display: none;">Thanks for your feedback!</p>
+</section>
+
+
+<section class="author-bio">
+  <div class="author-avatar">
+    <img src="/IAMDevBox.com.jpg" alt="IAMDevBox Author" width="64" height="64" loading="lazy">
+  </div>
+  <div class="author-info">
+    <h4>Written by IAMDevBox</h4>
+    <p>Enterprise IAM architect with 15+ years in identity modernization. Certified across ForgeRock, Ping Identity, SailPoint, AWS, and Azure.</p>
+    <div class="author-links">
+      <a href="https://twitter.com/iamdevbox" target="_blank" rel="noopener" title="Follow on X/Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/iamdevbox" target="_blank" rel="noopener" title="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="/contact/" title="Contact">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function trackFeedback(value, page) {
+  
+  document.querySelector('.feedback-buttons').style.display = 'none';
+  document.querySelector('.feedback-question').style.display = 'none';
+  document.querySelector('.feedback-thanks').style.display = 'block';
+
+  
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'post_feedback', {
+      'feedback_value': value,
+      'page_path': page
+    });
+  }
+
+  
+  localStorage.setItem('feedback_' + page, value);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const page = '\/posts\/managing-esvs-in-pingone-advanced-identity-cloud-best-practices-for-environment-variables\/';
+  if (localStorage.getItem('feedback_' + page)) {
+    document.querySelector('.feedback-buttons').style.display = 'none';
+    document.querySelector('.feedback-question').textContent = 'Thanks for your feedback!';
+  }
+});
+</script>
+
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+              Go Secretless with Snowflake Workload Identity Federation - Snowflake
+            </a>
+            <small class="custom-date">2026-03-01</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+              OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+            </a>
+            <small class="custom-date">2026-02-28</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/pingone-mfa-configuration-push-notifications-totp-and-fido2-setup/" class="custom-link">
+              PingOne MFA Configuration: Push Notifications, TOTP, and FIDO2 Setup
+            </a>
+            <small class="custom-date">2026-02-27</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/microsoft-s-entra-oauth-tokens-could-be-exploited-what-you-need-to-know/" class="custom-link">
+              Microsoft’s Entra OAuth Tokens Could Be Exploited - What You Need to Know
+            </a>
+            <small class="custom-date">2026-02-26</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/configuring-hosted-login-journey-urls-in-forgerock-identity-cloud/" class="custom-link">
+              Configuring Hosted Login Journey URLs in ForgeRock Identity Cloud
+            </a>
+            <small class="custom-date">2026-02-23</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+                Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+                Go Secretless with Snowflake Workload Identity Federation - Snowflake
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+                JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+                OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+                Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

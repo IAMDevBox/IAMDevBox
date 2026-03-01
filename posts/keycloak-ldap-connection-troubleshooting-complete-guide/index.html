@@ -1,0 +1,3225 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Keycloak LDAP Connection Troubleshooting: Complete Error Guide | IAMDevBox</title>
+<meta name="keywords" content="keycloak ldap connection refused, keycloak ldap bind failed, keycloak ldap error code 49, keycloak ldaps SSLHandshakeException, keycloak ldap sync error, keycloak ldap PartialResultException, keycloak ldap debug logging, keycloak ldap truststore configuration, keycloak active directory troubleshooting, keycloak ldap WILL_NOT_PERFORM">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/keycloak-ldap-connection-troubleshooting-complete-guide/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.e24ea479df3e367781fafa20cedde21c7e043c10bed4c8c913ef9261a049a1e2.css" integrity="sha256-4k6ked8&#43;NneB&#43;vogzt3iHH4EPBC&#43;1MjJE&#43;&#43;SYaBJoeI=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/keycloak-ldap-connection-troubleshooting-complete-guide/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/keycloak-ldap-connection-troubleshooting-complete-guide/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Keycloak LDAP Connection Troubleshooting: Complete Error Guide">
+  <meta property="og:description" content="Fix every Keycloak LDAP error including connection refused, bind failed, SSLHandshakeException, error code 49 sub-codes, PartialResultException, and sync failures. Debug commands for Active Directory, OpenLDAP, and FreeIPA.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-02-21T16:00:00+00:00">
+    <meta property="article:modified_time" content="2026-02-26T21:20:24-05:00">
+    <meta property="article:tag" content="Keycloak">
+    <meta property="article:tag" content="Ldap">
+    <meta property="article:tag" content="Active Directory">
+    <meta property="article:tag" content="Troubleshooting">
+    <meta property="article:tag" content="Identity Management">
+      <meta property="og:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:title" content="Keycloak LDAP Connection Troubleshooting: Complete Error Guide">
+<meta name="twitter:description" content="Fix every Keycloak LDAP error including connection refused, bind failed, SSLHandshakeException, error code 49 sub-codes, PartialResultException, and sync failures. Debug commands for Active Directory, OpenLDAP, and FreeIPA.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Keycloak LDAP Connection Troubleshooting: Complete Error Guide",
+      "item": "https://www.iamdevbox.com/posts/keycloak-ldap-connection-troubleshooting-complete-guide/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Keycloak LDAP Connection Troubleshooting: Complete Error Guide",
+  "name": "Keycloak LDAP Connection Troubleshooting: Complete Error Guide",
+  "description": "Fix every Keycloak LDAP error including connection refused, bind failed, SSLHandshakeException, error code 49 sub-codes, PartialResultException, and sync failures. Debug commands for Active Directory, OpenLDAP, and FreeIPA.",
+  "keywords": [
+    "keycloak ldap connection refused", "keycloak ldap bind failed", "keycloak ldap error code 49", "keycloak ldaps SSLHandshakeException", "keycloak ldap sync error", "keycloak ldap PartialResultException", "keycloak ldap debug logging", "keycloak ldap truststore configuration", "keycloak active directory troubleshooting", "keycloak ldap WILL_NOT_PERFORM"
+  ],
+  "articleBody": "Keycloak LDAP integration fails silently with generic error messages. The admin console shows “Connection refused” or “Test authentication failed” without revealing the actual cause. This guide catalogs every Keycloak LDAP error with exact log messages, Active Directory sub-codes, and fix commands.\nFor initial LDAP setup instructions, see Keycloak User Federation with LDAP and Active Directory.\nQuick Diagnostic: Which Error Are You Seeing? Admin Console / Log Message Jump To Connection refused Connection Errors LDAP: error code 49 Bind / Authentication Errors SSLHandshakeException: PKIX path building failed TLS / SSL Errors Test Connection passes, Test Authentication fails TLS / SSL Errors PartialResultException: Referral Search and Sync Errors SizeLimitExceededException Search and Sync Errors Sync shows 0 imported, 0 updated Search and Sync Errors LDAP: error code 53 - WILL_NOT_PERFORM Password Change Errors Groups sync but clicking a group raises errors Group Mapper Errors Connection Errors Connection Refused javax.naming.CommunicationException: ldap.example.com:389 [Root exception is java.net.ConnectException: Connection refused] Causes (in order of likelihood):\nLDAP server is down — Verify the LDAP service is running Wrong port — LDAP uses 389, LDAPS uses 636, AD Global Catalog uses 3268/3269 Firewall blocking — Check network path from Keycloak to LDAP server Wrong protocol/port combination — ldaps:// on port 389 or ldap:// on port 636 Debug commands:\n# Test TCP connectivity to LDAP port nc -zv ad.example.com 389 nc -zv ad.example.com 636 # From inside a Keycloak Docker container docker exec -it keycloak-container bash -c \"curl -v telnet://ad.example.com:636\" # DNS resolution check nslookup ad.example.com Port Confusion Reference Port Protocol Connection URL Prefix Notes 389 LDAP (plaintext) or StartTLS ldap:// Never use plaintext in production 636 LDAPS (TLS from start) ldaps:// Requires CA cert in truststore 3268 AD Global Catalog ldap:// Read-only, limited attributes 3269 AD Global Catalog over SSL ldaps:// Read-only, limited attributes, encrypted Common mistake: Using ldaps://ad.example.com:389 (LDAPS protocol on plaintext port) or ldap://ad.example.com:636 (plaintext protocol on LDAPS port). These combinations will always fail.\nLDAP Connection Has Been Closed javax.naming.CommunicationException: LDAP connection has been closed This happens when the LDAP server closes idle connections, typically during high-load sync operations. Causes include connection pool exhaustion, LDAP server timeout, or network interruption.\nFix: Increase connectionPoolingMaxSize in Keycloak LDAP provider settings and check the LDAP server’s max connections configuration.\nBind and Authentication Errors Error Code 49 — Invalid Credentials javax.naming.AuthenticationException: [LDAP: error code 49 - Invalid Credentials] Error code 49 is the generic “authentication failed” code, but Active Directory includes a hex sub-code that reveals the exact cause:\nAD Sub-Code Meaning Fix data 525 User not found Verify bind DN exists in AD data 52e Wrong password Correct the bind credential data 530 Logon not permitted at this time Check AD time-of-day restrictions data 531 Logon not permitted from this workstation Check AD workstation restrictions data 532 Password expired Reset the service account password data 533 Account disabled Re-enable the account in AD data 701 Account expired Extend the account expiration date data 773 User must reset password Reset password and clear “must change” flag How to read the sub-code: Look for the full error in Keycloak server logs:\n[LDAP: error code 49 - 80090308: LdapErr: DSID-0C090439, comment: AcceptSecurityContext error, data 52e, v4563] The data 52e part is the sub-code — this means “wrong password”.\nTest your bind credentials before configuring Keycloak:\n# Active Directory (full DN format) ldapsearch -x -H ldaps://ad.example.com:636 \\ -D \"CN=keycloak-svc,CN=Users,DC=corp,DC=example,DC=com\" \\ -W \\ -b \"DC=corp,DC=example,DC=com\" \\ \"(sAMAccountName=testuser)\" # Active Directory (UPN format — simpler) ldapsearch -x -H ldaps://ad.example.com:636 \\ -D \"keycloak-svc@corp.example.com\" \\ -W \\ -b \"DC=corp,DC=example,DC=com\" \\ \"(sAMAccountName=testuser)\" # OpenLDAP ldapsearch -x -H ldaps://ldap.example.com:636 \\ -D \"cn=admin,dc=example,dc=com\" \\ -W \\ -b \"ou=people,dc=example,dc=com\" \\ \"(uid=testuser)\" Wrong Bind DN Format The most common cause of error code 49 is using the wrong bind DN format:\n# WRONG — just the username Bind DN: keycloak-svc # WRONG — forward slash notation Bind DN: corp/keycloak-svc # CORRECT — Full DN for Active Directory Bind DN: CN=keycloak-svc,CN=Users,DC=corp,DC=example,DC=com # ALSO CORRECT — UPN format (AD only) Bind DN: keycloak-svc@corp.example.com # CORRECT — OpenLDAP Bind DN: cn=admin,dc=example,dc=com # CORRECT — FreeIPA Bind DN: uid=admin,cn=users,cn=accounts,dc=example,dc=com Account Lockout Warning Clicking Test Authentication in Keycloak admin console with wrong credentials counts as a failed login attempt in Active Directory. Repeated clicks can trigger the AD account lockout policy and lock out your bind service account.\nPrevention: Always test credentials with ldapsearch on the command line before configuring Keycloak.\nTLS and SSL Errors PKIX Path Building Failed (Most Common TLS Error) javax.net.ssl.SSLHandshakeException: PKIX path building failed: SunCertPathBuilderException: unable to find valid certification path to requested target This means the LDAP server’s certificate (or its CA) is not trusted by Keycloak’s Java runtime.\nCritical Keycloak gotcha: The admin console’s Test Connection button only tests TCP socket connectivity. It does NOT test the TLS handshake. So “Test Connection” passes, but “Test Authentication” fails with SSLHandshakeException.\nFix for Keycloak 22+ (Quarkus):\n# Step 1: Extract the CA certificate from the LDAP server openssl s_client -connect ad.example.com:636 -showcerts /dev/null \\ | openssl x509 -outform PEM \u003e /opt/keycloak/conf/truststores/ldap-ca.pem # Step 2: Restart Keycloak — it auto-loads PEM files from conf/truststores/ bin/kc.sh start Fix for older Keycloak (or JKS preference):\n# Step 1: Extract the certificate openssl s_client -connect ad.example.com:636 -showcerts /dev/null \\ | openssl x509 -outform PEM \u003e ldap-ca.pem # Step 2: Import into a Java keystore keytool -importcert -trustcacerts \\ -alias ldap-ca \\ -file ldap-ca.pem \\ -keystore /opt/keycloak/conf/truststore.jks \\ -storepass changeit \\ -noprompt # Step 3: Configure Keycloak to use the truststore bin/kc.sh start \\ --spi-truststore-file-file=/opt/keycloak/conf/truststore.jks \\ --spi-truststore-file-password=changeit Docker / Kubernetes:\n# Docker: Mount the certificate and restart docker run \\ -v /path/to/ldap-ca.pem:/opt/keycloak/conf/truststores/ldap-ca.pem:ro \\ quay.io/keycloak/keycloak:latest start # Kubernetes: Create a secret and mount to conf/truststores/ kubectl create secret generic ldap-ca-cert \\ --from-file=ldap-ca.pem=/path/to/ldap-ca.pem SAN Hostname Mismatch javax.net.ssl.SSLHandshakeException: No subject alternative names matching IP address X.X.X.X found The Connection URL uses an IP address, but the certificate only has hostnames in the Subject Alternative Name (SAN) field.\nFix: Use the FQDN in the Connection URL, not the IP address:\n# WRONG ldaps://10.0.1.50:636 # CORRECT ldaps://ad.corp.example.com:636 Diagnosing TLS Issues # View the full certificate chain openssl s_client -connect ad.example.com:636 -showcerts ",
+  "wordCount" : "2019",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/IAMDevBox.com.jpg","datePublished": "2026-02-21T16:00:00Z",
+  "dateModified": "2026-02-26T21:20:24-05:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/keycloak-ldap-connection-troubleshooting-complete-guide/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do I fix Keycloak LDAP error code 49 Invalid Credentials?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Error code 49 has multiple AD-specific sub-codes: data 52e means wrong password, data 525 means user not found, data 533 means account disabled, data 532 means password expired, data 773 means must reset password. Check the hex data code in the full error message. Test your bind DN and password with ldapsearch first: ldapsearch -x -H ldaps://ad.example.com:636 -D \"CN=svc,CN=Users,DC=corp,DC=com\" -W -b \"DC=corp,DC=com\" \"(sAMAccountName=testuser)\""
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does Keycloak LDAP Test Connection pass but Test Authentication fails with SSLHandshakeException?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Test Connection only verifies TCP socket connectivity — it does NOT test TLS handshake or certificates. Test Authentication performs the actual TLS handshake and bind. Fix: import the LDAP server CA certificate. For Keycloak 22+, copy the PEM file to conf/truststores/ directory and restart. For older versions, use keytool to import into a JKS truststore and configure the SPI."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I fix Keycloak LDAP PartialResultException referral errors?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "This error occurs in Active Directory multi-domain forests when search results span domains. AD returns referrals that Keycloak does not follow by default. Fix: either use Global Catalog port 3268 (read-only, limited attributes) or 3269 (SSL), or add the LDAP connection property java.naming.referral=follow in the Keycloak LDAP provider settings."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the correct Keycloak LDAP debug logging command?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Enable LDAP trace logging with: bin/kc.sh start --log-level=\"INFO,org.keycloak.storage.ldap:TRACE\". For TLS/SSL debugging, add JAVA_OPTS=\"-Djavax.net.debug=ssl:handshake\". In Docker, pass as environment variables: -e KC_LOG_LEVEL=\"INFO,org.keycloak.storage.ldap:TRACE\" -e JAVA_OPTS=\"-Djavax.net.debug=ssl:handshake\"."
+      }
+    }
+  ]
+}
+</script>
+    <meta name="description" content="Fix every Keycloak LDAP error including connection refused, bind failed, SSLHandshakeException, error code 49 sub-codes, PartialResultException, and sync failures. Debug commands for Active Directory, OpenLDAP, and FreeIPA."><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-ldap-connection-troubleshooting-complete-guide\/"
+  },
+  "headline": "Keycloak LDAP Connection Troubleshooting: Complete Error Guide",
+  "description": "Fix every Keycloak LDAP error including connection refused, bind failed, SSLHandshakeException, error code 49 sub-codes, PartialResultException, and sync failures. Debug commands for Active Directory, OpenLDAP, and FreeIPA.",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon-96x96.png",
+      "width": 96,
+      "height": 96
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://www.iamdevbox.com/IAMDevBox.com.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "datePublished": "2026-02-21T16:00:00Z",
+  "dateModified": "2026-02-26T21:20:24-05:00",
+  "wordCount":  2019 ,
+  "articleSection": "posts",
+  "keywords": ["keycloak ldap connection refused","keycloak ldap bind failed","keycloak ldap error code 49","keycloak ldaps SSLHandshakeException","keycloak ldap sync error","keycloak ldap PartialResultException","keycloak ldap debug logging","keycloak ldap truststore configuration","keycloak active directory troubleshooting","keycloak ldap WILL_NOT_PERFORM"]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Keycloak LDAP Connection Troubleshooting: Complete Error Guide",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/keycloak-ldap-connection-troubleshooting-complete-guide\/"
+    }
+  ]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-token-exchange-implementing-oauth-20-token-exchange\/"
+            },
+            "headline": "Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:29:55Z",
+            "dateModified": "2026-03-01T14:30:15Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/go-secretless-with-snowflake-workload-identity-federation-snowflake\/"
+            },
+            "headline": "Go Secretless with Snowflake Workload Identity Federation - Snowflake",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:24:03Z",
+            "dateModified": "2026-03-01T14:24:20Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-algorithm-confusion-attack-cve-2026-developer-guide\/"
+            },
+            "headline": "JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-02-28T18:00:00Z",
+            "dateModified": "2026-03-01T11:21:01-05:00"
+          }
+  ]
+}
+</script>
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    const mermaidBlocks = document.querySelectorAll('.mermaid, pre code.language-mermaid, code.language-mermaid');
+    if (mermaidBlocks.length > 0) {
+        
+        mermaidBlocks.forEach(block => {
+            if (block.tagName === 'CODE') {
+                const pre = block.parentElement;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = block.textContent;
+                if (pre && pre.tagName === 'PRE') {
+                    pre.parentNode.replaceChild(div, pre);
+                } else {
+                    block.parentNode.replaceChild(div, block);
+                }
+            }
+        });
+
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+            const isDark = document.body.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#5a67d8',
+                    
+                    secondaryColor: '#48bb78',
+                    secondaryTextColor: '#ffffff',
+                    secondaryBorderColor: '#38a169',
+                    
+                    tertiaryColor: '#ed8936',
+                    tertiaryTextColor: '#ffffff',
+                    tertiaryBorderColor: '#dd6b20',
+                    
+                    lineColor: '#718096',
+                    
+                    background: isDark ? '#1a202c' : '#ffffff',
+                    mainBkg: isDark ? '#2d3748' : '#f7fafc',
+                    
+                    actorBkg: '#667eea',
+                    actorBorder: '#5a67d8',
+                    actorTextColor: '#ffffff',
+                    actorLineColor: '#718096',
+                    signalColor: '#4a5568',
+                    signalTextColor: '#2d3748',
+                    labelBoxBkgColor: '#edf2f7',
+                    labelBoxBorderColor: '#cbd5e0',
+                    labelTextColor: '#2d3748',
+                    loopTextColor: '#553c9a',
+                    noteBkgColor: '#faf089',
+                    noteTextColor: '#744210',
+                    noteBorderColor: '#d69e2e',
+                    
+                    nodeBkg: '#667eea',
+                    nodeBorder: '#5a67d8',
+                    clusterBkg: '#e2e8f0',
+                    clusterBorder: '#a0aec0',
+                    defaultLinkColor: '#718096',
+                    titleColor: '#2d3748',
+                    edgeLabelBackground: 'transparent',
+                    
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                sequence: {
+                    useMaxWidth: true,
+                    boxMargin: 10,
+                    boxTextMargin: 5,
+                    noteMargin: 10,
+                    messageMargin: 35,
+                    mirrorActors: false
+                }
+            });
+            mermaid.run().then(() => {
+                
+                document.querySelectorAll('.mermaid .node').forEach(node => {
+                    const rect = node.querySelector('rect, circle, ellipse, polygon');
+                    if (rect) {
+                        const fill = rect.getAttribute('fill') || window.getComputedStyle(rect).fill;
+                        
+                        const isDarkBg = fill && (
+                            fill.includes('667eea') || fill.includes('102, 126, 234') ||
+                            fill.includes('48bb78') || fill.includes('72, 187, 120') ||
+                            fill.includes('ed8936') || fill.includes('237, 137, 54') ||
+                            fill.includes('553c9a') || fill.includes('9f7aea') ||
+                            fill.includes('e53e3e') || fill.includes('dd6b20')
+                        );
+                        const textColor = isDarkBg ? '#ffffff' : '#1a202c';
+                        node.querySelectorAll('span, .nodeLabel, text, foreignObject div').forEach(text => {
+                            text.style.color = textColor;
+                            text.style.fill = textColor;
+                        });
+                    }
+                });
+            });
+        };
+        document.head.appendChild(script);
+    }
+
+    
+    const postContent = document.querySelector('.post-content');
+    const isSinglePost = document.querySelector('.post-single');
+    const isToolsPage = window.location.pathname.startsWith('/tools/');
+    if (postContent && isSinglePost && window.innerWidth >= 1400 && !isToolsPage) {
+        const headings = postContent.querySelectorAll('h2, h3');
+        if (headings.length >= 3) {
+            const toc = document.createElement('nav');
+            toc.className = 'floating-toc';
+            toc.innerHTML = '<h4>📑 Contents</h4><ul></ul>';
+            const tocList = toc.querySelector('ul');
+
+            headings.forEach((heading, index) => {
+                const id = heading.id || `section-${index}`;
+                heading.id = id;
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2';
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            document.body.appendChild(toc);
+
+            
+            const tocLinks = toc.querySelectorAll('a');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 150) {
+                        current = heading.id;
+                    }
+                });
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+    }
+
+    
+    if (postContent && isSinglePost && window.innerWidth >= 1200) {
+        const h2s = postContent.querySelectorAll('h2');
+        if (h2s.length >= 2) {
+            const indicator = document.createElement('div');
+            indicator.className = 'section-indicator';
+
+            h2s.forEach((h2, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'section-dot';
+                dot.title = h2.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                dot.addEventListener('click', () => {
+                    h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                indicator.appendChild(dot);
+            });
+
+            document.body.appendChild(indicator);
+
+            
+            window.addEventListener('scroll', () => {
+                const dots = indicator.querySelectorAll('.section-dot');
+                let activeIndex = 0;
+                h2s.forEach((h2, index) => {
+                    if (h2.getBoundingClientRect().top <= 200) {
+                        activeIndex = index;
+                    }
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+    }
+    });
+    </script>
+
+    
+    
+    <script>
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        function loadGA() {
+            if (window.gaLoaded) return;
+            window.gaLoaded = true;
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975';
+            document.head.appendChild(script);
+
+            script.onload = () => {
+                gtag('js', new Date());
+                gtag('config', 'G-B6QCH29975');
+            };
+        }
+
+        
+        ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+            window.addEventListener(event, loadGA, { once: true, passive: true });
+        });
+
+        
+        setTimeout(loadGA, 3000);
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+    
+    <div class="reading-progress" id="reading-progress"></div>
+    <script>
+    window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / docHeight) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+    </script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+            </div>
+        </div><button id="menu-btn" aria-label="Menu" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/categories/trending/" title="Hot IAM topics">
+                    <span>🔥Trending</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+(function() {
+    var btn = document.getElementById('menu-btn');
+    var menu = document.getElementById('menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+        });
+        
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
+</script>
+<main class="main">
+
+
+
+<div class="reading-progress" id="reading-progress"></div>
+<script>
+(function() {
+  const progressBar = document.getElementById('reading-progress');
+  const article = document.querySelector('.post-content');
+
+  if (!progressBar || !article) return;
+
+  function updateProgress() {
+    const articleTop = article.offsetTop;
+    const articleHeight = article.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+
+    
+    const start = articleTop - windowHeight;
+    const end = articleTop + articleHeight;
+    const current = scrollTop - start;
+    const total = end - start;
+
+    const progress = Math.min(Math.max((current / total) * 100, 0), 100);
+    progressBar.style.width = progress + '%';
+  }
+
+  
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  
+  updateProgress();
+})();
+</script>
+
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent" data-pagefind-meta="title">
+      Keycloak LDAP Connection Troubleshooting: Complete Error Guide
+    </h1>
+    <div class="post-meta"><span title='2026-02-21 16:00:00'>Feb 21, 2026</span>&nbsp;·&nbsp;10 min&nbsp;·&nbsp;2019 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+    
+      <div class="post-updated">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Updated: Feb 26, 2026
+      </div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#quick-diagnostic-which-error-are-you-seeing" aria-label="Quick Diagnostic: Which Error Are You Seeing?">Quick Diagnostic: Which Error Are You Seeing?</a></li>
+                <li>
+                    <a href="#connection-errors" aria-label="Connection Errors">Connection Errors</a><ul>
+                        
+                <li>
+                    <a href="#connection-refused" aria-label="Connection Refused">Connection Refused</a></li>
+                <li>
+                    <a href="#port-confusion-reference" aria-label="Port Confusion Reference">Port Confusion Reference</a></li>
+                <li>
+                    <a href="#ldap-connection-has-been-closed" aria-label="LDAP Connection Has Been Closed">LDAP Connection Has Been Closed</a></li></ul>
+                </li>
+                <li>
+                    <a href="#bind-and-authentication-errors" aria-label="Bind and Authentication Errors">Bind and Authentication Errors</a><ul>
+                        
+                <li>
+                    <a href="#error-code-49--invalid-credentials" aria-label="Error Code 49 — Invalid Credentials">Error Code 49 — Invalid Credentials</a></li>
+                <li>
+                    <a href="#wrong-bind-dn-format" aria-label="Wrong Bind DN Format">Wrong Bind DN Format</a></li>
+                <li>
+                    <a href="#account-lockout-warning" aria-label="Account Lockout Warning">Account Lockout Warning</a></li></ul>
+                </li>
+                <li>
+                    <a href="#tls-and-ssl-errors" aria-label="TLS and SSL Errors">TLS and SSL Errors</a><ul>
+                        
+                <li>
+                    <a href="#pkix-path-building-failed-most-common-tls-error" aria-label="PKIX Path Building Failed (Most Common TLS Error)">PKIX Path Building Failed (Most Common TLS Error)</a></li>
+                <li>
+                    <a href="#san-hostname-mismatch" aria-label="SAN Hostname Mismatch">SAN Hostname Mismatch</a></li>
+                <li>
+                    <a href="#diagnosing-tls-issues" aria-label="Diagnosing TLS Issues">Diagnosing TLS Issues</a></li>
+                <li>
+                    <a href="#starttls-disables-connection-pooling" aria-label="StartTLS Disables Connection Pooling">StartTLS Disables Connection Pooling</a></li></ul>
+                </li>
+                <li>
+                    <a href="#search-and-sync-errors" aria-label="Search and Sync Errors">Search and Sync Errors</a><ul>
+                        
+                <li>
+                    <a href="#partialresultexception--ad-referrals" aria-label="PartialResultException — AD Referrals">PartialResultException — AD Referrals</a></li>
+                <li>
+                    <a href="#sizelimitexceededexception" aria-label="SizeLimitExceededException">SizeLimitExceededException</a></li>
+                <li>
+                    <a href="#sync-reports-0-imported-0-updated" aria-label="Sync Reports 0 Imported, 0 Updated">Sync Reports 0 Imported, 0 Updated</a></li>
+                <li>
+                    <a href="#timelimitexceededexception" aria-label="TimeLimitExceededException">TimeLimitExceededException</a></li></ul>
+                </li>
+                <li>
+                    <a href="#password-change-errors" aria-label="Password Change Errors">Password Change Errors</a><ul>
+                        
+                <li>
+                    <a href="#will_not_perform-error-code-53" aria-label="WILL_NOT_PERFORM (Error Code 53)">WILL_NOT_PERFORM (Error Code 53)</a></li>
+                <li>
+                    <a href="#insufficient-access-rights-error-code-50" aria-label="Insufficient Access Rights (Error Code 50)">Insufficient Access Rights (Error Code 50)</a></li></ul>
+                </li>
+                <li>
+                    <a href="#group-mapper-errors" aria-label="Group Mapper Errors">Group Mapper Errors</a><ul>
+                        
+                <li>
+                    <a href="#wrong-group-object-classes" aria-label="Wrong Group Object Classes">Wrong Group Object Classes</a></li>
+                <li>
+                    <a href="#empty-member-attribute-bug" aria-label="Empty Member Attribute Bug">Empty Member Attribute Bug</a></li></ul>
+                </li>
+                <li>
+                    <a href="#active-directory-vs-openldap-vs-freeipa" aria-label="Active Directory vs OpenLDAP vs FreeIPA">Active Directory vs OpenLDAP vs FreeIPA</a><ul>
+                        
+                <li>
+                    <a href="#ad-specific-pitfalls" aria-label="AD-Specific Pitfalls">AD-Specific Pitfalls</a></li>
+                <li>
+                    <a href="#openldap-specific-pitfalls" aria-label="OpenLDAP-Specific Pitfalls">OpenLDAP-Specific Pitfalls</a></li>
+                <li>
+                    <a href="#freeipa-specific-pitfalls" aria-label="FreeIPA-Specific Pitfalls">FreeIPA-Specific Pitfalls</a></li></ul>
+                </li>
+                <li>
+                    <a href="#debug-logging" aria-label="Debug Logging">Debug Logging</a><ul>
+                        
+                <li>
+                    <a href="#enable-keycloak-ldap-trace-logging" aria-label="Enable Keycloak LDAP Trace Logging">Enable Keycloak LDAP Trace Logging</a></li>
+                <li>
+                    <a href="#enable-tlsssl-debug-output" aria-label="Enable TLS/SSL Debug Output">Enable TLS/SSL Debug Output</a></li>
+                <li>
+                    <a href="#admin-console-gotcha-save-before-testing" aria-label="Admin Console Gotcha: Save Before Testing">Admin Console Gotcha: Save Before Testing</a></li></ul>
+                </li>
+                <li>
+                    <a href="#complete-debugging-workflow" aria-label="Complete Debugging Workflow">Complete Debugging Workflow</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content" data-pagefind-body><p>Keycloak LDAP integration fails silently with generic error messages. The admin console shows &ldquo;Connection refused&rdquo; or &ldquo;Test authentication failed&rdquo; without revealing the actual cause. This guide catalogs every Keycloak LDAP error with exact log messages, Active Directory sub-codes, and fix commands.</p>
+<p>For initial LDAP setup instructions, see <a href="/posts/keycloak-user-federation-with-ldap-and-active-directory/">Keycloak User Federation with LDAP and Active Directory</a>.</p>
+<h2 id="quick-diagnostic-which-error-are-you-seeing">Quick Diagnostic: Which Error Are You Seeing?<a hidden class="anchor" aria-hidden="true" href="#quick-diagnostic-which-error-are-you-seeing">#</a></h2>
+<table>
+  <thead>
+      <tr>
+          <th>Admin Console / Log Message</th>
+          <th>Jump To</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>Connection refused</code></td>
+          <td><a href="#connection-errors">Connection Errors</a></td>
+      </tr>
+      <tr>
+          <td><code>LDAP: error code 49</code></td>
+          <td><a href="#bind-and-authentication-errors">Bind / Authentication Errors</a></td>
+      </tr>
+      <tr>
+          <td><code>SSLHandshakeException: PKIX path building failed</code></td>
+          <td><a href="#tls-and-ssl-errors">TLS / SSL Errors</a></td>
+      </tr>
+      <tr>
+          <td>Test Connection passes, Test Authentication fails</td>
+          <td><a href="#tls-and-ssl-errors">TLS / SSL Errors</a></td>
+      </tr>
+      <tr>
+          <td><code>PartialResultException: Referral</code></td>
+          <td><a href="#search-and-sync-errors">Search and Sync Errors</a></td>
+      </tr>
+      <tr>
+          <td><code>SizeLimitExceededException</code></td>
+          <td><a href="#search-and-sync-errors">Search and Sync Errors</a></td>
+      </tr>
+      <tr>
+          <td>Sync shows <code>0 imported, 0 updated</code></td>
+          <td><a href="#search-and-sync-errors">Search and Sync Errors</a></td>
+      </tr>
+      <tr>
+          <td><code>LDAP: error code 53 - WILL_NOT_PERFORM</code></td>
+          <td><a href="#password-change-errors">Password Change Errors</a></td>
+      </tr>
+      <tr>
+          <td>Groups sync but clicking a group raises errors</td>
+          <td><a href="#group-mapper-errors">Group Mapper Errors</a></td>
+      </tr>
+  </tbody>
+</table>
+<h2 id="connection-errors">Connection Errors<a hidden class="anchor" aria-hidden="true" href="#connection-errors">#</a></h2>
+<h3 id="connection-refused">Connection Refused<a hidden class="anchor" aria-hidden="true" href="#connection-refused">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>javax.naming.CommunicationException: ldap.example.com:389
+</span></span><span style="display:flex;"><span>[Root exception is java.net.ConnectException: Connection refused]
+</span></span></code></pre></div><p><strong>Causes (in order of likelihood):</strong></p>
+<ol>
+<li><strong>LDAP server is down</strong> — Verify the LDAP service is running</li>
+<li><strong>Wrong port</strong> — LDAP uses 389, LDAPS uses 636, AD Global Catalog uses 3268/3269</li>
+<li><strong>Firewall blocking</strong> — Check network path from Keycloak to LDAP server</li>
+<li><strong>Wrong protocol/port combination</strong> — <code>ldaps://</code> on port 389 or <code>ldap://</code> on port 636</li>
+</ol>
+<p><strong>Debug commands:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Test TCP connectivity to LDAP port</span>
+</span></span><span style="display:flex;"><span>nc -zv ad.example.com <span style="color:#ae81ff">389</span>
+</span></span><span style="display:flex;"><span>nc -zv ad.example.com <span style="color:#ae81ff">636</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># From inside a Keycloak Docker container</span>
+</span></span><span style="display:flex;"><span>docker exec -it keycloak-container bash -c <span style="color:#e6db74">&#34;curl -v telnet://ad.example.com:636&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># DNS resolution check</span>
+</span></span><span style="display:flex;"><span>nslookup ad.example.com
+</span></span></code></pre></div><h3 id="port-confusion-reference">Port Confusion Reference<a hidden class="anchor" aria-hidden="true" href="#port-confusion-reference">#</a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>Port</th>
+          <th>Protocol</th>
+          <th>Connection URL Prefix</th>
+          <th>Notes</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>389</td>
+          <td>LDAP (plaintext) or StartTLS</td>
+          <td><code>ldap://</code></td>
+          <td>Never use plaintext in production</td>
+      </tr>
+      <tr>
+          <td>636</td>
+          <td>LDAPS (TLS from start)</td>
+          <td><code>ldaps://</code></td>
+          <td>Requires CA cert in truststore</td>
+      </tr>
+      <tr>
+          <td>3268</td>
+          <td>AD Global Catalog</td>
+          <td><code>ldap://</code></td>
+          <td>Read-only, limited attributes</td>
+      </tr>
+      <tr>
+          <td>3269</td>
+          <td>AD Global Catalog over SSL</td>
+          <td><code>ldaps://</code></td>
+          <td>Read-only, limited attributes, encrypted</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Common mistake:</strong> Using <code>ldaps://ad.example.com:389</code> (LDAPS protocol on plaintext port) or <code>ldap://ad.example.com:636</code> (plaintext protocol on LDAPS port). These combinations will always fail.</p>
+<h3 id="ldap-connection-has-been-closed">LDAP Connection Has Been Closed<a hidden class="anchor" aria-hidden="true" href="#ldap-connection-has-been-closed">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>javax.naming.CommunicationException: LDAP connection has been closed
+</span></span></code></pre></div><p>This happens when the LDAP server closes idle connections, typically during high-load sync operations. Causes include connection pool exhaustion, LDAP server timeout, or network interruption.</p>
+<p><strong>Fix:</strong> Increase <code>connectionPoolingMaxSize</code> in Keycloak LDAP provider settings and check the LDAP server&rsquo;s max connections configuration.</p>
+<h2 id="bind-and-authentication-errors">Bind and Authentication Errors<a hidden class="anchor" aria-hidden="true" href="#bind-and-authentication-errors">#</a></h2>
+<h3 id="error-code-49--invalid-credentials">Error Code 49 — Invalid Credentials<a hidden class="anchor" aria-hidden="true" href="#error-code-49--invalid-credentials">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>javax.naming.AuthenticationException: [LDAP: error code 49 - Invalid Credentials]
+</span></span></code></pre></div><p>Error code 49 is the generic &ldquo;authentication failed&rdquo; code, but <strong>Active Directory includes a hex sub-code</strong> that reveals the exact cause:</p>
+<table>
+  <thead>
+      <tr>
+          <th>AD Sub-Code</th>
+          <th>Meaning</th>
+          <th>Fix</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>data 525</code></td>
+          <td>User not found</td>
+          <td>Verify bind DN exists in AD</td>
+      </tr>
+      <tr>
+          <td><code>data 52e</code></td>
+          <td>Wrong password</td>
+          <td>Correct the bind credential</td>
+      </tr>
+      <tr>
+          <td><code>data 530</code></td>
+          <td>Logon not permitted at this time</td>
+          <td>Check AD time-of-day restrictions</td>
+      </tr>
+      <tr>
+          <td><code>data 531</code></td>
+          <td>Logon not permitted from this workstation</td>
+          <td>Check AD workstation restrictions</td>
+      </tr>
+      <tr>
+          <td><code>data 532</code></td>
+          <td>Password expired</td>
+          <td>Reset the service account password</td>
+      </tr>
+      <tr>
+          <td><code>data 533</code></td>
+          <td>Account disabled</td>
+          <td>Re-enable the account in AD</td>
+      </tr>
+      <tr>
+          <td><code>data 701</code></td>
+          <td>Account expired</td>
+          <td>Extend the account expiration date</td>
+      </tr>
+      <tr>
+          <td><code>data 773</code></td>
+          <td>User must reset password</td>
+          <td>Reset password and clear &ldquo;must change&rdquo; flag</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>How to read the sub-code:</strong> Look for the full error in Keycloak server logs:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>[LDAP: error code 49 - 80090308: LdapErr: DSID-0C090439,
+</span></span><span style="display:flex;"><span> comment: AcceptSecurityContext error, data 52e, v4563]
+</span></span></code></pre></div><p>The <code>data 52e</code> part is the sub-code — this means &ldquo;wrong password&rdquo;.</p>
+<p><strong>Test your bind credentials before configuring Keycloak:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Active Directory (full DN format)</span>
+</span></span><span style="display:flex;"><span>ldapsearch -x -H ldaps://ad.example.com:636 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -D <span style="color:#e6db74">&#34;CN=keycloak-svc,CN=Users,DC=corp,DC=example,DC=com&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -W <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -b <span style="color:#e6db74">&#34;DC=corp,DC=example,DC=com&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#e6db74">&#34;(sAMAccountName=testuser)&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Active Directory (UPN format — simpler)</span>
+</span></span><span style="display:flex;"><span>ldapsearch -x -H ldaps://ad.example.com:636 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -D <span style="color:#e6db74">&#34;keycloak-svc@corp.example.com&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -W <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -b <span style="color:#e6db74">&#34;DC=corp,DC=example,DC=com&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#e6db74">&#34;(sAMAccountName=testuser)&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># OpenLDAP</span>
+</span></span><span style="display:flex;"><span>ldapsearch -x -H ldaps://ldap.example.com:636 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -D <span style="color:#e6db74">&#34;cn=admin,dc=example,dc=com&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -W <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -b <span style="color:#e6db74">&#34;ou=people,dc=example,dc=com&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#e6db74">&#34;(uid=testuser)&#34;</span>
+</span></span></code></pre></div><h3 id="wrong-bind-dn-format">Wrong Bind DN Format<a hidden class="anchor" aria-hidden="true" href="#wrong-bind-dn-format">#</a></h3>
+<p>The most common cause of error code 49 is using the wrong bind DN format:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span># WRONG — just the username
+</span></span><span style="display:flex;"><span>Bind DN: keycloak-svc
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span># WRONG — forward slash notation
+</span></span><span style="display:flex;"><span>Bind DN: corp/keycloak-svc
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span># CORRECT — Full DN for Active Directory
+</span></span><span style="display:flex;"><span>Bind DN: CN=keycloak-svc,CN=Users,DC=corp,DC=example,DC=com
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span># ALSO CORRECT — UPN format (AD only)
+</span></span><span style="display:flex;"><span>Bind DN: keycloak-svc@corp.example.com
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span># CORRECT — OpenLDAP
+</span></span><span style="display:flex;"><span>Bind DN: cn=admin,dc=example,dc=com
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span># CORRECT — FreeIPA
+</span></span><span style="display:flex;"><span>Bind DN: uid=admin,cn=users,cn=accounts,dc=example,dc=com
+</span></span></code></pre></div><h3 id="account-lockout-warning">Account Lockout Warning<a hidden class="anchor" aria-hidden="true" href="#account-lockout-warning">#</a></h3>
+<p>Clicking <strong>Test Authentication</strong> in Keycloak admin console with wrong credentials counts as a failed login attempt in Active Directory. Repeated clicks can trigger the AD account lockout policy and lock out your bind service account.</p>
+<p><strong>Prevention:</strong> Always test credentials with <code>ldapsearch</code> on the command line before configuring Keycloak.</p>
+<h2 id="tls-and-ssl-errors">TLS and SSL Errors<a hidden class="anchor" aria-hidden="true" href="#tls-and-ssl-errors">#</a></h2>
+<h3 id="pkix-path-building-failed-most-common-tls-error">PKIX Path Building Failed (Most Common TLS Error)<a hidden class="anchor" aria-hidden="true" href="#pkix-path-building-failed-most-common-tls-error">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>javax.net.ssl.SSLHandshakeException: PKIX path building failed:
+</span></span><span style="display:flex;"><span>SunCertPathBuilderException: unable to find valid certification path to requested target
+</span></span></code></pre></div><p>This means the LDAP server&rsquo;s certificate (or its CA) is not trusted by Keycloak&rsquo;s Java runtime.</p>
+<p><strong>Critical Keycloak gotcha:</strong> The admin console&rsquo;s <strong>Test Connection</strong> button only tests TCP socket connectivity. It does <strong>NOT</strong> test the TLS handshake. So &ldquo;Test Connection&rdquo; passes, but &ldquo;Test Authentication&rdquo; fails with <code>SSLHandshakeException</code>.</p>
+<p><strong>Fix for Keycloak 22+ (Quarkus):</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Step 1: Extract the CA certificate from the LDAP server</span>
+</span></span><span style="display:flex;"><span>openssl s_client -connect ad.example.com:636 -showcerts &lt;/dev/null 2&gt;/dev/null <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  | openssl x509 -outform PEM &gt; /opt/keycloak/conf/truststores/ldap-ca.pem
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Step 2: Restart Keycloak — it auto-loads PEM files from conf/truststores/</span>
+</span></span><span style="display:flex;"><span>bin/kc.sh start
+</span></span></code></pre></div><p><strong>Fix for older Keycloak (or JKS preference):</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Step 1: Extract the certificate</span>
+</span></span><span style="display:flex;"><span>openssl s_client -connect ad.example.com:636 -showcerts &lt;/dev/null 2&gt;/dev/null <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  | openssl x509 -outform PEM &gt; ldap-ca.pem
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Step 2: Import into a Java keystore</span>
+</span></span><span style="display:flex;"><span>keytool -importcert -trustcacerts <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -alias ldap-ca <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -file ldap-ca.pem <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -keystore /opt/keycloak/conf/truststore.jks <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -storepass changeit <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -noprompt
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Step 3: Configure Keycloak to use the truststore</span>
+</span></span><span style="display:flex;"><span>bin/kc.sh start <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --spi-truststore-file-file<span style="color:#f92672">=</span>/opt/keycloak/conf/truststore.jks <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --spi-truststore-file-password<span style="color:#f92672">=</span>changeit
+</span></span></code></pre></div><p><strong>Docker / Kubernetes:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Docker: Mount the certificate and restart</span>
+</span></span><span style="display:flex;"><span>docker run <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -v /path/to/ldap-ca.pem:/opt/keycloak/conf/truststores/ldap-ca.pem:ro <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  quay.io/keycloak/keycloak:latest start
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Kubernetes: Create a secret and mount to conf/truststores/</span>
+</span></span><span style="display:flex;"><span>kubectl create secret generic ldap-ca-cert <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --from-file<span style="color:#f92672">=</span>ldap-ca.pem<span style="color:#f92672">=</span>/path/to/ldap-ca.pem
+</span></span></code></pre></div><h3 id="san-hostname-mismatch">SAN Hostname Mismatch<a hidden class="anchor" aria-hidden="true" href="#san-hostname-mismatch">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>javax.net.ssl.SSLHandshakeException: No subject alternative names
+</span></span><span style="display:flex;"><span>matching IP address X.X.X.X found
+</span></span></code></pre></div><p>The Connection URL uses an IP address, but the certificate only has hostnames in the Subject Alternative Name (SAN) field.</p>
+<p><strong>Fix:</strong> Use the FQDN in the Connection URL, not the IP address:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span># WRONG
+</span></span><span style="display:flex;"><span>ldaps://10.0.1.50:636
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span># CORRECT
+</span></span><span style="display:flex;"><span>ldaps://ad.corp.example.com:636
+</span></span></code></pre></div><h3 id="diagnosing-tls-issues">Diagnosing TLS Issues<a hidden class="anchor" aria-hidden="true" href="#diagnosing-tls-issues">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># View the full certificate chain</span>
+</span></span><span style="display:flex;"><span>openssl s_client -connect ad.example.com:636 -showcerts &lt;/dev/null
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Check certificate expiration date</span>
+</span></span><span style="display:flex;"><span>openssl s_client -connect ad.example.com:636 &lt;/dev/null 2&gt;/dev/null <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  | openssl x509 -noout -dates
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># View SAN entries (verify hostname matches)</span>
+</span></span><span style="display:flex;"><span>openssl s_client -connect ad.example.com:636 &lt;/dev/null 2&gt;/dev/null <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  | openssl x509 -noout -text | grep -A1 <span style="color:#e6db74">&#34;Subject Alternative Name&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Test StartTLS on port 389</span>
+</span></span><span style="display:flex;"><span>openssl s_client -connect ad.example.com:389 -starttls ldap -showcerts &lt;/dev/null
+</span></span></code></pre></div><h3 id="starttls-disables-connection-pooling">StartTLS Disables Connection Pooling<a hidden class="anchor" aria-hidden="true" href="#starttls-disables-connection-pooling">#</a></h3>
+<p>Java&rsquo;s JNDI implementation does not support connection pooling with StartTLS. If you use StartTLS (<code>ldap://</code> on port 389 with TLS upgrade), Keycloak creates a new connection for every LDAP operation, causing severe performance degradation under load.</p>
+<p><strong>Fix:</strong> Use LDAPS (<code>ldaps://</code> on port 636) instead of StartTLS if you need connection pooling.</p>
+<h2 id="search-and-sync-errors">Search and Sync Errors<a hidden class="anchor" aria-hidden="true" href="#search-and-sync-errors">#</a></h2>
+<h3 id="partialresultexception--ad-referrals">PartialResultException — AD Referrals<a hidden class="anchor" aria-hidden="true" href="#partialresultexception--ad-referrals">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>javax.naming.PartialResultException: Unprocessed Continuation Reference(s);
+</span></span><span style="display:flex;"><span>remaining name &#39;OU=Users,DC=corp,DC=example,DC=com&#39;
+</span></span></code></pre></div><p>This is an Active Directory multi-domain forest issue. When the search base spans multiple domains, AD returns referrals (pointers to other domain controllers) instead of results. Keycloak does not follow referrals by default.</p>
+<p><strong>Fix Option 1 — Use Global Catalog (recommended for multi-domain):</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>Connection URL: ldap://ad.example.com:3268    (or ldaps://ad.example.com:3269)
+</span></span></code></pre></div><p>Note: Global Catalog returns a limited subset of attributes. Custom attributes and passwords are not available through Global Catalog.</p>
+<p><strong>Fix Option 2 — Narrow the search base:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span># Instead of the forest root:
+</span></span><span style="display:flex;"><span>Users DN: DC=corp,DC=example,DC=com
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span># Use the specific domain:
+</span></span><span style="display:flex;"><span>Users DN: OU=Employees,DC=subdomain,DC=corp,DC=example,DC=com
+</span></span></code></pre></div><h3 id="sizelimitexceededexception">SizeLimitExceededException<a hidden class="anchor" aria-hidden="true" href="#sizelimitexceededexception">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>javax.naming.SizeLimitExceededException: [LDAP: error code 4 - Sizelimit Exceeded]
+</span></span></code></pre></div><p>Active Directory has a default size limit of 1000 entries per search. If your directory has more than 1000 users, this error occurs unless pagination is enabled.</p>
+<p><strong>Fix:</strong> Enable <strong>Pagination</strong> in the Keycloak LDAP provider settings (Admin Console → User Federation → LDAP → Pagination = ON).</p>
+<h3 id="sync-reports-0-imported-0-updated">Sync Reports 0 Imported, 0 Updated<a hidden class="anchor" aria-hidden="true" href="#sync-reports-0-imported-0-updated">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>WARN [org.keycloak.storage.ldap] Sync of users finished.
+</span></span><span style="display:flex;"><span>Updated: 0, Added: 0, Failed: 0
+</span></span></code></pre></div><p><strong>Causes:</strong></p>
+<ol>
+<li><strong>Users already exist in Keycloak</strong> — Users were created locally before LDAP federation was configured. They exist in Keycloak&rsquo;s database but are not linked to the LDAP provider.</li>
+<li><strong>Wrong <code>Username LDAP Attribute</code></strong> — Must match the directory type:</li>
+</ol>
+<table>
+  <thead>
+      <tr>
+          <th>Directory</th>
+          <th>Correct <code>Username LDAP Attribute</code></th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Active Directory</td>
+          <td><code>sAMAccountName</code></td>
+      </tr>
+      <tr>
+          <td>OpenLDAP</td>
+          <td><code>uid</code></td>
+      </tr>
+      <tr>
+          <td>FreeIPA</td>
+          <td><code>uid</code></td>
+      </tr>
+  </tbody>
+</table>
+<ol start="3">
+<li><strong>Custom User LDAP Filter too restrictive</strong> — Test your filter with <code>ldapsearch</code> to verify it returns expected users.</li>
+</ol>
+<h3 id="timelimitexceededexception">TimeLimitExceededException<a hidden class="anchor" aria-hidden="true" href="#timelimitexceededexception">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>javax.naming.TimeLimitExceededException: [LDAP: error code 3 - Time Limit Exceeded]
+</span></span></code></pre></div><p>The search is taking too long. Add a <strong>Custom User LDAP Filter</strong> to narrow results, or increase the LDAP server&rsquo;s search time limit.</p>
+<h2 id="password-change-errors">Password Change Errors<a hidden class="anchor" aria-hidden="true" href="#password-change-errors">#</a></h2>
+<h3 id="will_not_perform-error-code-53">WILL_NOT_PERFORM (Error Code 53)<a hidden class="anchor" aria-hidden="true" href="#will_not_perform-error-code-53">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>javax.naming.OperationNotSupportedException:
+</span></span><span style="display:flex;"><span>[LDAP: error code 53 - 0000001F: SvcErr: DSID-031A1262, problem 5003 (WILL_NOT_PERFORM)]
+</span></span></code></pre></div><p>Active Directory <strong>requires LDAPS</strong> for password change operations. Attempting to change a password over a non-SSL connection triggers this error.</p>
+<p><strong>Fix:</strong></p>
+<ol>
+<li>Use <code>ldaps://</code> (port 636) instead of <code>ldap://</code> (port 389)</li>
+<li>Ensure the bind account has &ldquo;Reset Password&rdquo; permission on the target user objects</li>
+<li>Set <strong>Edit Mode</strong> to <code>WRITABLE</code> in Keycloak LDAP settings</li>
+</ol>
+<h3 id="insufficient-access-rights-error-code-50">Insufficient Access Rights (Error Code 50)<a hidden class="anchor" aria-hidden="true" href="#insufficient-access-rights-error-code-50">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>javax.naming.NoPermissionException: [LDAP: error code 50 - Insufficient Access Rights]
+</span></span></code></pre></div><p>The bind account does not have write permissions, but Keycloak&rsquo;s <strong>Edit Mode</strong> is set to <code>WRITABLE</code>.</p>
+<p><strong>Fix:</strong> Either grant the bind account the required AD permissions (Write <code>userAccountControl</code>, Write <code>pwdLastSet</code>, Reset password) or set Edit Mode to <code>READ_ONLY</code>.</p>
+<h2 id="group-mapper-errors">Group Mapper Errors<a hidden class="anchor" aria-hidden="true" href="#group-mapper-errors">#</a></h2>
+<h3 id="wrong-group-object-classes">Wrong Group Object Classes<a hidden class="anchor" aria-hidden="true" href="#wrong-group-object-classes">#</a></h3>
+<p>Groups sync but clicking a group in Keycloak admin raises errors. This happens when the <strong>Group Object Classes</strong> setting doesn&rsquo;t match your directory:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Directory</th>
+          <th>Correct Group Object Classes</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Active Directory</td>
+          <td><code>group</code></td>
+      </tr>
+      <tr>
+          <td>OpenLDAP</td>
+          <td><code>groupOfNames</code></td>
+      </tr>
+      <tr>
+          <td>FreeIPA</td>
+          <td><code>groupofnames</code></td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="empty-member-attribute-bug">Empty Member Attribute Bug<a hidden class="anchor" aria-hidden="true" href="#empty-member-attribute-bug">#</a></h3>
+<p>LDAP groups with an empty <code>member:</code> attribute crash the group mapper in Keycloak versions before 22.0.3. Upgrade Keycloak or clean up empty groups in the LDAP directory.</p>
+<h2 id="active-directory-vs-openldap-vs-freeipa">Active Directory vs OpenLDAP vs FreeIPA<a hidden class="anchor" aria-hidden="true" href="#active-directory-vs-openldap-vs-freeipa">#</a></h2>
+<p>Configuration differs significantly across directory types. Using wrong values is the most common source of errors:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Setting</th>
+          <th>Active Directory</th>
+          <th>OpenLDAP</th>
+          <th>FreeIPA</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>Vendor</strong></td>
+          <td><code>Active Directory</code></td>
+          <td><code>Other</code></td>
+          <td><code>Red Hat Directory Server</code></td>
+      </tr>
+      <tr>
+          <td><strong>Username Attribute</strong></td>
+          <td><code>sAMAccountName</code></td>
+          <td><code>uid</code></td>
+          <td><code>uid</code></td>
+      </tr>
+      <tr>
+          <td><strong>UUID Attribute</strong></td>
+          <td><code>objectGUID</code></td>
+          <td><code>entryUUID</code></td>
+          <td><code>ipaUniqueID</code></td>
+      </tr>
+      <tr>
+          <td><strong>User Object Classes</strong></td>
+          <td><code>person, organizationalPerson, user</code></td>
+          <td><code>inetOrgPerson, organizationalPerson</code></td>
+          <td><code>inetOrgPerson, organizationalPerson, person</code></td>
+      </tr>
+      <tr>
+          <td><strong>Users DN</strong></td>
+          <td><code>CN=Users,DC=corp,DC=com</code></td>
+          <td><code>ou=people,dc=example,dc=com</code></td>
+          <td><code>cn=users,cn=accounts,dc=example,dc=com</code></td>
+      </tr>
+      <tr>
+          <td><strong>Group Object Classes</strong></td>
+          <td><code>group</code></td>
+          <td><code>groupOfNames</code></td>
+          <td><code>groupofnames</code></td>
+      </tr>
+      <tr>
+          <td><strong>Pagination</strong></td>
+          <td>Required (1000 limit)</td>
+          <td>Optional</td>
+          <td>Optional</td>
+      </tr>
+      <tr>
+          <td><strong>Password changes</strong></td>
+          <td>LDAPS required</td>
+          <td>Depends on config</td>
+          <td>LDAPS recommended</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="ad-specific-pitfalls">AD-Specific Pitfalls<a hidden class="anchor" aria-hidden="true" href="#ad-specific-pitfalls">#</a></h3>
+<ul>
+<li><strong>Account lockout during testing</strong> — &ldquo;Test Authentication&rdquo; counts as a login attempt</li>
+<li><strong>UPN vs DN for bind</strong> — AD accepts both <code>user@domain.com</code> (UPN) and full DN</li>
+<li><strong>Referrals in multi-domain forests</strong> — Causes <code>PartialResultException</code> (use Global Catalog port 3268/3269)</li>
+<li><strong>Password changes require LDAPS</strong> — Error code 53 <code>WILL_NOT_PERFORM</code> on non-SSL connections</li>
+</ul>
+<h3 id="openldap-specific-pitfalls">OpenLDAP-Specific Pitfalls<a hidden class="anchor" aria-hidden="true" href="#openldap-specific-pitfalls">#</a></h3>
+<ul>
+<li><strong>No built-in pagination</strong> — Disable pagination in Keycloak if you get <code>SizeLimitExceededException</code> on OpenLDAP</li>
+<li><strong><code>entryUUID</code> availability</strong> — May require the <code>entryUUID</code> overlay on older OpenLDAP versions</li>
+<li><strong>Plaintext passwords</strong> — OpenLDAP stores passwords in plaintext unless <code>ppolicy</code> overlay is configured</li>
+</ul>
+<h3 id="freeipa-specific-pitfalls">FreeIPA-Specific Pitfalls<a hidden class="anchor" aria-hidden="true" href="#freeipa-specific-pitfalls">#</a></h3>
+<ul>
+<li><strong>UUID attribute</strong> — Must manually change to <code>ipaUniqueID</code> (Keycloak does not auto-detect)</li>
+<li><strong>Users DN structure</strong> — Note the <code>cn=accounts</code> level: <code>cn=users,cn=accounts,dc=example,dc=com</code></li>
+</ul>
+<h2 id="debug-logging">Debug Logging<a hidden class="anchor" aria-hidden="true" href="#debug-logging">#</a></h2>
+<h3 id="enable-keycloak-ldap-trace-logging">Enable Keycloak LDAP Trace Logging<a hidden class="anchor" aria-hidden="true" href="#enable-keycloak-ldap-trace-logging">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># CLI startup parameter</span>
+</span></span><span style="display:flex;"><span>bin/kc.sh start --log-level<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;INFO,org.keycloak.storage.ldap:TRACE&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Environment variable</span>
+</span></span><span style="display:flex;"><span>export KC_LOG_LEVEL<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;INFO,org.keycloak.storage.ldap:TRACE&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># In conf/keycloak.conf</span>
+</span></span><span style="display:flex;"><span>log-level<span style="color:#f92672">=</span>INFO,org.keycloak.storage.ldap:TRACE
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Docker</span>
+</span></span><span style="display:flex;"><span>docker run -e KC_LOG_LEVEL<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;INFO,org.keycloak.storage.ldap:TRACE&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  quay.io/keycloak/keycloak:latest start
+</span></span></code></pre></div><h3 id="enable-tlsssl-debug-output">Enable TLS/SSL Debug Output<a hidden class="anchor" aria-hidden="true" href="#enable-tlsssl-debug-output">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Full SSL debug (very verbose)</span>
+</span></span><span style="display:flex;"><span>export JAVA_OPTS<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;-Djavax.net.debug=all&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># SSL handshake only (recommended for troubleshooting)</span>
+</span></span><span style="display:flex;"><span>export JAVA_OPTS<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;-Djavax.net.debug=ssl:handshake&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Docker</span>
+</span></span><span style="display:flex;"><span>docker run <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -e KC_LOG_LEVEL<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;INFO,org.keycloak.storage.ldap:TRACE&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -e JAVA_OPTS<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;-Djavax.net.debug=ssl:handshake&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  quay.io/keycloak/keycloak:latest start
+</span></span></code></pre></div><h3 id="admin-console-gotcha-save-before-testing">Admin Console Gotcha: Save Before Testing<a hidden class="anchor" aria-hidden="true" href="#admin-console-gotcha-save-before-testing">#</a></h3>
+<p>If you change the Connection URL or Bind Credential in the admin console and click &ldquo;Test Authentication&rdquo; <strong>without clicking &ldquo;Save&rdquo; first</strong>, Keycloak tests with the OLD saved values, not your new input. This causes false negatives and — if the old password is wrong — can lock out the bind account in Active Directory.</p>
+<p><strong>Always click Save before clicking Test Connection or Test Authentication.</strong></p>
+<h2 id="complete-debugging-workflow">Complete Debugging Workflow<a hidden class="anchor" aria-hidden="true" href="#complete-debugging-workflow">#</a></h2>
+<p>When any LDAP error occurs, work through this sequence:</p>
+<p><strong>Step 1: Test network connectivity</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>nc -zv ad.example.com <span style="color:#ae81ff">636</span>
+</span></span></code></pre></div><p><strong>Step 2: Test TLS/certificate chain</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>openssl s_client -connect ad.example.com:636 -showcerts &lt;/dev/null
+</span></span></code></pre></div><p><strong>Step 3: Test bind credentials</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>ldapsearch -x -H ldaps://ad.example.com:636 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -D <span style="color:#e6db74">&#34;CN=keycloak-svc,CN=Users,DC=corp,DC=example,DC=com&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -W -b <span style="color:#e6db74">&#34;DC=corp,DC=example,DC=com&#34;</span> <span style="color:#e6db74">&#34;(sAMAccountName=testuser)&#34;</span>
+</span></span></code></pre></div><p><strong>Step 4: Enable debug logging and reproduce</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>bin/kc.sh start --log-level<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;INFO,org.keycloak.storage.ldap:TRACE&#34;</span>
+</span></span></code></pre></div><p><strong>Step 5: Check Keycloak events</strong></p>
+<p>Navigate to Admin Console → Events → Login Events → filter by <code>REGISTER_ERROR</code> or check server logs for <code>org.keycloak.storage.ldap</code> entries.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/keycloak/">Keycloak</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/ldap/">Ldap</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/active-directory/">Active Directory</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/troubleshooting/">Troubleshooting</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/identity-management/">Identity Management</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/keycloak-session-expired-errors-troubleshooting-and-timeout-configuration/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Keycloak Session Expired Errors: Troubleshooting and Timeout Configuration</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/the-silent-credential-heist-halcyon/">
+    <span class="title">Next »</span>
+    <br>
+    <span>The Silent Credential Heist - Halcyon</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+
+<section class="post-feedback">
+  <p class="feedback-question">Was this article helpful?</p>
+  <div class="feedback-buttons">
+    <button class="feedback-btn feedback-yes" onclick="trackFeedback('yes', '\/posts\/keycloak-ldap-connection-troubleshooting-complete-guide\/')" aria-label="Yes, helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      Yes
+    </button>
+    <button class="feedback-btn feedback-no" onclick="trackFeedback('no', '\/posts\/keycloak-ldap-connection-troubleshooting-complete-guide\/')" aria-label="No, not helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>
+      No
+    </button>
+  </div>
+  <p class="feedback-thanks" style="display: none;">Thanks for your feedback!</p>
+</section>
+
+
+<section class="author-bio">
+  <div class="author-avatar">
+    <img src="/IAMDevBox.com.jpg" alt="IAMDevBox Author" width="64" height="64" loading="lazy">
+  </div>
+  <div class="author-info">
+    <h4>Written by IAMDevBox</h4>
+    <p>Enterprise IAM architect with 15+ years in identity modernization. Certified across ForgeRock, Ping Identity, SailPoint, AWS, and Azure.</p>
+    <div class="author-links">
+      <a href="https://twitter.com/iamdevbox" target="_blank" rel="noopener" title="Follow on X/Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/iamdevbox" target="_blank" rel="noopener" title="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="/contact/" title="Contact">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function trackFeedback(value, page) {
+  
+  document.querySelector('.feedback-buttons').style.display = 'none';
+  document.querySelector('.feedback-question').style.display = 'none';
+  document.querySelector('.feedback-thanks').style.display = 'block';
+
+  
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'post_feedback', {
+      'feedback_value': value,
+      'page_path': page
+    });
+  }
+
+  
+  localStorage.setItem('feedback_' + page, value);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const page = '\/posts\/keycloak-ldap-connection-troubleshooting-complete-guide\/';
+  if (localStorage.getItem('feedback_' + page)) {
+    document.querySelector('.feedback-buttons').style.display = 'none';
+    document.querySelector('.feedback-question').textContent = 'Thanks for your feedback!';
+  }
+});
+</script>
+
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+              Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+            </a>
+            <small class="custom-date">2026-02-28</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/pingone-mfa-configuration-push-notifications-totp-and-fido2-setup/" class="custom-link">
+              PingOne MFA Configuration: Push Notifications, TOTP, and FIDO2 Setup
+            </a>
+            <small class="custom-date">2026-02-27</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/perc-announces-single-sign-on-access-to-nfpa-link-for-propane-professionals-phcppros/" class="custom-link">
+              PERC Announces Single Sign-On Access to NFPA LiNK for Propane Professionals - PHCPPros
+            </a>
+            <small class="custom-date">2026-02-27</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/forgerock-ds-pkix-path-building-failed-certificate-troubleshooting/" class="custom-link">
+              ForgeRock DS PKIX Path Building Failed: Complete Certificate Troubleshooting Guide
+            </a>
+            <small class="custom-date">2026-02-21</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-vs-ory-open-source-iam-comparison-2026/" class="custom-link">
+              Ory vs Keycloak: Open Source IAM Comparison 2026
+            </a>
+            <small class="custom-date">2026-02-21</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+                Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+                Go Secretless with Snowflake Workload Identity Federation - Snowflake
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+                JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+                OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+                Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

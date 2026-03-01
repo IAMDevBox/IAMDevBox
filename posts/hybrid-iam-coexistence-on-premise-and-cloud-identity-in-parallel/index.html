@@ -1,0 +1,2673 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Hybrid IAM Coexistence: Running On-Premise and Cloud Identity Systems in Parallel | IAMDevBox</title>
+<meta name="keywords" content="hybrid iam architecture, hybrid identity coexistence, on premise cloud identity, identity federation patterns, hybrid sso configuration, iam coexistence strategy, parallel identity systems, enterprise hybrid identity">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/hybrid-iam-coexistence-on-premise-and-cloud-identity-in-parallel/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.e24ea479df3e367781fafa20cedde21c7e043c10bed4c8c913ef9261a049a1e2.css" integrity="sha256-4k6ked8&#43;NneB&#43;vogzt3iHH4EPBC&#43;1MjJE&#43;&#43;SYaBJoeI=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/hybrid-iam-coexistence-on-premise-and-cloud-identity-in-parallel/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/hybrid-iam-coexistence-on-premise-and-cloud-identity-in-parallel/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Hybrid IAM Coexistence: Running On-Premise and Cloud Identity Systems in Parallel">
+  <meta property="og:description" content="Hybrid IAM coexistence patterns for running on-premise and cloud identity systems in parallel, covering federation architecture, directory synchronization, SSO across environments, and graceful decommission strategies.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-02-05T11:15:00+00:00">
+    <meta property="article:modified_time" content="2026-02-06T14:43:17+00:00">
+    <meta property="article:tag" content="Hybrid Identity">
+    <meta property="article:tag" content="Iam-Architecture">
+    <meta property="article:tag" content="Identity Federation">
+    <meta property="article:tag" content="Enterprise-Iam">
+    <meta property="article:tag" content="Cloud-Migration">
+      <meta property="og:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:title" content="Hybrid IAM Coexistence: Running On-Premise and Cloud Identity Systems in Parallel">
+<meta name="twitter:description" content="Hybrid IAM coexistence patterns for running on-premise and cloud identity systems in parallel, covering federation architecture, directory synchronization, SSO across environments, and graceful decommission strategies.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Hybrid IAM Coexistence: Running On-Premise and Cloud Identity Systems in Parallel",
+      "item": "https://www.iamdevbox.com/posts/hybrid-iam-coexistence-on-premise-and-cloud-identity-in-parallel/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Hybrid IAM Coexistence: Running On-Premise and Cloud Identity Systems in Parallel",
+  "name": "Hybrid IAM Coexistence: Running On-Premise and Cloud Identity Systems in Parallel",
+  "description": "Hybrid IAM coexistence patterns for running on-premise and cloud identity systems in parallel, covering federation architecture, directory synchronization, SSO across environments, and graceful decommission strategies.",
+  "keywords": [
+    "hybrid iam architecture", "hybrid identity coexistence", "on premise cloud identity", "identity federation patterns", "hybrid sso configuration", "iam coexistence strategy", "parallel identity systems", "enterprise hybrid identity"
+  ],
+  "articleBody": "The day you decide to move identity to the cloud, you start a coexistence period. Whether it lasts 6 months or 3 years, your organization will run two identity systems simultaneously. Applications will live in both environments. Users will expect seamless SSO regardless of where the app is hosted. And any gap in the federation chain means someone can’t do their job.\nGetting hybrid IAM right is the difference between a controlled migration and a chaotic one.\nWhy Coexistence Is Unavoidable You can’t migrate 200 applications overnight. The application dependency graph, change management processes, and testing requirements make a phased migration the only realistic option. During this phase:\nSome applications trust the on-premises IdP (ADFS, PingFederate, on-prem Keycloak) Other applications trust the cloud IdP (Entra ID, Okta, Auth0) Users need access to both sets of applications with a single login User provisioning must keep both systems synchronized Security policies must be enforced consistently across both environments Architecture Pattern: Hub-and-Spoke Federation The most common hybrid pattern establishes the cloud IdP as the primary authentication hub, with the on-premises IdP as a federated spoke:\n┌─────────────────┐ │ Cloud IdP │ │ (Primary Hub) │ └───┬─────────┬───┘ │ │ Federation Direct Trust Trust (SAML) (OIDC/SAML) │ │ ┌────────┴──┐ ┌───┴──────────┐ │On-Prem IdP│ │ Cloud Apps │ │ (Spoke) │ │ (SaaS, etc.) │ └────┬──────┘ └───────────────┘ │ Direct Trust (SAML/Kerberos) │ ┌────┴──────────┐ │ On-Prem Apps │ │ (Legacy) │ └───────────────┘ How it works: Cloud apps authenticate directly against the cloud IdP. When a user needs to access an on-premises app, the cloud IdP redirects to the on-premises IdP via federation. The on-premises IdP authenticates (possibly via Kerberos for domain-joined devices) and returns a token to the cloud IdP, which issues a session.\nThe result: Users log in once at the cloud IdP and can access both cloud and on-prem apps.\nDirectory Synchronization Strategies Strategy 1: One-Way Sync (AD → Cloud) Active Directory ──sync agent──→ Cloud IdP (source) (replica) The most common approach. AD remains the source of truth. A sync agent (Entra Connect, Okta AD Agent, Keycloak LDAP Federation) pushes user and group changes to the cloud IdP.\nPros: Simple, well-supported by all vendors, HR processes don’t change. Cons: Delay between AD change and cloud propagation (typically 30-60 minutes), group membership sync can be complex.\nStrategy 2: Bi-Directional Sync Active Directory ←──sync──→ Cloud IdP Changes in either system propagate to the other. Useful when some users are managed natively in the cloud IdP (e.g., external contractors who don’t need AD accounts).\nPros: Flexibility for mixed user populations. Cons: Conflict resolution is hard — what happens when the same user is modified in both systems simultaneously? Requires careful scoping to avoid sync loops.\nStrategy 3: Cloud-Mastered with AD Writeback Cloud IdP ──writeback──→ Active Directory (source) (replica) Reverse the direction: the cloud IdP is the source of truth, and changes write back to AD for legacy applications. This is the target state for organizations committed to cloud-first, but it requires significant process changes.\nPros: Positions you for eventual AD decommission. Cons: Requires all provisioning workflows to target the cloud IdP first, which is a major change.\nSSO Configuration Patterns Kerberos SSO for Domain-Joined Devices Domain-joined Windows machines get transparent SSO via Kerberos. To extend this to cloud apps during coexistence:\nFor Entra ID: Enable Seamless SSO in Entra Connect. This creates a computer account (AZUREADSSOACC) in AD that issues Kerberos tickets for Entra ID authentication. Users on corporate network get SSO to both on-prem and cloud apps without additional prompts.\nFor Okta: Deploy the Okta IWA Web App on your domain. It uses IWA (Integrated Windows Authentication) to validate Kerberos tickets and issues Okta sessions.\nFor Keycloak (cloud): Configure SPNEGO/Kerberos authentication in Keycloak, with Keycloak’s service principal registered in AD.\nCertificate-Based Authentication If you use smart cards or client certificates:\nOn-prem IdP: Probably already handles certificate auth natively Cloud IdP: Configure CBA (Certificate-Based Authentication) in the cloud IdP Both systems need to trust the same CA chain CRL/OCSP validation must be accessible from both environments Conditional Access Across Environments The challenge: enforcing consistent security policies when authentication happens at different IdPs.\nPolicy On-Prem IdP Cloud IdP MFA for external access IP-based rules Conditional access (location + risk) Device compliance NAC/802.1x MDM integration Session timeout Token lifetime Session policy Block legacy protocols Protocol filtering Conditional access During coexistence, you’ll have gaps. The cloud IdP’s conditional access is typically more sophisticated (risk-based, device-aware) but only applies to apps that authenticate against it. On-prem apps get the on-prem IdP’s simpler policy engine.\nAccept this gap during migration. Trying to enforce identical policies across both systems adds complexity without proportional security benefit.\nMonitoring and Troubleshooting What to Monitor During hybrid coexistence, authentication failures are harder to diagnose because the problem could be in either system or in the federation between them.\nSet up dashboards for:\nAuthentication success/failure rates — per IdP, per application Federation latency — time for the on-prem IdP to respond to federation requests from the cloud IdP Sync lag — time between AD change and cloud IdP update Session anomalies — users with sessions in one IdP but not the other Common Failure Scenarios Scenario 1: User exists in AD but not in cloud IdP\nCause: Sync agent down or user out of sync scope Fix: Check sync agent health, verify user is in the correct OU/group for sync Scenario 2: User can access cloud apps but not on-prem apps\nCause: Federation trust expired or misconfigured Fix: Check SAML certificate validity on both IdPs, verify federation metadata is current Scenario 3: Password change in AD doesn’t take effect in cloud IdP\nCause: Password hash sync delay (typically 2-5 minutes for Entra Connect) Fix: Wait for sync cycle, or trigger manual sync Scenario 4: MFA prompt on every app switch\nCause: SSO session not shared between IdPs Fix: Verify federation trust is configured for SSO (not just authentication), check session cookie domains Decommission Readiness Checklist Before removing the on-premises IdP:\nZero active authentication sessions in on-prem IdP logs (30-day window) All applications migrated and tested against cloud IdP All federation trusts removed or redirected Directory sync direction reversed (if moving to cloud-mastered) Emergency admin access established in cloud IdP Rollback plan documented (re-enable on-prem IdP within 4 hours) Help desk trained on cloud IdP troubleshooting Monitoring alerts configured for cloud IdP availability Compliance team sign-off on new architecture The coexistence period is temporary by design. Keep the end goal in view — a single, authoritative identity system — and resist the temptation to make the hybrid architecture permanent. Every month of dual-system operation is a month of double the operational overhead and double the attack surface.\n",
+  "wordCount" : "1105",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/IAMDevBox.com.jpg","datePublished": "2026-02-05T11:15:00Z",
+  "dateModified": "2026-02-06T14:43:17Z",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/hybrid-iam-coexistence-on-premise-and-cloud-identity-in-parallel/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How long should a hybrid IAM coexistence period last?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Typically 6-18 months for enterprise environments. The coexistence period ends when all applications have migrated to the cloud IdP and the on-premises IdP handles zero authentication traffic. Don't set arbitrary deadlines — let application migration pace drive the timeline. Premature decommission of the on-prem IdP guarantees outages."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should the cloud IdP or on-premises IdP be the source of truth during coexistence?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Active Directory or your existing directory remains the source of truth for user lifecycle (create, update, disable). Sync agents push changes to the cloud IdP. The cloud IdP handles authentication for migrated apps. This means HR processes and provisioning workflows don't change until the final phase, reducing organizational disruption."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I handle SSO across on-prem and cloud apps during hybrid coexistence?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Configure federation between the two IdPs so a single authentication at either IdP establishes sessions at both. For SAML, set up a bi-directional federation trust. For OIDC, configure the on-prem IdP as an external identity provider in the cloud IdP. Users authenticate once and access both on-prem and cloud applications seamlessly."
+      }
+    }
+  ]
+}
+</script>
+    <meta name="description" content="Hybrid IAM coexistence patterns for running on-premise and cloud identity systems in parallel, covering federation architecture, directory synchronization, SSO across environments, and graceful decommission strategies."><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/hybrid-iam-coexistence-on-premise-and-cloud-identity-in-parallel\/"
+  },
+  "headline": "Hybrid IAM Coexistence: Running On-Premise and Cloud Identity Systems in Parallel",
+  "description": "Hybrid IAM coexistence patterns for running on-premise and cloud identity systems in parallel, covering federation architecture, directory synchronization, SSO across environments, and graceful decommission strategies.",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon-96x96.png",
+      "width": 96,
+      "height": 96
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://www.iamdevbox.com/IAMDevBox.com.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "datePublished": "2026-02-05T11:15:00Z",
+  "dateModified": "2026-02-06T14:43:17Z",
+  "wordCount":  1105 ,
+  "articleSection": "posts",
+  "keywords": ["hybrid iam architecture","hybrid identity coexistence","on premise cloud identity","identity federation patterns","hybrid sso configuration","iam coexistence strategy","parallel identity systems","enterprise hybrid identity"]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Hybrid IAM Coexistence: Running On-Premise and Cloud Identity Systems in Parallel",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/hybrid-iam-coexistence-on-premise-and-cloud-identity-in-parallel\/"
+    }
+  ]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-token-exchange-implementing-oauth-20-token-exchange\/"
+            },
+            "headline": "Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:29:55Z",
+            "dateModified": "2026-03-01T14:30:15Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/go-secretless-with-snowflake-workload-identity-federation-snowflake\/"
+            },
+            "headline": "Go Secretless with Snowflake Workload Identity Federation - Snowflake",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:24:03Z",
+            "dateModified": "2026-03-01T14:24:20Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-algorithm-confusion-attack-cve-2026-developer-guide\/"
+            },
+            "headline": "JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-02-28T18:00:00Z",
+            "dateModified": "2026-03-01T11:21:01-05:00"
+          }
+  ]
+}
+</script>
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    const mermaidBlocks = document.querySelectorAll('.mermaid, pre code.language-mermaid, code.language-mermaid');
+    if (mermaidBlocks.length > 0) {
+        
+        mermaidBlocks.forEach(block => {
+            if (block.tagName === 'CODE') {
+                const pre = block.parentElement;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = block.textContent;
+                if (pre && pre.tagName === 'PRE') {
+                    pre.parentNode.replaceChild(div, pre);
+                } else {
+                    block.parentNode.replaceChild(div, block);
+                }
+            }
+        });
+
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+            const isDark = document.body.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#5a67d8',
+                    
+                    secondaryColor: '#48bb78',
+                    secondaryTextColor: '#ffffff',
+                    secondaryBorderColor: '#38a169',
+                    
+                    tertiaryColor: '#ed8936',
+                    tertiaryTextColor: '#ffffff',
+                    tertiaryBorderColor: '#dd6b20',
+                    
+                    lineColor: '#718096',
+                    
+                    background: isDark ? '#1a202c' : '#ffffff',
+                    mainBkg: isDark ? '#2d3748' : '#f7fafc',
+                    
+                    actorBkg: '#667eea',
+                    actorBorder: '#5a67d8',
+                    actorTextColor: '#ffffff',
+                    actorLineColor: '#718096',
+                    signalColor: '#4a5568',
+                    signalTextColor: '#2d3748',
+                    labelBoxBkgColor: '#edf2f7',
+                    labelBoxBorderColor: '#cbd5e0',
+                    labelTextColor: '#2d3748',
+                    loopTextColor: '#553c9a',
+                    noteBkgColor: '#faf089',
+                    noteTextColor: '#744210',
+                    noteBorderColor: '#d69e2e',
+                    
+                    nodeBkg: '#667eea',
+                    nodeBorder: '#5a67d8',
+                    clusterBkg: '#e2e8f0',
+                    clusterBorder: '#a0aec0',
+                    defaultLinkColor: '#718096',
+                    titleColor: '#2d3748',
+                    edgeLabelBackground: 'transparent',
+                    
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                sequence: {
+                    useMaxWidth: true,
+                    boxMargin: 10,
+                    boxTextMargin: 5,
+                    noteMargin: 10,
+                    messageMargin: 35,
+                    mirrorActors: false
+                }
+            });
+            mermaid.run().then(() => {
+                
+                document.querySelectorAll('.mermaid .node').forEach(node => {
+                    const rect = node.querySelector('rect, circle, ellipse, polygon');
+                    if (rect) {
+                        const fill = rect.getAttribute('fill') || window.getComputedStyle(rect).fill;
+                        
+                        const isDarkBg = fill && (
+                            fill.includes('667eea') || fill.includes('102, 126, 234') ||
+                            fill.includes('48bb78') || fill.includes('72, 187, 120') ||
+                            fill.includes('ed8936') || fill.includes('237, 137, 54') ||
+                            fill.includes('553c9a') || fill.includes('9f7aea') ||
+                            fill.includes('e53e3e') || fill.includes('dd6b20')
+                        );
+                        const textColor = isDarkBg ? '#ffffff' : '#1a202c';
+                        node.querySelectorAll('span, .nodeLabel, text, foreignObject div').forEach(text => {
+                            text.style.color = textColor;
+                            text.style.fill = textColor;
+                        });
+                    }
+                });
+            });
+        };
+        document.head.appendChild(script);
+    }
+
+    
+    const postContent = document.querySelector('.post-content');
+    const isSinglePost = document.querySelector('.post-single');
+    const isToolsPage = window.location.pathname.startsWith('/tools/');
+    if (postContent && isSinglePost && window.innerWidth >= 1400 && !isToolsPage) {
+        const headings = postContent.querySelectorAll('h2, h3');
+        if (headings.length >= 3) {
+            const toc = document.createElement('nav');
+            toc.className = 'floating-toc';
+            toc.innerHTML = '<h4>📑 Contents</h4><ul></ul>';
+            const tocList = toc.querySelector('ul');
+
+            headings.forEach((heading, index) => {
+                const id = heading.id || `section-${index}`;
+                heading.id = id;
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2';
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            document.body.appendChild(toc);
+
+            
+            const tocLinks = toc.querySelectorAll('a');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 150) {
+                        current = heading.id;
+                    }
+                });
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+    }
+
+    
+    if (postContent && isSinglePost && window.innerWidth >= 1200) {
+        const h2s = postContent.querySelectorAll('h2');
+        if (h2s.length >= 2) {
+            const indicator = document.createElement('div');
+            indicator.className = 'section-indicator';
+
+            h2s.forEach((h2, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'section-dot';
+                dot.title = h2.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                dot.addEventListener('click', () => {
+                    h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                indicator.appendChild(dot);
+            });
+
+            document.body.appendChild(indicator);
+
+            
+            window.addEventListener('scroll', () => {
+                const dots = indicator.querySelectorAll('.section-dot');
+                let activeIndex = 0;
+                h2s.forEach((h2, index) => {
+                    if (h2.getBoundingClientRect().top <= 200) {
+                        activeIndex = index;
+                    }
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+    }
+    });
+    </script>
+
+    
+    
+    <script>
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        function loadGA() {
+            if (window.gaLoaded) return;
+            window.gaLoaded = true;
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975';
+            document.head.appendChild(script);
+
+            script.onload = () => {
+                gtag('js', new Date());
+                gtag('config', 'G-B6QCH29975');
+            };
+        }
+
+        
+        ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+            window.addEventListener(event, loadGA, { once: true, passive: true });
+        });
+
+        
+        setTimeout(loadGA, 3000);
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+    
+    <div class="reading-progress" id="reading-progress"></div>
+    <script>
+    window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / docHeight) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+    </script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+            </div>
+        </div><button id="menu-btn" aria-label="Menu" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/categories/trending/" title="Hot IAM topics">
+                    <span>🔥Trending</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+(function() {
+    var btn = document.getElementById('menu-btn');
+    var menu = document.getElementById('menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+        });
+        
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
+</script>
+<main class="main">
+
+
+
+<div class="reading-progress" id="reading-progress"></div>
+<script>
+(function() {
+  const progressBar = document.getElementById('reading-progress');
+  const article = document.querySelector('.post-content');
+
+  if (!progressBar || !article) return;
+
+  function updateProgress() {
+    const articleTop = article.offsetTop;
+    const articleHeight = article.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+
+    
+    const start = articleTop - windowHeight;
+    const end = articleTop + articleHeight;
+    const current = scrollTop - start;
+    const total = end - start;
+
+    const progress = Math.min(Math.max((current / total) * 100, 0), 100);
+    progressBar.style.width = progress + '%';
+  }
+
+  
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  
+  updateProgress();
+})();
+</script>
+
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent" data-pagefind-meta="title">
+      Hybrid IAM Coexistence: Running On-Premise and Cloud Identity Systems in Parallel
+    </h1>
+    <div class="post-meta"><span title='2026-02-05 11:15:00'>Feb 05, 2026</span>&nbsp;·&nbsp;6 min&nbsp;·&nbsp;1105 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+    
+      <div class="post-updated">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Updated: Feb 6, 2026
+      </div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#why-coexistence-is-unavoidable" aria-label="Why Coexistence Is Unavoidable">Why Coexistence Is Unavoidable</a></li>
+                <li>
+                    <a href="#architecture-pattern-hub-and-spoke-federation" aria-label="Architecture Pattern: Hub-and-Spoke Federation">Architecture Pattern: Hub-and-Spoke Federation</a></li>
+                <li>
+                    <a href="#directory-synchronization-strategies" aria-label="Directory Synchronization Strategies">Directory Synchronization Strategies</a><ul>
+                        
+                <li>
+                    <a href="#strategy-1-one-way-sync-ad--cloud" aria-label="Strategy 1: One-Way Sync (AD → Cloud)">Strategy 1: One-Way Sync (AD → Cloud)</a></li>
+                <li>
+                    <a href="#strategy-2-bi-directional-sync" aria-label="Strategy 2: Bi-Directional Sync">Strategy 2: Bi-Directional Sync</a></li>
+                <li>
+                    <a href="#strategy-3-cloud-mastered-with-ad-writeback" aria-label="Strategy 3: Cloud-Mastered with AD Writeback">Strategy 3: Cloud-Mastered with AD Writeback</a></li></ul>
+                </li>
+                <li>
+                    <a href="#sso-configuration-patterns" aria-label="SSO Configuration Patterns">SSO Configuration Patterns</a><ul>
+                        
+                <li>
+                    <a href="#kerberos-sso-for-domain-joined-devices" aria-label="Kerberos SSO for Domain-Joined Devices">Kerberos SSO for Domain-Joined Devices</a></li>
+                <li>
+                    <a href="#certificate-based-authentication" aria-label="Certificate-Based Authentication">Certificate-Based Authentication</a></li>
+                <li>
+                    <a href="#conditional-access-across-environments" aria-label="Conditional Access Across Environments">Conditional Access Across Environments</a></li></ul>
+                </li>
+                <li>
+                    <a href="#monitoring-and-troubleshooting" aria-label="Monitoring and Troubleshooting">Monitoring and Troubleshooting</a><ul>
+                        
+                <li>
+                    <a href="#what-to-monitor" aria-label="What to Monitor">What to Monitor</a></li>
+                <li>
+                    <a href="#common-failure-scenarios" aria-label="Common Failure Scenarios">Common Failure Scenarios</a></li></ul>
+                </li>
+                <li>
+                    <a href="#decommission-readiness-checklist" aria-label="Decommission Readiness Checklist">Decommission Readiness Checklist</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content" data-pagefind-body><p>The day you decide to move identity to the cloud, you start a coexistence period. Whether it lasts 6 months or 3 years, your organization will run two identity systems simultaneously. Applications will live in both environments. Users will expect seamless SSO regardless of where the app is hosted. And any gap in the federation chain means someone can&rsquo;t do their job.</p>
+<p>Getting hybrid IAM right is the difference between a controlled migration and a chaotic one.</p>
+<h2 id="why-coexistence-is-unavoidable">Why Coexistence Is Unavoidable<a hidden class="anchor" aria-hidden="true" href="#why-coexistence-is-unavoidable">#</a></h2>
+<p>You can&rsquo;t migrate 200 applications overnight. The application dependency graph, change management processes, and testing requirements make a phased migration the only realistic option. During this phase:</p>
+<ul>
+<li>Some applications trust the on-premises IdP (ADFS, PingFederate, on-prem Keycloak)</li>
+<li>Other applications trust the cloud IdP (Entra ID, Okta, Auth0)</li>
+<li>Users need access to both sets of applications with a single login</li>
+<li>User provisioning must keep both systems synchronized</li>
+<li>Security policies must be enforced consistently across both environments</li>
+</ul>
+<h2 id="architecture-pattern-hub-and-spoke-federation">Architecture Pattern: Hub-and-Spoke Federation<a hidden class="anchor" aria-hidden="true" href="#architecture-pattern-hub-and-spoke-federation">#</a></h2>
+<p>The most common hybrid pattern establishes the cloud IdP as the primary authentication hub, with the on-premises IdP as a federated spoke:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>                         ┌─────────────────┐
+</span></span><span style="display:flex;"><span>                         │  Cloud IdP      │
+</span></span><span style="display:flex;"><span>                         │  (Primary Hub)  │
+</span></span><span style="display:flex;"><span>                         └───┬─────────┬───┘
+</span></span><span style="display:flex;"><span>                             │         │
+</span></span><span style="display:flex;"><span>                    Federation         Direct Trust
+</span></span><span style="display:flex;"><span>                    Trust (SAML)       (OIDC/SAML)
+</span></span><span style="display:flex;"><span>                             │         │
+</span></span><span style="display:flex;"><span>                    ┌────────┴──┐  ┌───┴──────────┐
+</span></span><span style="display:flex;"><span>                    │On-Prem IdP│  │  Cloud Apps   │
+</span></span><span style="display:flex;"><span>                    │  (Spoke)  │  │  (SaaS, etc.) │
+</span></span><span style="display:flex;"><span>                    └────┬──────┘  └───────────────┘
+</span></span><span style="display:flex;"><span>                         │
+</span></span><span style="display:flex;"><span>                    Direct Trust
+</span></span><span style="display:flex;"><span>                    (SAML/Kerberos)
+</span></span><span style="display:flex;"><span>                         │
+</span></span><span style="display:flex;"><span>                    ┌────┴──────────┐
+</span></span><span style="display:flex;"><span>                    │  On-Prem Apps │
+</span></span><span style="display:flex;"><span>                    │  (Legacy)     │
+</span></span><span style="display:flex;"><span>                    └───────────────┘
+</span></span></code></pre></div><p><strong>How it works</strong>: Cloud apps authenticate directly against the cloud IdP. When a user needs to access an on-premises app, the cloud IdP redirects to the on-premises IdP via federation. The on-premises IdP authenticates (possibly via Kerberos for domain-joined devices) and returns a token to the cloud IdP, which issues a session.</p>
+<p><strong>The result</strong>: Users log in once at the cloud IdP and can access both cloud and on-prem apps.</p>
+<h2 id="directory-synchronization-strategies">Directory Synchronization Strategies<a hidden class="anchor" aria-hidden="true" href="#directory-synchronization-strategies">#</a></h2>
+<h3 id="strategy-1-one-way-sync-ad--cloud">Strategy 1: One-Way Sync (AD → Cloud)<a hidden class="anchor" aria-hidden="true" href="#strategy-1-one-way-sync-ad--cloud">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>Active Directory ──sync agent──→ Cloud IdP
+</span></span><span style="display:flex;"><span>     (source)                    (replica)
+</span></span></code></pre></div><p>The most common approach. AD remains the source of truth. A sync agent (Entra Connect, Okta AD Agent, Keycloak LDAP Federation) pushes user and group changes to the cloud IdP.</p>
+<p><strong>Pros</strong>: Simple, well-supported by all vendors, HR processes don&rsquo;t change.
+<strong>Cons</strong>: Delay between AD change and cloud propagation (typically 30-60 minutes), group membership sync can be complex.</p>
+<h3 id="strategy-2-bi-directional-sync">Strategy 2: Bi-Directional Sync<a hidden class="anchor" aria-hidden="true" href="#strategy-2-bi-directional-sync">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>Active Directory ←──sync──→ Cloud IdP
+</span></span></code></pre></div><p>Changes in either system propagate to the other. Useful when some users are managed natively in the cloud IdP (e.g., external contractors who don&rsquo;t need AD accounts).</p>
+<p><strong>Pros</strong>: Flexibility for mixed user populations.
+<strong>Cons</strong>: Conflict resolution is hard — what happens when the same user is modified in both systems simultaneously? Requires careful scoping to avoid sync loops.</p>
+<h3 id="strategy-3-cloud-mastered-with-ad-writeback">Strategy 3: Cloud-Mastered with AD Writeback<a hidden class="anchor" aria-hidden="true" href="#strategy-3-cloud-mastered-with-ad-writeback">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>Cloud IdP ──writeback──→ Active Directory
+</span></span><span style="display:flex;"><span>  (source)                   (replica)
+</span></span></code></pre></div><p>Reverse the direction: the cloud IdP is the source of truth, and changes write back to AD for legacy applications. This is the target state for organizations committed to cloud-first, but it requires significant process changes.</p>
+<p><strong>Pros</strong>: Positions you for eventual AD decommission.
+<strong>Cons</strong>: Requires all provisioning workflows to target the cloud IdP first, which is a major change.</p>
+<h2 id="sso-configuration-patterns">SSO Configuration Patterns<a hidden class="anchor" aria-hidden="true" href="#sso-configuration-patterns">#</a></h2>
+<h3 id="kerberos-sso-for-domain-joined-devices">Kerberos SSO for Domain-Joined Devices<a hidden class="anchor" aria-hidden="true" href="#kerberos-sso-for-domain-joined-devices">#</a></h3>
+<p>Domain-joined Windows machines get transparent SSO via Kerberos. To extend this to cloud apps during coexistence:</p>
+<p><strong>For Entra ID</strong>: Enable <strong>Seamless SSO</strong> in Entra Connect. This creates a computer account (<code>AZUREADSSOACC</code>) in AD that issues Kerberos tickets for Entra ID authentication. Users on corporate network get SSO to both on-prem and cloud apps without additional prompts.</p>
+<p><strong>For Okta</strong>: Deploy the <strong>Okta IWA Web App</strong> on your domain. It uses IWA (Integrated Windows Authentication) to validate Kerberos tickets and issues Okta sessions.</p>
+<p><strong>For Keycloak (cloud)</strong>: Configure <strong>SPNEGO/Kerberos</strong> authentication in Keycloak, with Keycloak&rsquo;s service principal registered in AD.</p>
+<h3 id="certificate-based-authentication">Certificate-Based Authentication<a hidden class="anchor" aria-hidden="true" href="#certificate-based-authentication">#</a></h3>
+<p>If you use smart cards or client certificates:</p>
+<ul>
+<li>On-prem IdP: Probably already handles certificate auth natively</li>
+<li>Cloud IdP: Configure CBA (Certificate-Based Authentication) in the cloud IdP</li>
+<li>Both systems need to trust the same CA chain</li>
+<li>CRL/OCSP validation must be accessible from both environments</li>
+</ul>
+<h3 id="conditional-access-across-environments">Conditional Access Across Environments<a hidden class="anchor" aria-hidden="true" href="#conditional-access-across-environments">#</a></h3>
+<p>The challenge: enforcing consistent security policies when authentication happens at different IdPs.</p>
+<table>
+  <thead>
+      <tr>
+          <th>Policy</th>
+          <th>On-Prem IdP</th>
+          <th>Cloud IdP</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>MFA for external access</td>
+          <td>IP-based rules</td>
+          <td>Conditional access (location + risk)</td>
+      </tr>
+      <tr>
+          <td>Device compliance</td>
+          <td>NAC/802.1x</td>
+          <td>MDM integration</td>
+      </tr>
+      <tr>
+          <td>Session timeout</td>
+          <td>Token lifetime</td>
+          <td>Session policy</td>
+      </tr>
+      <tr>
+          <td>Block legacy protocols</td>
+          <td>Protocol filtering</td>
+          <td>Conditional access</td>
+      </tr>
+  </tbody>
+</table>
+<p>During coexistence, you&rsquo;ll have gaps. The cloud IdP&rsquo;s conditional access is typically more sophisticated (risk-based, device-aware) but only applies to apps that authenticate against it. On-prem apps get the on-prem IdP&rsquo;s simpler policy engine.</p>
+<p>Accept this gap during migration. Trying to enforce identical policies across both systems adds complexity without proportional security benefit.</p>
+<h2 id="monitoring-and-troubleshooting">Monitoring and Troubleshooting<a hidden class="anchor" aria-hidden="true" href="#monitoring-and-troubleshooting">#</a></h2>
+<h3 id="what-to-monitor">What to Monitor<a hidden class="anchor" aria-hidden="true" href="#what-to-monitor">#</a></h3>
+<p>During hybrid coexistence, authentication failures are harder to diagnose because the problem could be in either system or in the federation between them.</p>
+<p>Set up dashboards for:</p>
+<ul>
+<li><strong>Authentication success/failure rates</strong> — per IdP, per application</li>
+<li><strong>Federation latency</strong> — time for the on-prem IdP to respond to federation requests from the cloud IdP</li>
+<li><strong>Sync lag</strong> — time between AD change and cloud IdP update</li>
+<li><strong>Session anomalies</strong> — users with sessions in one IdP but not the other</li>
+</ul>
+<h3 id="common-failure-scenarios">Common Failure Scenarios<a hidden class="anchor" aria-hidden="true" href="#common-failure-scenarios">#</a></h3>
+<p><strong>Scenario 1: User exists in AD but not in cloud IdP</strong></p>
+<ul>
+<li>Cause: Sync agent down or user out of sync scope</li>
+<li>Fix: Check sync agent health, verify user is in the correct OU/group for sync</li>
+</ul>
+<p><strong>Scenario 2: User can access cloud apps but not on-prem apps</strong></p>
+<ul>
+<li>Cause: Federation trust expired or misconfigured</li>
+<li>Fix: Check SAML certificate validity on both IdPs, verify federation metadata is current</li>
+</ul>
+<p><strong>Scenario 3: Password change in AD doesn&rsquo;t take effect in cloud IdP</strong></p>
+<ul>
+<li>Cause: Password hash sync delay (typically 2-5 minutes for Entra Connect)</li>
+<li>Fix: Wait for sync cycle, or trigger manual sync</li>
+</ul>
+<p><strong>Scenario 4: MFA prompt on every app switch</strong></p>
+<ul>
+<li>Cause: SSO session not shared between IdPs</li>
+<li>Fix: Verify federation trust is configured for SSO (not just authentication), check session cookie domains</li>
+</ul>
+<h2 id="decommission-readiness-checklist">Decommission Readiness Checklist<a hidden class="anchor" aria-hidden="true" href="#decommission-readiness-checklist">#</a></h2>
+<p>Before removing the on-premises IdP:</p>
+<ul>
+<li><input disabled="" type="checkbox"> Zero active authentication sessions in on-prem IdP logs (30-day window)</li>
+<li><input disabled="" type="checkbox"> All applications migrated and tested against cloud IdP</li>
+<li><input disabled="" type="checkbox"> All federation trusts removed or redirected</li>
+<li><input disabled="" type="checkbox"> Directory sync direction reversed (if moving to cloud-mastered)</li>
+<li><input disabled="" type="checkbox"> Emergency admin access established in cloud IdP</li>
+<li><input disabled="" type="checkbox"> Rollback plan documented (re-enable on-prem IdP within 4 hours)</li>
+<li><input disabled="" type="checkbox"> Help desk trained on cloud IdP troubleshooting</li>
+<li><input disabled="" type="checkbox"> Monitoring alerts configured for cloud IdP availability</li>
+<li><input disabled="" type="checkbox"> Compliance team sign-off on new architecture</li>
+</ul>
+<p>The coexistence period is temporary by design. Keep the end goal in view — a single, authoritative identity system — and resist the temptation to make the hybrid architecture permanent. Every month of dual-system operation is a month of double the operational overhead and double the attack surface.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/hybrid-identity/">Hybrid Identity</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/iam-architecture/">Iam-Architecture</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/identity-federation/">Identity Federation</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/enterprise-iam/">Enterprise-Iam</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/cloud-migration/">Cloud-Migration</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/phishing-and-oauth-token-vulnerabilities-lead-to-full-microsoft-365-breach/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Phishing and OAuth Token Vulnerabilities Lead to Full Microsoft 365 Breach</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/iam-platform-evaluation-framework-choosing-the-right-idp/">
+    <span class="title">Next »</span>
+    <br>
+    <span>IAM Platform Evaluation Framework: How to Choose Between Keycloak, Auth0, Okta, and Entra ID</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+
+<section class="post-feedback">
+  <p class="feedback-question">Was this article helpful?</p>
+  <div class="feedback-buttons">
+    <button class="feedback-btn feedback-yes" onclick="trackFeedback('yes', '\/posts\/hybrid-iam-coexistence-on-premise-and-cloud-identity-in-parallel\/')" aria-label="Yes, helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      Yes
+    </button>
+    <button class="feedback-btn feedback-no" onclick="trackFeedback('no', '\/posts\/hybrid-iam-coexistence-on-premise-and-cloud-identity-in-parallel\/')" aria-label="No, not helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>
+      No
+    </button>
+  </div>
+  <p class="feedback-thanks" style="display: none;">Thanks for your feedback!</p>
+</section>
+
+
+<section class="author-bio">
+  <div class="author-avatar">
+    <img src="/IAMDevBox.com.jpg" alt="IAMDevBox Author" width="64" height="64" loading="lazy">
+  </div>
+  <div class="author-info">
+    <h4>Written by IAMDevBox</h4>
+    <p>Enterprise IAM architect with 15+ years in identity modernization. Certified across ForgeRock, Ping Identity, SailPoint, AWS, and Azure.</p>
+    <div class="author-links">
+      <a href="https://twitter.com/iamdevbox" target="_blank" rel="noopener" title="Follow on X/Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/iamdevbox" target="_blank" rel="noopener" title="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="/contact/" title="Contact">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function trackFeedback(value, page) {
+  
+  document.querySelector('.feedback-buttons').style.display = 'none';
+  document.querySelector('.feedback-question').style.display = 'none';
+  document.querySelector('.feedback-thanks').style.display = 'block';
+
+  
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'post_feedback', {
+      'feedback_value': value,
+      'page_path': page
+    });
+  }
+
+  
+  localStorage.setItem('feedback_' + page, value);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const page = '\/posts\/hybrid-iam-coexistence-on-premise-and-cloud-identity-in-parallel\/';
+  if (localStorage.getItem('feedback_' + page)) {
+    document.querySelector('.feedback-buttons').style.display = 'none';
+    document.querySelector('.feedback-question').textContent = 'Thanks for your feedback!';
+  }
+});
+</script>
+
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-realm-federation-connecting-multiple-identity-sources/" class="custom-link">
+              Keycloak Realm Federation: Connecting Multiple Identity Sources
+            </a>
+            <small class="custom-date">2026-02-20</small>
+          </li>
+          
+        
+      
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/ciam-architecture-patterns-designing-customer-identity-at-scale/" class="custom-link">
+              CIAM Architecture Patterns: Designing Customer Identity for Millions of Users
+            </a>
+            <small class="custom-date">2026-02-05</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/identity-consolidation-after-mergers-acquisitions-playbook/" class="custom-link">
+              M&amp;A Identity Integration: Merging Multiple Identity Providers After Acquisition
+            </a>
+            <small class="custom-date">2026-02-05</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/on-premise-iam-to-cloud-migration-planning-framework/" class="custom-link">
+              On-Premise IAM to Cloud Migration: Planning Framework and Execution Strategy
+            </a>
+            <small class="custom-date">2026-02-05</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/adfs-to-microsoft-entra-id-migration-complete-guide/" class="custom-link">
+              ADFS to Microsoft Entra ID Migration: Complete Planning and Execution Guide
+            </a>
+            <small class="custom-date">2026-02-05</small>
+          </li>
+          
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+                Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+                Go Secretless with Snowflake Workload Identity Federation - Snowflake
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+                JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+                OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+                Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

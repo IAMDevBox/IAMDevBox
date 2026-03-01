@@ -1,0 +1,2923 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Keycloak Realm Federation: Connecting Multiple Identity Sources | IAMDevBox</title>
+<meta name="keywords" content="keycloak realm federation, connecting identity sources, keycloak identity providers, ldap integration, active directory keycloak, social login keycloak, keycloak security, federated identity management">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/keycloak-realm-federation-connecting-multiple-identity-sources/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.e24ea479df3e367781fafa20cedde21c7e043c10bed4c8c913ef9261a049a1e2.css" integrity="sha256-4k6ked8&#43;NneB&#43;vogzt3iHH4EPBC&#43;1MjJE&#43;&#43;SYaBJoeI=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/keycloak-realm-federation-connecting-multiple-identity-sources/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/keycloak-realm-federation-connecting-multiple-identity-sources/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Keycloak Realm Federation: Connecting Multiple Identity Sources">
+  <meta property="og:description" content="Learn how to implement Keycloak Realm Federation for connecting multiple identity sources. This guide covers setup, security, and best practices with code examples.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-02-20T14:43:16+00:00">
+    <meta property="article:modified_time" content="2026-02-26T21:20:24-05:00">
+    <meta property="article:tag" content="Keycloak">
+    <meta property="article:tag" content="Identity Federation">
+    <meta property="article:tag" content="Iam">
+    <meta property="article:tag" content="Security">
+    <meta property="article:tag" content="Identity-Sources">
+    <meta property="og:image" content="https://www.iamdevbox.com/images/posts/keycloak-realm-federation--connecting-multiple-ide-445315e4.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/images/posts/keycloak-realm-federation--connecting-multiple-ide-445315e4.webp">
+<meta name="twitter:title" content="Keycloak Realm Federation: Connecting Multiple Identity Sources">
+<meta name="twitter:description" content="Learn how to implement Keycloak Realm Federation for connecting multiple identity sources. This guide covers setup, security, and best practices with code examples.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Keycloak Realm Federation: Connecting Multiple Identity Sources",
+      "item": "https://www.iamdevbox.com/posts/keycloak-realm-federation-connecting-multiple-identity-sources/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Keycloak Realm Federation: Connecting Multiple Identity Sources",
+  "name": "Keycloak Realm Federation: Connecting Multiple Identity Sources",
+  "description": "Learn how to implement Keycloak Realm Federation for connecting multiple identity sources. This guide covers setup, security, and best practices with code examples.",
+  "keywords": [
+    "keycloak realm federation", "connecting identity sources", "keycloak identity providers", "ldap integration", "active directory keycloak", "social login keycloak", "keycloak security", "federated identity management"
+  ],
+  "articleBody": "Keycloak Realm Federation allows you to connect multiple identity sources within a single Keycloak realm, enabling unified authentication and authorization. This means you can manage users and their access across different directories and systems through a single interface, simplifying identity management and enhancing security.\nWhat is Keycloak Realm Federation? Keycloak Realm Federation lets you integrate various identity sources, such as LDAP, Active Directory, and social logins, into a single Keycloak realm. This integration enables seamless user authentication and authorization across different systems without duplicating user data.\nWhy use Keycloak Realm Federation? Using Keycloak Realm Federation streamlines identity management by centralizing user authentication and authorization. It reduces administrative overhead, improves security, and enhances user experience by allowing users to authenticate using familiar identity providers.\nHow do you configure an LDAP identity provider in Keycloak? Configuring an LDAP identity provider involves setting up the connection to your LDAP server and mapping LDAP attributes to Keycloak user attributes.\nStep-by-step Guide Create a New Identity Provider Navigate to the realm settings in Keycloak, go to the \"Identity Providers\" tab, and click \"Create.\" Select LDAP Choose \"ldap\" from the provider dropdown and provide a display name. Configure LDAP Settings Enter your LDAP server details, including hostname, port, and base DN. Map Attributes Map LDAP attributes to Keycloak user attributes such as username, email, and full name. Test Connection Test the connection to ensure Keycloak can communicate with your LDAP server. Example Configuration Here’s an example of configuring an LDAP identity provider using the Keycloak admin API:\ncurl -X POST \\ -H \"Content-Type: application/json\" \\ -d '{\"displayName\":\"LDAP\",\"providerId\":\"ldap\",\"enabled\":true,\"config\":{\"vendor\":[\"rhds\"],\"usernameLDAPAttribute\":[\"uid\"],\"rdnLDAPAttribute\":[\"uid\"],\"uuidLDAPAttribute\":[\"entryUUID\"],\"userObjectClasses\":[\"inetOrgPerson\"],\"connectionUrl\":[\"ldap://ldap.example.com\"],\"usersDn\":[\"ou=People,dc=example,dc=com\"],\"bindDn\":[\"cn=admin,dc=example,dc=com\"],\"bindCredential\":[\"password\"]}}' \\ http://localhost:8080/auth/admin/realms/myrealm/identity-provider/instances Common Errors ⚠️ Warning: Incorrect LDAP settings can lead to authentication failures. Connection Refused: Ensure your LDAP server is running and accessible. Invalid Credentials: Double-check the bind DN and password. Incorrect Base DN: Verify the base DN matches your LDAP structure. How do you configure an Active Directory identity provider in Keycloak? Configuring an Active Directory identity provider follows a similar process to LDAP but with AD-specific settings.\nStep-by-step Guide Create a New Identity Provider Navigate to the realm settings in Keycloak, go to the \"Identity Providers\" tab, and click \"Create.\" Select Active Directory Choose \"ad\" from the provider dropdown and provide a display name. Configure AD Settings Enter your Active Directory server details, including hostname, port, and base DN. Map Attributes Map AD attributes to Keycloak user attributes such as username, email, and full name. Test Connection Test the connection to ensure Keycloak can communicate with your Active Directory server. Example Configuration Here’s an example of configuring an Active Directory identity provider using the Keycloak admin API:\ncurl -X POST \\ -H \"Content-Type: application/json\" \\ -d '{\"displayName\":\"Active Directory\",\"providerId\":\"ad\",\"enabled\":true,\"config\":{\"vendor\":[\"ad\"],\"usernameLDAPAttribute\":[\"sAMAccountName\"],\"rdnLDAPAttribute\":[\"cn\"],\"uuidLDAPAttribute\":[\"objectGUID\"],\"userObjectClasses\":[\"person\"],\"connectionUrl\":[\"ldap://ad.example.com\"],\"usersDn\":[\"DC=example,DC=com\"],\"bindDn\":[\"CN=Administrator,CN=Users,DC=example,DC=com\"],\"bindCredential\":[\"password\"]}}' \\ http://localhost:8080/auth/admin/realms/myrealm/identity-provider/instances Common Errors ⚠️ Warning: Incorrect AD settings can lead to authentication failures. Connection Refused: Ensure your AD server is running and accessible. Invalid Credentials: Double-check the bind DN and password. Incorrect Base DN: Verify the base DN matches your AD structure. How do you enable social logins in Keycloak? Enabling social logins, such as Google, Facebook, or GitHub, allows users to authenticate using their existing accounts.\nStep-by-step Guide Create a New Identity Provider Navigate to the realm settings in Keycloak, go to the \"Identity Providers\" tab, and click \"Create.\" Select Social Login Choose the desired social provider (e.g., google, facebook, github) from the provider dropdown and provide a display name. Configure Client ID and Secret Register your application with the social provider to obtain a client ID and secret. Set Redirect URI Set the redirect URI to match the callback URL provided by Keycloak. Save Configuration Save the configuration and test the login flow. Example Configuration Here’s an example of configuring Google social login using the Keycloak admin API:\ncurl -X POST \\ -H \"Content-Type: application/json\" \\ -d '{\"displayName\":\"Google\",\"providerId\":\"google\",\"enabled\":true,\"config\":{\"clientId\":[\"GOOGLE_CLIENT_ID\"],\"clientSecret\":[\"GOOGLE_CLIENT_SECRET\"],\"defaultScope\":[\"email profile\"],\"redirectUri\":[\"http://localhost:8080/auth/realms/myrealm/broker/google/endpoint\"]}}' \\ http://localhost:8080/auth/admin/realms/myrealm/identity-provider/instances Common Errors ⚠️ Warning: Incorrect client ID or secret can lead to authentication failures. Invalid Client ID: Ensure the client ID matches the one registered with the social provider. Invalid Client Secret: Double-check the client secret. Incorrect Redirect URI: Verify the redirect URI matches the one provided by Keycloak. What are the security considerations for Keycloak Realm Federation? Ensuring the security of your Keycloak Realm Federation setup is crucial to protect user data and maintain system integrity.\nSecure Configuration 🚨 Security Alert: Always use secure connections (LDAPS, LDAPS, HTTPS) to prevent eavesdropping and man-in-the-middle attacks. Use LDAPS for LDAP: Ensure your LDAP server supports LDAPS and configure Keycloak to use it. Use HTTPS for AD: Ensure your Active Directory server supports LDAPS and configure Keycloak to use it. Use HTTPS for Social Logins: Ensure the redirect URIs use HTTPS. Manage Secrets 🚨 Security Alert: Never hard-code secrets in configuration files or source code. Store Secrets Securely: Use environment variables or a secrets manager to store sensitive information like client secrets and bind credentials. Regularly Rotate Secrets: Change secrets periodically and update configurations accordingly. Audit and Monitor 🚨 Security Alert: Regularly audit and monitor your Keycloak logs and configurations for suspicious activity. Enable Auditing: Configure Keycloak to log authentication attempts and other critical actions. Monitor Logs: Set up monitoring to alert you of unusual patterns or failed login attempts. How do you troubleshoot common issues with Keycloak Realm Federation? Troubleshooting common issues with Keycloak Realm Federation involves checking configurations, logs, and network connectivity.\nCommon Issues Authentication Failures: Check identity provider settings, network connectivity, and logs. User Attribute Mapping: Ensure attributes are correctly mapped between the identity provider and Keycloak. Permission Denied: Verify user roles and permissions in both Keycloak and the identity provider. Debugging Steps Check Configuration: Ensure all settings are correct and up-to-date. Review Logs: Examine Keycloak logs for error messages and stack traces. Test Connectivity: Use tools like telnet or ping to verify network connectivity to the identity provider. Verify Mappings: Ensure attribute mappings are accurate and complete. Example Log Analysis Here’s an example of analyzing a Keycloak log entry for an authentication failure:\nTerminal $ grep \"authentication failure\" /var/log/keycloak/server.log 2025-01-23 10:00:00,000 ERROR [org.keycloak.services] (default task-1) authentication failure: org.keycloak.models.ModelDuplicateException: User with username 'jdoe' already exists 💜 Pro Tip: Use `grep` to filter logs for specific error messages. Comparison of LDAP vs Active Directory Integration ApproachProsConsUse When LDAPFlexible, widely supportedMore complex setupGeneral-purpose directories Active DirectoryIntegrated with Windows, easy to manageWindows-specific, less flexibleWindows environments Quick Reference 📋 Quick Reference curl -X POST ... - Create an identity provider instance grep \"error\" /var/log/keycloak/server.log - Filter Keycloak logs for errors telnet ldap.example.com 389 - Test LDAP server connectivity Conclusion Implementing Keycloak Realm Federation allows you to connect multiple identity sources, streamlining user authentication and authorization. By following best practices for configuration, security, and troubleshooting, you can ensure a robust and secure identity management solution.\n🎯 Key Takeaways Configure identity providers like LDAP, Active Directory, and social logins in Keycloak. Ensure secure connections and manage secrets properly. Audit and monitor your Keycloak setup regularly. That’s it. Simple, secure, works.\n",
+  "wordCount" : "1141",
+  "inLanguage": "en",
+  "image":"https://www.iamdevbox.com/images/posts/keycloak-realm-federation--connecting-multiple-ide-445315e4.webp","datePublished": "2026-02-20T14:43:16Z",
+  "dateModified": "2026-02-26T21:20:24-05:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/keycloak-realm-federation-connecting-multiple-identity-sources/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is Keycloak Realm Federation?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Keycloak Realm Federation allows you to connect multiple identity sources within a single Keycloak realm, enabling unified authentication and authorization."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do you implement Keycloak Realm Federation?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "To implement Keycloak Realm Federation, configure identity providers such as LDAP, Active Directory, or social logins in your Keycloak realm settings."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the security considerations for Keycloak Realm Federation?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Ensure secure configuration of identity providers, manage secrets properly, and regularly audit federation settings for vulnerabilities."
+      }
+    }
+  ]
+}
+</script>
+    <meta name="description" content="Learn how to implement Keycloak Realm Federation for connecting multiple identity sources. This guide covers setup, security, and best practices with code examples."><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-realm-federation-connecting-multiple-identity-sources\/"
+  },
+  "headline": "Keycloak Realm Federation: Connecting Multiple Identity Sources",
+  "description": "Learn how to implement Keycloak Realm Federation for connecting multiple identity sources. This guide covers setup, security, and best practices with code examples.",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon-96x96.png",
+      "width": 96,
+      "height": 96
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://www.iamdevbox.com/IAMDevBox.com.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "datePublished": "2026-02-20T14:43:16Z",
+  "dateModified": "2026-02-26T21:20:24-05:00",
+  "wordCount":  1141 ,
+  "articleSection": "posts",
+  "keywords": ["keycloak realm federation","connecting identity sources","keycloak identity providers","ldap integration","active directory keycloak","social login keycloak","keycloak security","federated identity management"]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Keycloak Realm Federation: Connecting Multiple Identity Sources",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/keycloak-realm-federation-connecting-multiple-identity-sources\/"
+    }
+  ]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-token-exchange-implementing-oauth-20-token-exchange\/"
+            },
+            "headline": "Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:29:55Z",
+            "dateModified": "2026-03-01T14:30:15Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/go-secretless-with-snowflake-workload-identity-federation-snowflake\/"
+            },
+            "headline": "Go Secretless with Snowflake Workload Identity Federation - Snowflake",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:24:03Z",
+            "dateModified": "2026-03-01T14:24:20Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-algorithm-confusion-attack-cve-2026-developer-guide\/"
+            },
+            "headline": "JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-02-28T18:00:00Z",
+            "dateModified": "2026-03-01T11:21:01-05:00"
+          }
+  ]
+}
+</script>
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    const mermaidBlocks = document.querySelectorAll('.mermaid, pre code.language-mermaid, code.language-mermaid');
+    if (mermaidBlocks.length > 0) {
+        
+        mermaidBlocks.forEach(block => {
+            if (block.tagName === 'CODE') {
+                const pre = block.parentElement;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = block.textContent;
+                if (pre && pre.tagName === 'PRE') {
+                    pre.parentNode.replaceChild(div, pre);
+                } else {
+                    block.parentNode.replaceChild(div, block);
+                }
+            }
+        });
+
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+            const isDark = document.body.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#5a67d8',
+                    
+                    secondaryColor: '#48bb78',
+                    secondaryTextColor: '#ffffff',
+                    secondaryBorderColor: '#38a169',
+                    
+                    tertiaryColor: '#ed8936',
+                    tertiaryTextColor: '#ffffff',
+                    tertiaryBorderColor: '#dd6b20',
+                    
+                    lineColor: '#718096',
+                    
+                    background: isDark ? '#1a202c' : '#ffffff',
+                    mainBkg: isDark ? '#2d3748' : '#f7fafc',
+                    
+                    actorBkg: '#667eea',
+                    actorBorder: '#5a67d8',
+                    actorTextColor: '#ffffff',
+                    actorLineColor: '#718096',
+                    signalColor: '#4a5568',
+                    signalTextColor: '#2d3748',
+                    labelBoxBkgColor: '#edf2f7',
+                    labelBoxBorderColor: '#cbd5e0',
+                    labelTextColor: '#2d3748',
+                    loopTextColor: '#553c9a',
+                    noteBkgColor: '#faf089',
+                    noteTextColor: '#744210',
+                    noteBorderColor: '#d69e2e',
+                    
+                    nodeBkg: '#667eea',
+                    nodeBorder: '#5a67d8',
+                    clusterBkg: '#e2e8f0',
+                    clusterBorder: '#a0aec0',
+                    defaultLinkColor: '#718096',
+                    titleColor: '#2d3748',
+                    edgeLabelBackground: 'transparent',
+                    
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                sequence: {
+                    useMaxWidth: true,
+                    boxMargin: 10,
+                    boxTextMargin: 5,
+                    noteMargin: 10,
+                    messageMargin: 35,
+                    mirrorActors: false
+                }
+            });
+            mermaid.run().then(() => {
+                
+                document.querySelectorAll('.mermaid .node').forEach(node => {
+                    const rect = node.querySelector('rect, circle, ellipse, polygon');
+                    if (rect) {
+                        const fill = rect.getAttribute('fill') || window.getComputedStyle(rect).fill;
+                        
+                        const isDarkBg = fill && (
+                            fill.includes('667eea') || fill.includes('102, 126, 234') ||
+                            fill.includes('48bb78') || fill.includes('72, 187, 120') ||
+                            fill.includes('ed8936') || fill.includes('237, 137, 54') ||
+                            fill.includes('553c9a') || fill.includes('9f7aea') ||
+                            fill.includes('e53e3e') || fill.includes('dd6b20')
+                        );
+                        const textColor = isDarkBg ? '#ffffff' : '#1a202c';
+                        node.querySelectorAll('span, .nodeLabel, text, foreignObject div').forEach(text => {
+                            text.style.color = textColor;
+                            text.style.fill = textColor;
+                        });
+                    }
+                });
+            });
+        };
+        document.head.appendChild(script);
+    }
+
+    
+    const postContent = document.querySelector('.post-content');
+    const isSinglePost = document.querySelector('.post-single');
+    const isToolsPage = window.location.pathname.startsWith('/tools/');
+    if (postContent && isSinglePost && window.innerWidth >= 1400 && !isToolsPage) {
+        const headings = postContent.querySelectorAll('h2, h3');
+        if (headings.length >= 3) {
+            const toc = document.createElement('nav');
+            toc.className = 'floating-toc';
+            toc.innerHTML = '<h4>📑 Contents</h4><ul></ul>';
+            const tocList = toc.querySelector('ul');
+
+            headings.forEach((heading, index) => {
+                const id = heading.id || `section-${index}`;
+                heading.id = id;
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2';
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            document.body.appendChild(toc);
+
+            
+            const tocLinks = toc.querySelectorAll('a');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 150) {
+                        current = heading.id;
+                    }
+                });
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+    }
+
+    
+    if (postContent && isSinglePost && window.innerWidth >= 1200) {
+        const h2s = postContent.querySelectorAll('h2');
+        if (h2s.length >= 2) {
+            const indicator = document.createElement('div');
+            indicator.className = 'section-indicator';
+
+            h2s.forEach((h2, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'section-dot';
+                dot.title = h2.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                dot.addEventListener('click', () => {
+                    h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                indicator.appendChild(dot);
+            });
+
+            document.body.appendChild(indicator);
+
+            
+            window.addEventListener('scroll', () => {
+                const dots = indicator.querySelectorAll('.section-dot');
+                let activeIndex = 0;
+                h2s.forEach((h2, index) => {
+                    if (h2.getBoundingClientRect().top <= 200) {
+                        activeIndex = index;
+                    }
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+    }
+    });
+    </script>
+
+    
+    
+    <script>
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        function loadGA() {
+            if (window.gaLoaded) return;
+            window.gaLoaded = true;
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975';
+            document.head.appendChild(script);
+
+            script.onload = () => {
+                gtag('js', new Date());
+                gtag('config', 'G-B6QCH29975');
+            };
+        }
+
+        
+        ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+            window.addEventListener(event, loadGA, { once: true, passive: true });
+        });
+
+        
+        setTimeout(loadGA, 3000);
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+    
+    <div class="reading-progress" id="reading-progress"></div>
+    <script>
+    window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / docHeight) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+    </script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+            </div>
+        </div><button id="menu-btn" aria-label="Menu" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/categories/trending/" title="Hot IAM topics">
+                    <span>🔥Trending</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+(function() {
+    var btn = document.getElementById('menu-btn');
+    var menu = document.getElementById('menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+        });
+        
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
+</script>
+<main class="main">
+
+
+
+<div class="reading-progress" id="reading-progress"></div>
+<script>
+(function() {
+  const progressBar = document.getElementById('reading-progress');
+  const article = document.querySelector('.post-content');
+
+  if (!progressBar || !article) return;
+
+  function updateProgress() {
+    const articleTop = article.offsetTop;
+    const articleHeight = article.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+
+    
+    const start = articleTop - windowHeight;
+    const end = articleTop + articleHeight;
+    const current = scrollTop - start;
+    const total = end - start;
+
+    const progress = Math.min(Math.max((current / total) * 100, 0), 100);
+    progressBar.style.width = progress + '%';
+  }
+
+  
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  
+  updateProgress();
+})();
+</script>
+
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent" data-pagefind-meta="title">
+      Keycloak Realm Federation: Connecting Multiple Identity Sources
+    </h1>
+    <div class="post-meta"><span title='2026-02-20 14:43:16'>Feb 20, 2026</span>&nbsp;·&nbsp;6 min&nbsp;·&nbsp;1141 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+    
+      <div class="post-updated">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Updated: Feb 26, 2026
+      </div>
+  </header> 
+<figure class="entry-cover">
+        <img loading="eager" src="https://www.iamdevbox.com/images/posts/keycloak-realm-federation--connecting-multiple-ide-445315e4.webp" alt="Keycloak Realm Federation: Connecting Multiple Identity Sources">
+        
+</figure><div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#what-is-keycloak-realm-federation" aria-label="What is Keycloak Realm Federation?">What is Keycloak Realm Federation?</a></li>
+                <li>
+                    <a href="#why-use-keycloak-realm-federation" aria-label="Why use Keycloak Realm Federation?">Why use Keycloak Realm Federation?</a></li>
+                <li>
+                    <a href="#how-do-you-configure-an-ldap-identity-provider-in-keycloak" aria-label="How do you configure an LDAP identity provider in Keycloak?">How do you configure an LDAP identity provider in Keycloak?</a><ul>
+                        
+                <li>
+                    <a href="#step-by-step-guide" aria-label="Step-by-step Guide">Step-by-step Guide</a><ul>
+                        
+                <li>
+                    <a href="#" aria-label="Create a New Identity Provider">Create a New Identity Provider</a></li>
+                <li>
+                    <a href="#" aria-label="Select LDAP">Select LDAP</a></li>
+                <li>
+                    <a href="#" aria-label="Configure LDAP Settings">Configure LDAP Settings</a></li>
+                <li>
+                    <a href="#" aria-label="Map Attributes">Map Attributes</a></li>
+                <li>
+                    <a href="#" aria-label="Test Connection">Test Connection</a></li></ul>
+                </li>
+                <li>
+                    <a href="#example-configuration" aria-label="Example Configuration">Example Configuration</a></li>
+                <li>
+                    <a href="#common-errors" aria-label="Common Errors">Common Errors</a></li></ul>
+                </li>
+                <li>
+                    <a href="#how-do-you-configure-an-active-directory-identity-provider-in-keycloak" aria-label="How do you configure an Active Directory identity provider in Keycloak?">How do you configure an Active Directory identity provider in Keycloak?</a><ul>
+                        
+                <li>
+                    <a href="#step-by-step-guide-1" aria-label="Step-by-step Guide">Step-by-step Guide</a><ul>
+                        
+                <li>
+                    <a href="#" aria-label="Create a New Identity Provider">Create a New Identity Provider</a></li>
+                <li>
+                    <a href="#" aria-label="Select Active Directory">Select Active Directory</a></li>
+                <li>
+                    <a href="#" aria-label="Configure AD Settings">Configure AD Settings</a></li>
+                <li>
+                    <a href="#" aria-label="Map Attributes">Map Attributes</a></li>
+                <li>
+                    <a href="#" aria-label="Test Connection">Test Connection</a></li></ul>
+                </li>
+                <li>
+                    <a href="#example-configuration-1" aria-label="Example Configuration">Example Configuration</a></li>
+                <li>
+                    <a href="#common-errors-1" aria-label="Common Errors">Common Errors</a></li></ul>
+                </li>
+                <li>
+                    <a href="#how-do-you-enable-social-logins-in-keycloak" aria-label="How do you enable social logins in Keycloak?">How do you enable social logins in Keycloak?</a><ul>
+                        
+                <li>
+                    <a href="#step-by-step-guide-2" aria-label="Step-by-step Guide">Step-by-step Guide</a><ul>
+                        
+                <li>
+                    <a href="#" aria-label="Create a New Identity Provider">Create a New Identity Provider</a></li>
+                <li>
+                    <a href="#" aria-label="Select Social Login">Select Social Login</a></li>
+                <li>
+                    <a href="#" aria-label="Configure Client ID and Secret">Configure Client ID and Secret</a></li>
+                <li>
+                    <a href="#" aria-label="Set Redirect URI">Set Redirect URI</a></li>
+                <li>
+                    <a href="#" aria-label="Save Configuration">Save Configuration</a></li></ul>
+                </li>
+                <li>
+                    <a href="#example-configuration-2" aria-label="Example Configuration">Example Configuration</a></li>
+                <li>
+                    <a href="#common-errors-2" aria-label="Common Errors">Common Errors</a></li></ul>
+                </li>
+                <li>
+                    <a href="#what-are-the-security-considerations-for-keycloak-realm-federation" aria-label="What are the security considerations for Keycloak Realm Federation?">What are the security considerations for Keycloak Realm Federation?</a><ul>
+                        
+                <li>
+                    <a href="#secure-configuration" aria-label="Secure Configuration">Secure Configuration</a></li>
+                <li>
+                    <a href="#manage-secrets" aria-label="Manage Secrets">Manage Secrets</a></li>
+                <li>
+                    <a href="#audit-and-monitor" aria-label="Audit and Monitor">Audit and Monitor</a></li></ul>
+                </li>
+                <li>
+                    <a href="#how-do-you-troubleshoot-common-issues-with-keycloak-realm-federation" aria-label="How do you troubleshoot common issues with Keycloak Realm Federation?">How do you troubleshoot common issues with Keycloak Realm Federation?</a><ul>
+                        
+                <li>
+                    <a href="#common-issues" aria-label="Common Issues">Common Issues</a></li>
+                <li>
+                    <a href="#debugging-steps" aria-label="Debugging Steps">Debugging Steps</a></li>
+                <li>
+                    <a href="#example-log-analysis" aria-label="Example Log Analysis">Example Log Analysis</a></li></ul>
+                </li>
+                <li>
+                    <a href="#comparison-of-ldap-vs-active-directory-integration" aria-label="Comparison of LDAP vs Active Directory Integration">Comparison of LDAP vs Active Directory Integration</a></li>
+                <li>
+                    <a href="#quick-reference" aria-label="Quick Reference">Quick Reference</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#" aria-label="📋 Quick Reference">📋 Quick Reference</a></li></ul>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#conclusion" aria-label="Conclusion">Conclusion</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a>
+                </li>
+            </ul>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content" data-pagefind-body><p>Keycloak Realm Federation allows you to connect multiple identity sources within a single Keycloak realm, enabling unified authentication and authorization. This means you can manage users and their access across different directories and systems through a single interface, simplifying identity management and enhancing security.</p>
+<h2 id="what-is-keycloak-realm-federation">What is Keycloak Realm Federation?<a hidden class="anchor" aria-hidden="true" href="#what-is-keycloak-realm-federation">#</a></h2>
+<p>Keycloak Realm Federation lets you integrate various identity sources, such as LDAP, Active Directory, and social logins, into a single Keycloak realm. This integration enables seamless user authentication and authorization across different systems without duplicating user data.</p>
+<h2 id="why-use-keycloak-realm-federation">Why use Keycloak Realm Federation?<a hidden class="anchor" aria-hidden="true" href="#why-use-keycloak-realm-federation">#</a></h2>
+<p>Using Keycloak Realm Federation streamlines identity management by centralizing user authentication and authorization. It reduces administrative overhead, improves security, and enhances user experience by allowing users to authenticate using familiar identity providers.</p>
+<h2 id="how-do-you-configure-an-ldap-identity-provider-in-keycloak">How do you configure an LDAP identity provider in Keycloak?<a hidden class="anchor" aria-hidden="true" href="#how-do-you-configure-an-ldap-identity-provider-in-keycloak">#</a></h2>
+<p>Configuring an LDAP identity provider involves setting up the connection to your LDAP server and mapping LDAP attributes to Keycloak user attributes.</p>
+<h3 id="step-by-step-guide">Step-by-step Guide<a hidden class="anchor" aria-hidden="true" href="#step-by-step-guide">#</a></h3>
+<div class="step-guide">
+<div class="step-item"><div class="step-content">
+<h4>Create a New Identity Provider</h4>
+Navigate to the realm settings in Keycloak, go to the "Identity Providers" tab, and click "Create."
+</div></div>
+<div class="step-item"><div class="step-content">
+<h4>Select LDAP</h4>
+Choose "ldap" from the provider dropdown and provide a display name.
+</div></div>
+<div class="step-item"><div class="step-content">
+<h4>Configure LDAP Settings</h4>
+Enter your LDAP server details, including hostname, port, and base DN.
+</div></div>
+<div class="step-item"><div class="step-content">
+<h4>Map Attributes</h4>
+Map LDAP attributes to Keycloak user attributes such as username, email, and full name.
+</div></div>
+<div class="step-item"><div class="step-content">
+<h4>Test Connection</h4>
+Test the connection to ensure Keycloak can communicate with your LDAP server.
+</div></div>
+</div>
+<h3 id="example-configuration">Example Configuration<a hidden class="anchor" aria-hidden="true" href="#example-configuration">#</a></h3>
+<p>Here’s an example of configuring an LDAP identity provider using the Keycloak admin API:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -X POST <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -d <span style="color:#e6db74">&#39;{&#34;displayName&#34;:&#34;LDAP&#34;,&#34;providerId&#34;:&#34;ldap&#34;,&#34;enabled&#34;:true,&#34;config&#34;:{&#34;vendor&#34;:[&#34;rhds&#34;],&#34;usernameLDAPAttribute&#34;:[&#34;uid&#34;],&#34;rdnLDAPAttribute&#34;:[&#34;uid&#34;],&#34;uuidLDAPAttribute&#34;:[&#34;entryUUID&#34;],&#34;userObjectClasses&#34;:[&#34;inetOrgPerson&#34;],&#34;connectionUrl&#34;:[&#34;ldap://ldap.example.com&#34;],&#34;usersDn&#34;:[&#34;ou=People,dc=example,dc=com&#34;],&#34;bindDn&#34;:[&#34;cn=admin,dc=example,dc=com&#34;],&#34;bindCredential&#34;:[&#34;password&#34;]}}&#39;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  http://localhost:8080/auth/admin/realms/myrealm/identity-provider/instances
+</span></span></code></pre></div><h3 id="common-errors">Common Errors<a hidden class="anchor" aria-hidden="true" href="#common-errors">#</a></h3>
+<div class="notice warning">⚠️ <strong>Warning:</strong> Incorrect LDAP settings can lead to authentication failures.</div>
+<ul>
+<li><strong>Connection Refused</strong>: Ensure your LDAP server is running and accessible.</li>
+<li><strong>Invalid Credentials</strong>: Double-check the bind DN and password.</li>
+<li><strong>Incorrect Base DN</strong>: Verify the base DN matches your LDAP structure.</li>
+</ul>
+<h2 id="how-do-you-configure-an-active-directory-identity-provider-in-keycloak">How do you configure an Active Directory identity provider in Keycloak?<a hidden class="anchor" aria-hidden="true" href="#how-do-you-configure-an-active-directory-identity-provider-in-keycloak">#</a></h2>
+<p>Configuring an Active Directory identity provider follows a similar process to LDAP but with AD-specific settings.</p>
+<h3 id="step-by-step-guide-1">Step-by-step Guide<a hidden class="anchor" aria-hidden="true" href="#step-by-step-guide-1">#</a></h3>
+<div class="step-guide">
+<div class="step-item"><div class="step-content">
+<h4>Create a New Identity Provider</h4>
+Navigate to the realm settings in Keycloak, go to the "Identity Providers" tab, and click "Create."
+</div></div>
+<div class="step-item"><div class="step-content">
+<h4>Select Active Directory</h4>
+Choose "ad" from the provider dropdown and provide a display name.
+</div></div>
+<div class="step-item"><div class="step-content">
+<h4>Configure AD Settings</h4>
+Enter your Active Directory server details, including hostname, port, and base DN.
+</div></div>
+<div class="step-item"><div class="step-content">
+<h4>Map Attributes</h4>
+Map AD attributes to Keycloak user attributes such as username, email, and full name.
+</div></div>
+<div class="step-item"><div class="step-content">
+<h4>Test Connection</h4>
+Test the connection to ensure Keycloak can communicate with your Active Directory server.
+</div></div>
+</div>
+<h3 id="example-configuration-1">Example Configuration<a hidden class="anchor" aria-hidden="true" href="#example-configuration-1">#</a></h3>
+<p>Here’s an example of configuring an Active Directory identity provider using the Keycloak admin API:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -X POST <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -d <span style="color:#e6db74">&#39;{&#34;displayName&#34;:&#34;Active Directory&#34;,&#34;providerId&#34;:&#34;ad&#34;,&#34;enabled&#34;:true,&#34;config&#34;:{&#34;vendor&#34;:[&#34;ad&#34;],&#34;usernameLDAPAttribute&#34;:[&#34;sAMAccountName&#34;],&#34;rdnLDAPAttribute&#34;:[&#34;cn&#34;],&#34;uuidLDAPAttribute&#34;:[&#34;objectGUID&#34;],&#34;userObjectClasses&#34;:[&#34;person&#34;],&#34;connectionUrl&#34;:[&#34;ldap://ad.example.com&#34;],&#34;usersDn&#34;:[&#34;DC=example,DC=com&#34;],&#34;bindDn&#34;:[&#34;CN=Administrator,CN=Users,DC=example,DC=com&#34;],&#34;bindCredential&#34;:[&#34;password&#34;]}}&#39;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  http://localhost:8080/auth/admin/realms/myrealm/identity-provider/instances
+</span></span></code></pre></div><h3 id="common-errors-1">Common Errors<a hidden class="anchor" aria-hidden="true" href="#common-errors-1">#</a></h3>
+<div class="notice warning">⚠️ <strong>Warning:</strong> Incorrect AD settings can lead to authentication failures.</div>
+<ul>
+<li><strong>Connection Refused</strong>: Ensure your AD server is running and accessible.</li>
+<li><strong>Invalid Credentials</strong>: Double-check the bind DN and password.</li>
+<li><strong>Incorrect Base DN</strong>: Verify the base DN matches your AD structure.</li>
+</ul>
+<h2 id="how-do-you-enable-social-logins-in-keycloak">How do you enable social logins in Keycloak?<a hidden class="anchor" aria-hidden="true" href="#how-do-you-enable-social-logins-in-keycloak">#</a></h2>
+<p>Enabling social logins, such as Google, Facebook, or GitHub, allows users to authenticate using their existing accounts.</p>
+<h3 id="step-by-step-guide-2">Step-by-step Guide<a hidden class="anchor" aria-hidden="true" href="#step-by-step-guide-2">#</a></h3>
+<div class="step-guide">
+<div class="step-item"><div class="step-content">
+<h4>Create a New Identity Provider</h4>
+Navigate to the realm settings in Keycloak, go to the "Identity Providers" tab, and click "Create."
+</div></div>
+<div class="step-item"><div class="step-content">
+<h4>Select Social Login</h4>
+Choose the desired social provider (e.g., google, facebook, github) from the provider dropdown and provide a display name.
+</div></div>
+<div class="step-item"><div class="step-content">
+<h4>Configure Client ID and Secret</h4>
+Register your application with the social provider to obtain a client ID and secret.
+</div></div>
+<div class="step-item"><div class="step-content">
+<h4>Set Redirect URI</h4>
+Set the redirect URI to match the callback URL provided by Keycloak.
+</div></div>
+<div class="step-item"><div class="step-content">
+<h4>Save Configuration</h4>
+Save the configuration and test the login flow.
+</div></div>
+</div>
+<h3 id="example-configuration-2">Example Configuration<a hidden class="anchor" aria-hidden="true" href="#example-configuration-2">#</a></h3>
+<p>Here’s an example of configuring Google social login using the Keycloak admin API:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -X POST <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -d <span style="color:#e6db74">&#39;{&#34;displayName&#34;:&#34;Google&#34;,&#34;providerId&#34;:&#34;google&#34;,&#34;enabled&#34;:true,&#34;config&#34;:{&#34;clientId&#34;:[&#34;GOOGLE_CLIENT_ID&#34;],&#34;clientSecret&#34;:[&#34;GOOGLE_CLIENT_SECRET&#34;],&#34;defaultScope&#34;:[&#34;email profile&#34;],&#34;redirectUri&#34;:[&#34;http://localhost:8080/auth/realms/myrealm/broker/google/endpoint&#34;]}}&#39;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  http://localhost:8080/auth/admin/realms/myrealm/identity-provider/instances
+</span></span></code></pre></div><h3 id="common-errors-2">Common Errors<a hidden class="anchor" aria-hidden="true" href="#common-errors-2">#</a></h3>
+<div class="notice warning">⚠️ <strong>Warning:</strong> Incorrect client ID or secret can lead to authentication failures.</div>
+<ul>
+<li><strong>Invalid Client ID</strong>: Ensure the client ID matches the one registered with the social provider.</li>
+<li><strong>Invalid Client Secret</strong>: Double-check the client secret.</li>
+<li><strong>Incorrect Redirect URI</strong>: Verify the redirect URI matches the one provided by Keycloak.</li>
+</ul>
+<h2 id="what-are-the-security-considerations-for-keycloak-realm-federation">What are the security considerations for Keycloak Realm Federation?<a hidden class="anchor" aria-hidden="true" href="#what-are-the-security-considerations-for-keycloak-realm-federation">#</a></h2>
+<p>Ensuring the security of your Keycloak Realm Federation setup is crucial to protect user data and maintain system integrity.</p>
+<h3 id="secure-configuration">Secure Configuration<a hidden class="anchor" aria-hidden="true" href="#secure-configuration">#</a></h3>
+<div class="notice danger">🚨 <strong>Security Alert:</strong> Always use secure connections (LDAPS, LDAPS, HTTPS) to prevent eavesdropping and man-in-the-middle attacks.</div>
+<ul>
+<li><strong>Use LDAPS for LDAP</strong>: Ensure your LDAP server supports LDAPS and configure Keycloak to use it.</li>
+<li><strong>Use HTTPS for AD</strong>: Ensure your Active Directory server supports LDAPS and configure Keycloak to use it.</li>
+<li><strong>Use HTTPS for Social Logins</strong>: Ensure the redirect URIs use HTTPS.</li>
+</ul>
+<h3 id="manage-secrets">Manage Secrets<a hidden class="anchor" aria-hidden="true" href="#manage-secrets">#</a></h3>
+<div class="notice danger">🚨 <strong>Security Alert:</strong> Never hard-code secrets in configuration files or source code.</div>
+<ul>
+<li><strong>Store Secrets Securely</strong>: Use environment variables or a secrets manager to store sensitive information like client secrets and bind credentials.</li>
+<li><strong>Regularly Rotate Secrets</strong>: Change secrets periodically and update configurations accordingly.</li>
+</ul>
+<h3 id="audit-and-monitor">Audit and Monitor<a hidden class="anchor" aria-hidden="true" href="#audit-and-monitor">#</a></h3>
+<div class="notice danger">🚨 <strong>Security Alert:</strong> Regularly audit and monitor your Keycloak logs and configurations for suspicious activity.</div>
+<ul>
+<li><strong>Enable Auditing</strong>: Configure Keycloak to log authentication attempts and other critical actions.</li>
+<li><strong>Monitor Logs</strong>: Set up monitoring to alert you of unusual patterns or failed login attempts.</li>
+</ul>
+<h2 id="how-do-you-troubleshoot-common-issues-with-keycloak-realm-federation">How do you troubleshoot common issues with Keycloak Realm Federation?<a hidden class="anchor" aria-hidden="true" href="#how-do-you-troubleshoot-common-issues-with-keycloak-realm-federation">#</a></h2>
+<p>Troubleshooting common issues with Keycloak Realm Federation involves checking configurations, logs, and network connectivity.</p>
+<h3 id="common-issues">Common Issues<a hidden class="anchor" aria-hidden="true" href="#common-issues">#</a></h3>
+<ul>
+<li><strong>Authentication Failures</strong>: Check identity provider settings, network connectivity, and logs.</li>
+<li><strong>User Attribute Mapping</strong>: Ensure attributes are correctly mapped between the identity provider and Keycloak.</li>
+<li><strong>Permission Denied</strong>: Verify user roles and permissions in both Keycloak and the identity provider.</li>
+</ul>
+<h3 id="debugging-steps">Debugging Steps<a hidden class="anchor" aria-hidden="true" href="#debugging-steps">#</a></h3>
+<ol>
+<li><strong>Check Configuration</strong>: Ensure all settings are correct and up-to-date.</li>
+<li><strong>Review Logs</strong>: Examine Keycloak logs for error messages and stack traces.</li>
+<li><strong>Test Connectivity</strong>: Use tools like <code>telnet</code> or <code>ping</code> to verify network connectivity to the identity provider.</li>
+<li><strong>Verify Mappings</strong>: Ensure attribute mappings are accurate and complete.</li>
+</ol>
+<h3 id="example-log-analysis">Example Log Analysis<a hidden class="anchor" aria-hidden="true" href="#example-log-analysis">#</a></h3>
+<p>Here’s an example of analyzing a Keycloak log entry for an authentication failure:</p>
+<div class="terminal">
+<div class="terminal-header">
+<span class="terminal-dot red"></span>
+<span class="terminal-dot yellow"></span>
+<span class="terminal-dot green"></span>
+<span class="terminal-title">Terminal</span>
+</div>
+<div class="terminal-body">
+<span class="prompt">$</span> grep "authentication failure" /var/log/keycloak/server.log
+<span class="output">2025-01-23 10:00:00,000 ERROR [org.keycloak.services] (default task-1) authentication failure: org.keycloak.models.ModelDuplicateException: User with username 'jdoe' already exists</span>
+</div>
+</div>
+<div class="notice tip">💜 <strong>Pro Tip:</strong> Use `grep` to filter logs for specific error messages.</div>
+<h2 id="comparison-of-ldap-vs-active-directory-integration">Comparison of LDAP vs Active Directory Integration<a hidden class="anchor" aria-hidden="true" href="#comparison-of-ldap-vs-active-directory-integration">#</a></h2>
+<table class="comparison-table">
+<thead><tr><th>Approach</th><th>Pros</th><th>Cons</th><th>Use When</th></tr></thead>
+<tbody>
+<tr><td>LDAP</td><td>Flexible, widely supported</td><td>More complex setup</td><td>General-purpose directories</td></tr>
+<tr><td>Active Directory</td><td>Integrated with Windows, easy to manage</td><td>Windows-specific, less flexible</td><td>Windows environments</td></tr>
+</tbody>
+</table>
+<h2 id="quick-reference">Quick Reference<a hidden class="anchor" aria-hidden="true" href="#quick-reference">#</a></h2>
+<div class="quick-ref">
+<h4>📋 Quick Reference</h4>
+<ul>
+<li><code>curl -X POST ...</code> - Create an identity provider instance</li>
+<li><code>grep &quot;error&quot; /var/log/keycloak/server.log</code> - Filter Keycloak logs for errors</li>
+<li><code>telnet ldap.example.com 389</code> - Test LDAP server connectivity</li>
+</ul>
+</div>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>Implementing Keycloak Realm Federation allows you to connect multiple identity sources, streamlining user authentication and authorization. By following best practices for configuration, security, and troubleshooting, you can ensure a robust and secure identity management solution.</p>
+<div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>Configure identity providers like LDAP, Active Directory, and social logins in Keycloak.</li>
+<li>Ensure secure connections and manage secrets properly.</li>
+<li>Audit and monitor your Keycloak setup regularly.</li>
+</ul>
+</div>
+<p>That&rsquo;s it. Simple, secure, works.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/keycloak/">Keycloak</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/identity-federation/">Identity Federation</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/iam/">Iam</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/security/">Security</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/identity-sources/">Identity-Sources</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/mcp-oauth-21-authentication-how-ai-agents-securely-connect-to-tools/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>MCP OAuth 2.1 Authentication: How AI Agents Securely Connect to Tools</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/dshield-sensor-detects-credential-stuffing-attack-with-self-propagating-ssh-worm/">
+    <span class="title">Next »</span>
+    <br>
+    <span>DShield Sensor Detects Credential Stuffing Attack with Self-Propagating SSH Worm</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+
+<section class="post-feedback">
+  <p class="feedback-question">Was this article helpful?</p>
+  <div class="feedback-buttons">
+    <button class="feedback-btn feedback-yes" onclick="trackFeedback('yes', '\/posts\/keycloak-realm-federation-connecting-multiple-identity-sources\/')" aria-label="Yes, helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      Yes
+    </button>
+    <button class="feedback-btn feedback-no" onclick="trackFeedback('no', '\/posts\/keycloak-realm-federation-connecting-multiple-identity-sources\/')" aria-label="No, not helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>
+      No
+    </button>
+  </div>
+  <p class="feedback-thanks" style="display: none;">Thanks for your feedback!</p>
+</section>
+
+
+<section class="author-bio">
+  <div class="author-avatar">
+    <img src="/IAMDevBox.com.jpg" alt="IAMDevBox Author" width="64" height="64" loading="lazy">
+  </div>
+  <div class="author-info">
+    <h4>Written by IAMDevBox</h4>
+    <p>Enterprise IAM architect with 15+ years in identity modernization. Certified across ForgeRock, Ping Identity, SailPoint, AWS, and Azure.</p>
+    <div class="author-links">
+      <a href="https://twitter.com/iamdevbox" target="_blank" rel="noopener" title="Follow on X/Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/iamdevbox" target="_blank" rel="noopener" title="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="/contact/" title="Contact">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function trackFeedback(value, page) {
+  
+  document.querySelector('.feedback-buttons').style.display = 'none';
+  document.querySelector('.feedback-question').style.display = 'none';
+  document.querySelector('.feedback-thanks').style.display = 'block';
+
+  
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'post_feedback', {
+      'feedback_value': value,
+      'page_path': page
+    });
+  }
+
+  
+  localStorage.setItem('feedback_' + page, value);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const page = '\/posts\/keycloak-realm-federation-connecting-multiple-identity-sources\/';
+  if (localStorage.getItem('feedback_' + page)) {
+    document.querySelector('.feedback-buttons').style.display = 'none';
+    document.querySelector('.feedback-question').textContent = 'Thanks for your feedback!';
+  }
+});
+</script>
+
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+              Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+            </a>
+            <small class="custom-date">2026-03-01</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+              JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+            </a>
+            <small class="custom-date">2026-02-28</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/digital-identity-provider-v-key-secures-strategic-investment/" class="custom-link">
+              Digital Identity Provider V-Key Secures Strategic Investment
+            </a>
+            <small class="custom-date">2026-02-24</small>
+          </li>
+          
+        
+      
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/dshield-sensor-detects-credential-stuffing-attack-with-self-propagating-ssh-worm/" class="custom-link">
+              DShield Sensor Detects Credential Stuffing Attack with Self-Propagating SSH Worm
+            </a>
+            <small class="custom-date">2026-02-20</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/military-cyber-leaders-accelerate-zero-trust-modernization-efforts-meritalk/" class="custom-link">
+              Military Cyber Leaders Accelerate Zero Trust, Modernization Efforts - MeriTalk
+            </a>
+            <small class="custom-date">2026-02-14</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+                Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+                Go Secretless with Snowflake Workload Identity Federation - Snowflake
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+                JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+                OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+                Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

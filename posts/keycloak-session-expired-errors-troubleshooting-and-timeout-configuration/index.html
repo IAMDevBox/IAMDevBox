@@ -1,0 +1,3203 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Keycloak Session Expired Errors: Troubleshooting and Timeout Configuration | IAMDevBox</title>
+<meta name="keywords" content="keycloak session expired, keycloak sso session idle, keycloak session timeout configuration, keycloak session not active error, keycloak token is not active, keycloak session doesn&#39;t have required client, keycloak offline session configuration, keycloak infinispan session cache, keycloak client session idle, keycloak refresh token session expired">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/keycloak-session-expired-errors-troubleshooting-and-timeout-configuration/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.e24ea479df3e367781fafa20cedde21c7e043c10bed4c8c913ef9261a049a1e2.css" integrity="sha256-4k6ked8&#43;NneB&#43;vogzt3iHH4EPBC&#43;1MjJE&#43;&#43;SYaBJoeI=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/keycloak-session-expired-errors-troubleshooting-and-timeout-configuration/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/keycloak-session-expired-errors-troubleshooting-and-timeout-configuration/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Keycloak Session Expired Errors: Troubleshooting and Timeout Configuration">
+  <meta property="og:description" content="Fix Keycloak session expired errors including Session not active, Token is not active, and Session doesn&#39;t have required client. Complete guide to SSO session idle, session max, offline sessions, Infinispan cache, and per-client timeout configuration.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-02-21T18:00:00+00:00">
+    <meta property="article:modified_time" content="2026-02-26T21:20:24-05:00">
+    <meta property="article:tag" content="Keycloak">
+    <meta property="article:tag" content="Troubleshooting">
+    <meta property="article:tag" content="OAuth 2.0">
+    <meta property="article:tag" content="Identity Management">
+    <meta property="article:tag" content="Session Management">
+      <meta property="og:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:title" content="Keycloak Session Expired Errors: Troubleshooting and Timeout Configuration">
+<meta name="twitter:description" content="Fix Keycloak session expired errors including Session not active, Token is not active, and Session doesn&#39;t have required client. Complete guide to SSO session idle, session max, offline sessions, Infinispan cache, and per-client timeout configuration.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Keycloak Session Expired Errors: Troubleshooting and Timeout Configuration",
+      "item": "https://www.iamdevbox.com/posts/keycloak-session-expired-errors-troubleshooting-and-timeout-configuration/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Keycloak Session Expired Errors: Troubleshooting and Timeout Configuration",
+  "name": "Keycloak Session Expired Errors: Troubleshooting and Timeout Configuration",
+  "description": "Fix Keycloak session expired errors including Session not active, Token is not active, and Session doesn't have required client. Complete guide to SSO session idle, session max, offline sessions, Infinispan cache, and per-client timeout configuration.",
+  "keywords": [
+    "keycloak session expired", "keycloak sso session idle", "keycloak session timeout configuration", "keycloak session not active error", "keycloak token is not active", "keycloak session doesn't have required client", "keycloak offline session configuration", "keycloak infinispan session cache", "keycloak client session idle", "keycloak refresh token session expired"
+  ],
+  "articleBody": "Keycloak session errors are the most common source of unexpected logouts. Your application works perfectly in development, then users report being logged out randomly in production. The token refresh returns invalid_grant with a cryptic error_description like “Session not active” — and the Keycloak admin console shows no obvious misconfiguration.\nThis guide explains every Keycloak session type, how their timeouts interact, and how to fix each session error.\nQuick Diagnostic: Which Error Are You Seeing? error_description Jump To Session not active SSO Session Expired Token is not active Refresh Token Expired Session doesn't have required client Cache Eviction Offline session not active Offline Session Expired Client session not active Client Session Expired authentication_expired in redirect URL Authentication Session Timeout All of these appear as invalid_grant in the OAuth error response:\n{ \"error\": \"invalid_grant\", \"error_description\": \"Session not active\" } For a complete guide to all invalid_grant causes across Keycloak, Auth0, Okta, Azure AD, and Google, see the OAuth invalid_grant Troubleshooting Guide.\nUnderstanding Keycloak Session Types Keycloak has four session types, each with its own timeout. Understanding the hierarchy is critical to debugging session errors.\nSession Hierarchy SSO Session (User Session) ← Realm-wide, one per user login ├── Client Session (app-frontend) ← One per application accessed ├── Client Session (app-backend) ← Independent timeout per client └── Client Session (app-mobile) ← Expires independently Key rule: When the SSO session expires, ALL client sessions under it expire immediately — regardless of their individual timeout settings.\nAll Session Types and Defaults Session Type Idle Default Max Default Scope SSO Session 30 minutes 10 hours Realm-wide Client Session Inherits SSO Inherits SSO Per-client override available Offline Session 30 days Unlimited (unless limited) Per-client override available Authentication Session 5 min (action) / 30 min (total) N/A Temporary, during login only Remember Me Session Inherits SSO (unless overridden) Inherits SSO (unless overridden) Realm-wide Where to Configure Each Timeout Realm-wide: Admin Console → Realm Settings → Sessions tab\nSetting Description SSO Session Idle Inactivity timeout before session expires SSO Session Max Absolute maximum session duration Client Session Idle Default idle timeout for all clients Client Session Max Default max timeout for all clients Offline Session Idle Idle timeout for offline sessions Offline Session Max Limited Toggle to enable absolute offline max Offline Session Max Absolute max for offline sessions (when toggle is ON) Login Timeout Total time to complete login flow Login Action Timeout Time for a single login action Per-client override: Clients → [client] → Advanced → Advanced Settings\nSetting Description Client Session Idle Override realm default for this client Client Session Max Override realm default for this client Client Offline Session Idle Override realm offline idle Client Offline Session Max Override realm offline max Access Token Lifespan Override realm access token lifespan Timeout Interaction Rules This is the most misunderstood aspect of Keycloak session management. Timeouts follow a strict hierarchy:\nSSO Session Max (absolute ceiling, default 10h) └── SSO Session Idle (inactivity timeout, default 30m) └── Client Session Max (per-client ceiling, must be ≤ SSO Session Max) └── Client Session Idle (per-client inactivity, must be ≤ SSO Session Idle) └── Access Token Lifespan (must be ≤ Client Session Idle) Rules:\nSSO Session Max is the hard ceiling. No amount of refresh activity extends a session beyond this. Refreshing a token resets the SSO Session Idle timer. This is a sliding window. Client timeouts must be ≤ realm timeouts. Keycloak 26.5+ rejects configurations that violate this; older versions silently ignore the client override. Keycloak adds a ~2-minute buffer to configured idle timeouts (e.g., 30 minutes configured ≈ 32 minutes actual). When the SSO session expires, ALL client sessions expire immediately, even if the client session itself hasn’t timed out. Practical Example Realm: SSO Session Idle = 30 min, SSO Session Max = 10 hours Client: Client Session Idle = 15 min, Client Session Max = 2 hours Token: Access Token Lifespan = 5 min Timeline: 0:00 - User logs in → SSO session + client session created 0:05 - Access token expires → app refreshes → SSO idle resets to 30 min 0:15 - No activity on this client → CLIENT session expires (15 min idle) 0:15 - User clicks button → refresh fails: \"Client session not active\" 0:15 - But SSO session is still valid → user re-authenticates instantly (no login page) 2:00 - Client Session Max reached → client must re-auth 10:00 - SSO Session Max → full re-authentication required SSO Session Expired Error: “Session not active” ERROR [org.keycloak.protocol.oidc] REFRESH_TOKEN_ERROR error_description: Session not active The SSO session expired because the user was inactive longer than SSO Session Idle (default 30 minutes) or the SSO Session Max (default 10 hours) was reached.\nFix: Increase SSO Session Idle or ensure your application refreshes tokens before the idle timeout:\nAdmin Console → Realm Settings → Sessions tab: SSO Session Idle: 30 minutes → 60 minutes (or higher based on use case) SSO Session Max: 10 hours → 24 hours For SPAs: Schedule token refresh at (SSO Session Idle - buffer) intervals. If idle is 30 minutes, refresh every 25 minutes:\n// Refresh before session idle timeout const REFRESH_INTERVAL = (SSO_SESSION_IDLE_SECONDS - 300) * 1000; // 5 min buffer setInterval(() =\u003e { keycloak.updateToken(60) // Refresh if token expires within 60 seconds .catch(() =\u003e keycloak.login()); // Session expired, force re-login }, REFRESH_INTERVAL); Refresh Token Expired Error: “Token is not active” ERROR [org.keycloak.protocol.oidc] REFRESH_TOKEN_ERROR error_description: Token is not active The refresh token itself has expired or been revoked. This happens when:\nThe session idle timeout expired between the last refresh and the current attempt An admin revoked the user’s sessions The user changed their password (invalidates all tokens) Refresh Token Max Reuse is set to 0 and the same refresh token was used twice Verify token status via Admin REST API:\n# Get admin token ACCESS_TOKEN=$(curl -s -X POST \\ \"https://keycloak.example.com/realms/master/protocol/openid-connect/token\" \\ -d \"client_id=admin-cli\u0026username=admin\u0026password=admin\u0026grant_type=password\" \\ | jq -r '.access_token') # List user's sessions curl -s \\ \"https://keycloak.example.com/admin/realms/myrealm/users/{userId}/sessions\" \\ -H \"Authorization: Bearer $ACCESS_TOKEN\" | jq . If the response is empty, the session has expired or been terminated.\nClient Session Timeout Error: “Client session not active” This error occurs when a per-client session timeout is configured and it expires before the SSO session. The user’s SSO session is still valid, but the specific client’s session has ended.\nHow to identify: The user can access other applications without re-login, but one specific application forces re-authentication.\nFix: Check per-client overrides at Clients → [client] → Advanced → Advanced Settings. Either increase Client Session Idle or remove the override to inherit realm defaults.\nInfinispan Cache Eviction Error: “Session doesn’t have required client” ERROR [org.keycloak.protocol.oidc] REFRESH_TOKEN_ERROR error_description: Session doesn't have required client This is the most confusing session error because the user session is valid but the client session is missing. The sessions cache and clientSessions cache are evicted independently.\nCause: The Infinispan cache reached its per-node limit (default 10,000 entries in Keycloak 26+), and the client session was evicted.\nKeycloak 26+ (persistent sessions enabled by default): Evicted sessions are loaded from the database on demand. This error should be rare unless the database is unreachable.\nKeycloak 25 and earlier (volatile sessions): Evicted sessions are permanently lost. This error is common in high-traffic environments.\nFix for Keycloak 26+:\n# Increase cache size bin/kc.sh start \\ --cache-embedded-sessions-max-count=20000 \\ --cache-embedded-client-sessions-max-count=20000 Fix for Keycloak 25 and earlier:\n# Enable persistent sessions (preview feature in KC 25) bin/kc.sh start --features=persistent-user-sessions # Or increase cache size in conf/cache-ispn.xml Offline Session Expired Error: “Offline session not active” Offline sessions (created with offline_access scope) have much longer timeouts but still expire.\nDefault behavior:\nOffline Session Idle: 30 days — token must be refreshed within 30 days Offline Session Max Limited: OFF — no absolute limit by default With Offline Session Max Limited = ON:\nOffline Session Max: 60 days — absolute limit regardless of activity Known issue (Keycloak 22-23): When “Offline Session Max Limited” is enabled, the token’s exp claim is based on Offline Session Idle rather than Offline Session Max, causing tokens to expire sooner than expected.\nFix: Increase Offline Session Idle or ensure your background processes refresh offline tokens within the idle period.\nAuthentication Session Timeout Error: “authentication_expired” in redirect URL https://your-app.com/callback?error=temporarily_unavailable\u0026error_description=authentication_expired The user’s login page sat idle too long. The authentication session expired before they completed the login flow.\nSettings:\nLogin Timeout (default 30 minutes): Total time to complete the login flow Login Action Timeout (default 5 minutes): Time for a single login step Fix for slow login flows (MFA, email verification): Increase Login Action Timeout to 10-15 minutes.\nSPA handling: When your SPA receives authentication_expired, retry the authentication request immediately. If the user has an active SSO session, re-authentication succeeds without a login prompt.\nRemember Me Sessions When “Remember Me” is enabled (Realm Settings → Login tab), users who check the checkbox get persistent cookies that survive browser close.\nSeparate timeouts (optional):\nSetting Effect Remember Me SSO Session Idle Overrides SSO Session Idle for remember-me sessions (0 = use default) Remember Me SSO Session Max Overrides SSO Session Max for remember-me sessions (0 = use default) Common configuration: Set SSO Session Idle to 30 minutes for regular users, but Remember Me SSO Session Idle to 7 days for users who check “Remember Me”.\nDocker and Kubernetes Session Issues Sticky Sessions Required Keycloak uses the AUTH_SESSION_ID cookie for session affinity. Without sticky sessions configured on your load balancer, authentication requests may hit different Keycloak nodes, causing intermittent session errors.\nNginx Ingress:\nannotations: nginx.ingress.kubernetes.io/affinity: \"cookie\" nginx.ingress.kubernetes.io/session-cookie-name: \"AUTH_SESSION_ID\" Sessions Lost After Pod Restart Keycloak 26+: Persistent sessions are enabled by default. Sessions survive pod restarts because they’re stored in the database.\nKeycloak 25 and earlier: Sessions are stored only in Infinispan memory. Pod restarts lose all sessions. Fix: enable persistent-user-sessions feature or use an external Infinispan cluster.\nCommon Kubernetes Session Issues Issue Cause Fix Random logouts in cluster No sticky sessions Configure load balancer affinity on AUTH_SESSION_ID All sessions lost on restart Volatile sessions (KC \u003c 26) Upgrade to KC 26+ or enable persistent-user-sessions “Session doesn’t have required client” Cache eviction under load Increase --cache-embedded-client-sessions-max-count Slow authentication in cluster Requests hitting non-owner nodes Enable sticky sessions Debug Logging Enable Session-Specific Logging # Keycloak 22+ (Quarkus) bin/kc.sh start --log-level=\"INFO,org.keycloak.protocol.oidc:TRACE,org.keycloak.models.sessions:DEBUG\" # Docker docker run \\ -e KC_LOG_LEVEL=\"INFO,org.keycloak.protocol.oidc:TRACE,org.keycloak.models.sessions:DEBUG\" \\ quay.io/keycloak/keycloak:latest start Check Events via Admin API # Get recent session errors curl -s \\ \"https://keycloak.example.com/admin/realms/myrealm/events?type=REFRESH_TOKEN_ERROR\u0026max=50\" \\ -H \"Authorization: Bearer $ACCESS_TOKEN\" | jq . # Force logout a specific session curl -s -X DELETE \\ \"https://keycloak.example.com/admin/realms/myrealm/sessions/{sessionId}\" \\ -H \"Authorization: Bearer $ACCESS_TOKEN\" Event Types for Session Debugging Event Meaning LOGIN New user session created LOGOUT Session terminated by user CODE_TO_TOKEN Authorization code exchanged successfully CODE_TO_TOKEN_ERROR Code exchange failed (expired code, PKCE mismatch) REFRESH_TOKEN Token refreshed, session idle timer reset REFRESH_TOKEN_ERROR Refresh failed — session expired or revoked USER_SESSION_DELETED Session removed by admin or timeout Enable event logging: Admin Console → Realm Settings → Events → User events settings → Save events = ON.\nRecommended Timeout Configurations Enterprise (High Security) SSO Session Idle: 15 minutes SSO Session Max: 8 hours Client Session Idle: 15 minutes Access Token Lifespan: 1 minute Refresh Token Max Reuse: 0 Consumer Application SSO Session Idle: 7 days SSO Session Max: 30 days Remember Me SSO Session Idle: 30 days Remember Me SSO Session Max: 90 days Access Token Lifespan: 15 minutes Mobile / Offline SSO Session Idle: 30 minutes (online) Offline Session Idle: 30 days Offline Session Max Limited: ON Offline Session Max: 90 days Access Token Lifespan: 5 minutes ",
+  "wordCount" : "1905",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/IAMDevBox.com.jpg","datePublished": "2026-02-21T18:00:00Z",
+  "dateModified": "2026-02-26T21:20:24-05:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/keycloak-session-expired-errors-troubleshooting-and-timeout-configuration/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What does Keycloak Session not active error mean?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The \"Session not active\" error occurs when refreshing a token after the SSO session has expired. Keycloak has two idle timeouts: SSO Session Idle (default 30 minutes) and Client Session Idle (inherits SSO by default). When no token refresh occurs within the idle period, the session becomes inactive. Fix: either increase SSO Session Idle in Realm Settings \u003e Sessions, or ensure your application refreshes tokens before the idle timeout expires."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I configure Keycloak session timeout settings?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Realm-wide: Admin Console \u003e Realm Settings \u003e Sessions tab. Set SSO Session Idle (inactivity timeout, default 30 min), SSO Session Max (absolute lifetime, default 10 hours). Per-client overrides: Clients \u003e [client] \u003e Advanced \u003e Advanced Settings. Set Client Session Idle and Client Session Max. Rule: client timeouts must be equal to or shorter than realm timeouts."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does Keycloak show Session does not have required client error?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "This error means the client session was evicted from the Infinispan cache while the user session is still valid. In Keycloak 25 and earlier (without persistent sessions), the default cache limit is 10,000 entries per node. When exceeded, least-recently-used client sessions are evicted permanently. Fix: upgrade to Keycloak 26+ where persistent sessions are default, or increase the cache size with --cache-embedded-client-sessions-max-count=20000."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do Keycloak offline sessions differ from regular sessions?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Offline sessions are created when a client requests the offline_access scope. They survive browser close and Keycloak restarts. Default Offline Session Idle is 30 days (vs 30 minutes for regular). To set an absolute lifetime, enable Offline Session Max Limited in Realm Settings \u003e Sessions and set Offline Session Max (default 60 days). Without this toggle, offline tokens can be refreshed indefinitely."
+      }
+    }
+  ]
+}
+</script>
+    <meta name="description" content="Fix Keycloak session expired errors including Session not active, Token is not active, and Session doesn&#39;t have required client. Complete guide to SSO session idle, session max, offline sessions, Infinispan cache, and per-client timeout configuration."><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-session-expired-errors-troubleshooting-and-timeout-configuration\/"
+  },
+  "headline": "Keycloak Session Expired Errors: Troubleshooting and Timeout Configuration",
+  "description": "Fix Keycloak session expired errors including Session not active, Token is not active, and Session doesn't have required client. Complete guide to SSO session idle, session max, offline sessions, Infinispan cache, and per-client timeout configuration.",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon-96x96.png",
+      "width": 96,
+      "height": 96
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://www.iamdevbox.com/IAMDevBox.com.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "datePublished": "2026-02-21T18:00:00Z",
+  "dateModified": "2026-02-26T21:20:24-05:00",
+  "wordCount":  1905 ,
+  "articleSection": "posts",
+  "keywords": ["keycloak session expired","keycloak sso session idle","keycloak session timeout configuration","keycloak session not active error","keycloak token is not active","keycloak session doesn't have required client","keycloak offline session configuration","keycloak infinispan session cache","keycloak client session idle","keycloak refresh token session expired"]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Keycloak Session Expired Errors: Troubleshooting and Timeout Configuration",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/keycloak-session-expired-errors-troubleshooting-and-timeout-configuration\/"
+    }
+  ]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-token-exchange-implementing-oauth-20-token-exchange\/"
+            },
+            "headline": "Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:29:55Z",
+            "dateModified": "2026-03-01T14:30:15Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/go-secretless-with-snowflake-workload-identity-federation-snowflake\/"
+            },
+            "headline": "Go Secretless with Snowflake Workload Identity Federation - Snowflake",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:24:03Z",
+            "dateModified": "2026-03-01T14:24:20Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-algorithm-confusion-attack-cve-2026-developer-guide\/"
+            },
+            "headline": "JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-02-28T18:00:00Z",
+            "dateModified": "2026-03-01T11:21:01-05:00"
+          }
+  ]
+}
+</script>
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    const mermaidBlocks = document.querySelectorAll('.mermaid, pre code.language-mermaid, code.language-mermaid');
+    if (mermaidBlocks.length > 0) {
+        
+        mermaidBlocks.forEach(block => {
+            if (block.tagName === 'CODE') {
+                const pre = block.parentElement;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = block.textContent;
+                if (pre && pre.tagName === 'PRE') {
+                    pre.parentNode.replaceChild(div, pre);
+                } else {
+                    block.parentNode.replaceChild(div, block);
+                }
+            }
+        });
+
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+            const isDark = document.body.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#5a67d8',
+                    
+                    secondaryColor: '#48bb78',
+                    secondaryTextColor: '#ffffff',
+                    secondaryBorderColor: '#38a169',
+                    
+                    tertiaryColor: '#ed8936',
+                    tertiaryTextColor: '#ffffff',
+                    tertiaryBorderColor: '#dd6b20',
+                    
+                    lineColor: '#718096',
+                    
+                    background: isDark ? '#1a202c' : '#ffffff',
+                    mainBkg: isDark ? '#2d3748' : '#f7fafc',
+                    
+                    actorBkg: '#667eea',
+                    actorBorder: '#5a67d8',
+                    actorTextColor: '#ffffff',
+                    actorLineColor: '#718096',
+                    signalColor: '#4a5568',
+                    signalTextColor: '#2d3748',
+                    labelBoxBkgColor: '#edf2f7',
+                    labelBoxBorderColor: '#cbd5e0',
+                    labelTextColor: '#2d3748',
+                    loopTextColor: '#553c9a',
+                    noteBkgColor: '#faf089',
+                    noteTextColor: '#744210',
+                    noteBorderColor: '#d69e2e',
+                    
+                    nodeBkg: '#667eea',
+                    nodeBorder: '#5a67d8',
+                    clusterBkg: '#e2e8f0',
+                    clusterBorder: '#a0aec0',
+                    defaultLinkColor: '#718096',
+                    titleColor: '#2d3748',
+                    edgeLabelBackground: 'transparent',
+                    
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                sequence: {
+                    useMaxWidth: true,
+                    boxMargin: 10,
+                    boxTextMargin: 5,
+                    noteMargin: 10,
+                    messageMargin: 35,
+                    mirrorActors: false
+                }
+            });
+            mermaid.run().then(() => {
+                
+                document.querySelectorAll('.mermaid .node').forEach(node => {
+                    const rect = node.querySelector('rect, circle, ellipse, polygon');
+                    if (rect) {
+                        const fill = rect.getAttribute('fill') || window.getComputedStyle(rect).fill;
+                        
+                        const isDarkBg = fill && (
+                            fill.includes('667eea') || fill.includes('102, 126, 234') ||
+                            fill.includes('48bb78') || fill.includes('72, 187, 120') ||
+                            fill.includes('ed8936') || fill.includes('237, 137, 54') ||
+                            fill.includes('553c9a') || fill.includes('9f7aea') ||
+                            fill.includes('e53e3e') || fill.includes('dd6b20')
+                        );
+                        const textColor = isDarkBg ? '#ffffff' : '#1a202c';
+                        node.querySelectorAll('span, .nodeLabel, text, foreignObject div').forEach(text => {
+                            text.style.color = textColor;
+                            text.style.fill = textColor;
+                        });
+                    }
+                });
+            });
+        };
+        document.head.appendChild(script);
+    }
+
+    
+    const postContent = document.querySelector('.post-content');
+    const isSinglePost = document.querySelector('.post-single');
+    const isToolsPage = window.location.pathname.startsWith('/tools/');
+    if (postContent && isSinglePost && window.innerWidth >= 1400 && !isToolsPage) {
+        const headings = postContent.querySelectorAll('h2, h3');
+        if (headings.length >= 3) {
+            const toc = document.createElement('nav');
+            toc.className = 'floating-toc';
+            toc.innerHTML = '<h4>📑 Contents</h4><ul></ul>';
+            const tocList = toc.querySelector('ul');
+
+            headings.forEach((heading, index) => {
+                const id = heading.id || `section-${index}`;
+                heading.id = id;
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2';
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            document.body.appendChild(toc);
+
+            
+            const tocLinks = toc.querySelectorAll('a');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 150) {
+                        current = heading.id;
+                    }
+                });
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+    }
+
+    
+    if (postContent && isSinglePost && window.innerWidth >= 1200) {
+        const h2s = postContent.querySelectorAll('h2');
+        if (h2s.length >= 2) {
+            const indicator = document.createElement('div');
+            indicator.className = 'section-indicator';
+
+            h2s.forEach((h2, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'section-dot';
+                dot.title = h2.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                dot.addEventListener('click', () => {
+                    h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                indicator.appendChild(dot);
+            });
+
+            document.body.appendChild(indicator);
+
+            
+            window.addEventListener('scroll', () => {
+                const dots = indicator.querySelectorAll('.section-dot');
+                let activeIndex = 0;
+                h2s.forEach((h2, index) => {
+                    if (h2.getBoundingClientRect().top <= 200) {
+                        activeIndex = index;
+                    }
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+    }
+    });
+    </script>
+
+    
+    
+    <script>
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        function loadGA() {
+            if (window.gaLoaded) return;
+            window.gaLoaded = true;
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975';
+            document.head.appendChild(script);
+
+            script.onload = () => {
+                gtag('js', new Date());
+                gtag('config', 'G-B6QCH29975');
+            };
+        }
+
+        
+        ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+            window.addEventListener(event, loadGA, { once: true, passive: true });
+        });
+
+        
+        setTimeout(loadGA, 3000);
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+    
+    <div class="reading-progress" id="reading-progress"></div>
+    <script>
+    window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / docHeight) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+    </script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+            </div>
+        </div><button id="menu-btn" aria-label="Menu" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/categories/trending/" title="Hot IAM topics">
+                    <span>🔥Trending</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+(function() {
+    var btn = document.getElementById('menu-btn');
+    var menu = document.getElementById('menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+        });
+        
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
+</script>
+<main class="main">
+
+
+
+<div class="reading-progress" id="reading-progress"></div>
+<script>
+(function() {
+  const progressBar = document.getElementById('reading-progress');
+  const article = document.querySelector('.post-content');
+
+  if (!progressBar || !article) return;
+
+  function updateProgress() {
+    const articleTop = article.offsetTop;
+    const articleHeight = article.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+
+    
+    const start = articleTop - windowHeight;
+    const end = articleTop + articleHeight;
+    const current = scrollTop - start;
+    const total = end - start;
+
+    const progress = Math.min(Math.max((current / total) * 100, 0), 100);
+    progressBar.style.width = progress + '%';
+  }
+
+  
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  
+  updateProgress();
+})();
+</script>
+
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent" data-pagefind-meta="title">
+      Keycloak Session Expired Errors: Troubleshooting and Timeout Configuration
+    </h1>
+    <div class="post-meta"><span title='2026-02-21 18:00:00'>Feb 21, 2026</span>&nbsp;·&nbsp;9 min&nbsp;·&nbsp;1905 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+    
+      <div class="post-updated">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Updated: Feb 26, 2026
+      </div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#quick-diagnostic-which-error-are-you-seeing" aria-label="Quick Diagnostic: Which Error Are You Seeing?">Quick Diagnostic: Which Error Are You Seeing?</a></li>
+                <li>
+                    <a href="#understanding-keycloak-session-types" aria-label="Understanding Keycloak Session Types">Understanding Keycloak Session Types</a><ul>
+                        
+                <li>
+                    <a href="#session-hierarchy" aria-label="Session Hierarchy">Session Hierarchy</a></li>
+                <li>
+                    <a href="#all-session-types-and-defaults" aria-label="All Session Types and Defaults">All Session Types and Defaults</a></li>
+                <li>
+                    <a href="#where-to-configure-each-timeout" aria-label="Where to Configure Each Timeout">Where to Configure Each Timeout</a></li></ul>
+                </li>
+                <li>
+                    <a href="#timeout-interaction-rules" aria-label="Timeout Interaction Rules">Timeout Interaction Rules</a><ul>
+                        
+                <li>
+                    <a href="#practical-example" aria-label="Practical Example">Practical Example</a></li></ul>
+                </li>
+                <li>
+                    <a href="#sso-session-expired" aria-label="SSO Session Expired">SSO Session Expired</a><ul>
+                        
+                <li>
+                    <a href="#error-session-not-active" aria-label="Error: &ldquo;Session not active&rdquo;">Error: &ldquo;Session not active&rdquo;</a></li></ul>
+                </li>
+                <li>
+                    <a href="#refresh-token-expired" aria-label="Refresh Token Expired">Refresh Token Expired</a><ul>
+                        
+                <li>
+                    <a href="#error-token-is-not-active" aria-label="Error: &ldquo;Token is not active&rdquo;">Error: &ldquo;Token is not active&rdquo;</a></li></ul>
+                </li>
+                <li>
+                    <a href="#client-session-timeout" aria-label="Client Session Timeout">Client Session Timeout</a><ul>
+                        
+                <li>
+                    <a href="#error-client-session-not-active" aria-label="Error: &ldquo;Client session not active&rdquo;">Error: &ldquo;Client session not active&rdquo;</a></li></ul>
+                </li>
+                <li>
+                    <a href="#infinispan-cache-eviction" aria-label="Infinispan Cache Eviction">Infinispan Cache Eviction</a><ul>
+                        
+                <li>
+                    <a href="#error-session-doesnt-have-required-client" aria-label="Error: &ldquo;Session doesn&rsquo;t have required client&rdquo;">Error: &ldquo;Session doesn&rsquo;t have required client&rdquo;</a></li></ul>
+                </li>
+                <li>
+                    <a href="#offline-session-expired" aria-label="Offline Session Expired">Offline Session Expired</a><ul>
+                        
+                <li>
+                    <a href="#error-offline-session-not-active" aria-label="Error: &ldquo;Offline session not active&rdquo;">Error: &ldquo;Offline session not active&rdquo;</a></li></ul>
+                </li>
+                <li>
+                    <a href="#authentication-session-timeout" aria-label="Authentication Session Timeout">Authentication Session Timeout</a><ul>
+                        
+                <li>
+                    <a href="#error-authentication_expired-in-redirect-url" aria-label="Error: &ldquo;authentication_expired&rdquo; in redirect URL">Error: &ldquo;authentication_expired&rdquo; in redirect URL</a></li></ul>
+                </li>
+                <li>
+                    <a href="#remember-me-sessions" aria-label="Remember Me Sessions">Remember Me Sessions</a></li>
+                <li>
+                    <a href="#docker-and-kubernetes-session-issues" aria-label="Docker and Kubernetes Session Issues">Docker and Kubernetes Session Issues</a><ul>
+                        
+                <li>
+                    <a href="#sticky-sessions-required" aria-label="Sticky Sessions Required">Sticky Sessions Required</a></li>
+                <li>
+                    <a href="#sessions-lost-after-pod-restart" aria-label="Sessions Lost After Pod Restart">Sessions Lost After Pod Restart</a></li>
+                <li>
+                    <a href="#common-kubernetes-session-issues" aria-label="Common Kubernetes Session Issues">Common Kubernetes Session Issues</a></li></ul>
+                </li>
+                <li>
+                    <a href="#debug-logging" aria-label="Debug Logging">Debug Logging</a><ul>
+                        
+                <li>
+                    <a href="#enable-session-specific-logging" aria-label="Enable Session-Specific Logging">Enable Session-Specific Logging</a></li>
+                <li>
+                    <a href="#check-events-via-admin-api" aria-label="Check Events via Admin API">Check Events via Admin API</a></li>
+                <li>
+                    <a href="#event-types-for-session-debugging" aria-label="Event Types for Session Debugging">Event Types for Session Debugging</a></li></ul>
+                </li>
+                <li>
+                    <a href="#recommended-timeout-configurations" aria-label="Recommended Timeout Configurations">Recommended Timeout Configurations</a><ul>
+                        
+                <li>
+                    <a href="#enterprise-high-security" aria-label="Enterprise (High Security)">Enterprise (High Security)</a></li>
+                <li>
+                    <a href="#consumer-application" aria-label="Consumer Application">Consumer Application</a></li>
+                <li>
+                    <a href="#mobile--offline" aria-label="Mobile / Offline">Mobile / Offline</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content" data-pagefind-body><p>Keycloak session errors are the most common source of unexpected logouts. Your application works perfectly in development, then users report being logged out randomly in production. The token refresh returns <code>invalid_grant</code> with a cryptic <code>error_description</code> like &ldquo;Session not active&rdquo; — and the Keycloak admin console shows no obvious misconfiguration.</p>
+<p>This guide explains every Keycloak session type, how their timeouts interact, and how to fix each session error.</p>
+<h2 id="quick-diagnostic-which-error-are-you-seeing">Quick Diagnostic: Which Error Are You Seeing?<a hidden class="anchor" aria-hidden="true" href="#quick-diagnostic-which-error-are-you-seeing">#</a></h2>
+<table>
+  <thead>
+      <tr>
+          <th>error_description</th>
+          <th>Jump To</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>Session not active</code></td>
+          <td><a href="#sso-session-expired">SSO Session Expired</a></td>
+      </tr>
+      <tr>
+          <td><code>Token is not active</code></td>
+          <td><a href="#refresh-token-expired">Refresh Token Expired</a></td>
+      </tr>
+      <tr>
+          <td><code>Session doesn't have required client</code></td>
+          <td><a href="#infinispan-cache-eviction">Cache Eviction</a></td>
+      </tr>
+      <tr>
+          <td><code>Offline session not active</code></td>
+          <td><a href="#offline-session-expired">Offline Session Expired</a></td>
+      </tr>
+      <tr>
+          <td><code>Client session not active</code></td>
+          <td><a href="#client-session-timeout">Client Session Expired</a></td>
+      </tr>
+      <tr>
+          <td><code>authentication_expired</code> in redirect URL</td>
+          <td><a href="#authentication-session-timeout">Authentication Session Timeout</a></td>
+      </tr>
+  </tbody>
+</table>
+<p>All of these appear as <code>invalid_grant</code> in the OAuth error response:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;error&#34;</span>: <span style="color:#e6db74">&#34;invalid_grant&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;error_description&#34;</span>: <span style="color:#e6db74">&#34;Session not active&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>For a complete guide to all <code>invalid_grant</code> causes across Keycloak, Auth0, Okta, Azure AD, and Google, see the <a href="/posts/oauth-invalid-grant-error-complete-troubleshooting-guide/">OAuth invalid_grant Troubleshooting Guide</a>.</p>
+<h2 id="understanding-keycloak-session-types">Understanding Keycloak Session Types<a hidden class="anchor" aria-hidden="true" href="#understanding-keycloak-session-types">#</a></h2>
+<p>Keycloak has four session types, each with its own timeout. Understanding the hierarchy is critical to debugging session errors.</p>
+<h3 id="session-hierarchy">Session Hierarchy<a hidden class="anchor" aria-hidden="true" href="#session-hierarchy">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>SSO Session (User Session)          ← Realm-wide, one per user login
+</span></span><span style="display:flex;"><span>  ├── Client Session (app-frontend)  ← One per application accessed
+</span></span><span style="display:flex;"><span>  ├── Client Session (app-backend)   ← Independent timeout per client
+</span></span><span style="display:flex;"><span>  └── Client Session (app-mobile)    ← Expires independently
+</span></span></code></pre></div><p><strong>Key rule:</strong> When the SSO session expires, ALL client sessions under it expire immediately — regardless of their individual timeout settings.</p>
+<h3 id="all-session-types-and-defaults">All Session Types and Defaults<a hidden class="anchor" aria-hidden="true" href="#all-session-types-and-defaults">#</a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>Session Type</th>
+          <th>Idle Default</th>
+          <th>Max Default</th>
+          <th>Scope</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>SSO Session</td>
+          <td>30 minutes</td>
+          <td>10 hours</td>
+          <td>Realm-wide</td>
+      </tr>
+      <tr>
+          <td>Client Session</td>
+          <td>Inherits SSO</td>
+          <td>Inherits SSO</td>
+          <td>Per-client override available</td>
+      </tr>
+      <tr>
+          <td>Offline Session</td>
+          <td>30 days</td>
+          <td>Unlimited (unless limited)</td>
+          <td>Per-client override available</td>
+      </tr>
+      <tr>
+          <td>Authentication Session</td>
+          <td>5 min (action) / 30 min (total)</td>
+          <td>N/A</td>
+          <td>Temporary, during login only</td>
+      </tr>
+      <tr>
+          <td>Remember Me Session</td>
+          <td>Inherits SSO (unless overridden)</td>
+          <td>Inherits SSO (unless overridden)</td>
+          <td>Realm-wide</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="where-to-configure-each-timeout">Where to Configure Each Timeout<a hidden class="anchor" aria-hidden="true" href="#where-to-configure-each-timeout">#</a></h3>
+<p><strong>Realm-wide:</strong> Admin Console → Realm Settings → Sessions tab</p>
+<table>
+  <thead>
+      <tr>
+          <th>Setting</th>
+          <th>Description</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>SSO Session Idle</td>
+          <td>Inactivity timeout before session expires</td>
+      </tr>
+      <tr>
+          <td>SSO Session Max</td>
+          <td>Absolute maximum session duration</td>
+      </tr>
+      <tr>
+          <td>Client Session Idle</td>
+          <td>Default idle timeout for all clients</td>
+      </tr>
+      <tr>
+          <td>Client Session Max</td>
+          <td>Default max timeout for all clients</td>
+      </tr>
+      <tr>
+          <td>Offline Session Idle</td>
+          <td>Idle timeout for offline sessions</td>
+      </tr>
+      <tr>
+          <td>Offline Session Max Limited</td>
+          <td>Toggle to enable absolute offline max</td>
+      </tr>
+      <tr>
+          <td>Offline Session Max</td>
+          <td>Absolute max for offline sessions (when toggle is ON)</td>
+      </tr>
+      <tr>
+          <td>Login Timeout</td>
+          <td>Total time to complete login flow</td>
+      </tr>
+      <tr>
+          <td>Login Action Timeout</td>
+          <td>Time for a single login action</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Per-client override:</strong> Clients → [client] → Advanced → Advanced Settings</p>
+<table>
+  <thead>
+      <tr>
+          <th>Setting</th>
+          <th>Description</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Client Session Idle</td>
+          <td>Override realm default for this client</td>
+      </tr>
+      <tr>
+          <td>Client Session Max</td>
+          <td>Override realm default for this client</td>
+      </tr>
+      <tr>
+          <td>Client Offline Session Idle</td>
+          <td>Override realm offline idle</td>
+      </tr>
+      <tr>
+          <td>Client Offline Session Max</td>
+          <td>Override realm offline max</td>
+      </tr>
+      <tr>
+          <td>Access Token Lifespan</td>
+          <td>Override realm access token lifespan</td>
+      </tr>
+  </tbody>
+</table>
+<h2 id="timeout-interaction-rules">Timeout Interaction Rules<a hidden class="anchor" aria-hidden="true" href="#timeout-interaction-rules">#</a></h2>
+<p>This is the most misunderstood aspect of Keycloak session management. Timeouts follow a strict hierarchy:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>SSO Session Max (absolute ceiling, default 10h)
+</span></span><span style="display:flex;"><span>  └── SSO Session Idle (inactivity timeout, default 30m)
+</span></span><span style="display:flex;"><span>       └── Client Session Max (per-client ceiling, must be ≤ SSO Session Max)
+</span></span><span style="display:flex;"><span>            └── Client Session Idle (per-client inactivity, must be ≤ SSO Session Idle)
+</span></span><span style="display:flex;"><span>                 └── Access Token Lifespan (must be ≤ Client Session Idle)
+</span></span></code></pre></div><p><strong>Rules:</strong></p>
+<ol>
+<li><strong>SSO Session Max is the hard ceiling.</strong> No amount of refresh activity extends a session beyond this.</li>
+<li><strong>Refreshing a token resets the SSO Session Idle timer.</strong> This is a sliding window.</li>
+<li><strong>Client timeouts must be ≤ realm timeouts.</strong> Keycloak 26.5+ rejects configurations that violate this; older versions silently ignore the client override.</li>
+<li><strong>Keycloak adds a ~2-minute buffer</strong> to configured idle timeouts (e.g., 30 minutes configured ≈ 32 minutes actual).</li>
+<li><strong>When the SSO session expires, ALL client sessions expire immediately</strong>, even if the client session itself hasn&rsquo;t timed out.</li>
+</ol>
+<h3 id="practical-example">Practical Example<a hidden class="anchor" aria-hidden="true" href="#practical-example">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">Realm</span>:  <span style="color:#ae81ff">SSO Session Idle = 30 min, SSO Session Max = 10 hours</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">Client</span>: <span style="color:#ae81ff">Client Session Idle = 15 min, Client Session Max = 2 hours</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">Token</span>:  <span style="color:#ae81ff">Access Token Lifespan = 5 min</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">Timeline</span>:
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0</span>:<span style="color:#ae81ff">00</span>  - <span style="color:#ae81ff">User logs in → SSO session + client session created</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0</span>:<span style="color:#ae81ff">05</span>  - <span style="color:#ae81ff">Access token expires → app refreshes → SSO idle resets to 30 min</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0</span>:<span style="color:#ae81ff">15</span>  - <span style="color:#66d9ef">No</span> <span style="color:#ae81ff">activity on this client → CLIENT session expires (15 min idle)</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">0:15  - User clicks button → refresh fails</span>: <span style="color:#e6db74">&#34;Client session not active&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0</span>:<span style="color:#ae81ff">15</span>  - <span style="color:#ae81ff">But SSO session is still valid → user re-authenticates instantly (no login page)</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">2</span>:<span style="color:#ae81ff">00</span>  - <span style="color:#ae81ff">Client Session Max reached → client must re-auth</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">10</span>:<span style="color:#ae81ff">00</span> - <span style="color:#ae81ff">SSO Session Max → full re-authentication required</span>
+</span></span></code></pre></div><h2 id="sso-session-expired">SSO Session Expired<a hidden class="anchor" aria-hidden="true" href="#sso-session-expired">#</a></h2>
+<h3 id="error-session-not-active">Error: &ldquo;Session not active&rdquo;<a hidden class="anchor" aria-hidden="true" href="#error-session-not-active">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>ERROR [org.keycloak.protocol.oidc] REFRESH_TOKEN_ERROR
+</span></span><span style="display:flex;"><span>  error_description: Session not active
+</span></span></code></pre></div><p>The SSO session expired because the user was inactive longer than SSO Session Idle (default 30 minutes) or the SSO Session Max (default 10 hours) was reached.</p>
+<p><strong>Fix:</strong> Increase SSO Session Idle or ensure your application refreshes tokens before the idle timeout:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>Admin Console → Realm Settings → Sessions tab:
+</span></span><span style="display:flex;"><span>  SSO Session Idle: 30 minutes → 60 minutes (or higher based on use case)
+</span></span><span style="display:flex;"><span>  SSO Session Max: 10 hours → 24 hours
+</span></span></code></pre></div><p><strong>For SPAs:</strong> Schedule token refresh at <code>(SSO Session Idle - buffer)</code> intervals. If idle is 30 minutes, refresh every 25 minutes:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// Refresh before session idle timeout
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">REFRESH_INTERVAL</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">SSO_SESSION_IDLE_SECONDS</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">300</span>) <span style="color:#f92672">*</span> <span style="color:#ae81ff">1000</span>; <span style="color:#75715e">// 5 min buffer
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">setInterval</span>(() =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">keycloak</span>.<span style="color:#a6e22e">updateToken</span>(<span style="color:#ae81ff">60</span>) <span style="color:#75715e">// Refresh if token expires within 60 seconds
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    .<span style="color:#66d9ef">catch</span>(() =&gt; <span style="color:#a6e22e">keycloak</span>.<span style="color:#a6e22e">login</span>()); <span style="color:#75715e">// Session expired, force re-login
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}, <span style="color:#a6e22e">REFRESH_INTERVAL</span>);
+</span></span></code></pre></div><h2 id="refresh-token-expired">Refresh Token Expired<a hidden class="anchor" aria-hidden="true" href="#refresh-token-expired">#</a></h2>
+<h3 id="error-token-is-not-active">Error: &ldquo;Token is not active&rdquo;<a hidden class="anchor" aria-hidden="true" href="#error-token-is-not-active">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>ERROR [org.keycloak.protocol.oidc] REFRESH_TOKEN_ERROR
+</span></span><span style="display:flex;"><span>  error_description: Token is not active
+</span></span></code></pre></div><p>The refresh token itself has expired or been revoked. This happens when:</p>
+<ol>
+<li>The session idle timeout expired between the last refresh and the current attempt</li>
+<li>An admin revoked the user&rsquo;s sessions</li>
+<li>The user changed their password (invalidates all tokens)</li>
+<li><strong>Refresh Token Max Reuse</strong> is set to 0 and the same refresh token was used twice</li>
+</ol>
+<p><strong>Verify token status via Admin REST API:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Get admin token</span>
+</span></span><span style="display:flex;"><span>ACCESS_TOKEN<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>curl -s -X POST <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#e6db74">&#34;https://keycloak.example.com/realms/master/protocol/openid-connect/token&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -d <span style="color:#e6db74">&#34;client_id=admin-cli&amp;username=admin&amp;password=admin&amp;grant_type=password&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  | jq -r <span style="color:#e6db74">&#39;.access_token&#39;</span><span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># List user&#39;s sessions</span>
+</span></span><span style="display:flex;"><span>curl -s <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#e6db74">&#34;https://keycloak.example.com/admin/realms/myrealm/users/{userId}/sessions&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Authorization: Bearer </span>$ACCESS_TOKEN<span style="color:#e6db74">&#34;</span> | jq .
+</span></span></code></pre></div><p>If the response is empty, the session has expired or been terminated.</p>
+<h2 id="client-session-timeout">Client Session Timeout<a hidden class="anchor" aria-hidden="true" href="#client-session-timeout">#</a></h2>
+<h3 id="error-client-session-not-active">Error: &ldquo;Client session not active&rdquo;<a hidden class="anchor" aria-hidden="true" href="#error-client-session-not-active">#</a></h3>
+<p>This error occurs when a per-client session timeout is configured and it expires before the SSO session. The user&rsquo;s SSO session is still valid, but the specific client&rsquo;s session has ended.</p>
+<p><strong>How to identify:</strong> The user can access other applications without re-login, but one specific application forces re-authentication.</p>
+<p><strong>Fix:</strong> Check per-client overrides at Clients → [client] → Advanced → Advanced Settings. Either increase Client Session Idle or remove the override to inherit realm defaults.</p>
+<h2 id="infinispan-cache-eviction">Infinispan Cache Eviction<a hidden class="anchor" aria-hidden="true" href="#infinispan-cache-eviction">#</a></h2>
+<h3 id="error-session-doesnt-have-required-client">Error: &ldquo;Session doesn&rsquo;t have required client&rdquo;<a hidden class="anchor" aria-hidden="true" href="#error-session-doesnt-have-required-client">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>ERROR [org.keycloak.protocol.oidc] REFRESH_TOKEN_ERROR
+</span></span><span style="display:flex;"><span>  error_description: Session doesn&#39;t have required client
+</span></span></code></pre></div><p>This is the most confusing session error because the user session is valid but the client session is missing. The <code>sessions</code> cache and <code>clientSessions</code> cache are evicted independently.</p>
+<p><strong>Cause:</strong> The Infinispan cache reached its per-node limit (default 10,000 entries in Keycloak 26+), and the client session was evicted.</p>
+<p><strong>Keycloak 26+ (persistent sessions enabled by default):</strong> Evicted sessions are loaded from the database on demand. This error should be rare unless the database is unreachable.</p>
+<p><strong>Keycloak 25 and earlier (volatile sessions):</strong> Evicted sessions are permanently lost. This error is common in high-traffic environments.</p>
+<p><strong>Fix for Keycloak 26+:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Increase cache size</span>
+</span></span><span style="display:flex;"><span>bin/kc.sh start <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --cache-embedded-sessions-max-count<span style="color:#f92672">=</span><span style="color:#ae81ff">20000</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --cache-embedded-client-sessions-max-count<span style="color:#f92672">=</span><span style="color:#ae81ff">20000</span>
+</span></span></code></pre></div><p><strong>Fix for Keycloak 25 and earlier:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Enable persistent sessions (preview feature in KC 25)</span>
+</span></span><span style="display:flex;"><span>bin/kc.sh start --features<span style="color:#f92672">=</span>persistent-user-sessions
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Or increase cache size in conf/cache-ispn.xml</span>
+</span></span></code></pre></div><h2 id="offline-session-expired">Offline Session Expired<a hidden class="anchor" aria-hidden="true" href="#offline-session-expired">#</a></h2>
+<h3 id="error-offline-session-not-active">Error: &ldquo;Offline session not active&rdquo;<a hidden class="anchor" aria-hidden="true" href="#error-offline-session-not-active">#</a></h3>
+<p>Offline sessions (created with <code>offline_access</code> scope) have much longer timeouts but still expire.</p>
+<p><strong>Default behavior:</strong></p>
+<ul>
+<li>Offline Session Idle: 30 days — token must be refreshed within 30 days</li>
+<li>Offline Session Max Limited: OFF — no absolute limit by default</li>
+</ul>
+<p><strong>With Offline Session Max Limited = ON:</strong></p>
+<ul>
+<li>Offline Session Max: 60 days — absolute limit regardless of activity</li>
+</ul>
+<p><strong>Known issue (Keycloak 22-23):</strong> When &ldquo;Offline Session Max Limited&rdquo; is enabled, the token&rsquo;s <code>exp</code> claim is based on Offline Session Idle rather than Offline Session Max, causing tokens to expire sooner than expected.</p>
+<p><strong>Fix:</strong> Increase Offline Session Idle or ensure your background processes refresh offline tokens within the idle period.</p>
+<h2 id="authentication-session-timeout">Authentication Session Timeout<a hidden class="anchor" aria-hidden="true" href="#authentication-session-timeout">#</a></h2>
+<h3 id="error-authentication_expired-in-redirect-url">Error: &ldquo;authentication_expired&rdquo; in redirect URL<a hidden class="anchor" aria-hidden="true" href="#error-authentication_expired-in-redirect-url">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>https://your-app.com/callback?error=temporarily_unavailable&amp;error_description=authentication_expired
+</span></span></code></pre></div><p>The user&rsquo;s login page sat idle too long. The authentication session expired before they completed the login flow.</p>
+<p><strong>Settings:</strong></p>
+<ul>
+<li><strong>Login Timeout</strong> (default 30 minutes): Total time to complete the login flow</li>
+<li><strong>Login Action Timeout</strong> (default 5 minutes): Time for a single login step</li>
+</ul>
+<p><strong>Fix for slow login flows (MFA, email verification):</strong> Increase Login Action Timeout to 10-15 minutes.</p>
+<p><strong>SPA handling:</strong> When your SPA receives <code>authentication_expired</code>, retry the authentication request immediately. If the user has an active SSO session, re-authentication succeeds without a login prompt.</p>
+<h2 id="remember-me-sessions">Remember Me Sessions<a hidden class="anchor" aria-hidden="true" href="#remember-me-sessions">#</a></h2>
+<p>When &ldquo;Remember Me&rdquo; is enabled (Realm Settings → Login tab), users who check the checkbox get persistent cookies that survive browser close.</p>
+<p><strong>Separate timeouts (optional):</strong></p>
+<table>
+  <thead>
+      <tr>
+          <th>Setting</th>
+          <th>Effect</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Remember Me SSO Session Idle</td>
+          <td>Overrides SSO Session Idle for remember-me sessions (0 = use default)</td>
+      </tr>
+      <tr>
+          <td>Remember Me SSO Session Max</td>
+          <td>Overrides SSO Session Max for remember-me sessions (0 = use default)</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Common configuration:</strong> Set SSO Session Idle to 30 minutes for regular users, but Remember Me SSO Session Idle to 7 days for users who check &ldquo;Remember Me&rdquo;.</p>
+<h2 id="docker-and-kubernetes-session-issues">Docker and Kubernetes Session Issues<a hidden class="anchor" aria-hidden="true" href="#docker-and-kubernetes-session-issues">#</a></h2>
+<h3 id="sticky-sessions-required">Sticky Sessions Required<a hidden class="anchor" aria-hidden="true" href="#sticky-sessions-required">#</a></h3>
+<p>Keycloak uses the <code>AUTH_SESSION_ID</code> cookie for session affinity. Without sticky sessions configured on your load balancer, authentication requests may hit different Keycloak nodes, causing intermittent session errors.</p>
+<p><strong>Nginx Ingress:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">annotations</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">nginx.ingress.kubernetes.io/affinity</span>: <span style="color:#e6db74">&#34;cookie&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">nginx.ingress.kubernetes.io/session-cookie-name</span>: <span style="color:#e6db74">&#34;AUTH_SESSION_ID&#34;</span>
+</span></span></code></pre></div><h3 id="sessions-lost-after-pod-restart">Sessions Lost After Pod Restart<a hidden class="anchor" aria-hidden="true" href="#sessions-lost-after-pod-restart">#</a></h3>
+<p><strong>Keycloak 26+:</strong> Persistent sessions are enabled by default. Sessions survive pod restarts because they&rsquo;re stored in the database.</p>
+<p><strong>Keycloak 25 and earlier:</strong> Sessions are stored only in Infinispan memory. Pod restarts lose all sessions. Fix: enable <code>persistent-user-sessions</code> feature or use an external Infinispan cluster.</p>
+<h3 id="common-kubernetes-session-issues">Common Kubernetes Session Issues<a hidden class="anchor" aria-hidden="true" href="#common-kubernetes-session-issues">#</a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>Issue</th>
+          <th>Cause</th>
+          <th>Fix</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Random logouts in cluster</td>
+          <td>No sticky sessions</td>
+          <td>Configure load balancer affinity on <code>AUTH_SESSION_ID</code></td>
+      </tr>
+      <tr>
+          <td>All sessions lost on restart</td>
+          <td>Volatile sessions (KC &lt; 26)</td>
+          <td>Upgrade to KC 26+ or enable <code>persistent-user-sessions</code></td>
+      </tr>
+      <tr>
+          <td>&ldquo;Session doesn&rsquo;t have required client&rdquo;</td>
+          <td>Cache eviction under load</td>
+          <td>Increase <code>--cache-embedded-client-sessions-max-count</code></td>
+      </tr>
+      <tr>
+          <td>Slow authentication in cluster</td>
+          <td>Requests hitting non-owner nodes</td>
+          <td>Enable sticky sessions</td>
+      </tr>
+  </tbody>
+</table>
+<h2 id="debug-logging">Debug Logging<a hidden class="anchor" aria-hidden="true" href="#debug-logging">#</a></h2>
+<h3 id="enable-session-specific-logging">Enable Session-Specific Logging<a hidden class="anchor" aria-hidden="true" href="#enable-session-specific-logging">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Keycloak 22+ (Quarkus)</span>
+</span></span><span style="display:flex;"><span>bin/kc.sh start --log-level<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;INFO,org.keycloak.protocol.oidc:TRACE,org.keycloak.models.sessions:DEBUG&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Docker</span>
+</span></span><span style="display:flex;"><span>docker run <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -e KC_LOG_LEVEL<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;INFO,org.keycloak.protocol.oidc:TRACE,org.keycloak.models.sessions:DEBUG&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  quay.io/keycloak/keycloak:latest start
+</span></span></code></pre></div><h3 id="check-events-via-admin-api">Check Events via Admin API<a hidden class="anchor" aria-hidden="true" href="#check-events-via-admin-api">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Get recent session errors</span>
+</span></span><span style="display:flex;"><span>curl -s <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#e6db74">&#34;https://keycloak.example.com/admin/realms/myrealm/events?type=REFRESH_TOKEN_ERROR&amp;max=50&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Authorization: Bearer </span>$ACCESS_TOKEN<span style="color:#e6db74">&#34;</span> | jq .
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Force logout a specific session</span>
+</span></span><span style="display:flex;"><span>curl -s -X DELETE <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#e6db74">&#34;https://keycloak.example.com/admin/realms/myrealm/sessions/{sessionId}&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Authorization: Bearer </span>$ACCESS_TOKEN<span style="color:#e6db74">&#34;</span>
+</span></span></code></pre></div><h3 id="event-types-for-session-debugging">Event Types for Session Debugging<a hidden class="anchor" aria-hidden="true" href="#event-types-for-session-debugging">#</a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>Event</th>
+          <th>Meaning</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>LOGIN</code></td>
+          <td>New user session created</td>
+      </tr>
+      <tr>
+          <td><code>LOGOUT</code></td>
+          <td>Session terminated by user</td>
+      </tr>
+      <tr>
+          <td><code>CODE_TO_TOKEN</code></td>
+          <td>Authorization code exchanged successfully</td>
+      </tr>
+      <tr>
+          <td><code>CODE_TO_TOKEN_ERROR</code></td>
+          <td>Code exchange failed (expired code, PKCE mismatch)</td>
+      </tr>
+      <tr>
+          <td><code>REFRESH_TOKEN</code></td>
+          <td>Token refreshed, session idle timer reset</td>
+      </tr>
+      <tr>
+          <td><code>REFRESH_TOKEN_ERROR</code></td>
+          <td>Refresh failed — session expired or revoked</td>
+      </tr>
+      <tr>
+          <td><code>USER_SESSION_DELETED</code></td>
+          <td>Session removed by admin or timeout</td>
+      </tr>
+  </tbody>
+</table>
+<p>Enable event logging: Admin Console → Realm Settings → Events → User events settings → Save events = ON.</p>
+<h2 id="recommended-timeout-configurations">Recommended Timeout Configurations<a hidden class="anchor" aria-hidden="true" href="#recommended-timeout-configurations">#</a></h2>
+<h3 id="enterprise-high-security">Enterprise (High Security)<a hidden class="anchor" aria-hidden="true" href="#enterprise-high-security">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>SSO Session Idle: 15 minutes
+</span></span><span style="display:flex;"><span>SSO Session Max: 8 hours
+</span></span><span style="display:flex;"><span>Client Session Idle: 15 minutes
+</span></span><span style="display:flex;"><span>Access Token Lifespan: 1 minute
+</span></span><span style="display:flex;"><span>Refresh Token Max Reuse: 0
+</span></span></code></pre></div><h3 id="consumer-application">Consumer Application<a hidden class="anchor" aria-hidden="true" href="#consumer-application">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>SSO Session Idle: 7 days
+</span></span><span style="display:flex;"><span>SSO Session Max: 30 days
+</span></span><span style="display:flex;"><span>Remember Me SSO Session Idle: 30 days
+</span></span><span style="display:flex;"><span>Remember Me SSO Session Max: 90 days
+</span></span><span style="display:flex;"><span>Access Token Lifespan: 15 minutes
+</span></span></code></pre></div><h3 id="mobile--offline">Mobile / Offline<a hidden class="anchor" aria-hidden="true" href="#mobile--offline">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>SSO Session Idle: 30 minutes (online)
+</span></span><span style="display:flex;"><span>Offline Session Idle: 30 days
+</span></span><span style="display:flex;"><span>Offline Session Max Limited: ON
+</span></span><span style="display:flex;"><span>Offline Session Max: 90 days
+</span></span><span style="display:flex;"><span>Access Token Lifespan: 5 minutes
+</span></span></code></pre></div>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/keycloak/">Keycloak</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/troubleshooting/">Troubleshooting</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/oauth-2.0/">OAuth 2.0</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/identity-management/">Identity Management</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/session-management/">Session Management</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/oauth-redirect-uri-mismatch-error-fix-guide/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>OAuth redirect_uri Mismatch Error: Complete Fix Guide</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/keycloak-ldap-connection-troubleshooting-complete-guide/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Keycloak LDAP Connection Troubleshooting: Complete Error Guide</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+
+<section class="post-feedback">
+  <p class="feedback-question">Was this article helpful?</p>
+  <div class="feedback-buttons">
+    <button class="feedback-btn feedback-yes" onclick="trackFeedback('yes', '\/posts\/keycloak-session-expired-errors-troubleshooting-and-timeout-configuration\/')" aria-label="Yes, helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      Yes
+    </button>
+    <button class="feedback-btn feedback-no" onclick="trackFeedback('no', '\/posts\/keycloak-session-expired-errors-troubleshooting-and-timeout-configuration\/')" aria-label="No, not helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>
+      No
+    </button>
+  </div>
+  <p class="feedback-thanks" style="display: none;">Thanks for your feedback!</p>
+</section>
+
+
+<section class="author-bio">
+  <div class="author-avatar">
+    <img src="/IAMDevBox.com.jpg" alt="IAMDevBox Author" width="64" height="64" loading="lazy">
+  </div>
+  <div class="author-info">
+    <h4>Written by IAMDevBox</h4>
+    <p>Enterprise IAM architect with 15+ years in identity modernization. Certified across ForgeRock, Ping Identity, SailPoint, AWS, and Azure.</p>
+    <div class="author-links">
+      <a href="https://twitter.com/iamdevbox" target="_blank" rel="noopener" title="Follow on X/Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/iamdevbox" target="_blank" rel="noopener" title="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="/contact/" title="Contact">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function trackFeedback(value, page) {
+  
+  document.querySelector('.feedback-buttons').style.display = 'none';
+  document.querySelector('.feedback-question').style.display = 'none';
+  document.querySelector('.feedback-thanks').style.display = 'block';
+
+  
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'post_feedback', {
+      'feedback_value': value,
+      'page_path': page
+    });
+  }
+
+  
+  localStorage.setItem('feedback_' + page, value);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const page = '\/posts\/keycloak-session-expired-errors-troubleshooting-and-timeout-configuration\/';
+  if (localStorage.getItem('feedback_' + page)) {
+    document.querySelector('.feedback-buttons').style.display = 'none';
+    document.querySelector('.feedback-question').textContent = 'Thanks for your feedback!';
+  }
+});
+</script>
+
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+              Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+            </a>
+            <small class="custom-date">2026-02-28</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/pingone-mfa-configuration-push-notifications-totp-and-fido2-setup/" class="custom-link">
+              PingOne MFA Configuration: Push Notifications, TOTP, and FIDO2 Setup
+            </a>
+            <small class="custom-date">2026-02-27</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/perc-announces-single-sign-on-access-to-nfpa-link-for-propane-professionals-phcppros/" class="custom-link">
+              PERC Announces Single Sign-On Access to NFPA LiNK for Propane Professionals - PHCPPros
+            </a>
+            <small class="custom-date">2026-02-27</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/forgerock-ds-pkix-path-building-failed-certificate-troubleshooting/" class="custom-link">
+              ForgeRock DS PKIX Path Building Failed: Complete Certificate Troubleshooting Guide
+            </a>
+            <small class="custom-date">2026-02-21</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-vs-ory-open-source-iam-comparison-2026/" class="custom-link">
+              Ory vs Keycloak: Open Source IAM Comparison 2026
+            </a>
+            <small class="custom-date">2026-02-21</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+                Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+                Go Secretless with Snowflake Workload Identity Federation - Snowflake
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+                JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+                OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+                Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

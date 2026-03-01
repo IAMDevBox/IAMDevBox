@@ -1,0 +1,2918 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>How to Decode JWT Tokens from the Command Line | IAMDevBox</title>
+<meta name="keywords" content="how to decode jwt tokens from the command line, python, jwt-decoding, command-line-tools, iam-engineering, security-tips, developer-tricks, base64">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/how-to-decode-jwt-tokens-from-the-command-line/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.e24ea479df3e367781fafa20cedde21c7e043c10bed4c8c913ef9261a049a1e2.css" integrity="sha256-4k6ked8&#43;NneB&#43;vogzt3iHH4EPBC&#43;1MjJE&#43;&#43;SYaBJoeI=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/how-to-decode-jwt-tokens-from-the-command-line/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/how-to-decode-jwt-tokens-from-the-command-line/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="How to Decode JWT Tokens from the Command Line">
+  <meta property="og:description" content="Learn how to decode JWT tokens using command line tools like jq and base64. This guide includes best practices and security considerations.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-12-19T22:44:28+00:00">
+    <meta property="article:modified_time" content="2026-02-10T09:19:20-05:00">
+    <meta property="article:tag" content="Jwt-Decoding">
+    <meta property="article:tag" content="Command-Line-Tools">
+    <meta property="article:tag" content="IAM Engineering">
+    <meta property="article:tag" content="Security-Tips">
+    <meta property="article:tag" content="Developer-Tricks">
+    <meta property="og:image" content="https://www.iamdevbox.com/images/posts/how-to-decode-jwt-tokens-from-the-command-line-fc74fd68.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/images/posts/how-to-decode-jwt-tokens-from-the-command-line-fc74fd68.webp">
+<meta name="twitter:title" content="How to Decode JWT Tokens from the Command Line">
+<meta name="twitter:description" content="Learn how to decode JWT tokens using command line tools like jq and base64. This guide includes best practices and security considerations.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "How to Decode JWT Tokens from the Command Line",
+      "item": "https://www.iamdevbox.com/posts/how-to-decode-jwt-tokens-from-the-command-line/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "How to Decode JWT Tokens from the Command Line",
+  "name": "How to Decode JWT Tokens from the Command Line",
+  "description": "Learn how to decode JWT tokens using command line tools like jq and base64. This guide includes best practices and security considerations.",
+  "keywords": [
+    "how to decode jwt tokens from the command line", "python", "jwt-decoding", "command-line-tools", "iam-engineering", "security-tips", "developer-tricks", "base64"
+  ],
+  "articleBody": "Decoding JWT tokens can be a crucial part of debugging and understanding the authentication and authorization processes in your applications. Whether you’re working on a microservices architecture or a single-page application, being able to quickly inspect JWT tokens can save you a lot of time. In this post, I’ll walk you through how to decode JWT tokens from the command line using tools like base64 and jq.\nThe Problem JWT tokens are compact, URL-safe means of representing claims to be transferred between two parties. They are commonly used for authentication and information exchange. However, JWT tokens are often encoded, making them unreadable. Decoding them manually can be cumbersome, especially if you need to do it frequently during development or debugging.\nUnderstanding JWT Structure Before diving into decoding, let’s briefly understand the structure of a JWT token. A JWT token consists of three parts separated by dots (.):\nHeader: Metadata about the token type and the signing algorithm. Payload: Claims (statements about an entity) and additional data. Signature: Used to verify that the sender of the JWT is who it says it is and to ensure that the message wasn’t changed along the way. Here’s an example of a JWT token:\neyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c Each part is Base64Url encoded. To decode a JWT, you need to decode each part separately.\nDecoding JWT Tokens Using base64 The simplest way to decode a JWT token is by using the base64 command available in most Unix-like systems. Here’s how you can do it:\nStep-by-Step Guide Extract the Header Use the following command to extract and decode the header: Extract the Payload Similarly, extract and decode the payload: Ignore the Signature The signature is used for verification and doesn’t need to be decoded manually. Let’s break down each step with an example.\nExample JWT Token Consider the following JWT token:\neyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c Extract and Decode the Header Split the token into its components. Decode the header using base64. # Extract the header part HEADER=$(echo \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\" | tr -d '\\n') # Decode the header echo $HEADER | base64 --decode Terminal $ HEADER=$(echo \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\" | tr -d '\\n') $ echo $HEADER | base64 --decode { \"alg\": \"HS256\", \"typ\": \"JWT\" } Extract and Decode the Payload Extract the payload part. Decode the payload using base64. # Extract the payload part PAYLOAD=$(echo \"eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ\" | tr -d '\\n') # Decode the payload echo $PAYLOAD | base64 --decode Terminal $ PAYLOAD=$(echo \"eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ\" | tr -d '\\n') $ echo $PAYLOAD | base64 --decode { \"sub\": \"1234567890\", \"name\": \"John Doe\", \"iat\": 1516239022 } Handling Base64Url Encoding JWT tokens use Base64Url encoding, which is similar to Base64 but uses - and _ instead of + and /, and does not include padding =. To handle this, you can replace - and _ with + and / respectively, and add padding if necessary.\n# Function to decode Base64Url decode_base64url() { local encoded=\"$1\" # Replace URL-safe characters encoded=\"${encoded//_/+}\" encoded=\"${encoded//-/$__}\" # Add padding while (( ${#encoded} % 4 )); do encoded+=\"=\" done echo \"$encoded\" | base64 --decode } # Decode the header using the function decode_base64url \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\" Terminal $ decode_base64url \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\" { \"alg\": \"HS256\", \"typ\": \"JWT\" } Decoding the Entire Token You can create a script to decode the entire JWT token automatically.\n#!/bin/bash # Function to decode Base64Url decode_base64url() { local encoded=\"$1\" # Replace URL-safe characters encoded=\"${encoded//_/+}\" encoded=\"${encoded//-/$__}\" # Add padding while (( ${#encoded} % 4 )); do encoded+=\"=\" done echo \"$encoded\" | base64 --decode } # Check if a token is provided if [ -z \"$1\" ]; then echo \"Usage: $0 \" exit 1 fi # Split the token into parts IFS='.' read -r -a parts \u003c\u003c\u003c \"$1\" # Decode each part for i in \"${!parts[@]}\"; do case $i in 0) echo \"Header: $(decode_base64url \"${parts[$i]}\")\" ;; 1) echo \"Payload: $(decode_base64url \"${parts[$i]}\")\" ;; 2) echo \"Signature: ${parts[$i]}\" ;; esac done 💜 Pro Tip: Save this script as `decode_jwt.sh` and make it executable with `chmod +x decode_jwt.sh`. You can then run it by passing a JWT token as an argument. 🎯 Key Takeaways JWT tokens consist of three parts: Header, Payload, and Signature. Use `base64` to decode the Header and Payload. Handle Base64Url encoding by replacing `-` and `_` with `+` and `/`, and adding padding. Decoding JWT Tokens Using jq While base64 is sufficient for basic decoding, jq is a powerful tool for parsing JSON data. It can make the output more readable and easier to work with.\nInstalling jq If you don’t have jq installed, you can install it using your package manager.\n# On Ubuntu/Debian sudo apt-get install jq # On macOS brew install jq Decoding with jq You can combine base64 and jq to decode and pretty-print the JWT token.\n# Decode the header and pretty-print echo \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\" | base64 --decode | jq . # Decode the payload and pretty-print echo \"eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ\" | base64 --decode | jq . Terminal $ echo \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\" | base64 --decode | jq . { \"alg\": \"HS256\", \"typ\": \"JWT\" } $ echo \"eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ\" | base64 --decode | jq . { \"sub\": \"1234567890\", \"name\": \"John Doe\", \"iat\": 1516239022 } Automating with a Script You can create a script to decode and pretty-print the entire JWT token using jq.\n#!/bin/bash # Function to decode Base64Url decode_base64url() { local encoded=\"$1\" # Replace URL-safe characters encoded=\"${encoded//_/+}\" encoded=\"${encoded//-/$__}\" # Add padding while (( ${#encoded} % 4 )); do encoded+=\"=\" done echo \"$encoded\" | base64 --decode } # Check if a token is provided if [ -z \"$1\" ]; then echo \"Usage: $0 \" exit 1 fi # Split the token into parts IFS='.' read -r -a parts \u003c\u003c\u003c \"$1\" # Decode each part and pretty-print with jq for i in \"${!parts[@]}\"; do case $i in 0) echo \"Header: $(decode_base64url \"${parts[$i]}\" | jq .)\" ;; 1) echo \"Payload: $(decode_base64url \"${parts[$i]}\" | jq .)\" ;; 2) echo \"Signature: ${parts[$i]}\" ;; esac done 💜 Pro Tip: Save this script as `decode_jwt_jq.sh` and make it executable with `chmod +x decode_jwt_jq.sh`. You can then run it by passing a JWT token as an argument. 🎯 Key Takeaways `jq` makes JSON output more readable and easier to work with. Combine `base64` and `jq` for a powerful decoding solution. Create scripts for automation and convenience. Decoding JWT Tokens Without Installing Tools Sometimes, you might not have the luxury of installing additional tools like jq. In such cases, you can use pure Bash or other built-in tools.\nUsing Pure Bash Bash has limited capabilities for JSON parsing, but you can still decode and display the token parts.\n#!/bin/bash # Function to decode Base64Url decode_base64url() { local encoded=\"$1\" # Replace URL-safe characters encoded=\"${encoded//_/+}\" encoded=\"${encoded//-/$__}\" # Add padding while (( ${#encoded} % 4 )); do encoded+=\"=\" done echo \"$encoded\" | base64 --decode } # Check if a token is provided if [ -z \"$1\" ]; then echo \"Usage: $0 \" exit 1 fi # Split the token into parts IFS='.' read -r -a parts \u003c\u003c\u003c \"$1\" # Decode each part for i in \"${!parts[@]}\"; do case $i in 0) echo \"Header: $(decode_base64url \"${parts[$i]}\")\" ;; 1) echo \"Payload: $(decode_base64url \"${parts[$i]}\")\" ;; 2) echo \"Signature: ${parts[$i]}\" ;; esac done 💜 Pro Tip: This script only decodes the token and doesn’t pretty-print the JSON. For readability, consider using `jq` if possible. Using python If you have Python installed, you can use it to decode JWT tokens.\n#!/bin/bash # Check if a token is provided if [ -z \"$1\" ]; then echo \"Usage: $0 \" exit 1 fi # Decode the token using Python python -c \"import sys, base64, json; token = sys.argv[1].split('.'); print('Header:', json.dumps(json.loads(base64.b64decode(token[0] + '==' * (-len(token[0]) % 4))), indent=2)); print('Payload:', json.dumps(json.loads(base64.b64decode(token[1] + '==' * (-len(token[1]) % 4))), indent=2))\" \"$1\" 💜 Pro Tip: This script uses Python to decode and pretty-print the JWT token. Ensure Python is installed on your system. 🎯 Key Takeaways Use pure Bash for environments where no additional tools are available. Leverage Python for decoding if it’s already installed. Choose the method that best fits your environment. Security Considerations Decoding JWT tokens is generally safe, but there are some security considerations to keep in mind.\nDon’t Modify JWT Tokens JWT tokens are signed to ensure their integrity. Modifying the token will invalidate the signature, causing the token to be rejected by the server.\n🚨 Security Alert: Never modify JWT tokens manually. This can lead to authentication failures or security vulnerabilities. Keep Tokens Secure JWT tokens should be treated as sensitive data. Avoid logging or storing them unnecessarily. Use secure storage solutions and follow best practices for handling sensitive information.\n⚠️ Warning: Protect JWT tokens from unauthorized access. Use HTTPS and secure storage mechanisms. Validate Tokens on the Server Always validate JWT tokens on the server side. Relying solely on client-side validation can be insecure.\n💡 Key Point: Server-side validation ensures that tokens are valid and haven’t been tampered with. 🎯 Key Takeaways Never modify JWT tokens manually. Keep JWT tokens secure and avoid unnecessary logging. Validate tokens on the server side for security. Comparison of Decoding Methods Here’s a comparison of different methods for decoding JWT tokens:\nMethodProsConsUse When Pure BashNo additional dependenciesLimited JSON parsingMinimal environments `base64` + `jq`Readable output, powerful JSON parsingRequires `jq` installationDevelopment and debugging PythonFlexible, powerfulRequires Python installationPython is available 📋 Quick Reference base64 --decode - Decode Base64 encoded strings. jq - Parse and pretty-print JSON data. python - Use Python for flexible decoding and parsing. Conclusion Decoding JWT tokens from the command line is a valuable skill for IAM engineers and developers. By using tools like base64 and jq, you can quickly inspect and understand the contents of JWT tokens. Remember to handle tokens securely and validate them on the server side. With these techniques, you can save time and improve your debugging process.\nThat’s it. Simple, secure, works. Happy coding!\n",
+  "wordCount" : "1610",
+  "inLanguage": "en",
+  "image":"https://www.iamdevbox.com/images/posts/how-to-decode-jwt-tokens-from-the-command-line-fc74fd68.webp","datePublished": "2025-12-19T22:44:28Z",
+  "dateModified": "2026-02-10T09:19:20-05:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/how-to-decode-jwt-tokens-from-the-command-line/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do I decode a JWT token without installing any tools?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Use the built-in `base64` command available in most Unix-like systems to decode each part of the JWT token separately."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the security implications of decoding JWT tokens?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Decoding JWT tokens does not compromise security as it only reveals the contents; however, modifying the token requires re-signing with the secret key, which should be kept secure."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I modify the claims in a JWT token?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, you can modify the claims, but the token must be re-signed with the secret key to maintain its validity and integrity."
+      }
+    }
+  ]
+}
+</script>
+    <meta name="description" content="Learn how to decode JWT tokens using command line tools like jq and base64. This guide includes best practices and security considerations."><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/how-to-decode-jwt-tokens-from-the-command-line\/"
+  },
+  "headline": "How to Decode JWT Tokens from the Command Line",
+  "description": "Learn how to decode JWT tokens using command line tools like jq and base64. This guide includes best practices and security considerations.",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon-96x96.png",
+      "width": 96,
+      "height": 96
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://www.iamdevbox.com/IAMDevBox.com.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "datePublished": "2025-12-19T22:44:28Z",
+  "dateModified": "2026-02-10T09:19:20-05:00",
+  "wordCount":  1610 ,
+  "articleSection": "posts",
+  "keywords": ["how to decode jwt tokens from the command line","python","jwt-decoding","command-line-tools","iam-engineering","security-tips","developer-tricks","base64"]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "How to Decode JWT Tokens from the Command Line",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/how-to-decode-jwt-tokens-from-the-command-line\/"
+    }
+  ]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-token-exchange-implementing-oauth-20-token-exchange\/"
+            },
+            "headline": "Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:29:55Z",
+            "dateModified": "2026-03-01T14:30:15Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/go-secretless-with-snowflake-workload-identity-federation-snowflake\/"
+            },
+            "headline": "Go Secretless with Snowflake Workload Identity Federation - Snowflake",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:24:03Z",
+            "dateModified": "2026-03-01T14:24:20Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-algorithm-confusion-attack-cve-2026-developer-guide\/"
+            },
+            "headline": "JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-02-28T18:00:00Z",
+            "dateModified": "2026-03-01T11:21:01-05:00"
+          }
+  ]
+}
+</script>
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    const mermaidBlocks = document.querySelectorAll('.mermaid, pre code.language-mermaid, code.language-mermaid');
+    if (mermaidBlocks.length > 0) {
+        
+        mermaidBlocks.forEach(block => {
+            if (block.tagName === 'CODE') {
+                const pre = block.parentElement;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = block.textContent;
+                if (pre && pre.tagName === 'PRE') {
+                    pre.parentNode.replaceChild(div, pre);
+                } else {
+                    block.parentNode.replaceChild(div, block);
+                }
+            }
+        });
+
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+            const isDark = document.body.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#5a67d8',
+                    
+                    secondaryColor: '#48bb78',
+                    secondaryTextColor: '#ffffff',
+                    secondaryBorderColor: '#38a169',
+                    
+                    tertiaryColor: '#ed8936',
+                    tertiaryTextColor: '#ffffff',
+                    tertiaryBorderColor: '#dd6b20',
+                    
+                    lineColor: '#718096',
+                    
+                    background: isDark ? '#1a202c' : '#ffffff',
+                    mainBkg: isDark ? '#2d3748' : '#f7fafc',
+                    
+                    actorBkg: '#667eea',
+                    actorBorder: '#5a67d8',
+                    actorTextColor: '#ffffff',
+                    actorLineColor: '#718096',
+                    signalColor: '#4a5568',
+                    signalTextColor: '#2d3748',
+                    labelBoxBkgColor: '#edf2f7',
+                    labelBoxBorderColor: '#cbd5e0',
+                    labelTextColor: '#2d3748',
+                    loopTextColor: '#553c9a',
+                    noteBkgColor: '#faf089',
+                    noteTextColor: '#744210',
+                    noteBorderColor: '#d69e2e',
+                    
+                    nodeBkg: '#667eea',
+                    nodeBorder: '#5a67d8',
+                    clusterBkg: '#e2e8f0',
+                    clusterBorder: '#a0aec0',
+                    defaultLinkColor: '#718096',
+                    titleColor: '#2d3748',
+                    edgeLabelBackground: 'transparent',
+                    
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                sequence: {
+                    useMaxWidth: true,
+                    boxMargin: 10,
+                    boxTextMargin: 5,
+                    noteMargin: 10,
+                    messageMargin: 35,
+                    mirrorActors: false
+                }
+            });
+            mermaid.run().then(() => {
+                
+                document.querySelectorAll('.mermaid .node').forEach(node => {
+                    const rect = node.querySelector('rect, circle, ellipse, polygon');
+                    if (rect) {
+                        const fill = rect.getAttribute('fill') || window.getComputedStyle(rect).fill;
+                        
+                        const isDarkBg = fill && (
+                            fill.includes('667eea') || fill.includes('102, 126, 234') ||
+                            fill.includes('48bb78') || fill.includes('72, 187, 120') ||
+                            fill.includes('ed8936') || fill.includes('237, 137, 54') ||
+                            fill.includes('553c9a') || fill.includes('9f7aea') ||
+                            fill.includes('e53e3e') || fill.includes('dd6b20')
+                        );
+                        const textColor = isDarkBg ? '#ffffff' : '#1a202c';
+                        node.querySelectorAll('span, .nodeLabel, text, foreignObject div').forEach(text => {
+                            text.style.color = textColor;
+                            text.style.fill = textColor;
+                        });
+                    }
+                });
+            });
+        };
+        document.head.appendChild(script);
+    }
+
+    
+    const postContent = document.querySelector('.post-content');
+    const isSinglePost = document.querySelector('.post-single');
+    const isToolsPage = window.location.pathname.startsWith('/tools/');
+    if (postContent && isSinglePost && window.innerWidth >= 1400 && !isToolsPage) {
+        const headings = postContent.querySelectorAll('h2, h3');
+        if (headings.length >= 3) {
+            const toc = document.createElement('nav');
+            toc.className = 'floating-toc';
+            toc.innerHTML = '<h4>📑 Contents</h4><ul></ul>';
+            const tocList = toc.querySelector('ul');
+
+            headings.forEach((heading, index) => {
+                const id = heading.id || `section-${index}`;
+                heading.id = id;
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2';
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            document.body.appendChild(toc);
+
+            
+            const tocLinks = toc.querySelectorAll('a');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 150) {
+                        current = heading.id;
+                    }
+                });
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+    }
+
+    
+    if (postContent && isSinglePost && window.innerWidth >= 1200) {
+        const h2s = postContent.querySelectorAll('h2');
+        if (h2s.length >= 2) {
+            const indicator = document.createElement('div');
+            indicator.className = 'section-indicator';
+
+            h2s.forEach((h2, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'section-dot';
+                dot.title = h2.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                dot.addEventListener('click', () => {
+                    h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                indicator.appendChild(dot);
+            });
+
+            document.body.appendChild(indicator);
+
+            
+            window.addEventListener('scroll', () => {
+                const dots = indicator.querySelectorAll('.section-dot');
+                let activeIndex = 0;
+                h2s.forEach((h2, index) => {
+                    if (h2.getBoundingClientRect().top <= 200) {
+                        activeIndex = index;
+                    }
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+    }
+    });
+    </script>
+
+    
+    
+    <script>
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        function loadGA() {
+            if (window.gaLoaded) return;
+            window.gaLoaded = true;
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975';
+            document.head.appendChild(script);
+
+            script.onload = () => {
+                gtag('js', new Date());
+                gtag('config', 'G-B6QCH29975');
+            };
+        }
+
+        
+        ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+            window.addEventListener(event, loadGA, { once: true, passive: true });
+        });
+
+        
+        setTimeout(loadGA, 3000);
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+    
+    <div class="reading-progress" id="reading-progress"></div>
+    <script>
+    window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / docHeight) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+    </script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+            </div>
+        </div><button id="menu-btn" aria-label="Menu" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/categories/trending/" title="Hot IAM topics">
+                    <span>🔥Trending</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+(function() {
+    var btn = document.getElementById('menu-btn');
+    var menu = document.getElementById('menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+        });
+        
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
+</script>
+<main class="main">
+
+
+
+<div class="reading-progress" id="reading-progress"></div>
+<script>
+(function() {
+  const progressBar = document.getElementById('reading-progress');
+  const article = document.querySelector('.post-content');
+
+  if (!progressBar || !article) return;
+
+  function updateProgress() {
+    const articleTop = article.offsetTop;
+    const articleHeight = article.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+
+    
+    const start = articleTop - windowHeight;
+    const end = articleTop + articleHeight;
+    const current = scrollTop - start;
+    const total = end - start;
+
+    const progress = Math.min(Math.max((current / total) * 100, 0), 100);
+    progressBar.style.width = progress + '%';
+  }
+
+  
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  
+  updateProgress();
+})();
+</script>
+
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent" data-pagefind-meta="title">
+      How to Decode JWT Tokens from the Command Line
+    </h1>
+    <div class="post-meta"><span title='2025-12-19 22:44:28'>Dec 19, 2025</span>&nbsp;·&nbsp;8 min&nbsp;·&nbsp;1610 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+    
+      <div class="post-updated">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Updated: Feb 10, 2026
+      </div>
+  </header> 
+<figure class="entry-cover">
+        <img loading="eager" src="https://www.iamdevbox.com/images/posts/how-to-decode-jwt-tokens-from-the-command-line-fc74fd68.webp" alt="How to Decode JWT Tokens from the Command Line">
+        
+</figure><div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#the-problem" aria-label="The Problem">The Problem</a></li>
+                <li>
+                    <a href="#understanding-jwt-structure" aria-label="Understanding JWT Structure">Understanding JWT Structure</a></li>
+                <li>
+                    <a href="#decoding-jwt-tokens-using-base64" aria-label="Decoding JWT Tokens Using base64">Decoding JWT Tokens Using base64</a><ul>
+                        
+                <li>
+                    <a href="#step-by-step-guide" aria-label="Step-by-Step Guide">Step-by-Step Guide</a><ul>
+                        
+                <li>
+                    <a href="#" aria-label="Extract the Header">Extract the Header</a></li>
+                <li>
+                    <a href="#" aria-label="Extract the Payload">Extract the Payload</a></li>
+                <li>
+                    <a href="#" aria-label="Ignore the Signature">Ignore the Signature</a></li></ul>
+                </li>
+                <li>
+                    <a href="#example-jwt-token" aria-label="Example JWT Token">Example JWT Token</a></li>
+                <li>
+                    <a href="#extract-and-decode-the-header" aria-label="Extract and Decode the Header">Extract and Decode the Header</a></li>
+                <li>
+                    <a href="#extract-and-decode-the-payload" aria-label="Extract and Decode the Payload">Extract and Decode the Payload</a></li>
+                <li>
+                    <a href="#handling-base64url-encoding" aria-label="Handling Base64Url Encoding">Handling Base64Url Encoding</a></li>
+                <li>
+                    <a href="#decoding-the-entire-token" aria-label="Decoding the Entire Token">Decoding the Entire Token</a><ul>
+                        
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#decoding-jwt-tokens-using-jq" aria-label="Decoding JWT Tokens Using jq">Decoding JWT Tokens Using jq</a><ul>
+                        
+                <li>
+                    <a href="#installing-jq" aria-label="Installing jq">Installing jq</a></li>
+                <li>
+                    <a href="#decoding-with-jq" aria-label="Decoding with jq">Decoding with jq</a></li>
+                <li>
+                    <a href="#automating-with-a-script" aria-label="Automating with a Script">Automating with a Script</a><ul>
+                        
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#decoding-jwt-tokens-without-installing-tools" aria-label="Decoding JWT Tokens Without Installing Tools">Decoding JWT Tokens Without Installing Tools</a><ul>
+                        
+                <li>
+                    <a href="#using-pure-bash" aria-label="Using Pure Bash">Using Pure Bash</a></li>
+                <li>
+                    <a href="#using-python" aria-label="Using python">Using python</a><ul>
+                        
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#security-considerations" aria-label="Security Considerations">Security Considerations</a><ul>
+                        
+                <li>
+                    <a href="#dont-modify-jwt-tokens" aria-label="Don’t Modify JWT Tokens">Don’t Modify JWT Tokens</a></li>
+                <li>
+                    <a href="#keep-tokens-secure" aria-label="Keep Tokens Secure">Keep Tokens Secure</a></li>
+                <li>
+                    <a href="#validate-tokens-on-the-server" aria-label="Validate Tokens on the Server">Validate Tokens on the Server</a><ul>
+                        
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#comparison-of-decoding-methods" aria-label="Comparison of Decoding Methods">Comparison of Decoding Methods</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#" aria-label="📋 Quick Reference">📋 Quick Reference</a></li></ul>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#conclusion" aria-label="Conclusion">Conclusion</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content" data-pagefind-body><p>Decoding JWT tokens can be a crucial part of debugging and understanding the authentication and authorization processes in your applications. Whether you&rsquo;re working on a microservices architecture or a single-page application, being able to quickly inspect JWT tokens can save you a lot of time. In this post, I’ll walk you through how to decode JWT tokens from the command line using tools like <code>base64</code> and <code>jq</code>.</p>
+<h2 id="the-problem">The Problem<a hidden class="anchor" aria-hidden="true" href="#the-problem">#</a></h2>
+<p>JWT tokens are compact, URL-safe means of representing claims to be transferred between two parties. They are commonly used for authentication and information exchange. However, JWT tokens are often encoded, making them unreadable. Decoding them manually can be cumbersome, especially if you need to do it frequently during development or debugging.</p>
+<h2 id="understanding-jwt-structure">Understanding JWT Structure<a hidden class="anchor" aria-hidden="true" href="#understanding-jwt-structure">#</a></h2>
+<p>Before diving into decoding, let’s briefly understand the structure of a JWT token. A JWT token consists of three parts separated by dots (<code>.</code>):</p>
+<ol>
+<li><strong>Header</strong>: Metadata about the token type and the signing algorithm.</li>
+<li><strong>Payload</strong>: Claims (statements about an entity) and additional data.</li>
+<li><strong>Signature</strong>: Used to verify that the sender of the JWT is who it says it is and to ensure that the message wasn’t changed along the way.</li>
+</ol>
+<p>Here’s an example of a JWT token:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+</span></span></code></pre></div><p>Each part is Base64Url encoded. To decode a JWT, you need to decode each part separately.</p>
+<h2 id="decoding-jwt-tokens-using-base64">Decoding JWT Tokens Using <code>base64</code><a hidden class="anchor" aria-hidden="true" href="#decoding-jwt-tokens-using-base64">#</a></h2>
+<p>The simplest way to decode a JWT token is by using the <code>base64</code> command available in most Unix-like systems. Here’s how you can do it:</p>
+<h3 id="step-by-step-guide">Step-by-Step Guide<a hidden class="anchor" aria-hidden="true" href="#step-by-step-guide">#</a></h3>
+<div class="step-guide">
+<div class="step-item"><div class="step-content">
+<h4>Extract the Header</h4>
+Use the following command to extract and decode the header:
+</div></div>
+<div class="step-item"><div class="step-content">
+<h4>Extract the Payload</h4>
+Similarly, extract and decode the payload:
+</div></div>
+<div class="step-item"><div class="step-content">
+<h4>Ignore the Signature</h4>
+The signature is used for verification and doesn’t need to be decoded manually.
+</div></div>
+</div>
+<p>Let’s break down each step with an example.</p>
+<h3 id="example-jwt-token">Example JWT Token<a hidden class="anchor" aria-hidden="true" href="#example-jwt-token">#</a></h3>
+<p>Consider the following JWT token:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+</span></span></code></pre></div><h3 id="extract-and-decode-the-header">Extract and Decode the Header<a hidden class="anchor" aria-hidden="true" href="#extract-and-decode-the-header">#</a></h3>
+<ol>
+<li>Split the token into its components.</li>
+<li>Decode the header using <code>base64</code>.</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Extract the header part</span>
+</span></span><span style="display:flex;"><span>HEADER<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>echo <span style="color:#e6db74">&#34;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9&#34;</span> | tr -d <span style="color:#e6db74">&#39;\n&#39;</span><span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Decode the header</span>
+</span></span><span style="display:flex;"><span>echo $HEADER | base64 --decode
+</span></span></code></pre></div><div class="terminal">
+<div class="terminal-header">
+<span class="terminal-dot red"></span>
+<span class="terminal-dot yellow"></span>
+<span class="terminal-dot green"></span>
+<span class="terminal-title">Terminal</span>
+</div>
+<div class="terminal-body">
+<span class="prompt">$</span> HEADER=$(echo "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9" | tr -d '\n')
+<span class="prompt">$</span> echo $HEADER | base64 --decode
+<span class="output">{ "alg": "HS256", "typ": "JWT" }</span>
+</div>
+</div>
+<h3 id="extract-and-decode-the-payload">Extract and Decode the Payload<a hidden class="anchor" aria-hidden="true" href="#extract-and-decode-the-payload">#</a></h3>
+<ol>
+<li>Extract the payload part.</li>
+<li>Decode the payload using <code>base64</code>.</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Extract the payload part</span>
+</span></span><span style="display:flex;"><span>PAYLOAD<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>echo <span style="color:#e6db74">&#34;eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ&#34;</span> | tr -d <span style="color:#e6db74">&#39;\n&#39;</span><span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Decode the payload</span>
+</span></span><span style="display:flex;"><span>echo $PAYLOAD | base64 --decode
+</span></span></code></pre></div><div class="terminal">
+<div class="terminal-header">
+<span class="terminal-dot red"></span>
+<span class="terminal-dot yellow"></span>
+<span class="terminal-dot green"></span>
+<span class="terminal-title">Terminal</span>
+</div>
+<div class="terminal-body">
+<span class="prompt">$</span> PAYLOAD=$(echo "eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ" | tr -d '\n')
+<span class="prompt">$</span> echo $PAYLOAD | base64 --decode
+<span class="output">{ "sub": "1234567890", "name": "John Doe", "iat": 1516239022 }</span>
+</div>
+</div>
+<h3 id="handling-base64url-encoding">Handling Base64Url Encoding<a hidden class="anchor" aria-hidden="true" href="#handling-base64url-encoding">#</a></h3>
+<p>JWT tokens use Base64Url encoding, which is similar to Base64 but uses <code>-</code> and <code>_</code> instead of <code>+</code> and <code>/</code>, and does not include padding <code>=</code>. To handle this, you can replace <code>-</code> and <code>_</code> with <code>+</code> and <code>/</code> respectively, and add padding if necessary.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Function to decode Base64Url</span>
+</span></span><span style="display:flex;"><span>decode_base64url<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>  local encoded<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span>$1<span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e"># Replace URL-safe characters</span>
+</span></span><span style="display:flex;"><span>  encoded<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>encoded//_/+<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  encoded<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>encoded//-/$__<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e"># Add padding</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">while</span> <span style="color:#f92672">((</span> <span style="color:#e6db74">${#</span>encoded<span style="color:#e6db74">}</span> % <span style="color:#ae81ff">4</span> <span style="color:#f92672">))</span>; <span style="color:#66d9ef">do</span>
+</span></span><span style="display:flex;"><span>    encoded<span style="color:#f92672">+=</span><span style="color:#e6db74">&#34;=&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">done</span>
+</span></span><span style="display:flex;"><span>  echo <span style="color:#e6db74">&#34;</span>$encoded<span style="color:#e6db74">&#34;</span> | base64 --decode
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Decode the header using the function</span>
+</span></span><span style="display:flex;"><span>decode_base64url <span style="color:#e6db74">&#34;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9&#34;</span>
+</span></span></code></pre></div><div class="terminal">
+<div class="terminal-header">
+<span class="terminal-dot red"></span>
+<span class="terminal-dot yellow"></span>
+<span class="terminal-dot green"></span>
+<span class="terminal-title">Terminal</span>
+</div>
+<div class="terminal-body">
+<span class="prompt">$</span> decode_base64url "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+<span class="output">{ "alg": "HS256", "typ": "JWT" }</span>
+</div>
+</div>
+<h3 id="decoding-the-entire-token">Decoding the Entire Token<a hidden class="anchor" aria-hidden="true" href="#decoding-the-entire-token">#</a></h3>
+<p>You can create a script to decode the entire JWT token automatically.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/bash
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Function to decode Base64Url</span>
+</span></span><span style="display:flex;"><span>decode_base64url<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>  local encoded<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span>$1<span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e"># Replace URL-safe characters</span>
+</span></span><span style="display:flex;"><span>  encoded<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>encoded//_/+<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  encoded<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>encoded//-/$__<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e"># Add padding</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">while</span> <span style="color:#f92672">((</span> <span style="color:#e6db74">${#</span>encoded<span style="color:#e6db74">}</span> % <span style="color:#ae81ff">4</span> <span style="color:#f92672">))</span>; <span style="color:#66d9ef">do</span>
+</span></span><span style="display:flex;"><span>    encoded<span style="color:#f92672">+=</span><span style="color:#e6db74">&#34;=&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">done</span>
+</span></span><span style="display:flex;"><span>  echo <span style="color:#e6db74">&#34;</span>$encoded<span style="color:#e6db74">&#34;</span> | base64 --decode
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Check if a token is provided</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> <span style="color:#f92672">[</span> -z <span style="color:#e6db74">&#34;</span>$1<span style="color:#e6db74">&#34;</span> <span style="color:#f92672">]</span>; <span style="color:#66d9ef">then</span>
+</span></span><span style="display:flex;"><span>  echo <span style="color:#e6db74">&#34;Usage: </span>$0<span style="color:#e6db74"> &lt;jwt_token&gt;&#34;</span>
+</span></span><span style="display:flex;"><span>  exit <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">fi</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Split the token into parts</span>
+</span></span><span style="display:flex;"><span>IFS<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;.&#39;</span> read -r -a parts <span style="color:#f92672">&lt;&lt;&lt;</span> <span style="color:#e6db74">&#34;</span>$1<span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Decode each part</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> i in <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>!parts[@]<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>; <span style="color:#66d9ef">do</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">case</span> $i in
+</span></span><span style="display:flex;"><span>    0<span style="color:#f92672">)</span> echo <span style="color:#e6db74">&#34;Header: </span><span style="color:#66d9ef">$(</span>decode_base64url <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>parts[$i]<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span> ;;
+</span></span><span style="display:flex;"><span>    1<span style="color:#f92672">)</span> echo <span style="color:#e6db74">&#34;Payload: </span><span style="color:#66d9ef">$(</span>decode_base64url <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>parts[$i]<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span> ;;
+</span></span><span style="display:flex;"><span>    2<span style="color:#f92672">)</span> echo <span style="color:#e6db74">&#34;Signature: </span><span style="color:#e6db74">${</span>parts[$i]<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> ;;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">esac</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">done</span>
+</span></span></code></pre></div><div class="tip">💜 <strong>Pro Tip:</strong> Save this script as `decode_jwt.sh` and make it executable with `chmod +x decode_jwt.sh`. You can then run it by passing a JWT token as an argument.</div>
+<div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>JWT tokens consist of three parts: Header, Payload, and Signature.</li>
+<li>Use `base64` to decode the Header and Payload.</li>
+<li>Handle Base64Url encoding by replacing `-` and `_` with `+` and `/`, and adding padding.</li>
+</ul>
+</div>
+<h2 id="decoding-jwt-tokens-using-jq">Decoding JWT Tokens Using <code>jq</code><a hidden class="anchor" aria-hidden="true" href="#decoding-jwt-tokens-using-jq">#</a></h2>
+<p>While <code>base64</code> is sufficient for basic decoding, <code>jq</code> is a powerful tool for parsing JSON data. It can make the output more readable and easier to work with.</p>
+<h3 id="installing-jq">Installing <code>jq</code><a hidden class="anchor" aria-hidden="true" href="#installing-jq">#</a></h3>
+<p>If you don’t have <code>jq</code> installed, you can install it using your package manager.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># On Ubuntu/Debian</span>
+</span></span><span style="display:flex;"><span>sudo apt-get install jq
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># On macOS</span>
+</span></span><span style="display:flex;"><span>brew install jq
+</span></span></code></pre></div><h3 id="decoding-with-jq">Decoding with <code>jq</code><a hidden class="anchor" aria-hidden="true" href="#decoding-with-jq">#</a></h3>
+<p>You can combine <code>base64</code> and <code>jq</code> to decode and pretty-print the JWT token.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Decode the header and pretty-print</span>
+</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9&#34;</span> | base64 --decode | jq .
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Decode the payload and pretty-print</span>
+</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ&#34;</span> | base64 --decode | jq .
+</span></span></code></pre></div><div class="terminal">
+<div class="terminal-header">
+<span class="terminal-dot red"></span>
+<span class="terminal-dot yellow"></span>
+<span class="terminal-dot green"></span>
+<span class="terminal-title">Terminal</span>
+</div>
+<div class="terminal-body">
+<span class="prompt">$</span> echo "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9" | base64 --decode | jq .
+<span class="output">{
+  "alg": "HS256",
+  "typ": "JWT"
+}</span>
+<span class="prompt">$</span> echo "eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ" | base64 --decode | jq .
+<span class="output">{
+  "sub": "1234567890",
+  "name": "John Doe",
+  "iat": 1516239022
+}</span>
+</div>
+</div>
+<h3 id="automating-with-a-script">Automating with a Script<a hidden class="anchor" aria-hidden="true" href="#automating-with-a-script">#</a></h3>
+<p>You can create a script to decode and pretty-print the entire JWT token using <code>jq</code>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/bash
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Function to decode Base64Url</span>
+</span></span><span style="display:flex;"><span>decode_base64url<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>  local encoded<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span>$1<span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e"># Replace URL-safe characters</span>
+</span></span><span style="display:flex;"><span>  encoded<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>encoded//_/+<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  encoded<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>encoded//-/$__<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e"># Add padding</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">while</span> <span style="color:#f92672">((</span> <span style="color:#e6db74">${#</span>encoded<span style="color:#e6db74">}</span> % <span style="color:#ae81ff">4</span> <span style="color:#f92672">))</span>; <span style="color:#66d9ef">do</span>
+</span></span><span style="display:flex;"><span>    encoded<span style="color:#f92672">+=</span><span style="color:#e6db74">&#34;=&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">done</span>
+</span></span><span style="display:flex;"><span>  echo <span style="color:#e6db74">&#34;</span>$encoded<span style="color:#e6db74">&#34;</span> | base64 --decode
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Check if a token is provided</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> <span style="color:#f92672">[</span> -z <span style="color:#e6db74">&#34;</span>$1<span style="color:#e6db74">&#34;</span> <span style="color:#f92672">]</span>; <span style="color:#66d9ef">then</span>
+</span></span><span style="display:flex;"><span>  echo <span style="color:#e6db74">&#34;Usage: </span>$0<span style="color:#e6db74"> &lt;jwt_token&gt;&#34;</span>
+</span></span><span style="display:flex;"><span>  exit <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">fi</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Split the token into parts</span>
+</span></span><span style="display:flex;"><span>IFS<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;.&#39;</span> read -r -a parts <span style="color:#f92672">&lt;&lt;&lt;</span> <span style="color:#e6db74">&#34;</span>$1<span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Decode each part and pretty-print with jq</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> i in <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>!parts[@]<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>; <span style="color:#66d9ef">do</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">case</span> $i in
+</span></span><span style="display:flex;"><span>    0<span style="color:#f92672">)</span> echo <span style="color:#e6db74">&#34;Header: </span><span style="color:#66d9ef">$(</span>decode_base64url <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>parts[$i]<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> | jq .<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span> ;;
+</span></span><span style="display:flex;"><span>    1<span style="color:#f92672">)</span> echo <span style="color:#e6db74">&#34;Payload: </span><span style="color:#66d9ef">$(</span>decode_base64url <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>parts[$i]<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> | jq .<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span> ;;
+</span></span><span style="display:flex;"><span>    2<span style="color:#f92672">)</span> echo <span style="color:#e6db74">&#34;Signature: </span><span style="color:#e6db74">${</span>parts[$i]<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> ;;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">esac</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">done</span>
+</span></span></code></pre></div><div class="tip">💜 <strong>Pro Tip:</strong> Save this script as `decode_jwt_jq.sh` and make it executable with `chmod +x decode_jwt_jq.sh`. You can then run it by passing a JWT token as an argument.</div>
+<div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>`jq` makes JSON output more readable and easier to work with.</li>
+<li>Combine `base64` and `jq` for a powerful decoding solution.</li>
+<li>Create scripts for automation and convenience.</li>
+</ul>
+</div>
+<h2 id="decoding-jwt-tokens-without-installing-tools">Decoding JWT Tokens Without Installing Tools<a hidden class="anchor" aria-hidden="true" href="#decoding-jwt-tokens-without-installing-tools">#</a></h2>
+<p>Sometimes, you might not have the luxury of installing additional tools like <code>jq</code>. In such cases, you can use pure Bash or other built-in tools.</p>
+<h3 id="using-pure-bash">Using Pure Bash<a hidden class="anchor" aria-hidden="true" href="#using-pure-bash">#</a></h3>
+<p>Bash has limited capabilities for JSON parsing, but you can still decode and display the token parts.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/bash
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Function to decode Base64Url</span>
+</span></span><span style="display:flex;"><span>decode_base64url<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>  local encoded<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span>$1<span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e"># Replace URL-safe characters</span>
+</span></span><span style="display:flex;"><span>  encoded<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>encoded//_/+<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  encoded<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>encoded//-/$__<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e"># Add padding</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">while</span> <span style="color:#f92672">((</span> <span style="color:#e6db74">${#</span>encoded<span style="color:#e6db74">}</span> % <span style="color:#ae81ff">4</span> <span style="color:#f92672">))</span>; <span style="color:#66d9ef">do</span>
+</span></span><span style="display:flex;"><span>    encoded<span style="color:#f92672">+=</span><span style="color:#e6db74">&#34;=&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">done</span>
+</span></span><span style="display:flex;"><span>  echo <span style="color:#e6db74">&#34;</span>$encoded<span style="color:#e6db74">&#34;</span> | base64 --decode
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Check if a token is provided</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> <span style="color:#f92672">[</span> -z <span style="color:#e6db74">&#34;</span>$1<span style="color:#e6db74">&#34;</span> <span style="color:#f92672">]</span>; <span style="color:#66d9ef">then</span>
+</span></span><span style="display:flex;"><span>  echo <span style="color:#e6db74">&#34;Usage: </span>$0<span style="color:#e6db74"> &lt;jwt_token&gt;&#34;</span>
+</span></span><span style="display:flex;"><span>  exit <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">fi</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Split the token into parts</span>
+</span></span><span style="display:flex;"><span>IFS<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;.&#39;</span> read -r -a parts <span style="color:#f92672">&lt;&lt;&lt;</span> <span style="color:#e6db74">&#34;</span>$1<span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Decode each part</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> i in <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>!parts[@]<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>; <span style="color:#66d9ef">do</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">case</span> $i in
+</span></span><span style="display:flex;"><span>    0<span style="color:#f92672">)</span> echo <span style="color:#e6db74">&#34;Header: </span><span style="color:#66d9ef">$(</span>decode_base64url <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>parts[$i]<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span> ;;
+</span></span><span style="display:flex;"><span>    1<span style="color:#f92672">)</span> echo <span style="color:#e6db74">&#34;Payload: </span><span style="color:#66d9ef">$(</span>decode_base64url <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>parts[$i]<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span> ;;
+</span></span><span style="display:flex;"><span>    2<span style="color:#f92672">)</span> echo <span style="color:#e6db74">&#34;Signature: </span><span style="color:#e6db74">${</span>parts[$i]<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> ;;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">esac</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">done</span>
+</span></span></code></pre></div><div class="tip">💜 <strong>Pro Tip:</strong> This script only decodes the token and doesn’t pretty-print the JSON. For readability, consider using `jq` if possible.</div>
+<h3 id="using-python">Using <code>python</code><a hidden class="anchor" aria-hidden="true" href="#using-python">#</a></h3>
+<p>If you have Python installed, you can use it to decode JWT tokens.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/bash
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Check if a token is provided</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> <span style="color:#f92672">[</span> -z <span style="color:#e6db74">&#34;</span>$1<span style="color:#e6db74">&#34;</span> <span style="color:#f92672">]</span>; <span style="color:#66d9ef">then</span>
+</span></span><span style="display:flex;"><span>  echo <span style="color:#e6db74">&#34;Usage: </span>$0<span style="color:#e6db74"> &lt;jwt_token&gt;&#34;</span>
+</span></span><span style="display:flex;"><span>  exit <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">fi</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Decode the token using Python</span>
+</span></span><span style="display:flex;"><span>python -c <span style="color:#e6db74">&#34;import sys, base64, json; token = sys.argv[1].split(&#39;.&#39;); print(&#39;Header:&#39;, json.dumps(json.loads(base64.b64decode(token[0] + &#39;==&#39; * (-len(token[0]) % 4))), indent=2)); print(&#39;Payload:&#39;, json.dumps(json.loads(base64.b64decode(token[1] + &#39;==&#39; * (-len(token[1]) % 4))), indent=2))&#34;</span> <span style="color:#e6db74">&#34;</span>$1<span style="color:#e6db74">&#34;</span>
+</span></span></code></pre></div><div class="tip">💜 <strong>Pro Tip:</strong> This script uses Python to decode and pretty-print the JWT token. Ensure Python is installed on your system.</div>
+<div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>Use pure Bash for environments where no additional tools are available.</li>
+<li>Leverage Python for decoding if it’s already installed.</li>
+<li>Choose the method that best fits your environment.</li>
+</ul>
+</div>
+<h2 id="security-considerations">Security Considerations<a hidden class="anchor" aria-hidden="true" href="#security-considerations">#</a></h2>
+<p>Decoding JWT tokens is generally safe, but there are some security considerations to keep in mind.</p>
+<h3 id="dont-modify-jwt-tokens">Don’t Modify JWT Tokens<a hidden class="anchor" aria-hidden="true" href="#dont-modify-jwt-tokens">#</a></h3>
+<p>JWT tokens are signed to ensure their integrity. Modifying the token will invalidate the signature, causing the token to be rejected by the server.</p>
+<div class="danger">🚨 <strong>Security Alert:</strong> Never modify JWT tokens manually. This can lead to authentication failures or security vulnerabilities.</div>
+<h3 id="keep-tokens-secure">Keep Tokens Secure<a hidden class="anchor" aria-hidden="true" href="#keep-tokens-secure">#</a></h3>
+<p>JWT tokens should be treated as sensitive data. Avoid logging or storing them unnecessarily. Use secure storage solutions and follow best practices for handling sensitive information.</p>
+<div class="warning">⚠️ <strong>Warning:</strong> Protect JWT tokens from unauthorized access. Use HTTPS and secure storage mechanisms.</div>
+<h3 id="validate-tokens-on-the-server">Validate Tokens on the Server<a hidden class="anchor" aria-hidden="true" href="#validate-tokens-on-the-server">#</a></h3>
+<p>Always validate JWT tokens on the server side. Relying solely on client-side validation can be insecure.</p>
+<div class="info">💡 <strong>Key Point:</strong> Server-side validation ensures that tokens are valid and haven’t been tampered with.</div>
+<div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>Never modify JWT tokens manually.</li>
+<li>Keep JWT tokens secure and avoid unnecessary logging.</li>
+<li>Validate tokens on the server side for security.</li>
+</ul>
+</div>
+<h2 id="comparison-of-decoding-methods">Comparison of Decoding Methods<a hidden class="anchor" aria-hidden="true" href="#comparison-of-decoding-methods">#</a></h2>
+<p>Here’s a comparison of different methods for decoding JWT tokens:</p>
+<table class="comparison-table">
+<thead><tr><th>Method</th><th>Pros</th><th>Cons</th><th>Use When</th></tr></thead>
+<tbody>
+<tr><td>Pure Bash</td><td>No additional dependencies</td><td>Limited JSON parsing</td><td>Minimal environments</td></tr>
+<tr><td>`base64` + `jq`</td><td>Readable output, powerful JSON parsing</td><td>Requires `jq` installation</td><td>Development and debugging</td></tr>
+<tr><td>Python</td><td>Flexible, powerful</td><td>Requires Python installation</td><td>Python is available</td></tr>
+</tbody>
+</table>
+<div class="quick-ref">
+<h4>📋 Quick Reference</h4>
+<ul>
+<li><code>base64 --decode</code> - Decode Base64 encoded strings.</li>
+<li><code>jq</code> - Parse and pretty-print JSON data.</li>
+<li><code>python</code> - Use Python for flexible decoding and parsing.</li>
+</ul>
+</div>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>Decoding JWT tokens from the command line is a valuable skill for IAM engineers and developers. By using tools like <code>base64</code> and <code>jq</code>, you can quickly inspect and understand the contents of JWT tokens. Remember to handle tokens securely and validate them on the server side. With these techniques, you can save time and improve your debugging process.</p>
+<p>That&rsquo;s it. Simple, secure, works. Happy coding!</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/jwt-decoding/">Jwt-Decoding</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/command-line-tools/">Command-Line-Tools</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/iam-engineering/">IAM Engineering</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/security-tips/">Security-Tips</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/developer-tricks/">Developer-Tricks</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/frodo-cli-complete-guide-installation-setup-and-multi-tenant-management/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Frodo CLI Complete Guide: Installation, Setup, and Multi-Tenant Management for ForgeRock</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/pyjwt-vs-python-jose-choosing-the-right-python-jwt-library/">
+    <span class="title">Next »</span>
+    <br>
+    <span>PyJWT vs python-jose: Choosing the Right Python JWT Library</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+
+<section class="post-feedback">
+  <p class="feedback-question">Was this article helpful?</p>
+  <div class="feedback-buttons">
+    <button class="feedback-btn feedback-yes" onclick="trackFeedback('yes', '\/posts\/how-to-decode-jwt-tokens-from-the-command-line\/')" aria-label="Yes, helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      Yes
+    </button>
+    <button class="feedback-btn feedback-no" onclick="trackFeedback('no', '\/posts\/how-to-decode-jwt-tokens-from-the-command-line\/')" aria-label="No, not helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>
+      No
+    </button>
+  </div>
+  <p class="feedback-thanks" style="display: none;">Thanks for your feedback!</p>
+</section>
+
+
+<section class="author-bio">
+  <div class="author-avatar">
+    <img src="/IAMDevBox.com.jpg" alt="IAMDevBox Author" width="64" height="64" loading="lazy">
+  </div>
+  <div class="author-info">
+    <h4>Written by IAMDevBox</h4>
+    <p>Enterprise IAM architect with 15+ years in identity modernization. Certified across ForgeRock, Ping Identity, SailPoint, AWS, and Azure.</p>
+    <div class="author-links">
+      <a href="https://twitter.com/iamdevbox" target="_blank" rel="noopener" title="Follow on X/Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/iamdevbox" target="_blank" rel="noopener" title="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="/contact/" title="Contact">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function trackFeedback(value, page) {
+  
+  document.querySelector('.feedback-buttons').style.display = 'none';
+  document.querySelector('.feedback-question').style.display = 'none';
+  document.querySelector('.feedback-thanks').style.display = 'block';
+
+  
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'post_feedback', {
+      'feedback_value': value,
+      'page_path': page
+    });
+  }
+
+  
+  localStorage.setItem('feedback_' + page, value);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const page = '\/posts\/how-to-decode-jwt-tokens-from-the-command-line\/';
+  if (localStorage.getItem('feedback_' + page)) {
+    document.querySelector('.feedback-buttons').style.display = 'none';
+    document.querySelector('.feedback-question').textContent = 'Thanks for your feedback!';
+  }
+});
+</script>
+
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/cross-device-passkey-authentication-hybrid-flow-implementation/" class="custom-link">
+              Cross-Device Passkey Authentication: Hybrid Flow Implementation
+            </a>
+            <small class="custom-date">2026-02-25</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/forgerock-infrastructure-as-code-terraform-provider-for-identity-management/" class="custom-link">
+              ForgeRock Infrastructure as Code: Terraform Provider for Identity Management
+            </a>
+            <small class="custom-date">2026-01-30</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-custom-authentication-flows-building-advanced-login-journeys/" class="custom-link">
+              Keycloak Custom Authentication Flows: Building Advanced Login Journeys
+            </a>
+            <small class="custom-date">2026-01-28</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/migrating-from-forgerock-identity-cloud-to-pingone-aic-step-by-step-guide/" class="custom-link">
+              Migrating from ForgeRock Identity Cloud to PingOne AIC: Step-by-Step Guide
+            </a>
+            <small class="custom-date">2026-01-16</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/forgerock-backup-and-restore-automation-complete-scripts-for-am-idm-and-ds/" class="custom-link">
+              ForgeRock Backup and Restore Automation: Complete Scripts for AM IDM and DS
+            </a>
+            <small class="custom-date">2026-01-11</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+                Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+                Go Secretless with Snowflake Workload Identity Federation - Snowflake
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+                JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+                OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+                Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

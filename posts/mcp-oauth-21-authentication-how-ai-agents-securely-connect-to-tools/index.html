@@ -1,0 +1,2910 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>MCP OAuth 2.1 Authentication: How AI Agents Securely Connect to Tools | IAMDevBox</title>
+<meta name="keywords" content="mcp oauth authentication, model context protocol oauth 2.1, mcp server authentication, ai agent authorization oauth, mcp pkce mandatory, mcp authorization specification, oauth 2.1 for ai agents, mcp token validation, rfc 9728 protected resource metadata, mcp idp compatibility">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/mcp-oauth-21-authentication-how-ai-agents-securely-connect-to-tools/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.e24ea479df3e367781fafa20cedde21c7e043c10bed4c8c913ef9261a049a1e2.css" integrity="sha256-4k6ked8&#43;NneB&#43;vogzt3iHH4EPBC&#43;1MjJE&#43;&#43;SYaBJoeI=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/mcp-oauth-21-authentication-how-ai-agents-securely-connect-to-tools/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/mcp-oauth-21-authentication-how-ai-agents-securely-connect-to-tools/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="MCP OAuth 2.1 Authentication: How AI Agents Securely Connect to Tools">
+  <meta property="og:description" content="MCP OAuth 2.1 authentication explained with the Discovery Trifecta, mandatory PKCE, token audience binding, and IdP compatibility. Complete guide for securing AI agent connections.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-02-21T10:00:00+00:00">
+    <meta property="article:modified_time" content="2026-02-26T21:20:24-05:00">
+    <meta property="article:tag" content="OAuth 2.1">
+    <meta property="article:tag" content="MCP">
+    <meta property="article:tag" content="AI Agent Security">
+    <meta property="article:tag" content="Pkce">
+    <meta property="article:tag" content="Identity Management">
+      <meta property="og:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:title" content="MCP OAuth 2.1 Authentication: How AI Agents Securely Connect to Tools">
+<meta name="twitter:description" content="MCP OAuth 2.1 authentication explained with the Discovery Trifecta, mandatory PKCE, token audience binding, and IdP compatibility. Complete guide for securing AI agent connections.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "MCP OAuth 2.1 Authentication: How AI Agents Securely Connect to Tools",
+      "item": "https://www.iamdevbox.com/posts/mcp-oauth-21-authentication-how-ai-agents-securely-connect-to-tools/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "MCP OAuth 2.1 Authentication: How AI Agents Securely Connect to Tools",
+  "name": "MCP OAuth 2.1 Authentication: How AI Agents Securely Connect to Tools",
+  "description": "MCP OAuth 2.1 authentication explained with the Discovery Trifecta, mandatory PKCE, token audience binding, and IdP compatibility. Complete guide for securing AI agent connections.",
+  "keywords": [
+    "mcp oauth authentication", "model context protocol oauth 2.1", "mcp server authentication", "ai agent authorization oauth", "mcp pkce mandatory", "mcp authorization specification", "oauth 2.1 for ai agents", "mcp token validation", "rfc 9728 protected resource metadata", "mcp idp compatibility"
+  ],
+  "articleBody": "The Model Context Protocol (MCP) defines how AI agents connect to external tools and data sources. When an MCP client (like Claude Desktop or a custom AI agent) needs to access a protected MCP server, it uses OAuth 2.1 — not OAuth 2.0 — as the authorization mechanism. This article explains exactly how MCP authentication works, what makes it different from traditional OAuth, and which identity providers actually support it.\nWhy MCP Uses OAuth 2.1, Not 2.0 OAuth 2.0 has six gaps that MCP cannot tolerate:\nGap in OAuth 2.0 MCP Requirement OAuth 2.1 Fix PKCE optional Code interception attacks critical for AI agents PKCE mandatory with S256 Implicit flow allowed Token leakage in agent-to-server communication Implicit flow removed No audience binding Token confusion between MCP servers RFC 8707 resource indicators mandatory No discovery standard Zero-config federation needed for dynamic agents RFC 8414 + RFC 9728 ROPC flow allowed Plaintext passwords unacceptable ROPC removed Manual client registration Agents need automatic registration CIMD + DCR support The Discovery Trifecta MCP’s most novel feature is zero-configuration discovery. An MCP client can connect to any compliant MCP server without pre-configured endpoints.\nStep 1: Trigger Authentication The client sends an unauthenticated request to the MCP server and receives:\nHTTP/1.1 401 Unauthorized WWW-Authenticate: Bearer resource_metadata=\"https://mcp.example.com/.well-known/oauth-protected-resource\", scope=\"mcp:tools:weather\" Step 2: Protected Resource Metadata (RFC 9728) The client fetches the MCP server’s resource metadata:\nGET /.well-known/oauth-protected-resource HTTP/1.1 Host: mcp.example.com { \"resource\": \"https://mcp.example.com\", \"authorization_servers\": [\"https://auth.example.com\"], \"bearer_methods_supported\": [\"header\"], \"scopes_supported\": [\"mcp:tools:weather\", \"mcp:tools:calendar:read\"] } This tells the client which authorization server to use — the MCP server itself is NOT the authorization server.\nStep 3: Authorization Server Metadata (RFC 8414) The client discovers the AS endpoints. For issuer https://auth.example.com/tenant1, clients MUST try these URLs in order:\nhttps://auth.example.com/.well-known/oauth-authorization-server/tenant1 https://auth.example.com/.well-known/openid-configuration/tenant1 https://auth.example.com/tenant1/.well-known/openid-configuration Client Registration: Three Approaches MCP clients register with the authorization server using one of three mechanisms (in priority order):\n1. Pre-registration — Use an existing client_id if available.\n2. Client ID Metadata Documents (CIMD) — The client hosts a JSON document at an HTTPS URL and uses that URL as its client_id:\n{ \"client_id\": \"https://app.example.com/oauth/client-metadata.json\", \"client_name\": \"My MCP Client\", \"redirect_uris\": [\"http://127.0.0.1:3000/callback\"], \"grant_types\": [\"authorization_code\"], \"token_endpoint_auth_method\": \"none\" } The AS fetches and validates this document automatically. CIMD replaced Dynamic Client Registration (DCR) as the preferred approach in the November 2025 spec revision.\n3. Dynamic Client Registration (RFC 7591) — Fallback if the AS has a registration_endpoint.\nAuthorization Code Flow with Mandatory PKCE PKCE is non-negotiable in MCP. Clients MUST use S256 and MUST verify code_challenge_methods_supported in the AS metadata before proceeding. If S256 is not listed, the client MUST refuse to continue.\nGET /authorize? response_type=code \u0026client_id=https://app.example.com/oauth/client-metadata.json \u0026redirect_uri=http://localhost:3000/callback \u0026scope=mcp:tools:weather \u0026code_challenge=E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM \u0026code_challenge_method=S256 \u0026resource=https://mcp.example.com \u0026state=random-state-xyz HTTP/1.1 Host: auth.example.com The resource parameter (RFC 8707) binds the token to the specific MCP server. This prevents token confusion attacks where a token issued for one MCP server is used against another.\nToken Validation on the MCP Server MCP servers validate tokens as standard JWT bearer tokens:\nimport { jwtVerify, createRemoteJWKSet } from 'jose'; const JWKS = createRemoteJWKSet( new URL('https://auth.example.com/.well-known/jwks') ); const validateToken = async (token) =\u003e { const { payload } = await jwtVerify(token, JWKS, { issuer: 'https://auth.example.com', audience: 'https://mcp.example.com' // Must match resource parameter }); return { userId: payload.sub, scopes: payload.scope?.split(' ') || [], clientId: payload.client_id }; }; Critical rule: MCP servers MUST NOT relay client tokens to downstream services. Token passthrough is explicitly forbidden in the spec.\nStep-Up Authorization MCP supports progressive scope elevation. When a client has a valid token but needs additional permissions, the server returns:\nHTTP/1.1 403 Forbidden WWW-Authenticate: Bearer error=\"insufficient_scope\", scope=\"mcp:tools:weather mcp:tools:calendar:write\" The client then initiates a new authorization flow with the required scopes.\nIdP Compatibility Matrix Most major identity providers are NOT fully compliant with MCP’s requirements:\nProvider RFC 8707 (Resource Indicators) RFC 7591 (DCR) MCP Compliance PingFederate 12.1+ Yes Yes Fully compliant Keycloak Custom mapper needed Yes Partial Amazon Cognito Yes No Partial Auth0 Non-standard audience param Partial Incompatible Okta No Partial Incompatible Microsoft Entra ID Proprietary syntax No Incompatible The primary bottleneck is RFC 8707 (Resource Indicators). Most providers predate this standard and use proprietary audience parameters instead.\nMCP vs Traditional OAuth: Key Differences Aspect Traditional Web App MCP Actor Human in browser AI agent (often unattended) Client discovery Pre-configured client_id Dynamic via PRM + CIMD Token audience Often implicit Mandatory RFC 8707 binding PKCE Recommended Mandatory S256 Scope model Fixed at registration Progressive step-up elevation Token passthrough Common in microservices Explicitly forbidden Multi-hop Single client-server User → AI Host → MCP Client → MCP Servers Security Considerations Confused Deputy Attack When an MCP proxy server uses a static client_id with a third-party AS, an attacker can exploit pre-existing consent cookies to obtain authorization codes redirected to their own server. MCP proxy servers MUST implement per-client consent before forwarding to third-party authorization servers.\nSender-Constrained Tokens The spec recommends DPoP (Demonstrating Proof-of-Possession) or mTLS to prevent token replay. A stolen bearer token alone becomes useless without the client’s private key.\nSSRF in Discovery MCP clients fetch URLs from potentially malicious MCP servers during discovery. Mitigations include enforcing HTTPS, blocking private IP ranges (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16), and validating redirect targets.\nGetting Started To implement MCP OAuth in your server:\nImplement /.well-known/oauth-protected-resource (RFC 9728) returning your authorization server URL Return WWW-Authenticate headers on 401 responses with the resource_metadata URL Validate JWT tokens using JWKS, checking iss, aud, exp, and scope claims Use the MCP Auth SDK for Python or TypeScript For Cloudflare Workers, use workers-oauth-provider which wraps the full MCP OAuth flow ",
+  "wordCount" : "907",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/IAMDevBox.com.jpg","datePublished": "2026-02-21T10:00:00Z",
+  "dateModified": "2026-02-26T21:20:24-05:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/mcp-oauth-21-authentication-how-ai-agents-securely-connect-to-tools/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Does MCP require OAuth 2.1 or can I use OAuth 2.0?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The MCP authorization specification is built on OAuth 2.1 specifically. OAuth 2.0 lacks mandatory PKCE, has deprecated flows (implicit, ROPC), and does not require audience binding via RFC 8707. MCP clients MUST refuse to proceed if the authorization server does not support PKCE with S256."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does an MCP client discover which authorization server to use?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "MCP uses a three-step discovery process. First, the MCP server returns a 401 with a WWW-Authenticate header containing a resource_metadata URL. Second, the client fetches Protected Resource Metadata (RFC 9728) from that URL to find the authorization_servers list. Third, the client fetches Authorization Server Metadata (RFC 8414) to discover endpoints like token_endpoint and authorization_endpoint."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is PKCE mandatory for all MCP OAuth flows?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. PKCE with S256 is mandatory for all MCP authorization code flows. Clients MUST check code_challenge_methods_supported in the AS metadata and refuse to proceed if S256 is not listed. The plain method is not acceptable."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which identity providers are fully compatible with MCP OAuth?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "As of early 2026, only PingFederate 12.1+ is fully compliant with MCP requirements (RFC 8707 resource indicators + RFC 7591 DCR). Keycloak requires a custom mapper for RFC 8707. Auth0, Okta, and Microsoft Entra ID lack full RFC 8707 support, making them partially incompatible with the MCP spec."
+      }
+    }
+  ]
+}
+</script>
+    <meta name="description" content="MCP OAuth 2.1 authentication explained with the Discovery Trifecta, mandatory PKCE, token audience binding, and IdP compatibility. Complete guide for securing AI agent connections."><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/mcp-oauth-21-authentication-how-ai-agents-securely-connect-to-tools\/"
+  },
+  "headline": "MCP OAuth 2.1 Authentication: How AI Agents Securely Connect to Tools",
+  "description": "MCP OAuth 2.1 authentication explained with the Discovery Trifecta, mandatory PKCE, token audience binding, and IdP compatibility. Complete guide for securing AI agent connections.",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon-96x96.png",
+      "width": 96,
+      "height": 96
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://www.iamdevbox.com/IAMDevBox.com.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "datePublished": "2026-02-21T10:00:00Z",
+  "dateModified": "2026-02-26T21:20:24-05:00",
+  "wordCount":  907 ,
+  "articleSection": "posts",
+  "keywords": ["mcp oauth authentication","model context protocol oauth 2.1","mcp server authentication","ai agent authorization oauth","mcp pkce mandatory","mcp authorization specification","oauth 2.1 for ai agents","mcp token validation","rfc 9728 protected resource metadata","mcp idp compatibility"]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "MCP OAuth 2.1 Authentication: How AI Agents Securely Connect to Tools",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/mcp-oauth-21-authentication-how-ai-agents-securely-connect-to-tools\/"
+    }
+  ]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-token-exchange-implementing-oauth-20-token-exchange\/"
+            },
+            "headline": "Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:29:55Z",
+            "dateModified": "2026-03-01T14:30:15Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/go-secretless-with-snowflake-workload-identity-federation-snowflake\/"
+            },
+            "headline": "Go Secretless with Snowflake Workload Identity Federation - Snowflake",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:24:03Z",
+            "dateModified": "2026-03-01T14:24:20Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-algorithm-confusion-attack-cve-2026-developer-guide\/"
+            },
+            "headline": "JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-02-28T18:00:00Z",
+            "dateModified": "2026-03-01T11:21:01-05:00"
+          }
+  ]
+}
+</script>
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    const mermaidBlocks = document.querySelectorAll('.mermaid, pre code.language-mermaid, code.language-mermaid');
+    if (mermaidBlocks.length > 0) {
+        
+        mermaidBlocks.forEach(block => {
+            if (block.tagName === 'CODE') {
+                const pre = block.parentElement;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = block.textContent;
+                if (pre && pre.tagName === 'PRE') {
+                    pre.parentNode.replaceChild(div, pre);
+                } else {
+                    block.parentNode.replaceChild(div, block);
+                }
+            }
+        });
+
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+            const isDark = document.body.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#5a67d8',
+                    
+                    secondaryColor: '#48bb78',
+                    secondaryTextColor: '#ffffff',
+                    secondaryBorderColor: '#38a169',
+                    
+                    tertiaryColor: '#ed8936',
+                    tertiaryTextColor: '#ffffff',
+                    tertiaryBorderColor: '#dd6b20',
+                    
+                    lineColor: '#718096',
+                    
+                    background: isDark ? '#1a202c' : '#ffffff',
+                    mainBkg: isDark ? '#2d3748' : '#f7fafc',
+                    
+                    actorBkg: '#667eea',
+                    actorBorder: '#5a67d8',
+                    actorTextColor: '#ffffff',
+                    actorLineColor: '#718096',
+                    signalColor: '#4a5568',
+                    signalTextColor: '#2d3748',
+                    labelBoxBkgColor: '#edf2f7',
+                    labelBoxBorderColor: '#cbd5e0',
+                    labelTextColor: '#2d3748',
+                    loopTextColor: '#553c9a',
+                    noteBkgColor: '#faf089',
+                    noteTextColor: '#744210',
+                    noteBorderColor: '#d69e2e',
+                    
+                    nodeBkg: '#667eea',
+                    nodeBorder: '#5a67d8',
+                    clusterBkg: '#e2e8f0',
+                    clusterBorder: '#a0aec0',
+                    defaultLinkColor: '#718096',
+                    titleColor: '#2d3748',
+                    edgeLabelBackground: 'transparent',
+                    
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                sequence: {
+                    useMaxWidth: true,
+                    boxMargin: 10,
+                    boxTextMargin: 5,
+                    noteMargin: 10,
+                    messageMargin: 35,
+                    mirrorActors: false
+                }
+            });
+            mermaid.run().then(() => {
+                
+                document.querySelectorAll('.mermaid .node').forEach(node => {
+                    const rect = node.querySelector('rect, circle, ellipse, polygon');
+                    if (rect) {
+                        const fill = rect.getAttribute('fill') || window.getComputedStyle(rect).fill;
+                        
+                        const isDarkBg = fill && (
+                            fill.includes('667eea') || fill.includes('102, 126, 234') ||
+                            fill.includes('48bb78') || fill.includes('72, 187, 120') ||
+                            fill.includes('ed8936') || fill.includes('237, 137, 54') ||
+                            fill.includes('553c9a') || fill.includes('9f7aea') ||
+                            fill.includes('e53e3e') || fill.includes('dd6b20')
+                        );
+                        const textColor = isDarkBg ? '#ffffff' : '#1a202c';
+                        node.querySelectorAll('span, .nodeLabel, text, foreignObject div').forEach(text => {
+                            text.style.color = textColor;
+                            text.style.fill = textColor;
+                        });
+                    }
+                });
+            });
+        };
+        document.head.appendChild(script);
+    }
+
+    
+    const postContent = document.querySelector('.post-content');
+    const isSinglePost = document.querySelector('.post-single');
+    const isToolsPage = window.location.pathname.startsWith('/tools/');
+    if (postContent && isSinglePost && window.innerWidth >= 1400 && !isToolsPage) {
+        const headings = postContent.querySelectorAll('h2, h3');
+        if (headings.length >= 3) {
+            const toc = document.createElement('nav');
+            toc.className = 'floating-toc';
+            toc.innerHTML = '<h4>📑 Contents</h4><ul></ul>';
+            const tocList = toc.querySelector('ul');
+
+            headings.forEach((heading, index) => {
+                const id = heading.id || `section-${index}`;
+                heading.id = id;
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2';
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            document.body.appendChild(toc);
+
+            
+            const tocLinks = toc.querySelectorAll('a');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 150) {
+                        current = heading.id;
+                    }
+                });
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+    }
+
+    
+    if (postContent && isSinglePost && window.innerWidth >= 1200) {
+        const h2s = postContent.querySelectorAll('h2');
+        if (h2s.length >= 2) {
+            const indicator = document.createElement('div');
+            indicator.className = 'section-indicator';
+
+            h2s.forEach((h2, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'section-dot';
+                dot.title = h2.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                dot.addEventListener('click', () => {
+                    h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                indicator.appendChild(dot);
+            });
+
+            document.body.appendChild(indicator);
+
+            
+            window.addEventListener('scroll', () => {
+                const dots = indicator.querySelectorAll('.section-dot');
+                let activeIndex = 0;
+                h2s.forEach((h2, index) => {
+                    if (h2.getBoundingClientRect().top <= 200) {
+                        activeIndex = index;
+                    }
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+    }
+    });
+    </script>
+
+    
+    
+    <script>
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        function loadGA() {
+            if (window.gaLoaded) return;
+            window.gaLoaded = true;
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975';
+            document.head.appendChild(script);
+
+            script.onload = () => {
+                gtag('js', new Date());
+                gtag('config', 'G-B6QCH29975');
+            };
+        }
+
+        
+        ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+            window.addEventListener(event, loadGA, { once: true, passive: true });
+        });
+
+        
+        setTimeout(loadGA, 3000);
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+    
+    <div class="reading-progress" id="reading-progress"></div>
+    <script>
+    window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / docHeight) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+    </script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+            </div>
+        </div><button id="menu-btn" aria-label="Menu" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/categories/trending/" title="Hot IAM topics">
+                    <span>🔥Trending</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+(function() {
+    var btn = document.getElementById('menu-btn');
+    var menu = document.getElementById('menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+        });
+        
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
+</script>
+<main class="main">
+
+
+
+<div class="reading-progress" id="reading-progress"></div>
+<script>
+(function() {
+  const progressBar = document.getElementById('reading-progress');
+  const article = document.querySelector('.post-content');
+
+  if (!progressBar || !article) return;
+
+  function updateProgress() {
+    const articleTop = article.offsetTop;
+    const articleHeight = article.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+
+    
+    const start = articleTop - windowHeight;
+    const end = articleTop + articleHeight;
+    const current = scrollTop - start;
+    const total = end - start;
+
+    const progress = Math.min(Math.max((current / total) * 100, 0), 100);
+    progressBar.style.width = progress + '%';
+  }
+
+  
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  
+  updateProgress();
+})();
+</script>
+
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent" data-pagefind-meta="title">
+      MCP OAuth 2.1 Authentication: How AI Agents Securely Connect to Tools
+    </h1>
+    <div class="post-meta"><span title='2026-02-21 10:00:00'>Feb 21, 2026</span>&nbsp;·&nbsp;5 min&nbsp;·&nbsp;907 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+    
+      <div class="post-updated">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Updated: Feb 26, 2026
+      </div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#why-mcp-uses-oauth-21-not-20" aria-label="Why MCP Uses OAuth 2.1, Not 2.0">Why MCP Uses OAuth 2.1, Not 2.0</a></li>
+                <li>
+                    <a href="#the-discovery-trifecta" aria-label="The Discovery Trifecta">The Discovery Trifecta</a><ul>
+                        
+                <li>
+                    <a href="#step-1-trigger-authentication" aria-label="Step 1: Trigger Authentication">Step 1: Trigger Authentication</a></li>
+                <li>
+                    <a href="#step-2-protected-resource-metadata-rfc-9728" aria-label="Step 2: Protected Resource Metadata (RFC 9728)">Step 2: Protected Resource Metadata (RFC 9728)</a></li>
+                <li>
+                    <a href="#step-3-authorization-server-metadata-rfc-8414" aria-label="Step 3: Authorization Server Metadata (RFC 8414)">Step 3: Authorization Server Metadata (RFC 8414)</a></li></ul>
+                </li>
+                <li>
+                    <a href="#client-registration-three-approaches" aria-label="Client Registration: Three Approaches">Client Registration: Three Approaches</a></li>
+                <li>
+                    <a href="#authorization-code-flow-with-mandatory-pkce" aria-label="Authorization Code Flow with Mandatory PKCE">Authorization Code Flow with Mandatory PKCE</a></li>
+                <li>
+                    <a href="#token-validation-on-the-mcp-server" aria-label="Token Validation on the MCP Server">Token Validation on the MCP Server</a></li>
+                <li>
+                    <a href="#step-up-authorization" aria-label="Step-Up Authorization">Step-Up Authorization</a></li>
+                <li>
+                    <a href="#idp-compatibility-matrix" aria-label="IdP Compatibility Matrix">IdP Compatibility Matrix</a></li>
+                <li>
+                    <a href="#mcp-vs-traditional-oauth-key-differences" aria-label="MCP vs Traditional OAuth: Key Differences">MCP vs Traditional OAuth: Key Differences</a></li>
+                <li>
+                    <a href="#security-considerations" aria-label="Security Considerations">Security Considerations</a><ul>
+                        
+                <li>
+                    <a href="#confused-deputy-attack" aria-label="Confused Deputy Attack">Confused Deputy Attack</a></li>
+                <li>
+                    <a href="#sender-constrained-tokens" aria-label="Sender-Constrained Tokens">Sender-Constrained Tokens</a></li>
+                <li>
+                    <a href="#ssrf-in-discovery" aria-label="SSRF in Discovery">SSRF in Discovery</a></li></ul>
+                </li>
+                <li>
+                    <a href="#getting-started" aria-label="Getting Started">Getting Started</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content" data-pagefind-body><p>The Model Context Protocol (MCP) defines how AI agents connect to external tools and data sources. When an MCP client (like Claude Desktop or a custom AI agent) needs to access a protected MCP server, it uses OAuth 2.1 — not OAuth 2.0 — as the authorization mechanism. This article explains exactly how MCP authentication works, what makes it different from traditional OAuth, and which identity providers actually support it.</p>
+<h2 id="why-mcp-uses-oauth-21-not-20">Why MCP Uses OAuth 2.1, Not 2.0<a hidden class="anchor" aria-hidden="true" href="#why-mcp-uses-oauth-21-not-20">#</a></h2>
+<p>OAuth 2.0 has six gaps that MCP cannot tolerate:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Gap in OAuth 2.0</th>
+          <th>MCP Requirement</th>
+          <th>OAuth 2.1 Fix</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>PKCE optional</td>
+          <td>Code interception attacks critical for AI agents</td>
+          <td>PKCE mandatory with S256</td>
+      </tr>
+      <tr>
+          <td>Implicit flow allowed</td>
+          <td>Token leakage in agent-to-server communication</td>
+          <td>Implicit flow removed</td>
+      </tr>
+      <tr>
+          <td>No audience binding</td>
+          <td>Token confusion between MCP servers</td>
+          <td>RFC 8707 resource indicators mandatory</td>
+      </tr>
+      <tr>
+          <td>No discovery standard</td>
+          <td>Zero-config federation needed for dynamic agents</td>
+          <td>RFC 8414 + RFC 9728</td>
+      </tr>
+      <tr>
+          <td>ROPC flow allowed</td>
+          <td>Plaintext passwords unacceptable</td>
+          <td>ROPC removed</td>
+      </tr>
+      <tr>
+          <td>Manual client registration</td>
+          <td>Agents need automatic registration</td>
+          <td>CIMD + DCR support</td>
+      </tr>
+  </tbody>
+</table>
+<h2 id="the-discovery-trifecta">The Discovery Trifecta<a hidden class="anchor" aria-hidden="true" href="#the-discovery-trifecta">#</a></h2>
+<p>MCP&rsquo;s most novel feature is zero-configuration discovery. An MCP client can connect to any compliant MCP server without pre-configured endpoints.</p>
+<h3 id="step-1-trigger-authentication">Step 1: Trigger Authentication<a hidden class="anchor" aria-hidden="true" href="#step-1-trigger-authentication">#</a></h3>
+<p>The client sends an unauthenticated request to the MCP server and receives:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-http" data-lang="http"><span style="display:flex;"><span><span style="color:#66d9ef">HTTP</span><span style="color:#f92672">/</span><span style="color:#ae81ff">1.1</span> <span style="color:#ae81ff">401</span> <span style="color:#a6e22e">Unauthorized</span>
+</span></span><span style="display:flex;"><span>WWW-Authenticate<span style="color:#f92672">:</span> <span style="color:#ae81ff">Bearer resource_metadata=&#34;https://mcp.example.com/.well-known/oauth-protected-resource&#34;,</span>
+</span></span><span style="display:flex;"><span>                         <span style="color:#ae81ff">scope=&#34;mcp:tools:weather&#34;</span>
+</span></span></code></pre></div><h3 id="step-2-protected-resource-metadata-rfc-9728">Step 2: Protected Resource Metadata (RFC 9728)<a hidden class="anchor" aria-hidden="true" href="#step-2-protected-resource-metadata-rfc-9728">#</a></h3>
+<p>The client fetches the MCP server&rsquo;s resource metadata:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-http" data-lang="http"><span style="display:flex;"><span><span style="color:#a6e22e">GET</span> /.well-known/oauth-protected-resource <span style="color:#66d9ef">HTTP</span><span style="color:#f92672">/</span><span style="color:#ae81ff">1.1</span>
+</span></span><span style="display:flex;"><span>Host<span style="color:#f92672">:</span> <span style="color:#ae81ff">mcp.example.com</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;resource&#34;</span>: <span style="color:#e6db74">&#34;https://mcp.example.com&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;authorization_servers&#34;</span>: [<span style="color:#e6db74">&#34;https://auth.example.com&#34;</span>],
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;bearer_methods_supported&#34;</span>: [<span style="color:#e6db74">&#34;header&#34;</span>],
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;scopes_supported&#34;</span>: [<span style="color:#e6db74">&#34;mcp:tools:weather&#34;</span>, <span style="color:#e6db74">&#34;mcp:tools:calendar:read&#34;</span>]
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This tells the client <em>which authorization server</em> to use — the MCP server itself is NOT the authorization server.</p>
+<h3 id="step-3-authorization-server-metadata-rfc-8414">Step 3: Authorization Server Metadata (RFC 8414)<a hidden class="anchor" aria-hidden="true" href="#step-3-authorization-server-metadata-rfc-8414">#</a></h3>
+<p>The client discovers the AS endpoints. For issuer <code>https://auth.example.com/tenant1</code>, clients MUST try these URLs in order:</p>
+<ol>
+<li><code>https://auth.example.com/.well-known/oauth-authorization-server/tenant1</code></li>
+<li><code>https://auth.example.com/.well-known/openid-configuration/tenant1</code></li>
+<li><code>https://auth.example.com/tenant1/.well-known/openid-configuration</code></li>
+</ol>
+<h2 id="client-registration-three-approaches">Client Registration: Three Approaches<a hidden class="anchor" aria-hidden="true" href="#client-registration-three-approaches">#</a></h2>
+<p>MCP clients register with the authorization server using one of three mechanisms (in priority order):</p>
+<p><strong>1. Pre-registration</strong> — Use an existing <code>client_id</code> if available.</p>
+<p><strong>2. Client ID Metadata Documents (CIMD)</strong> — The client hosts a JSON document at an HTTPS URL and uses that URL as its <code>client_id</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;client_id&#34;</span>: <span style="color:#e6db74">&#34;https://app.example.com/oauth/client-metadata.json&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;client_name&#34;</span>: <span style="color:#e6db74">&#34;My MCP Client&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;redirect_uris&#34;</span>: [<span style="color:#e6db74">&#34;http://127.0.0.1:3000/callback&#34;</span>],
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;grant_types&#34;</span>: [<span style="color:#e6db74">&#34;authorization_code&#34;</span>],
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;token_endpoint_auth_method&#34;</span>: <span style="color:#e6db74">&#34;none&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The AS fetches and validates this document automatically. CIMD replaced Dynamic Client Registration (DCR) as the preferred approach in the November 2025 spec revision.</p>
+<p><strong>3. Dynamic Client Registration (RFC 7591)</strong> — Fallback if the AS has a <code>registration_endpoint</code>.</p>
+<h2 id="authorization-code-flow-with-mandatory-pkce">Authorization Code Flow with Mandatory PKCE<a hidden class="anchor" aria-hidden="true" href="#authorization-code-flow-with-mandatory-pkce">#</a></h2>
+<p>PKCE is non-negotiable in MCP. Clients MUST use S256 and MUST verify <code>code_challenge_methods_supported</code> in the AS metadata before proceeding. If S256 is not listed, the client MUST refuse to continue.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>GET /authorize?
+</span></span><span style="display:flex;"><span>  response_type=code
+</span></span><span style="display:flex;"><span>  &amp;client_id=https://app.example.com/oauth/client-metadata.json
+</span></span><span style="display:flex;"><span>  &amp;redirect_uri=http://localhost:3000/callback
+</span></span><span style="display:flex;"><span>  &amp;scope=mcp:tools:weather
+</span></span><span style="display:flex;"><span>  &amp;code_challenge=E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM
+</span></span><span style="display:flex;"><span>  &amp;code_challenge_method=S256
+</span></span><span style="display:flex;"><span>  &amp;resource=https://mcp.example.com
+</span></span><span style="display:flex;"><span>  &amp;state=random-state-xyz
+</span></span><span style="display:flex;"><span>HTTP/1.1
+</span></span><span style="display:flex;"><span>Host: auth.example.com
+</span></span></code></pre></div><p>The <code>resource</code> parameter (RFC 8707) binds the token to the specific MCP server. This prevents token confusion attacks where a token issued for one MCP server is used against another.</p>
+<h2 id="token-validation-on-the-mcp-server">Token Validation on the MCP Server<a hidden class="anchor" aria-hidden="true" href="#token-validation-on-the-mcp-server">#</a></h2>
+<p>MCP servers validate tokens as standard JWT bearer tokens:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">import</span> { <span style="color:#a6e22e">jwtVerify</span>, <span style="color:#a6e22e">createRemoteJWKSet</span> } <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;jose&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">JWKS</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">createRemoteJWKSet</span>(
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">URL</span>(<span style="color:#e6db74">&#39;https://auth.example.com/.well-known/jwks&#39;</span>)
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">validateToken</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">async</span> (<span style="color:#a6e22e">token</span>) =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> { <span style="color:#a6e22e">payload</span> } <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">jwtVerify</span>(<span style="color:#a6e22e">token</span>, <span style="color:#a6e22e">JWKS</span>, {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">issuer</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;https://auth.example.com&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">audience</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;https://mcp.example.com&#39;</span>  <span style="color:#75715e">// Must match resource parameter
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  });
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">userId</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">payload</span>.<span style="color:#a6e22e">sub</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">scopes</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">payload</span>.<span style="color:#a6e22e">scope</span><span style="color:#f92672">?</span>.<span style="color:#a6e22e">split</span>(<span style="color:#e6db74">&#39; &#39;</span>) <span style="color:#f92672">||</span> [],
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">clientId</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">payload</span>.<span style="color:#a6e22e">client_id</span>
+</span></span><span style="display:flex;"><span>  };
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><p><strong>Critical rule:</strong> MCP servers MUST NOT relay client tokens to downstream services. Token passthrough is explicitly forbidden in the spec.</p>
+<h2 id="step-up-authorization">Step-Up Authorization<a hidden class="anchor" aria-hidden="true" href="#step-up-authorization">#</a></h2>
+<p>MCP supports progressive scope elevation. When a client has a valid token but needs additional permissions, the server returns:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-http" data-lang="http"><span style="display:flex;"><span><span style="color:#66d9ef">HTTP</span><span style="color:#f92672">/</span><span style="color:#ae81ff">1.1</span> <span style="color:#ae81ff">403</span> <span style="color:#a6e22e">Forbidden</span>
+</span></span><span style="display:flex;"><span>WWW-Authenticate<span style="color:#f92672">:</span> <span style="color:#ae81ff">Bearer error=&#34;insufficient_scope&#34;,</span>
+</span></span><span style="display:flex;"><span>                         <span style="color:#ae81ff">scope=&#34;mcp:tools:weather mcp:tools:calendar:write&#34;</span>
+</span></span></code></pre></div><p>The client then initiates a new authorization flow with the required scopes.</p>
+<h2 id="idp-compatibility-matrix">IdP Compatibility Matrix<a hidden class="anchor" aria-hidden="true" href="#idp-compatibility-matrix">#</a></h2>
+<p>Most major identity providers are NOT fully compliant with MCP&rsquo;s requirements:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Provider</th>
+          <th>RFC 8707 (Resource Indicators)</th>
+          <th>RFC 7591 (DCR)</th>
+          <th>MCP Compliance</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>PingFederate 12.1+</strong></td>
+          <td>Yes</td>
+          <td>Yes</td>
+          <td>Fully compliant</td>
+      </tr>
+      <tr>
+          <td><strong>Keycloak</strong></td>
+          <td>Custom mapper needed</td>
+          <td>Yes</td>
+          <td>Partial</td>
+      </tr>
+      <tr>
+          <td><strong>Amazon Cognito</strong></td>
+          <td>Yes</td>
+          <td>No</td>
+          <td>Partial</td>
+      </tr>
+      <tr>
+          <td><strong>Auth0</strong></td>
+          <td>Non-standard <code>audience</code> param</td>
+          <td>Partial</td>
+          <td>Incompatible</td>
+      </tr>
+      <tr>
+          <td><strong>Okta</strong></td>
+          <td>No</td>
+          <td>Partial</td>
+          <td>Incompatible</td>
+      </tr>
+      <tr>
+          <td><strong>Microsoft Entra ID</strong></td>
+          <td>Proprietary syntax</td>
+          <td>No</td>
+          <td>Incompatible</td>
+      </tr>
+  </tbody>
+</table>
+<p>The primary bottleneck is RFC 8707 (Resource Indicators). Most providers predate this standard and use proprietary audience parameters instead.</p>
+<h2 id="mcp-vs-traditional-oauth-key-differences">MCP vs Traditional OAuth: Key Differences<a hidden class="anchor" aria-hidden="true" href="#mcp-vs-traditional-oauth-key-differences">#</a></h2>
+<table>
+  <thead>
+      <tr>
+          <th>Aspect</th>
+          <th>Traditional Web App</th>
+          <th>MCP</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>Actor</strong></td>
+          <td>Human in browser</td>
+          <td>AI agent (often unattended)</td>
+      </tr>
+      <tr>
+          <td><strong>Client discovery</strong></td>
+          <td>Pre-configured <code>client_id</code></td>
+          <td>Dynamic via PRM + CIMD</td>
+      </tr>
+      <tr>
+          <td><strong>Token audience</strong></td>
+          <td>Often implicit</td>
+          <td>Mandatory RFC 8707 binding</td>
+      </tr>
+      <tr>
+          <td><strong>PKCE</strong></td>
+          <td>Recommended</td>
+          <td>Mandatory S256</td>
+      </tr>
+      <tr>
+          <td><strong>Scope model</strong></td>
+          <td>Fixed at registration</td>
+          <td>Progressive step-up elevation</td>
+      </tr>
+      <tr>
+          <td><strong>Token passthrough</strong></td>
+          <td>Common in microservices</td>
+          <td>Explicitly forbidden</td>
+      </tr>
+      <tr>
+          <td><strong>Multi-hop</strong></td>
+          <td>Single client-server</td>
+          <td>User → AI Host → MCP Client → MCP Servers</td>
+      </tr>
+  </tbody>
+</table>
+<h2 id="security-considerations">Security Considerations<a hidden class="anchor" aria-hidden="true" href="#security-considerations">#</a></h2>
+<h3 id="confused-deputy-attack">Confused Deputy Attack<a hidden class="anchor" aria-hidden="true" href="#confused-deputy-attack">#</a></h3>
+<p>When an MCP proxy server uses a static <code>client_id</code> with a third-party AS, an attacker can exploit pre-existing consent cookies to obtain authorization codes redirected to their own server. MCP proxy servers MUST implement per-client consent before forwarding to third-party authorization servers.</p>
+<h3 id="sender-constrained-tokens">Sender-Constrained Tokens<a hidden class="anchor" aria-hidden="true" href="#sender-constrained-tokens">#</a></h3>
+<p>The spec recommends DPoP (Demonstrating Proof-of-Possession) or mTLS to prevent token replay. A stolen bearer token alone becomes useless without the client&rsquo;s private key.</p>
+<h3 id="ssrf-in-discovery">SSRF in Discovery<a hidden class="anchor" aria-hidden="true" href="#ssrf-in-discovery">#</a></h3>
+<p>MCP clients fetch URLs from potentially malicious MCP servers during discovery. Mitigations include enforcing HTTPS, blocking private IP ranges (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16), and validating redirect targets.</p>
+<h2 id="getting-started">Getting Started<a hidden class="anchor" aria-hidden="true" href="#getting-started">#</a></h2>
+<p>To implement MCP OAuth in your server:</p>
+<ol>
+<li>Implement <code>/.well-known/oauth-protected-resource</code> (RFC 9728) returning your authorization server URL</li>
+<li>Return <code>WWW-Authenticate</code> headers on 401 responses with the <code>resource_metadata</code> URL</li>
+<li>Validate JWT tokens using JWKS, checking <code>iss</code>, <code>aud</code>, <code>exp</code>, and <code>scope</code> claims</li>
+<li>Use the <a href="https://mcp-auth.dev/docs">MCP Auth SDK</a> for Python or TypeScript</li>
+<li>For Cloudflare Workers, use <code>workers-oauth-provider</code> which wraps the full MCP OAuth flow</li>
+</ol>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/oauth-2.1/">OAuth 2.1</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/mcp/">MCP</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/ai-agent-security/">AI Agent Security</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/pkce/">Pkce</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/identity-management/">Identity Management</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/oauth-invalid-grant-error-complete-troubleshooting-guide/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>OAuth invalid_grant Error: Complete Troubleshooting Guide</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/keycloak-realm-federation-connecting-multiple-identity-sources/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Keycloak Realm Federation: Connecting Multiple Identity Sources</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+
+<section class="post-feedback">
+  <p class="feedback-question">Was this article helpful?</p>
+  <div class="feedback-buttons">
+    <button class="feedback-btn feedback-yes" onclick="trackFeedback('yes', '\/posts\/mcp-oauth-21-authentication-how-ai-agents-securely-connect-to-tools\/')" aria-label="Yes, helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      Yes
+    </button>
+    <button class="feedback-btn feedback-no" onclick="trackFeedback('no', '\/posts\/mcp-oauth-21-authentication-how-ai-agents-securely-connect-to-tools\/')" aria-label="No, not helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>
+      No
+    </button>
+  </div>
+  <p class="feedback-thanks" style="display: none;">Thanks for your feedback!</p>
+</section>
+
+
+<section class="author-bio">
+  <div class="author-avatar">
+    <img src="/IAMDevBox.com.jpg" alt="IAMDevBox Author" width="64" height="64" loading="lazy">
+  </div>
+  <div class="author-info">
+    <h4>Written by IAMDevBox</h4>
+    <p>Enterprise IAM architect with 15+ years in identity modernization. Certified across ForgeRock, Ping Identity, SailPoint, AWS, and Azure.</p>
+    <div class="author-links">
+      <a href="https://twitter.com/iamdevbox" target="_blank" rel="noopener" title="Follow on X/Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/iamdevbox" target="_blank" rel="noopener" title="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="/contact/" title="Contact">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function trackFeedback(value, page) {
+  
+  document.querySelector('.feedback-buttons').style.display = 'none';
+  document.querySelector('.feedback-question').style.display = 'none';
+  document.querySelector('.feedback-thanks').style.display = 'block';
+
+  
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'post_feedback', {
+      'feedback_value': value,
+      'page_path': page
+    });
+  }
+
+  
+  localStorage.setItem('feedback_' + page, value);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const page = '\/posts\/mcp-oauth-21-authentication-how-ai-agents-securely-connect-to-tools\/';
+  if (localStorage.getItem('feedback_' + page)) {
+    document.querySelector('.feedback-buttons').style.display = 'none';
+    document.querySelector('.feedback-question').textContent = 'Thanks for your feedback!';
+  }
+});
+</script>
+
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/pingone-mfa-configuration-push-notifications-totp-and-fido2-setup/" class="custom-link">
+              PingOne MFA Configuration: Push Notifications, TOTP, and FIDO2 Setup
+            </a>
+            <small class="custom-date">2026-02-27</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/perc-announces-single-sign-on-access-to-nfpa-link-for-propane-professionals-phcppros/" class="custom-link">
+              PERC Announces Single Sign-On Access to NFPA LiNK for Propane Professionals - PHCPPros
+            </a>
+            <small class="custom-date">2026-02-27</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-vs-ory-open-source-iam-comparison-2026/" class="custom-link">
+              Ory vs Keycloak: Open Source IAM Comparison 2026
+            </a>
+            <small class="custom-date">2026-02-21</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-vs-authentik-open-source-iam-comparison-2026/" class="custom-link">
+              Keycloak vs Authentik: Open Source IAM Comparison 2026
+            </a>
+            <small class="custom-date">2026-02-21</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-vs-zitadel-open-source-iam-comparison-2026/" class="custom-link">
+              Keycloak vs Zitadel: Open Source IAM Comparison 2026
+            </a>
+            <small class="custom-date">2026-02-21</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+                Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+                Go Secretless with Snowflake Workload Identity Federation - Snowflake
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+                JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+                OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+                Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

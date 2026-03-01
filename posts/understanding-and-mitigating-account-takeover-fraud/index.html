@@ -1,0 +1,2921 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Understanding and Mitigating Account Takeover Fraud | IAMDevBox</title>
+<meta name="keywords" content="understanding and mitigating account takeover fraud, nginx, aws cognito, multi-factor authentication, azure ad, okta, account-takeover, security, fraud, oauth">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/understanding-and-mitigating-account-takeover-fraud/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.e24ea479df3e367781fafa20cedde21c7e043c10bed4c8c913ef9261a049a1e2.css" integrity="sha256-4k6ked8&#43;NneB&#43;vogzt3iHH4EPBC&#43;1MjJE&#43;&#43;SYaBJoeI=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/understanding-and-mitigating-account-takeover-fraud/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/understanding-and-mitigating-account-takeover-fraud/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Understanding and Mitigating Account Takeover Fraud">
+  <meta property="og:description" content="Learn to safeguard your systems from account takeover fraud with expert IAM/DevOps tips. Discover strategies to mitigate risks and enhance security today.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-12-04T14:21:00+00:00">
+    <meta property="article:modified_time" content="2026-02-10T09:19:20-05:00">
+    <meta property="article:tag" content="Account-Takeover">
+    <meta property="article:tag" content="Iam">
+    <meta property="article:tag" content="Security">
+    <meta property="article:tag" content="Fraud">
+    <meta property="article:tag" content="Oauth">
+    <meta property="og:image" content="https://www.iamdevbox.com/images/posts/understanding-and-mitigating-account-takeover-frau-30f10c47.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/images/posts/understanding-and-mitigating-account-takeover-frau-30f10c47.webp">
+<meta name="twitter:title" content="Understanding and Mitigating Account Takeover Fraud">
+<meta name="twitter:description" content="Learn to safeguard your systems from account takeover fraud with expert IAM/DevOps tips. Discover strategies to mitigate risks and enhance security today.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Understanding and Mitigating Account Takeover Fraud",
+      "item": "https://www.iamdevbox.com/posts/understanding-and-mitigating-account-takeover-fraud/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Understanding and Mitigating Account Takeover Fraud",
+  "name": "Understanding and Mitigating Account Takeover Fraud",
+  "description": "Learn to safeguard your systems from account takeover fraud with expert IAM/DevOps tips. Discover strategies to mitigate risks and enhance security today.",
+  "keywords": [
+    "understanding and mitigating account takeover fraud", "nginx", "aws cognito", "multi-factor authentication", "azure ad", "okta", "account-takeover", "security", "fraud", "oauth"
+  ],
+  "articleBody": "Why This Matters Now: The rise of sophisticated phishing attacks and credential stuffing has made account takeover fraud a critical concern. Recent high-profile breaches have highlighted the vulnerabilities in identity management systems, emphasizing the need for robust prevention and detection strategies.\n🚨 Breaking: Over 100,000 user accounts were compromised in a recent phishing campaign. Ensure your IAM setup includes multi-factor authentication (MFA) and secret rotation policies. 100K+Accounts Compromised 24hrsResponse Time Understanding Account Takeover Fraud Account takeover fraud involves unauthorized access to user accounts, often through phishing, brute force, or credential stuffing attacks. This type of fraud can lead to data theft, financial loss, and reputational damage.\nCommon Attack Vectors Phishing: Attackers send deceptive emails or messages to trick users into revealing their login credentials. Credential Stuffing: Automated tools attempt to log in to multiple accounts using lists of stolen usernames and passwords. Brute Force Attacks: Attackers systematically try different password combinations until they find the correct one. Session Hijacking: Attackers intercept valid session tokens to gain unauthorized access. Impact of Account Takeover Financial Loss: Unauthorized transactions and purchases. Data Breaches: Sensitive information can be stolen. Reputational Damage: Trust erosion with customers and partners. Operational Costs: Time and resources spent on recovery and mitigation. Preventing Account Takeover Fraud Implement Multi-Factor Authentication (MFA) MFA adds an extra layer of security by requiring users to provide two or more verification factors to gain access.\nExample Configuration in AWS Cognito # Enable MFA in AWS Cognito User Pool UserPool: MfaConfiguration: ON Policies: PasswordPolicy: MinimumLength: 8 RequireLowercase: true RequireNumbers: true RequireSymbols: true RequireUppercase: true 🎯 Key Takeaways MFA significantly reduces the risk of unauthorized access. Ensure all user pools and applications support MFA. Enforce Strong Password Policies Strong password policies help prevent brute force and credential stuffing attacks.\nExample Policy in Okta { \"passwordPolicy\": { \"complexity\": { \"minLength\": 12, \"minLowerCase\": 1, \"minUpperCase\": 1, \"minNumber\": 1, \"minSymbol\": 1 }, \"lockout\": { \"maxAttempts\": 5, \"autoUnlockMinutes\": 30 } } } 🎯 Key Takeaways Set minimum length and complexity requirements. Implement account lockout mechanisms to prevent brute force attacks. Regularly Rotate Secrets Rotating secrets ensures that even if credentials are compromised, they remain valid for a limited time.\nExample Secret Rotation in AWS Secrets Manager # Create a Lambda function for secret rotation aws lambda create-function \\ --function-name RotateMySecret \\ --runtime python3.8 \\ --role arn:aws:iam::123456789012:role/service-role/SecretsManagerLambdaRole \\ --handler lambda_function.lambda_handler \\ --zip-file fileb://function.zip # Configure rotation schedule aws secretsmanager rotate-secret \\ --secret-id MySecret \\ --rotation-lambda-arn arn:aws:lambda:us-east-1:123456789012:function:RotateMySecret \\ --rotation-rules AutomaticallyAfterDays=90 🎯 Key Takeaways Automate secret rotation to minimize exposure. Set appropriate rotation intervals based on risk. Monitor and Detect Suspicious Activity Continuous monitoring helps identify and respond to suspicious activities promptly.\nExample Monitoring Setup in Azure AD # Enable sign-in logs in Azure AD Connect-AzureAD Set-AzureADDirectorySetting -Id (Get-AzureADDirectorySetting | Where-Object -Property DisplayName -Value \"Group.Unified\" -EQ).Id -Values @{\"EnableSignInLogs\" = $true} # Set up alerts for failed login attempts New-AzScheduledQueryRule -Name \"FailedLoginAlert\" -Location \"Global\" -ResourceGroupName \"MyResourceGroup\" -Description \"Alert on failed login attempts\" -Action $action -Schedule $schedule -Source $source -Enabled $true 🎯 Key Takeaways Enable and configure sign-in logs for auditing. Create alerts for unusual or failed login attempts. Responding to Account Takeover Attempts Immediate Actions Notify Users: Inform affected users about the breach and instruct them to change their passwords. Review Logs: Analyze authentication logs for any suspicious activity. Disable Affected Accounts: Temporarily disable compromised accounts to prevent further access. Example Log Review in Google Cloud # Query logs for failed login attempts gcloud logging read \"resource.type=gce_instance AND severity\u003e=ERROR AND logName:logs/cloudaudit.googleapis.com%2Fdata_access AND protoPayload.status.code!=0\" --limit 100 🎯 Key Takeaways Act quickly to minimize damage. Communicate transparently with users. Post-Incident Analysis Root Cause Analysis: Determine how the account was compromised. Patch Vulnerabilities: Address any identified security gaps. Enhance Security Measures: Implement additional controls to prevent future incidents. Example Root Cause Analysis in AWS CloudTrail # Query CloudTrail logs for specific events aws cloudtrail lookup-events --lookup-attributes AttributeKey=EventName,AttributeValue=ConsoleLogin --max-results 100 🎯 Key Takeaways Conduct thorough investigations to understand the breach. Strengthen your security posture based on findings. Best Practices for IAM Security Least Privilege Principle Grant users only the permissions necessary to perform their jobs.\nExample Role Assignment in AWS IAM # Define a role with limited permissions Role: AssumeRolePolicyDocument: Version: '2012-10-17' Statement: - Effect: Allow Principal: Service: ec2.amazonaws.com Action: sts:AssumeRole Policies: - PolicyName: EC2ReadOnlyAccess PolicyDocument: Version: '2012-10-17' Statement: - Effect: Allow Action: - ec2:Describe* Resource: '*' 🎯 Key Takeaways Limit permissions to essential actions. Regularly review and update roles. Use Secure Communication Protocols Ensure all communications between systems are encrypted.\nExample HTTPS Configuration in Nginx # Configure Nginx to use HTTPS server { listen 443 ssl; server_name example.com; ssl_certificate /etc/nginx/ssl/example.com.crt; ssl_certificate_key /etc/nginx/ssl/example.com.key; location / { proxy_pass http://backend; } } 🎯 Key Takeaways Always use HTTPS for web traffic. Keep SSL/TLS certificates up to date. Educate and Train Users Regular training helps users recognize and respond to potential threats.\nExample Training Program Outline # User Security Training Program ## Module 1: Introduction to Cybersecurity - Overview of common threats - Importance of strong passwords ## Module 2: Recognizing Phishing Attempts - Types of phishing attacks - Steps to report suspicious emails ## Module 3: Safe Online Practices - Avoiding public Wi-Fi for sensitive transactions - Updating software regularly 🎯 Key Takeaways Educate users about security best practices. Regular training improves overall security awareness. Conclusion Account takeover fraud is a significant threat that requires proactive measures to mitigate. By implementing MFA, enforcing strong password policies, rotating secrets, monitoring activity, and following best practices, you can significantly reduce the risk of unauthorized access. Stay vigilant and continuously improve your IAM security posture.\nEnable MFA for all user accounts Enforce strong password policies Rotate secrets regularly Monitor and detect suspicious activity Educate users about security best practices 💜 Pro Tip: Regularly audit your IAM configurations to ensure compliance with security standards.",
+  "wordCount" : "960",
+  "inLanguage": "en",
+  "image":"https://www.iamdevbox.com/images/posts/understanding-and-mitigating-account-takeover-frau-30f10c47.webp","datePublished": "2025-12-04T14:21:00Z",
+  "dateModified": "2026-02-10T09:19:20-05:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/understanding-and-mitigating-account-takeover-fraud/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How can I detect account takeover attempts?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Implement monitoring and alerting for unusual login activities, such as logins from new devices or locations."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the most common methods attackers use to gain unauthorized access?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Attackers commonly use phishing, credential stuffing, brute force attacks, and session hijacking to gain unauthorized access."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How often should I rotate my secrets?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Rotate secrets regularly, at least every 90 days, and more frequently for high-risk accounts."
+      }
+    }
+  ]
+}
+</script>
+    <meta name="description" content="Learn to safeguard your systems from account takeover fraud with expert IAM/DevOps tips. Discover strategies to mitigate risks and enhance security today."><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/understanding-and-mitigating-account-takeover-fraud\/"
+  },
+  "headline": "Understanding and Mitigating Account Takeover Fraud",
+  "description": "Learn to safeguard your systems from account takeover fraud with expert IAM/DevOps tips. Discover strategies to mitigate risks and enhance security today.",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon-96x96.png",
+      "width": 96,
+      "height": 96
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://www.iamdevbox.com/IAMDevBox.com.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "datePublished": "2025-12-04T14:21:00Z",
+  "dateModified": "2026-02-10T09:19:20-05:00",
+  "wordCount":  960 ,
+  "articleSection": "posts",
+  "keywords": ["understanding and mitigating account takeover fraud","nginx","aws cognito","multi-factor authentication","azure ad","okta","account-takeover","security","fraud","oauth"]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Understanding and Mitigating Account Takeover Fraud",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/understanding-and-mitigating-account-takeover-fraud\/"
+    }
+  ]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-token-exchange-implementing-oauth-20-token-exchange\/"
+            },
+            "headline": "Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:29:55Z",
+            "dateModified": "2026-03-01T14:30:15Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/go-secretless-with-snowflake-workload-identity-federation-snowflake\/"
+            },
+            "headline": "Go Secretless with Snowflake Workload Identity Federation - Snowflake",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:24:03Z",
+            "dateModified": "2026-03-01T14:24:20Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-algorithm-confusion-attack-cve-2026-developer-guide\/"
+            },
+            "headline": "JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-02-28T18:00:00Z",
+            "dateModified": "2026-03-01T11:21:01-05:00"
+          }
+  ]
+}
+</script>
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    const mermaidBlocks = document.querySelectorAll('.mermaid, pre code.language-mermaid, code.language-mermaid');
+    if (mermaidBlocks.length > 0) {
+        
+        mermaidBlocks.forEach(block => {
+            if (block.tagName === 'CODE') {
+                const pre = block.parentElement;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = block.textContent;
+                if (pre && pre.tagName === 'PRE') {
+                    pre.parentNode.replaceChild(div, pre);
+                } else {
+                    block.parentNode.replaceChild(div, block);
+                }
+            }
+        });
+
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+            const isDark = document.body.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#5a67d8',
+                    
+                    secondaryColor: '#48bb78',
+                    secondaryTextColor: '#ffffff',
+                    secondaryBorderColor: '#38a169',
+                    
+                    tertiaryColor: '#ed8936',
+                    tertiaryTextColor: '#ffffff',
+                    tertiaryBorderColor: '#dd6b20',
+                    
+                    lineColor: '#718096',
+                    
+                    background: isDark ? '#1a202c' : '#ffffff',
+                    mainBkg: isDark ? '#2d3748' : '#f7fafc',
+                    
+                    actorBkg: '#667eea',
+                    actorBorder: '#5a67d8',
+                    actorTextColor: '#ffffff',
+                    actorLineColor: '#718096',
+                    signalColor: '#4a5568',
+                    signalTextColor: '#2d3748',
+                    labelBoxBkgColor: '#edf2f7',
+                    labelBoxBorderColor: '#cbd5e0',
+                    labelTextColor: '#2d3748',
+                    loopTextColor: '#553c9a',
+                    noteBkgColor: '#faf089',
+                    noteTextColor: '#744210',
+                    noteBorderColor: '#d69e2e',
+                    
+                    nodeBkg: '#667eea',
+                    nodeBorder: '#5a67d8',
+                    clusterBkg: '#e2e8f0',
+                    clusterBorder: '#a0aec0',
+                    defaultLinkColor: '#718096',
+                    titleColor: '#2d3748',
+                    edgeLabelBackground: 'transparent',
+                    
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                sequence: {
+                    useMaxWidth: true,
+                    boxMargin: 10,
+                    boxTextMargin: 5,
+                    noteMargin: 10,
+                    messageMargin: 35,
+                    mirrorActors: false
+                }
+            });
+            mermaid.run().then(() => {
+                
+                document.querySelectorAll('.mermaid .node').forEach(node => {
+                    const rect = node.querySelector('rect, circle, ellipse, polygon');
+                    if (rect) {
+                        const fill = rect.getAttribute('fill') || window.getComputedStyle(rect).fill;
+                        
+                        const isDarkBg = fill && (
+                            fill.includes('667eea') || fill.includes('102, 126, 234') ||
+                            fill.includes('48bb78') || fill.includes('72, 187, 120') ||
+                            fill.includes('ed8936') || fill.includes('237, 137, 54') ||
+                            fill.includes('553c9a') || fill.includes('9f7aea') ||
+                            fill.includes('e53e3e') || fill.includes('dd6b20')
+                        );
+                        const textColor = isDarkBg ? '#ffffff' : '#1a202c';
+                        node.querySelectorAll('span, .nodeLabel, text, foreignObject div').forEach(text => {
+                            text.style.color = textColor;
+                            text.style.fill = textColor;
+                        });
+                    }
+                });
+            });
+        };
+        document.head.appendChild(script);
+    }
+
+    
+    const postContent = document.querySelector('.post-content');
+    const isSinglePost = document.querySelector('.post-single');
+    const isToolsPage = window.location.pathname.startsWith('/tools/');
+    if (postContent && isSinglePost && window.innerWidth >= 1400 && !isToolsPage) {
+        const headings = postContent.querySelectorAll('h2, h3');
+        if (headings.length >= 3) {
+            const toc = document.createElement('nav');
+            toc.className = 'floating-toc';
+            toc.innerHTML = '<h4>📑 Contents</h4><ul></ul>';
+            const tocList = toc.querySelector('ul');
+
+            headings.forEach((heading, index) => {
+                const id = heading.id || `section-${index}`;
+                heading.id = id;
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2';
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            document.body.appendChild(toc);
+
+            
+            const tocLinks = toc.querySelectorAll('a');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 150) {
+                        current = heading.id;
+                    }
+                });
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+    }
+
+    
+    if (postContent && isSinglePost && window.innerWidth >= 1200) {
+        const h2s = postContent.querySelectorAll('h2');
+        if (h2s.length >= 2) {
+            const indicator = document.createElement('div');
+            indicator.className = 'section-indicator';
+
+            h2s.forEach((h2, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'section-dot';
+                dot.title = h2.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                dot.addEventListener('click', () => {
+                    h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                indicator.appendChild(dot);
+            });
+
+            document.body.appendChild(indicator);
+
+            
+            window.addEventListener('scroll', () => {
+                const dots = indicator.querySelectorAll('.section-dot');
+                let activeIndex = 0;
+                h2s.forEach((h2, index) => {
+                    if (h2.getBoundingClientRect().top <= 200) {
+                        activeIndex = index;
+                    }
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+    }
+    });
+    </script>
+
+    
+    
+    <script>
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        function loadGA() {
+            if (window.gaLoaded) return;
+            window.gaLoaded = true;
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975';
+            document.head.appendChild(script);
+
+            script.onload = () => {
+                gtag('js', new Date());
+                gtag('config', 'G-B6QCH29975');
+            };
+        }
+
+        
+        ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+            window.addEventListener(event, loadGA, { once: true, passive: true });
+        });
+
+        
+        setTimeout(loadGA, 3000);
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+    
+    <div class="reading-progress" id="reading-progress"></div>
+    <script>
+    window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / docHeight) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+    </script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+            </div>
+        </div><button id="menu-btn" aria-label="Menu" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/categories/trending/" title="Hot IAM topics">
+                    <span>🔥Trending</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+(function() {
+    var btn = document.getElementById('menu-btn');
+    var menu = document.getElementById('menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+        });
+        
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
+</script>
+<main class="main">
+
+
+
+<div class="reading-progress" id="reading-progress"></div>
+<script>
+(function() {
+  const progressBar = document.getElementById('reading-progress');
+  const article = document.querySelector('.post-content');
+
+  if (!progressBar || !article) return;
+
+  function updateProgress() {
+    const articleTop = article.offsetTop;
+    const articleHeight = article.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+
+    
+    const start = articleTop - windowHeight;
+    const end = articleTop + articleHeight;
+    const current = scrollTop - start;
+    const total = end - start;
+
+    const progress = Math.min(Math.max((current / total) * 100, 0), 100);
+    progressBar.style.width = progress + '%';
+  }
+
+  
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  
+  updateProgress();
+})();
+</script>
+
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent" data-pagefind-meta="title">
+      Understanding and Mitigating Account Takeover Fraud
+    </h1>
+    <div class="post-meta"><span title='2025-12-04 14:21:00'>Dec 04, 2025</span>&nbsp;·&nbsp;5 min&nbsp;·&nbsp;960 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+    
+      <div class="post-updated">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Updated: Feb 10, 2026
+      </div>
+  </header> 
+<figure class="entry-cover">
+        <img loading="eager" src="https://www.iamdevbox.com/images/posts/understanding-and-mitigating-account-takeover-frau-30f10c47.webp" alt="Understanding and Mitigating Account Takeover Fraud">
+        
+</figure><div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#understanding-account-takeover-fraud" aria-label="Understanding Account Takeover Fraud">Understanding Account Takeover Fraud</a><ul>
+                        
+                <li>
+                    <a href="#common-attack-vectors" aria-label="Common Attack Vectors">Common Attack Vectors</a></li>
+                <li>
+                    <a href="#impact-of-account-takeover" aria-label="Impact of Account Takeover">Impact of Account Takeover</a></li></ul>
+                </li>
+                <li>
+                    <a href="#preventing-account-takeover-fraud" aria-label="Preventing Account Takeover Fraud">Preventing Account Takeover Fraud</a><ul>
+                        
+                <li>
+                    <a href="#implement-multi-factor-authentication-mfa" aria-label="Implement Multi-Factor Authentication (MFA)">Implement Multi-Factor Authentication (MFA)</a><ul>
+                        
+                <li>
+                    <a href="#example-configuration-in-aws-cognito" aria-label="Example Configuration in AWS Cognito">Example Configuration in AWS Cognito</a></li>
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                </li>
+                <li>
+                    <a href="#enforce-strong-password-policies" aria-label="Enforce Strong Password Policies">Enforce Strong Password Policies</a><ul>
+                        
+                <li>
+                    <a href="#example-policy-in-okta" aria-label="Example Policy in Okta">Example Policy in Okta</a></li>
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                </li>
+                <li>
+                    <a href="#regularly-rotate-secrets" aria-label="Regularly Rotate Secrets">Regularly Rotate Secrets</a><ul>
+                        
+                <li>
+                    <a href="#example-secret-rotation-in-aws-secrets-manager" aria-label="Example Secret Rotation in AWS Secrets Manager">Example Secret Rotation in AWS Secrets Manager</a></li>
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                </li>
+                <li>
+                    <a href="#monitor-and-detect-suspicious-activity" aria-label="Monitor and Detect Suspicious Activity">Monitor and Detect Suspicious Activity</a><ul>
+                        
+                <li>
+                    <a href="#example-monitoring-setup-in-azure-ad" aria-label="Example Monitoring Setup in Azure AD">Example Monitoring Setup in Azure AD</a></li>
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#responding-to-account-takeover-attempts" aria-label="Responding to Account Takeover Attempts">Responding to Account Takeover Attempts</a><ul>
+                        
+                <li>
+                    <a href="#immediate-actions" aria-label="Immediate Actions">Immediate Actions</a><ul>
+                        
+                <li>
+                    <a href="#example-log-review-in-google-cloud" aria-label="Example Log Review in Google Cloud">Example Log Review in Google Cloud</a></li>
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                </li>
+                <li>
+                    <a href="#post-incident-analysis" aria-label="Post-Incident Analysis">Post-Incident Analysis</a><ul>
+                        
+                <li>
+                    <a href="#example-root-cause-analysis-in-aws-cloudtrail" aria-label="Example Root Cause Analysis in AWS CloudTrail">Example Root Cause Analysis in AWS CloudTrail</a></li>
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#best-practices-for-iam-security" aria-label="Best Practices for IAM Security">Best Practices for IAM Security</a><ul>
+                        
+                <li>
+                    <a href="#least-privilege-principle" aria-label="Least Privilege Principle">Least Privilege Principle</a><ul>
+                        
+                <li>
+                    <a href="#example-role-assignment-in-aws-iam" aria-label="Example Role Assignment in AWS IAM">Example Role Assignment in AWS IAM</a></li>
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                </li>
+                <li>
+                    <a href="#use-secure-communication-protocols" aria-label="Use Secure Communication Protocols">Use Secure Communication Protocols</a><ul>
+                        
+                <li>
+                    <a href="#example-https-configuration-in-nginx" aria-label="Example HTTPS Configuration in Nginx">Example HTTPS Configuration in Nginx</a></li>
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                </li>
+                <li>
+                    <a href="#educate-and-train-users" aria-label="Educate and Train Users">Educate and Train Users</a><ul>
+                        
+                <li>
+                    <a href="#example-training-program-outline" aria-label="Example Training Program Outline">Example Training Program Outline</a></li>
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#conclusion" aria-label="Conclusion">Conclusion</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content" data-pagefind-body><p><strong>Why This Matters Now</strong>: The rise of sophisticated phishing attacks and credential stuffing has made account takeover fraud a critical concern. Recent high-profile breaches have highlighted the vulnerabilities in identity management systems, emphasizing the need for robust prevention and detection strategies.</p>
+<div class="notice danger">🚨 <strong>Breaking:</strong> Over 100,000 user accounts were compromised in a recent phishing campaign. Ensure your IAM setup includes multi-factor authentication (MFA) and secret rotation policies.</div>
+<div class="stat-grid">
+<div class="stat-card"><div class="stat-value">100K+</div><div class="stat-label">Accounts Compromised</div></div>
+<div class="stat-card"><div class="stat-value">24hrs</div><div class="stat-label">Response Time</div></div>
+</div>
+<h2 id="understanding-account-takeover-fraud">Understanding Account Takeover Fraud<a hidden class="anchor" aria-hidden="true" href="#understanding-account-takeover-fraud">#</a></h2>
+<p>Account takeover fraud involves unauthorized access to user accounts, often through phishing, brute force, or credential stuffing attacks. This type of fraud can lead to data theft, financial loss, and reputational damage.</p>
+<h3 id="common-attack-vectors">Common Attack Vectors<a hidden class="anchor" aria-hidden="true" href="#common-attack-vectors">#</a></h3>
+<ol>
+<li><strong>Phishing</strong>: Attackers send deceptive emails or messages to trick users into revealing their login credentials.</li>
+<li><strong>Credential Stuffing</strong>: Automated tools attempt to log in to multiple accounts using lists of stolen usernames and passwords.</li>
+<li><strong>Brute Force Attacks</strong>: Attackers systematically try different password combinations until they find the correct one.</li>
+<li><strong>Session Hijacking</strong>: Attackers intercept valid session tokens to gain unauthorized access.</li>
+</ol>
+<h3 id="impact-of-account-takeover">Impact of Account Takeover<a hidden class="anchor" aria-hidden="true" href="#impact-of-account-takeover">#</a></h3>
+<ul>
+<li><strong>Financial Loss</strong>: Unauthorized transactions and purchases.</li>
+<li><strong>Data Breaches</strong>: Sensitive information can be stolen.</li>
+<li><strong>Reputational Damage</strong>: Trust erosion with customers and partners.</li>
+<li><strong>Operational Costs</strong>: Time and resources spent on recovery and mitigation.</li>
+</ul>
+<h2 id="preventing-account-takeover-fraud">Preventing Account Takeover Fraud<a hidden class="anchor" aria-hidden="true" href="#preventing-account-takeover-fraud">#</a></h2>
+<h3 id="implement-multi-factor-authentication-mfa">Implement Multi-Factor Authentication (MFA)<a hidden class="anchor" aria-hidden="true" href="#implement-multi-factor-authentication-mfa">#</a></h3>
+<p>MFA adds an extra layer of security by requiring users to provide two or more verification factors to gain access.</p>
+<h4 id="example-configuration-in-aws-cognito">Example Configuration in AWS Cognito<a hidden class="anchor" aria-hidden="true" href="#example-configuration-in-aws-cognito">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># Enable MFA in AWS Cognito User Pool</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">UserPool</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">MfaConfiguration</span>: <span style="color:#66d9ef">ON</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">Policies</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">PasswordPolicy</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">MinimumLength</span>: <span style="color:#ae81ff">8</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">RequireLowercase</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">RequireNumbers</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">RequireSymbols</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">RequireUppercase</span>: <span style="color:#66d9ef">true</span>
+</span></span></code></pre></div><div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>MFA significantly reduces the risk of unauthorized access.</li>
+<li>Ensure all user pools and applications support MFA.</li>
+</ul>
+</div>
+<h3 id="enforce-strong-password-policies">Enforce Strong Password Policies<a hidden class="anchor" aria-hidden="true" href="#enforce-strong-password-policies">#</a></h3>
+<p>Strong password policies help prevent brute force and credential stuffing attacks.</p>
+<h4 id="example-policy-in-okta">Example Policy in Okta<a hidden class="anchor" aria-hidden="true" href="#example-policy-in-okta">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;passwordPolicy&#34;</span>: {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;complexity&#34;</span>: {
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;minLength&#34;</span>: <span style="color:#ae81ff">12</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;minLowerCase&#34;</span>: <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;minUpperCase&#34;</span>: <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;minNumber&#34;</span>: <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;minSymbol&#34;</span>: <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;lockout&#34;</span>: {
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;maxAttempts&#34;</span>: <span style="color:#ae81ff">5</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;autoUnlockMinutes&#34;</span>: <span style="color:#ae81ff">30</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>Set minimum length and complexity requirements.</li>
+<li>Implement account lockout mechanisms to prevent brute force attacks.</li>
+</ul>
+</div>
+<h3 id="regularly-rotate-secrets">Regularly Rotate Secrets<a hidden class="anchor" aria-hidden="true" href="#regularly-rotate-secrets">#</a></h3>
+<p>Rotating secrets ensures that even if credentials are compromised, they remain valid for a limited time.</p>
+<h4 id="example-secret-rotation-in-aws-secrets-manager">Example Secret Rotation in AWS Secrets Manager<a hidden class="anchor" aria-hidden="true" href="#example-secret-rotation-in-aws-secrets-manager">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Create a Lambda function for secret rotation</span>
+</span></span><span style="display:flex;"><span>aws lambda create-function <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --function-name RotateMySecret <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --runtime python3.8 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --role arn:aws:iam::123456789012:role/service-role/SecretsManagerLambdaRole <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --handler lambda_function.lambda_handler <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --zip-file fileb://function.zip
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Configure rotation schedule</span>
+</span></span><span style="display:flex;"><span>aws secretsmanager rotate-secret <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --secret-id MySecret <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --rotation-lambda-arn arn:aws:lambda:us-east-1:123456789012:function:RotateMySecret <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --rotation-rules AutomaticallyAfterDays<span style="color:#f92672">=</span><span style="color:#ae81ff">90</span>
+</span></span></code></pre></div><div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>Automate secret rotation to minimize exposure.</li>
+<li>Set appropriate rotation intervals based on risk.</li>
+</ul>
+</div>
+<h3 id="monitor-and-detect-suspicious-activity">Monitor and Detect Suspicious Activity<a hidden class="anchor" aria-hidden="true" href="#monitor-and-detect-suspicious-activity">#</a></h3>
+<p>Continuous monitoring helps identify and respond to suspicious activities promptly.</p>
+<h4 id="example-monitoring-setup-in-azure-ad">Example Monitoring Setup in Azure AD<a hidden class="anchor" aria-hidden="true" href="#example-monitoring-setup-in-azure-ad">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span><span style="color:#75715e"># Enable sign-in logs in Azure AD</span>
+</span></span><span style="display:flex;"><span>Connect-AzureAD
+</span></span><span style="display:flex;"><span>Set-AzureADDirectorySetting -Id (Get-AzureADDirectorySetting | Where-Object -Property DisplayName -Value <span style="color:#e6db74">&#34;Group.Unified&#34;</span> <span style="color:#f92672">-EQ</span>).Id -Values @{<span style="color:#e6db74">&#34;EnableSignInLogs&#34;</span> = $true}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Set up alerts for failed login attempts</span>
+</span></span><span style="display:flex;"><span>New-AzScheduledQueryRule -Name <span style="color:#e6db74">&#34;FailedLoginAlert&#34;</span> -Location <span style="color:#e6db74">&#34;Global&#34;</span> -ResourceGroupName <span style="color:#e6db74">&#34;MyResourceGroup&#34;</span> -Description <span style="color:#e6db74">&#34;Alert on failed login attempts&#34;</span> -Action $action -Schedule $schedule -Source $source -Enabled $true
+</span></span></code></pre></div><div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>Enable and configure sign-in logs for auditing.</li>
+<li>Create alerts for unusual or failed login attempts.</li>
+</ul>
+</div>
+<h2 id="responding-to-account-takeover-attempts">Responding to Account Takeover Attempts<a hidden class="anchor" aria-hidden="true" href="#responding-to-account-takeover-attempts">#</a></h2>
+<h3 id="immediate-actions">Immediate Actions<a hidden class="anchor" aria-hidden="true" href="#immediate-actions">#</a></h3>
+<ol>
+<li><strong>Notify Users</strong>: Inform affected users about the breach and instruct them to change their passwords.</li>
+<li><strong>Review Logs</strong>: Analyze authentication logs for any suspicious activity.</li>
+<li><strong>Disable Affected Accounts</strong>: Temporarily disable compromised accounts to prevent further access.</li>
+</ol>
+<h4 id="example-log-review-in-google-cloud">Example Log Review in Google Cloud<a hidden class="anchor" aria-hidden="true" href="#example-log-review-in-google-cloud">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Query logs for failed login attempts</span>
+</span></span><span style="display:flex;"><span>gcloud logging read <span style="color:#e6db74">&#34;resource.type=gce_instance AND severity&gt;=ERROR AND logName:logs/cloudaudit.googleapis.com%2Fdata_access AND protoPayload.status.code!=0&#34;</span> --limit <span style="color:#ae81ff">100</span>
+</span></span></code></pre></div><div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>Act quickly to minimize damage.</li>
+<li>Communicate transparently with users.</li>
+</ul>
+</div>
+<h3 id="post-incident-analysis">Post-Incident Analysis<a hidden class="anchor" aria-hidden="true" href="#post-incident-analysis">#</a></h3>
+<ol>
+<li><strong>Root Cause Analysis</strong>: Determine how the account was compromised.</li>
+<li><strong>Patch Vulnerabilities</strong>: Address any identified security gaps.</li>
+<li><strong>Enhance Security Measures</strong>: Implement additional controls to prevent future incidents.</li>
+</ol>
+<h4 id="example-root-cause-analysis-in-aws-cloudtrail">Example Root Cause Analysis in AWS CloudTrail<a hidden class="anchor" aria-hidden="true" href="#example-root-cause-analysis-in-aws-cloudtrail">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Query CloudTrail logs for specific events</span>
+</span></span><span style="display:flex;"><span>aws cloudtrail lookup-events --lookup-attributes AttributeKey<span style="color:#f92672">=</span>EventName,AttributeValue<span style="color:#f92672">=</span>ConsoleLogin --max-results <span style="color:#ae81ff">100</span>
+</span></span></code></pre></div><div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>Conduct thorough investigations to understand the breach.</li>
+<li>Strengthen your security posture based on findings.</li>
+</ul>
+</div>
+<h2 id="best-practices-for-iam-security">Best Practices for IAM Security<a hidden class="anchor" aria-hidden="true" href="#best-practices-for-iam-security">#</a></h2>
+<h3 id="least-privilege-principle">Least Privilege Principle<a hidden class="anchor" aria-hidden="true" href="#least-privilege-principle">#</a></h3>
+<p>Grant users only the permissions necessary to perform their jobs.</p>
+<h4 id="example-role-assignment-in-aws-iam">Example Role Assignment in AWS IAM<a hidden class="anchor" aria-hidden="true" href="#example-role-assignment-in-aws-iam">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># Define a role with limited permissions</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">Role</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">AssumeRolePolicyDocument</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">Version</span>: <span style="color:#e6db74">&#39;2012-10-17&#39;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">Statement</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">Effect</span>: <span style="color:#ae81ff">Allow</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">Principal</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">Service</span>: <span style="color:#ae81ff">ec2.amazonaws.com</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">Action</span>: <span style="color:#ae81ff">sts:AssumeRole</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">Policies</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">PolicyName</span>: <span style="color:#ae81ff">EC2ReadOnlyAccess</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">PolicyDocument</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">Version</span>: <span style="color:#e6db74">&#39;2012-10-17&#39;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">Statement</span>:
+</span></span><span style="display:flex;"><span>          - <span style="color:#f92672">Effect</span>: <span style="color:#ae81ff">Allow</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">Action</span>:
+</span></span><span style="display:flex;"><span>              - <span style="color:#ae81ff">ec2:Describe*</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">Resource</span>: <span style="color:#e6db74">&#39;*&#39;</span>
+</span></span></code></pre></div><div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>Limit permissions to essential actions.</li>
+<li>Regularly review and update roles.</li>
+</ul>
+</div>
+<h3 id="use-secure-communication-protocols">Use Secure Communication Protocols<a hidden class="anchor" aria-hidden="true" href="#use-secure-communication-protocols">#</a></h3>
+<p>Ensure all communications between systems are encrypted.</p>
+<h4 id="example-https-configuration-in-nginx">Example HTTPS Configuration in Nginx<a hidden class="anchor" aria-hidden="true" href="#example-https-configuration-in-nginx">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-nginx" data-lang="nginx"><span style="display:flex;"><span><span style="color:#75715e"># Configure Nginx to use HTTPS
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">server</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">listen</span> <span style="color:#ae81ff">443</span> <span style="color:#e6db74">ssl</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">server_name</span> <span style="color:#e6db74">example.com</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">ssl_certificate</span> <span style="color:#e6db74">/etc/nginx/ssl/example.com.crt</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">ssl_certificate_key</span> <span style="color:#e6db74">/etc/nginx/ssl/example.com.key</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">location</span> <span style="color:#e6db74">/</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">proxy_pass</span> <span style="color:#e6db74">http://backend</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>Always use HTTPS for web traffic.</li>
+<li>Keep SSL/TLS certificates up to date.</li>
+</ul>
+</div>
+<h3 id="educate-and-train-users">Educate and Train Users<a hidden class="anchor" aria-hidden="true" href="#educate-and-train-users">#</a></h3>
+<p>Regular training helps users recognize and respond to potential threats.</p>
+<h4 id="example-training-program-outline">Example Training Program Outline<a hidden class="anchor" aria-hidden="true" href="#example-training-program-outline">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-markdown" data-lang="markdown"><span style="display:flex;"><span># User Security Training Program
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">## Module 1: Introduction to Cybersecurity
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">-</span> Overview of common threats
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">-</span> Importance of strong passwords
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">## Module 2: Recognizing Phishing Attempts
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">-</span> Types of phishing attacks
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">-</span> Steps to report suspicious emails
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">## Module 3: Safe Online Practices
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">-</span> Avoiding public Wi-Fi for sensitive transactions
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">-</span> Updating software regularly
+</span></span></code></pre></div><div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>Educate users about security best practices.</li>
+<li>Regular training improves overall security awareness.</li>
+</ul>
+</div>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>Account takeover fraud is a significant threat that requires proactive measures to mitigate. By implementing MFA, enforcing strong password policies, rotating secrets, monitoring activity, and following best practices, you can significantly reduce the risk of unauthorized access. Stay vigilant and continuously improve your IAM security posture.</p>
+<ul class="checklist">
+<li class="checked">Enable MFA for all user accounts</li>
+<li>Enforce strong password policies</li>
+<li>Rotate secrets regularly</li>
+<li>Monitor and detect suspicious activity</li>
+<li>Educate users about security best practices</li>
+</ul>
+<div class="notice tip">💜 <strong>Pro Tip:</strong> Regularly audit your IAM configurations to ensure compliance with security standards.</div>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/account-takeover/">Account-Takeover</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/iam/">Iam</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/security/">Security</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/fraud/">Fraud</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/oauth/">Oauth</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/passkeys-and-webauthn-the-future-of-passwordless-authentication/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Passkeys and WebAuthn: The Future of Passwordless Authentication</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/proactive-auth0-security-posture-via-real-time-audit-of-management-api-logs/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Proactive Auth0 Security Posture via Real-Time Audit of Management API Logs</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+
+<section class="post-feedback">
+  <p class="feedback-question">Was this article helpful?</p>
+  <div class="feedback-buttons">
+    <button class="feedback-btn feedback-yes" onclick="trackFeedback('yes', '\/posts\/understanding-and-mitigating-account-takeover-fraud\/')" aria-label="Yes, helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      Yes
+    </button>
+    <button class="feedback-btn feedback-no" onclick="trackFeedback('no', '\/posts\/understanding-and-mitigating-account-takeover-fraud\/')" aria-label="No, not helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>
+      No
+    </button>
+  </div>
+  <p class="feedback-thanks" style="display: none;">Thanks for your feedback!</p>
+</section>
+
+
+<section class="author-bio">
+  <div class="author-avatar">
+    <img src="/IAMDevBox.com.jpg" alt="IAMDevBox Author" width="64" height="64" loading="lazy">
+  </div>
+  <div class="author-info">
+    <h4>Written by IAMDevBox</h4>
+    <p>Enterprise IAM architect with 15+ years in identity modernization. Certified across ForgeRock, Ping Identity, SailPoint, AWS, and Azure.</p>
+    <div class="author-links">
+      <a href="https://twitter.com/iamdevbox" target="_blank" rel="noopener" title="Follow on X/Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/iamdevbox" target="_blank" rel="noopener" title="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="/contact/" title="Contact">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function trackFeedback(value, page) {
+  
+  document.querySelector('.feedback-buttons').style.display = 'none';
+  document.querySelector('.feedback-question').style.display = 'none';
+  document.querySelector('.feedback-thanks').style.display = 'block';
+
+  
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'post_feedback', {
+      'feedback_value': value,
+      'page_path': page
+    });
+  }
+
+  
+  localStorage.setItem('feedback_' + page, value);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const page = '\/posts\/understanding-and-mitigating-account-takeover-fraud\/';
+  if (localStorage.getItem('feedback_' + page)) {
+    document.querySelector('.feedback-buttons').style.display = 'none';
+    document.querySelector('.feedback-question').textContent = 'Thanks for your feedback!';
+  }
+});
+</script>
+
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+              Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+            </a>
+            <small class="custom-date">2026-03-01</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+              JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+            </a>
+            <small class="custom-date">2026-02-28</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/digital-identity-provider-v-key-secures-strategic-investment/" class="custom-link">
+              Digital Identity Provider V-Key Secures Strategic Investment
+            </a>
+            <small class="custom-date">2026-02-24</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-realm-federation-connecting-multiple-identity-sources/" class="custom-link">
+              Keycloak Realm Federation: Connecting Multiple Identity Sources
+            </a>
+            <small class="custom-date">2026-02-20</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/dshield-sensor-detects-credential-stuffing-attack-with-self-propagating-ssh-worm/" class="custom-link">
+              DShield Sensor Detects Credential Stuffing Attack with Self-Propagating SSH Worm
+            </a>
+            <small class="custom-date">2026-02-20</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+                Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+                Go Secretless with Snowflake Workload Identity Federation - Snowflake
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+                JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+                OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+                Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

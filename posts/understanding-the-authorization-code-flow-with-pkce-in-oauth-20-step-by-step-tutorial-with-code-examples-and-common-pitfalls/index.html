@@ -1,0 +1,2814 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Understanding the Authorization Code Flow with PKCE in OAuth 2.0: Step-by-Step Tutorial with Code Examples and Common Pitfalls | IAMDevBox</title>
+<meta name="keywords" content="oauth 2.0 authorization code flow with pkce, pkce implementation tutorial, oauth pkce code challenge code verifier, authorization code flow vs implicit flow, pkce spa single page application oauth, oauth 2.0 public client pkce example, pkce code verifier generator, authorization code grant type oauth 2.0, pkce react javascript implementation, oauth pkce flow diagram step by step">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/understanding-the-authorization-code-flow-with-pkce-in-oauth-20-step-by-step-tutorial-with-code-examples-and-common-pitfalls/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.e24ea479df3e367781fafa20cedde21c7e043c10bed4c8c913ef9261a049a1e2.css" integrity="sha256-4k6ked8&#43;NneB&#43;vogzt3iHH4EPBC&#43;1MjJE&#43;&#43;SYaBJoeI=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/understanding-the-authorization-code-flow-with-pkce-in-oauth-20-step-by-step-tutorial-with-code-examples-and-common-pitfalls/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/understanding-the-authorization-code-flow-with-pkce-in-oauth-20-step-by-step-tutorial-with-code-examples-and-common-pitfalls/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Understanding the Authorization Code Flow with PKCE in OAuth 2.0: Step-by-Step Tutorial with Code Examples and Common Pitfalls">
+  <meta property="og:description" content="OAuth 2.0 Authorization Code Flow with PKCE explained step by step — code_verifier, code_challenge generation, implementation examples for SPAs and mobile apps, and common pitfalls to avoid.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-11-25T03:32:10+00:00">
+    <meta property="article:modified_time" content="2026-02-26T21:20:24-05:00">
+    <meta property="article:tag" content="Oauth2">
+    <meta property="article:tag" content="Pkce">
+    <meta property="article:tag" content="Authorization-Code-Flow">
+    <meta property="article:tag" content="Iam">
+    <meta property="article:tag" content="Security">
+    <meta property="og:image" content="https://www.iamdevbox.com/images/posts/understanding-the-authorization-code-flow-with-pkc-1b8e5d64.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/images/posts/understanding-the-authorization-code-flow-with-pkc-1b8e5d64.webp">
+<meta name="twitter:title" content="Understanding the Authorization Code Flow with PKCE in OAuth 2.0: Step-by-Step Tutorial with Code Examples and Common Pitfalls">
+<meta name="twitter:description" content="OAuth 2.0 Authorization Code Flow with PKCE explained step by step — code_verifier, code_challenge generation, implementation examples for SPAs and mobile apps, and common pitfalls to avoid.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Understanding the Authorization Code Flow with PKCE in OAuth 2.0: Step-by-Step Tutorial with Code Examples and Common Pitfalls",
+      "item": "https://www.iamdevbox.com/posts/understanding-the-authorization-code-flow-with-pkce-in-oauth-20-step-by-step-tutorial-with-code-examples-and-common-pitfalls/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Understanding the Authorization Code Flow with PKCE in OAuth 2.0: Step-by-Step Tutorial with Code Examples and Common Pitfalls",
+  "name": "Understanding the Authorization Code Flow with PKCE in OAuth 2.0: Step-by-Step Tutorial with Code Examples and Common Pitfalls",
+  "description": "OAuth 2.0 Authorization Code Flow with PKCE explained step by step — code_verifier, code_challenge generation, implementation examples for SPAs and mobile apps, and common pitfalls to avoid.",
+  "keywords": [
+    "oauth 2.0 authorization code flow with pkce", "pkce implementation tutorial", "oauth pkce code challenge code verifier", "authorization code flow vs implicit flow", "pkce spa single page application oauth", "oauth 2.0 public client pkce example", "pkce code verifier generator", "authorization code grant type oauth 2.0", "pkce react javascript implementation", "oauth pkce flow diagram step by step"
+  ],
+  "articleBody": "Authorization Code Flow with Proof Key for Code Exchange (PKCE) is a critical part of OAuth 2.0, especially for securing applications that run in environments where client secrets can’t be safely stored, like mobile apps and single-page applications (SPAs). The problem arises when these types of applications need to authenticate users without exposing sensitive information. PKCE addresses this by adding an additional layer of security.\nVisual Overview:\nsequenceDiagram participant User participant App as Client App participant AuthServer as Authorization Server participant Resource as Resource Server User-\u003e\u003eApp: 1. Click Login App-\u003e\u003eAuthServer: 2. Authorization Request AuthServer-\u003e\u003eUser: 3. Login Page User-\u003e\u003eAuthServer: 4. Authenticate AuthServer-\u003e\u003eApp: 5. Authorization Code App-\u003e\u003eAuthServer: 6. Exchange Code for Token AuthServer-\u003e\u003eApp: 7. Access Token + Refresh Token App-\u003e\u003eResource: 8. API Request with Token Resource-\u003e\u003eApp: 9. Protected Resource Setting Up the Authorization Code Flow with PKCE Let’s dive into setting up the Authorization Code Flow with PKCE step-by-step. We’ll use Python with the requests library for simplicity, but the concepts apply to any language.\nStep 1: Register Your Application First, register your application with the OAuth provider. You’ll get a client_id and a redirect_uri. For this example, let’s assume our provider is https://oauth-provider.com.\nclient_id = 'your-client-id' redirect_uri = 'https://your-app.com/callback' Step 2: Generate a Code Verifier and Code Challenge The core of PKCE is generating a code_verifier and a code_challenge. The code_verifier is a random string, and the code_challenge is a hash of the code_verifier.\nimport secrets import hashlib import base64 import urllib.parse # Generate a code verifier code_verifier = secrets.token_urlsafe(32) # Generate a code challenge code_challenge = base64.urlsafe_b64encode(hashlib.sha256(code_verifier.encode('utf-8')).digest()).rstrip(b'=') code_challenge = code_challenge.decode('utf-8') Step 3: Redirect the User to the Authorization Server Construct the authorization URL with the response_type=code, client_id, redirect_uri, scope, and code_challenge_method=S256.\nauthorization_url = ( 'https://oauth-provider.com/authorize' '?response_type=code' '\u0026client_id={}' '\u0026redirect_uri={}' '\u0026scope=openid%20profile%20email' '\u0026code_challenge={}' '\u0026code_challenge_method=S256' ).format(client_id, redirect_uri, code_challenge) print('Visit this URL to authorize:', authorization_url) Step 4: Handle the Authorization Response After the user authorizes your application, they’ll be redirected back to your redirect_uri with a code query parameter.\n# Example of parsing the redirect URL from urllib.parse import urlparse, parse_qs redirect_response = 'https://your-app.com/callback?code=AUTHORIZATION_CODE_FROM_PROVIDER' parsed_url = urlparse(redirect_response) code = parse_qs(parsed_url.query)['code'][0] Step 5: Exchange the Authorization Code for an Access Token Send a POST request to the token endpoint with the code, client_id, redirect_uri, and code_verifier.\ntoken_url = 'https://oauth-provider.com/token' token_data = { 'grant_type': 'authorization_code', 'code': code, 'redirect_uri': redirect_uri, 'client_id': client_id, 'code_verifier': code_verifier } response = requests.post(token_url, data=token_data) if response.status_code == 200: tokens = response.json() access_token = tokens['access_token'] print('Access Token:', access_token) else: print('Error:', response.json()) Common Pitfalls and Solutions 1. Incorrect Code Challenge Method Using the wrong code_challenge_method can lead to errors. Always use S256 (SHA-256).\nWrong:\n# Incorrect code challenge method code_challenge_method = 'plain' Right:\n# Correct code challenge method code_challenge_method = 'S256' 🎯 Key Takeaways Testing: Test the entire flow in a staging environment before going live Logging: Implement logging to capture errors and debug issues Security: Regularly audit your code and dependencies for vulnerabilities Updates: Stay updated with OAuth 2.0 best practices and security advisories 2. Mismatched Code Verifier Ensure the code_verifier sent in the token request matches the one used to generate the code_challenge.\nWrong:\n# Different code verifiers code_verifier_for_token_request = 'different-verifier' Right:\n# Same code verifier code_verifier_for_token_request = code_verifier 3. Missing or Incorrect Parameters Always double-check the parameters in your requests. Missing or incorrect parameters can cause authorization failures.\nWrong:\n# Missing redirect_uri — causes invalid_grant token_data = { 'grant_type': 'authorization_code', 'code': code, 'client_id': client_id, 'code_verifier': code_verifier } See the redirect_uri mismatch troubleshooting guide for all causes including trailing slashes, protocol mismatches, and reverse proxy issues.\nRight:\n# All required parameters token_data = { 'grant_type': 'authorization_code', 'code': code, 'redirect_uri': redirect_uri, 'client_id': client_id, 'code_verifier': code_verifier } 4. Exposing Secrets Never expose your client_secret in public client applications. PKCE is designed to mitigate this risk.\nWrong:\n# Exposing client_secret in public client token_data = { 'grant_type': 'auth \u003cdiv class=\"notice warning\"\u003e⚠️ \u003cstrong\u003eImportant:\u003c/strong\u003e 'client_secret': 'your-client-secret', # Never do this orization_code', 'code': code, 'redirect_uri': redirect_uri, 'client_id': client_id, 'client_secret': 'your-client-secret', # Never do this 'code_verifier': code_verifier } Right:\n# No client_secret in public client token_data = { 'grant_type': 'authorization_code', 'code': code, 'redirect_uri': redirect_uri, 'client_id': client_id, 'code_verifier': code_verifier } Real-World Tips Testing: Test the entire flow in a staging environment before going live. Logging: Implement logging to capture errors and debug issues. If token exchange returns invalid_grant, see the complete troubleshooting guide for all known causes. Security: Regularly audit your code and dependencies for vulnerabilities. Updates: Stay updated with OAuth 2.0 best practices and security advisories. This saved me 3 hours last week when I realized I was missing a parameter in the token request. Always double-check your requests and responses.\nThat’s it. Simple, secure, works. Implement PKCE in your applications to enhance security and protect user data. Happy coding!\n",
+  "wordCount" : "780",
+  "inLanguage": "en",
+  "image":"https://www.iamdevbox.com/images/posts/understanding-the-authorization-code-flow-with-pkc-1b8e5d64.webp","datePublished": "2025-11-25T03:32:10Z",
+  "dateModified": "2026-02-26T21:20:24-05:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/understanding-the-authorization-code-flow-with-pkce-in-oauth-20-step-by-step-tutorial-with-code-examples-and-common-pitfalls/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is PKCE in OAuth 2.0?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "PKCE is a security extension for OAuth 2.0's Authorization Code flow, enhancing security for public clients by adding a code verifier and challenge to prevent authorization code interception."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why should I use PKCE?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "PKCE prevents authorization code interception attacks, making it essential for applications where client secrets cannot be securely stored, such as mobile apps and SPAs."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I implement PKCE in my application?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Generate a random `code_verifier`, create a `code_challenge` using SHA-256, include both in the authorization request, and exchange the authorization code for tokens using the `code_verifier`."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are common pitfalls to avoid when using PKCE?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Avoid reusing `code_verifiers`, ensure secure storage of `code_challenges`, and correctly encode and hash values to prevent security vulnerabilities."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can PKCE be used with public clients only?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "PKCE is primarily designed for public clients, but it can also be used with confidential clients to enhance security."
+      }
+    }
+  ]
+}
+</script>
+    <meta name="description" content="OAuth 2.0 Authorization Code Flow with PKCE explained step by step — code_verifier, code_challenge generation, implementation examples for SPAs and mobile apps, and common pitfalls to avoid."><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/understanding-the-authorization-code-flow-with-pkce-in-oauth-20-step-by-step-tutorial-with-code-examples-and-common-pitfalls\/"
+  },
+  "headline": "Understanding the Authorization Code Flow with PKCE in OAuth 2.0: Step-by-Step Tutorial with Code Examples and Common Pitfalls",
+  "description": "OAuth 2.0 Authorization Code Flow with PKCE explained step by step — code_verifier, code_challenge generation, implementation examples for SPAs and mobile apps, and common pitfalls to avoid.",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon-96x96.png",
+      "width": 96,
+      "height": 96
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://www.iamdevbox.com/IAMDevBox.com.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "datePublished": "2025-11-25T03:32:10Z",
+  "dateModified": "2026-02-26T21:20:24-05:00",
+  "wordCount":  780 ,
+  "articleSection": "posts",
+  "keywords": ["oauth 2.0 authorization code flow with pkce","pkce implementation tutorial","oauth pkce code challenge code verifier","authorization code flow vs implicit flow","pkce spa single page application oauth","oauth 2.0 public client pkce example","pkce code verifier generator","authorization code grant type oauth 2.0","pkce react javascript implementation","oauth pkce flow diagram step by step"]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Understanding the Authorization Code Flow with PKCE in OAuth 2.0: Step-by-Step Tutorial with Code Examples and Common Pitfalls",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/understanding-the-authorization-code-flow-with-pkce-in-oauth-20-step-by-step-tutorial-with-code-examples-and-common-pitfalls\/"
+    }
+  ]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-token-exchange-implementing-oauth-20-token-exchange\/"
+            },
+            "headline": "Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:29:55Z",
+            "dateModified": "2026-03-01T14:30:15Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/go-secretless-with-snowflake-workload-identity-federation-snowflake\/"
+            },
+            "headline": "Go Secretless with Snowflake Workload Identity Federation - Snowflake",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:24:03Z",
+            "dateModified": "2026-03-01T14:24:20Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-algorithm-confusion-attack-cve-2026-developer-guide\/"
+            },
+            "headline": "JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-02-28T18:00:00Z",
+            "dateModified": "2026-03-01T11:21:01-05:00"
+          }
+  ]
+}
+</script>
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    const mermaidBlocks = document.querySelectorAll('.mermaid, pre code.language-mermaid, code.language-mermaid');
+    if (mermaidBlocks.length > 0) {
+        
+        mermaidBlocks.forEach(block => {
+            if (block.tagName === 'CODE') {
+                const pre = block.parentElement;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = block.textContent;
+                if (pre && pre.tagName === 'PRE') {
+                    pre.parentNode.replaceChild(div, pre);
+                } else {
+                    block.parentNode.replaceChild(div, block);
+                }
+            }
+        });
+
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+            const isDark = document.body.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#5a67d8',
+                    
+                    secondaryColor: '#48bb78',
+                    secondaryTextColor: '#ffffff',
+                    secondaryBorderColor: '#38a169',
+                    
+                    tertiaryColor: '#ed8936',
+                    tertiaryTextColor: '#ffffff',
+                    tertiaryBorderColor: '#dd6b20',
+                    
+                    lineColor: '#718096',
+                    
+                    background: isDark ? '#1a202c' : '#ffffff',
+                    mainBkg: isDark ? '#2d3748' : '#f7fafc',
+                    
+                    actorBkg: '#667eea',
+                    actorBorder: '#5a67d8',
+                    actorTextColor: '#ffffff',
+                    actorLineColor: '#718096',
+                    signalColor: '#4a5568',
+                    signalTextColor: '#2d3748',
+                    labelBoxBkgColor: '#edf2f7',
+                    labelBoxBorderColor: '#cbd5e0',
+                    labelTextColor: '#2d3748',
+                    loopTextColor: '#553c9a',
+                    noteBkgColor: '#faf089',
+                    noteTextColor: '#744210',
+                    noteBorderColor: '#d69e2e',
+                    
+                    nodeBkg: '#667eea',
+                    nodeBorder: '#5a67d8',
+                    clusterBkg: '#e2e8f0',
+                    clusterBorder: '#a0aec0',
+                    defaultLinkColor: '#718096',
+                    titleColor: '#2d3748',
+                    edgeLabelBackground: 'transparent',
+                    
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                sequence: {
+                    useMaxWidth: true,
+                    boxMargin: 10,
+                    boxTextMargin: 5,
+                    noteMargin: 10,
+                    messageMargin: 35,
+                    mirrorActors: false
+                }
+            });
+            mermaid.run().then(() => {
+                
+                document.querySelectorAll('.mermaid .node').forEach(node => {
+                    const rect = node.querySelector('rect, circle, ellipse, polygon');
+                    if (rect) {
+                        const fill = rect.getAttribute('fill') || window.getComputedStyle(rect).fill;
+                        
+                        const isDarkBg = fill && (
+                            fill.includes('667eea') || fill.includes('102, 126, 234') ||
+                            fill.includes('48bb78') || fill.includes('72, 187, 120') ||
+                            fill.includes('ed8936') || fill.includes('237, 137, 54') ||
+                            fill.includes('553c9a') || fill.includes('9f7aea') ||
+                            fill.includes('e53e3e') || fill.includes('dd6b20')
+                        );
+                        const textColor = isDarkBg ? '#ffffff' : '#1a202c';
+                        node.querySelectorAll('span, .nodeLabel, text, foreignObject div').forEach(text => {
+                            text.style.color = textColor;
+                            text.style.fill = textColor;
+                        });
+                    }
+                });
+            });
+        };
+        document.head.appendChild(script);
+    }
+
+    
+    const postContent = document.querySelector('.post-content');
+    const isSinglePost = document.querySelector('.post-single');
+    const isToolsPage = window.location.pathname.startsWith('/tools/');
+    if (postContent && isSinglePost && window.innerWidth >= 1400 && !isToolsPage) {
+        const headings = postContent.querySelectorAll('h2, h3');
+        if (headings.length >= 3) {
+            const toc = document.createElement('nav');
+            toc.className = 'floating-toc';
+            toc.innerHTML = '<h4>📑 Contents</h4><ul></ul>';
+            const tocList = toc.querySelector('ul');
+
+            headings.forEach((heading, index) => {
+                const id = heading.id || `section-${index}`;
+                heading.id = id;
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2';
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            document.body.appendChild(toc);
+
+            
+            const tocLinks = toc.querySelectorAll('a');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 150) {
+                        current = heading.id;
+                    }
+                });
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+    }
+
+    
+    if (postContent && isSinglePost && window.innerWidth >= 1200) {
+        const h2s = postContent.querySelectorAll('h2');
+        if (h2s.length >= 2) {
+            const indicator = document.createElement('div');
+            indicator.className = 'section-indicator';
+
+            h2s.forEach((h2, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'section-dot';
+                dot.title = h2.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                dot.addEventListener('click', () => {
+                    h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                indicator.appendChild(dot);
+            });
+
+            document.body.appendChild(indicator);
+
+            
+            window.addEventListener('scroll', () => {
+                const dots = indicator.querySelectorAll('.section-dot');
+                let activeIndex = 0;
+                h2s.forEach((h2, index) => {
+                    if (h2.getBoundingClientRect().top <= 200) {
+                        activeIndex = index;
+                    }
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+    }
+    });
+    </script>
+
+    
+    
+    <script>
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        function loadGA() {
+            if (window.gaLoaded) return;
+            window.gaLoaded = true;
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975';
+            document.head.appendChild(script);
+
+            script.onload = () => {
+                gtag('js', new Date());
+                gtag('config', 'G-B6QCH29975');
+            };
+        }
+
+        
+        ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+            window.addEventListener(event, loadGA, { once: true, passive: true });
+        });
+
+        
+        setTimeout(loadGA, 3000);
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+    
+    <div class="reading-progress" id="reading-progress"></div>
+    <script>
+    window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / docHeight) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+    </script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+            </div>
+        </div><button id="menu-btn" aria-label="Menu" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/categories/trending/" title="Hot IAM topics">
+                    <span>🔥Trending</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+(function() {
+    var btn = document.getElementById('menu-btn');
+    var menu = document.getElementById('menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+        });
+        
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
+</script>
+<main class="main">
+
+
+
+<div class="reading-progress" id="reading-progress"></div>
+<script>
+(function() {
+  const progressBar = document.getElementById('reading-progress');
+  const article = document.querySelector('.post-content');
+
+  if (!progressBar || !article) return;
+
+  function updateProgress() {
+    const articleTop = article.offsetTop;
+    const articleHeight = article.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+
+    
+    const start = articleTop - windowHeight;
+    const end = articleTop + articleHeight;
+    const current = scrollTop - start;
+    const total = end - start;
+
+    const progress = Math.min(Math.max((current / total) * 100, 0), 100);
+    progressBar.style.width = progress + '%';
+  }
+
+  
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  
+  updateProgress();
+})();
+</script>
+
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent" data-pagefind-meta="title">
+      Understanding the Authorization Code Flow with PKCE in OAuth 2.0: Step-by-Step Tutorial with Code Examples and Common Pitfalls
+    </h1>
+    <div class="post-meta"><span title='2025-11-25 03:32:10'>Nov 25, 2025</span>&nbsp;·&nbsp;4 min&nbsp;·&nbsp;780 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+    
+      <div class="post-updated">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Updated: Feb 26, 2026
+      </div>
+  </header> 
+<figure class="entry-cover">
+        <img loading="eager" src="https://www.iamdevbox.com/images/posts/understanding-the-authorization-code-flow-with-pkc-1b8e5d64.webp" alt="Understanding the Authorization Code Flow with PKCE in OAuth 2.0: Step-by-Step Tutorial with Code Examples and Common Pitfalls">
+        
+</figure><div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#setting-up-the-authorization-code-flow-with-pkce" aria-label="Setting Up the Authorization Code Flow with PKCE">Setting Up the Authorization Code Flow with PKCE</a><ul>
+                        
+                <li>
+                    <a href="#step-1-register-your-application" aria-label="Step 1: Register Your Application">Step 1: Register Your Application</a></li>
+                <li>
+                    <a href="#step-2-generate-a-code-verifier-and-code-challenge" aria-label="Step 2: Generate a Code Verifier and Code Challenge">Step 2: Generate a Code Verifier and Code Challenge</a></li>
+                <li>
+                    <a href="#step-3-redirect-the-user-to-the-authorization-server" aria-label="Step 3: Redirect the User to the Authorization Server">Step 3: Redirect the User to the Authorization Server</a></li>
+                <li>
+                    <a href="#step-4-handle-the-authorization-response" aria-label="Step 4: Handle the Authorization Response">Step 4: Handle the Authorization Response</a></li>
+                <li>
+                    <a href="#step-5-exchange-the-authorization-code-for-an-access-token" aria-label="Step 5: Exchange the Authorization Code for an Access Token">Step 5: Exchange the Authorization Code for an Access Token</a></li>
+                <li>
+                    <a href="#common-pitfalls-and-solutions" aria-label="Common Pitfalls and Solutions">Common Pitfalls and Solutions</a><ul>
+                        
+                <li>
+                    <a href="#1-incorrect-code-challenge-method" aria-label="1. Incorrect Code Challenge Method">1. Incorrect Code Challenge Method</a></li>
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li>
+                <li>
+                    <a href="#2-mismatched-code-verifier" aria-label="2. Mismatched Code Verifier">2. Mismatched Code Verifier</a></li>
+                <li>
+                    <a href="#3-missing-or-incorrect-parameters" aria-label="3. Missing or Incorrect Parameters">3. Missing or Incorrect Parameters</a></li>
+                <li>
+                    <a href="#4-exposing-secrets" aria-label="4. Exposing Secrets">4. Exposing Secrets</a></li></ul>
+                </li>
+                <li>
+                    <a href="#real-world-tips" aria-label="Real-World Tips">Real-World Tips</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content" data-pagefind-body><p>Authorization Code Flow with Proof Key for Code Exchange (PKCE) is a critical part of OAuth 2.0, especially for securing applications that run in environments where client secrets can’t be safely stored, like mobile apps and single-page applications (SPAs). The problem arises when these types of applications need to authenticate users without exposing sensitive information. PKCE addresses this by adding an additional layer of security.</p>
+<div class="article-diagram">
+<p><strong>Visual Overview:</strong></p>
+<pre tabindex="0"><code class="language-mermaid" data-lang="mermaid">sequenceDiagram
+    participant User
+    participant App as Client App
+    participant AuthServer as Authorization Server
+    participant Resource as Resource Server
+
+    User-&gt;&gt;App: 1. Click Login
+    App-&gt;&gt;AuthServer: 2. Authorization Request
+    AuthServer-&gt;&gt;User: 3. Login Page
+    User-&gt;&gt;AuthServer: 4. Authenticate
+    AuthServer-&gt;&gt;App: 5. Authorization Code
+    App-&gt;&gt;AuthServer: 6. Exchange Code for Token
+    AuthServer-&gt;&gt;App: 7. Access Token + Refresh Token
+    App-&gt;&gt;Resource: 8. API Request with Token
+    Resource-&gt;&gt;App: 9. Protected Resource
+</code></pre></div>
+<h2 id="setting-up-the-authorization-code-flow-with-pkce">Setting Up the Authorization Code Flow with PKCE<a hidden class="anchor" aria-hidden="true" href="#setting-up-the-authorization-code-flow-with-pkce">#</a></h2>
+<p>Let&rsquo;s dive into setting up the Authorization Code Flow with PKCE step-by-step. We&rsquo;ll use Python with the <code>requests</code> library for simplicity, but the concepts apply to any language.</p>
+<h3 id="step-1-register-your-application">Step 1: Register Your Application<a hidden class="anchor" aria-hidden="true" href="#step-1-register-your-application">#</a></h3>
+<p>First, register your application with the OAuth provider. You&rsquo;ll get a <code>client_id</code> and a <code>redirect_uri</code>. For this example, let&rsquo;s assume our provider is <code>https://oauth-provider.com</code>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>client_id <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;your-client-id&#39;</span>
+</span></span><span style="display:flex;"><span>redirect_uri <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;https://your-app.com/callback&#39;</span>
+</span></span></code></pre></div><h3 id="step-2-generate-a-code-verifier-and-code-challenge">Step 2: Generate a Code Verifier and Code Challenge<a hidden class="anchor" aria-hidden="true" href="#step-2-generate-a-code-verifier-and-code-challenge">#</a></h3>
+<p>The core of PKCE is generating a <code>code_verifier</code> and a <code>code_challenge</code>. The <code>code_verifier</code> is a random string, and the <code>code_challenge</code> is a hash of the <code>code_verifier</code>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> secrets
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> hashlib
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> base64
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> urllib.parse
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Generate a code verifier</span>
+</span></span><span style="display:flex;"><span>code_verifier <span style="color:#f92672">=</span> secrets<span style="color:#f92672">.</span>token_urlsafe(<span style="color:#ae81ff">32</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Generate a code challenge</span>
+</span></span><span style="display:flex;"><span>code_challenge <span style="color:#f92672">=</span> base64<span style="color:#f92672">.</span>urlsafe_b64encode(hashlib<span style="color:#f92672">.</span>sha256(code_verifier<span style="color:#f92672">.</span>encode(<span style="color:#e6db74">&#39;utf-8&#39;</span>))<span style="color:#f92672">.</span>digest())<span style="color:#f92672">.</span>rstrip(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;=&#39;</span>)
+</span></span><span style="display:flex;"><span>code_challenge <span style="color:#f92672">=</span> code_challenge<span style="color:#f92672">.</span>decode(<span style="color:#e6db74">&#39;utf-8&#39;</span>)
+</span></span></code></pre></div><h3 id="step-3-redirect-the-user-to-the-authorization-server">Step 3: Redirect the User to the Authorization Server<a hidden class="anchor" aria-hidden="true" href="#step-3-redirect-the-user-to-the-authorization-server">#</a></h3>
+<p>Construct the authorization URL with the <code>response_type=code</code>, <code>client_id</code>, <code>redirect_uri</code>, <code>scope</code>, and <code>code_challenge_method=S256</code>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>authorization_url <span style="color:#f92672">=</span> (
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;https://oauth-provider.com/authorize&#39;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;?response_type=code&#39;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;&amp;client_id=</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#39;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;&amp;redirect_uri=</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#39;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;&amp;scope=openid%20profile</span><span style="color:#e6db74">%20e</span><span style="color:#e6db74">mail&#39;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;&amp;code_challenge=</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#39;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;&amp;code_challenge_method=S256&#39;</span>
+</span></span><span style="display:flex;"><span>)<span style="color:#f92672">.</span>format(client_id, redirect_uri, code_challenge)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#39;Visit this URL to authorize:&#39;</span>, authorization_url)
+</span></span></code></pre></div><h3 id="step-4-handle-the-authorization-response">Step 4: Handle the Authorization Response<a hidden class="anchor" aria-hidden="true" href="#step-4-handle-the-authorization-response">#</a></h3>
+<p>After the user authorizes your application, they&rsquo;ll be redirected back to your <code>redirect_uri</code> with a <code>code</code> query parameter.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Example of parsing the redirect URL</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> urllib.parse <span style="color:#f92672">import</span> urlparse, parse_qs
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>redirect_response <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;https://your-app.com/callback?code=AUTHORIZATION_CODE_FROM_PROVIDER&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>parsed_url <span style="color:#f92672">=</span> urlparse(redirect_response)
+</span></span><span style="display:flex;"><span>code <span style="color:#f92672">=</span> parse_qs(parsed_url<span style="color:#f92672">.</span>query)[<span style="color:#e6db74">&#39;code&#39;</span>][<span style="color:#ae81ff">0</span>]
+</span></span></code></pre></div><h3 id="step-5-exchange-the-authorization-code-for-an-access-token">Step 5: Exchange the Authorization Code for an Access Token<a hidden class="anchor" aria-hidden="true" href="#step-5-exchange-the-authorization-code-for-an-access-token">#</a></h3>
+<p>Send a POST request to the token endpoint with the <code>code</code>, <code>client_id</code>, <code>redirect_uri</code>, and <code>code_verifier</code>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>token_url <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;https://oauth-provider.com/token&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>token_data <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;grant_type&#39;</span>: <span style="color:#e6db74">&#39;authorization_code&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;code&#39;</span>: code,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;redirect_uri&#39;</span>: redirect_uri,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;client_id&#39;</span>: client_id,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;code_verifier&#39;</span>: code_verifier
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>response <span style="color:#f92672">=</span> requests<span style="color:#f92672">.</span>post(token_url, data<span style="color:#f92672">=</span>token_data)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> response<span style="color:#f92672">.</span>status_code <span style="color:#f92672">==</span> <span style="color:#ae81ff">200</span>:
+</span></span><span style="display:flex;"><span>    tokens <span style="color:#f92672">=</span> response<span style="color:#f92672">.</span>json()
+</span></span><span style="display:flex;"><span>    access_token <span style="color:#f92672">=</span> tokens[<span style="color:#e6db74">&#39;access_token&#39;</span>]
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#39;Access Token:&#39;</span>, access_token)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#39;Error:&#39;</span>, response<span style="color:#f92672">.</span>json())
+</span></span></code></pre></div><h3 id="common-pitfalls-and-solutions">Common Pitfalls and Solutions<a hidden class="anchor" aria-hidden="true" href="#common-pitfalls-and-solutions">#</a></h3>
+<h4 id="1-incorrect-code-challenge-method">1. Incorrect Code Challenge Method<a hidden class="anchor" aria-hidden="true" href="#1-incorrect-code-challenge-method">#</a></h4>
+<p>Using the wrong <code>code_challenge_method</code> can lead to errors. Always use <code>S256</code> (SHA-256).</p>
+<p><strong>Wrong:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Incorrect code challenge method</span>
+</span></span><span style="display:flex;"><span>code_challenge_method <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;plain&#39;</span>
+</span></span></code></pre></div><p><strong>Right:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Correct code challenge method</span>
+</span></span><span style="display:flex;"><span>code_challenge_method <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;S256&#39;</span>
+</span></span></code></pre></div><div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>Testing: Test the entire flow in a staging environment before going live</li>
+<li>Logging: Implement logging to capture errors and debug issues</li>
+<li>Security: Regularly audit your code and dependencies for vulnerabilities</li>
+<li>Updates: Stay updated with OAuth 2.0 best practices and security advisories</li>
+</ul>
+</div>
+<h4 id="2-mismatched-code-verifier">2. Mismatched Code Verifier<a hidden class="anchor" aria-hidden="true" href="#2-mismatched-code-verifier">#</a></h4>
+<p>Ensure the <code>code_verifier</code> sent in the token request matches the one used to generate the <code>code_challenge</code>.</p>
+<p><strong>Wrong:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Different code verifiers</span>
+</span></span><span style="display:flex;"><span>code_verifier_for_token_request <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;different-verifier&#39;</span>
+</span></span></code></pre></div><p><strong>Right:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Same code verifier</span>
+</span></span><span style="display:flex;"><span>code_verifier_for_token_request <span style="color:#f92672">=</span> code_verifier
+</span></span></code></pre></div><h4 id="3-missing-or-incorrect-parameters">3. Missing or Incorrect Parameters<a hidden class="anchor" aria-hidden="true" href="#3-missing-or-incorrect-parameters">#</a></h4>
+<p>Always double-check the parameters in your requests. Missing or incorrect parameters can cause authorization failures.</p>
+<p><strong>Wrong:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Missing redirect_uri — causes invalid_grant</span>
+</span></span><span style="display:flex;"><span>token_data <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;grant_type&#39;</span>: <span style="color:#e6db74">&#39;authorization_code&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;code&#39;</span>: code,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;client_id&#39;</span>: client_id,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;code_verifier&#39;</span>: code_verifier
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>See the <a href="/posts/oauth-redirect-uri-mismatch-error-fix-guide/">redirect_uri mismatch troubleshooting guide</a> for all causes including trailing slashes, protocol mismatches, and reverse proxy issues.</p>
+<p><strong>Right:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># All required parameters</span>
+</span></span><span style="display:flex;"><span>token_data <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;grant_type&#39;</span>: <span style="color:#e6db74">&#39;authorization_code&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;code&#39;</span>: code,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;redirect_uri&#39;</span>: redirect_uri,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;client_id&#39;</span>: client_id,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;code_verifier&#39;</span>: code_verifier
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h4 id="4-exposing-secrets">4. Exposing Secrets<a hidden class="anchor" aria-hidden="true" href="#4-exposing-secrets">#</a></h4>
+<p>Never expose your <code>client_secret</code> in public client applications. PKCE is designed to mitigate this risk.</p>
+<p><strong>Wrong:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Exposing client_secret in public client</span>
+</span></span><span style="display:flex;"><span>token_data <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;grant_type&#39;</span>: <span style="color:#e6db74">&#39;auth</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&lt;</span>div class<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;notice warning&#34;</span><span style="color:#f92672">&gt;</span><span style="color:#960050;background-color:#1e0010">⚠️</span> <span style="color:#f92672">&lt;</span>strong<span style="color:#f92672">&gt;</span>Important:<span style="color:#f92672">&lt;/</span>strong<span style="color:#f92672">&gt;</span> <span style="color:#e6db74">&#39;client_secret&#39;</span>: <span style="color:#e6db74">&#39;your-client-secret&#39;</span>,  <span style="color:#75715e"># Never do this&lt;/div&gt;</span>
+</span></span><span style="display:flex;"><span>orization_code<span style="color:#e6db74">&#39;,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;code&#39;</span>: code,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;redirect_uri&#39;</span>: redirect_uri,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;client_id&#39;</span>: client_id,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;client_secret&#39;</span>: <span style="color:#e6db74">&#39;your-client-secret&#39;</span>,  <span style="color:#75715e"># Never do this</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;code_verifier&#39;</span>: code_verifier
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><strong>Right:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># No client_secret in public client</span>
+</span></span><span style="display:flex;"><span>token_data <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;grant_type&#39;</span>: <span style="color:#e6db74">&#39;authorization_code&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;code&#39;</span>: code,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;redirect_uri&#39;</span>: redirect_uri,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;client_id&#39;</span>: client_id,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;code_verifier&#39;</span>: code_verifier
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="real-world-tips">Real-World Tips<a hidden class="anchor" aria-hidden="true" href="#real-world-tips">#</a></h3>
+<ul>
+<li><strong>Testing:</strong> Test the entire flow in a staging environment before going live.</li>
+<li><strong>Logging:</strong> Implement logging to capture errors and debug issues. If token exchange returns <code>invalid_grant</code>, see the <a href="/posts/oauth-invalid-grant-error-complete-troubleshooting-guide/">complete troubleshooting guide</a> for all known causes.</li>
+<li><strong>Security:</strong> Regularly audit your code and dependencies for vulnerabilities.</li>
+<li><strong>Updates:</strong> Stay updated with OAuth 2.0 best practices and security advisories.</li>
+</ul>
+<p>This saved me 3 hours last week when I realized I was missing a parameter in the token request. Always double-check your requests and responses.</p>
+<p>That&rsquo;s it. Simple, secure, works. Implement PKCE in your applications to enhance security and protect user data. Happy coding!</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/oauth2/">Oauth2</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/pkce/">Pkce</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/authorization-code-flow/">Authorization-Code-Flow</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/iam/">Iam</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/security/">Security</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/navigating-openid-connect-implicit-flow-security-implementation-and-migration/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Navigating OpenID Connect Implicit Flow: Security, Implementation, and Migration</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/how-pkce-enhances-security-in-authorization-code-flow-complete-guide-with-implementation-examples-best-practices-and-security-benefits/">
+    <span class="title">Next »</span>
+    <br>
+    <span>How PKCE Enhances Security in Authorization Code Flow: Complete Guide with Implementation Examples, Best Practices, and Security Benefits</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+
+<section class="post-feedback">
+  <p class="feedback-question">Was this article helpful?</p>
+  <div class="feedback-buttons">
+    <button class="feedback-btn feedback-yes" onclick="trackFeedback('yes', '\/posts\/understanding-the-authorization-code-flow-with-pkce-in-oauth-20-step-by-step-tutorial-with-code-examples-and-common-pitfalls\/')" aria-label="Yes, helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      Yes
+    </button>
+    <button class="feedback-btn feedback-no" onclick="trackFeedback('no', '\/posts\/understanding-the-authorization-code-flow-with-pkce-in-oauth-20-step-by-step-tutorial-with-code-examples-and-common-pitfalls\/')" aria-label="No, not helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>
+      No
+    </button>
+  </div>
+  <p class="feedback-thanks" style="display: none;">Thanks for your feedback!</p>
+</section>
+
+
+<section class="author-bio">
+  <div class="author-avatar">
+    <img src="/IAMDevBox.com.jpg" alt="IAMDevBox Author" width="64" height="64" loading="lazy">
+  </div>
+  <div class="author-info">
+    <h4>Written by IAMDevBox</h4>
+    <p>Enterprise IAM architect with 15+ years in identity modernization. Certified across ForgeRock, Ping Identity, SailPoint, AWS, and Azure.</p>
+    <div class="author-links">
+      <a href="https://twitter.com/iamdevbox" target="_blank" rel="noopener" title="Follow on X/Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/iamdevbox" target="_blank" rel="noopener" title="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="/contact/" title="Contact">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function trackFeedback(value, page) {
+  
+  document.querySelector('.feedback-buttons').style.display = 'none';
+  document.querySelector('.feedback-question').style.display = 'none';
+  document.querySelector('.feedback-thanks').style.display = 'block';
+
+  
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'post_feedback', {
+      'feedback_value': value,
+      'page_path': page
+    });
+  }
+
+  
+  localStorage.setItem('feedback_' + page, value);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const page = '\/posts\/understanding-the-authorization-code-flow-with-pkce-in-oauth-20-step-by-step-tutorial-with-code-examples-and-common-pitfalls\/';
+  if (localStorage.getItem('feedback_' + page)) {
+    document.querySelector('.feedback-buttons').style.display = 'none';
+    document.querySelector('.feedback-question').textContent = 'Thanks for your feedback!';
+  }
+});
+</script>
+
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+              Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+            </a>
+            <small class="custom-date">2026-03-01</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+              JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+            </a>
+            <small class="custom-date">2026-02-28</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/digital-identity-provider-v-key-secures-strategic-investment/" class="custom-link">
+              Digital Identity Provider V-Key Secures Strategic Investment
+            </a>
+            <small class="custom-date">2026-02-24</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/the-silent-credential-heist-halcyon/" class="custom-link">
+              The Silent Credential Heist - Halcyon
+            </a>
+            <small class="custom-date">2026-02-21</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-realm-federation-connecting-multiple-identity-sources/" class="custom-link">
+              Keycloak Realm Federation: Connecting Multiple Identity Sources
+            </a>
+            <small class="custom-date">2026-02-20</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+                Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+                Go Secretless with Snowflake Workload Identity Federation - Snowflake
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+                JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+                OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+                Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

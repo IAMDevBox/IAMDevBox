@@ -1,0 +1,2876 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Password Hash Migration Between Identity Platforms: A Practical Guide | IAMDevBox</title>
+<meta name="keywords" content="password hash migration, bcrypt to argon2 migration, migrate passwords between idp, password hash import keycloak, password hash export auth0, progressive password rehashing, identity provider password migration, bcrypt scrypt argon2 comparison">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/password-hash-migration-between-identity-platforms/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.e24ea479df3e367781fafa20cedde21c7e043c10bed4c8c913ef9261a049a1e2.css" integrity="sha256-4k6ked8&#43;NneB&#43;vogzt3iHH4EPBC&#43;1MjJE&#43;&#43;SYaBJoeI=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/password-hash-migration-between-identity-platforms/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/password-hash-migration-between-identity-platforms/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Password Hash Migration Between Identity Platforms: A Practical Guide">
+  <meta property="og:description" content="Password hash migration guide for identity platform transitions covering bcrypt, scrypt, and Argon2 hash formats, progressive rehashing strategies, bulk import techniques for Keycloak, Auth0, and Okta, and zero-downtime migration patterns.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-02-05T10:45:00+00:00">
+    <meta property="article:modified_time" content="2026-02-26T21:20:24-05:00">
+    <meta property="article:tag" content="Password-Migration">
+    <meta property="article:tag" content="Identity-Migration">
+    <meta property="article:tag" content="Bcrypt">
+    <meta property="article:tag" content="Argon2">
+    <meta property="article:tag" content="Iam-Operations">
+      <meta property="og:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:title" content="Password Hash Migration Between Identity Platforms: A Practical Guide">
+<meta name="twitter:description" content="Password hash migration guide for identity platform transitions covering bcrypt, scrypt, and Argon2 hash formats, progressive rehashing strategies, bulk import techniques for Keycloak, Auth0, and Okta, and zero-downtime migration patterns.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Password Hash Migration Between Identity Platforms: A Practical Guide",
+      "item": "https://www.iamdevbox.com/posts/password-hash-migration-between-identity-platforms/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Password Hash Migration Between Identity Platforms: A Practical Guide",
+  "name": "Password Hash Migration Between Identity Platforms: A Practical Guide",
+  "description": "Password hash migration guide for identity platform transitions covering bcrypt, scrypt, and Argon2 hash formats, progressive rehashing strategies, bulk import techniques for Keycloak, Auth0, and Okta, and zero-downtime migration patterns.",
+  "keywords": [
+    "password hash migration", "bcrypt to argon2 migration", "migrate passwords between idp", "password hash import keycloak", "password hash export auth0", "progressive password rehashing", "identity provider password migration", "bcrypt scrypt argon2 comparison"
+  ],
+  "articleBody": "Every IAM migration eventually hits the password problem. Users have passwords stored as cryptographic hashes in the old system. You need those users in the new system without forcing all of them to reset their passwords on Day 1. Depending on the source and target platforms, this ranges from straightforward to genuinely painful.\nThe Core Problem Password hashes are one-way functions by design. You can’t reverse a bcrypt hash back to the original password. This means you have three options when migrating between identity platforms:\nImport hashes directly — If the target platform can verify the same hash format Progressive rehashing — Authenticate against the old system, capture the password, re-hash in the new format Force password reset — Nuclear option, simple but terrible UX Option 1 is cleanest but depends on hash format compatibility. Option 2 is most common in practice. Option 3 is the last resort.\nHash Format Compatibility Matrix Before planning your migration, check what your source and target systems support:\nSource → Target Keycloak Auth0 Okta Entra ID Cognito bcrypt Import ✅ Import ✅ No import ❌ No import ❌ Custom Lambda ⚠️ PBKDF2 Import ✅ Import ✅ No import ❌ No import ❌ Custom Lambda ⚠️ scrypt Custom SPI ⚠️ Import ✅ No import ❌ No import ❌ Custom Lambda ⚠️ Argon2 Import ✅ (v23+) Custom rule ⚠️ No import ❌ No import ❌ Custom Lambda ⚠️ SHA-256/512 Import ✅ Import ✅ No import ❌ No import ❌ Custom Lambda ⚠️ MD5 Import ✅ Import ✅ No import ❌ No import ❌ Custom Lambda ⚠️ Notice the pattern: Okta and Entra ID don’t support hash import at all. If migrating to either platform, you’re forced into progressive rehashing or password reset.\nStrategy 1: Direct Hash Import When the target platform supports your hash format, this is the fastest path.\nKeycloak Hash Import Keycloak accepts password hashes via the Admin REST API:\n# Create user with pre-hashed password (bcrypt example) curl -X POST \"https://keycloak.example.com/admin/realms/myrealm/users\" \\ -H \"Authorization: Bearer $ACCESS_TOKEN\" \\ -H \"Content-Type: application/json\" \\ -d '{ \"username\": \"jdoe\", \"email\": \"jdoe@example.com\", \"enabled\": true, \"credentials\": [{ \"type\": \"password\", \"hashedSaltedValue\": \"$2a$12$LJ3m4yv5WGEHzNz...\", \"algorithm\": \"bcrypt\", \"hashIterations\": 12 }] }' For bulk import, use the realm import feature with a JSON file:\n{ \"users\": [ { \"username\": \"jdoe\", \"email\": \"jdoe@example.com\", \"credentials\": [{ \"type\": \"password\", \"credentialData\": \"{\\\"algorithm\\\":\\\"bcrypt\\\",\\\"hashIterations\\\":12}\", \"secretData\": \"{\\\"value\\\":\\\"$2a$12$LJ3m4yv5WGEHzNz...\\\"}\" }] } ] } Auth0 Hash Import Auth0 supports bulk user import with password hashes via the Management API:\n# Create import job curl -X POST \"https://YOUR_DOMAIN.auth0.com/api/v2/jobs/users-imports\" \\ -H \"Authorization: Bearer $MGMT_TOKEN\" \\ -F users=@users.json \\ -F connection_id=\"con_abc123\" \\ -F upsert=false # users.json format: [ { \"email\": \"jdoe@example.com\", \"custom_password_hash\": { \"algorithm\": \"bcrypt\", \"hash\": { \"value\": \"$2b$12$LJ3m4yv5WGEHzNz...\" } } } ] Auth0 supports bcrypt ($2a$, $2b$), PBKDF2, scrypt, SHA-256, SHA-512, MD5, and custom hash functions via Rules/Actions.\nStrategy 2: Progressive Rehashing When direct hash import isn’t possible (or when you want to upgrade the hash algorithm during migration), progressive rehashing is the answer.\nArchitecture User Login Request │ ▼ ┌──────────────────┐ ┌──────────────────┐ │ New IdP │────→│ Old IdP / DB │ │ (target) │ │ (source) │ │ │ │ │ │ 1. Check if user │ │ 3. Validate │ │ has new hash │ │ old hash │ │ 2. If not, proxy │ │ 4. Return success│ │ auth to old │ │ /failure │ │ 5. On success, │ └──────────────────┘ │ re-hash and │ │ store new hash│ │ 6. Next login │ │ uses new hash │ └──────────────────┘ Implementation Examples Keycloak custom authenticator for progressive rehashing:\npublic class LegacyAuthenticator implements Authenticator { @Override public void authenticate(AuthenticationFlowContext context) { UserModel user = context.getUser(); // Check if user already has a Keycloak-native password if (user.credentialManager().isConfiguredFor(PasswordCredentialModel.TYPE)) { context.success(); return; } // User doesn't have a local password — authenticate against legacy system String password = extractPassword(context); if (validateAgainstLegacy(user.getUsername(), password)) { // Set the password in Keycloak (hashes with Keycloak's algorithm) user.credentialManager().updateCredential( UserCredentialModel.password(password) ); context.success(); } else { context.failure(AuthenticationFlowError.INVALID_CREDENTIALS); } } private boolean validateAgainstLegacy(String username, String password) { // Call legacy IdP or validate against imported hash // ... } } Auth0 custom database connection — Auth0 natively supports this pattern:\n// Auth0 Login script (custom database) function login(email, password, callback) { // Try new database first const user = await findUserInNewDB(email); if (user \u0026\u0026 user.migrated) { return callback(null, user); } // Fall back to legacy system const legacyResult = await authenticateAgainstLegacy(email, password); if (legacyResult.success) { // User authenticated — migrate their password await migrateUser(email, password, legacyResult.profile); return callback(null, legacyResult.profile); } return callback(new WrongUsernameOrPasswordError(email)); } Handling Dormant Accounts Progressive rehashing only works for users who actually log in. After 90 days of migration, you’ll typically see:\n70-85% of active users have been re-hashed 15-30% of accounts are dormant (haven’t logged in) For dormant accounts, you have two options:\nForce password reset: Send an email requiring password reset for accounts that haven’t been re-hashed within the migration window Keep legacy auth: Maintain the legacy authentication path for dormant users indefinitely (not recommended — it becomes a maintenance burden) Strategy 3: Hash Algorithm Upgrade Even if you’re not changing platforms, upgrading your hash algorithm is a migration event.\nbcrypt → Argon2id The recommended upgrade path in 2026. Argon2id provides memory-hardness (protects against GPU attacks) that bcrypt lacks.\n# Progressive bcrypt → Argon2id upgrade import bcrypt from argon2 import PasswordHasher ph = PasswordHasher( time_cost=2, memory_cost=19456, # 19 MiB parallelism=1, hash_len=32, type=argon2.Type.ID ) def verify_and_upgrade(password: str, stored_hash: str) -\u003e tuple[bool, str | None]: \"\"\"Verify password and return upgraded hash if applicable.\"\"\" if stored_hash.startswith('$2'): # bcrypt hash — verify with bcrypt if bcrypt.checkpw(password.encode(), stored_hash.encode()): # Rehash with Argon2id new_hash = ph.hash(password) return True, new_hash return False, None elif stored_hash.startswith('$argon2'): # Already Argon2 — verify directly try: if ph.verify(stored_hash, password): # Check if parameters need updating if ph.check_needs_rehash(stored_hash): return True, ph.hash(password) return True, None except argon2.exceptions.VerifyMismatchError: return False, None return False, None Cost Factor Updates Even without changing algorithms, increase hash cost factors periodically:\nYear bcrypt cost PBKDF2 iterations Argon2id memory 2020 10 100,000 37 MiB 2023 12 310,000 19 MiB 2025 12-13 600,000 19 MiB 2026+ 13-14 600,000+ 46 MiB Use progressive rehashing to upgrade cost factors transparently — same technique as algorithm migration but within the same algorithm family.\nPlatform-Specific Export Methods Export from Keycloak -- Direct database query (PostgreSQL) SELECT u.username, u.email, c.secret_data-\u003e\u003e'value' as password_hash, c.credential_data-\u003e\u003e'algorithm' as algorithm, c.credential_data-\u003e\u003e'hashIterations' as iterations FROM user_entity u JOIN credential c ON c.user_id = u.id WHERE c.type = 'password'; Export from Auth0 # Create export job curl -X POST \"https://YOUR_DOMAIN.auth0.com/api/v2/jobs/users-exports\" \\ -H \"Authorization: Bearer $MGMT_TOKEN\" \\ -H \"Content-Type: application/json\" \\ -d '{ \"format\": \"json\", \"fields\": [ {\"name\": \"email\"}, {\"name\": \"user_id\"}, {\"name\": \"custom_password_hash\"} ] }' Export from LDAP/AD # OpenLDAP — export userPassword attribute ldapsearch -x -H ldaps://ldap.corp.local -D \"cn=admin,dc=corp,dc=local\" -W \\ -b \"ou=people,dc=corp,dc=local\" \\ \"(objectClass=person)\" uid mail userPassword Note: Active Directory does not expose password hashes via LDAP. Use Entra Connect’s Password Hash Sync or the DSInternals PowerShell module for offline extraction from ntds.dit backups.\nMigration Timeline Day Activity 1-5 Audit source hash formats and target compatibility 6-10 Build progressive rehashing integration or bulk import scripts 11-15 Test with 100 pilot users 16-20 Deploy to production, monitor rehash progress 21-90 Progressive rehashing captures active users 91-95 Force password reset for remaining dormant accounts 96-100 Decommission legacy authentication path The 90-day window isn’t arbitrary — it captures approximately 3 monthly login cycles, catching users who log in infrequently. Adjust based on your actual login frequency distribution.\n",
+  "wordCount" : "1233",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/IAMDevBox.com.jpg","datePublished": "2026-02-05T10:45:00Z",
+  "dateModified": "2026-02-26T21:20:24-05:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/password-hash-migration-between-identity-platforms/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Can I export password hashes from Okta or Auth0 for migration?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Okta does not allow password hash export. Auth0 allows bulk export of bcrypt hashes via the Management API's export job endpoint. Keycloak stores bcrypt hashes in its database and they can be exported via direct DB query or Admin REST API (credential representation). Entra ID does not expose password hashes at all."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is progressive password rehashing and how does it work?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Progressive rehashing validates the old hash on login, then immediately re-hashes the password with the new algorithm and stores the new hash. Users never notice — they log in normally and their password hash silently upgrades. After 90 days, most active users have been re-hashed. Dormant accounts get a forced password reset."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which password hashing algorithm should I use in 2026?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Argon2id is the recommended choice per OWASP 2025 guidelines. Use memory cost of 19 MiB, time cost of 2, and parallelism of 1 as minimum parameters. If you need FIPS-140 compliance, use PBKDF2-HMAC-SHA256 with 600,000+ iterations. bcrypt at cost factor 12+ remains acceptable but lacks memory-hardness protection against GPU attacks."
+      }
+    }
+  ]
+}
+</script>
+    <meta name="description" content="Password hash migration guide for identity platform transitions covering bcrypt, scrypt, and Argon2 hash formats, progressive rehashing strategies, bulk import techniques for Keycloak, Auth0, and Okta, and zero-downtime migration patterns."><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/password-hash-migration-between-identity-platforms\/"
+  },
+  "headline": "Password Hash Migration Between Identity Platforms: A Practical Guide",
+  "description": "Password hash migration guide for identity platform transitions covering bcrypt, scrypt, and Argon2 hash formats, progressive rehashing strategies, bulk import techniques for Keycloak, Auth0, and Okta, and zero-downtime migration patterns.",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon-96x96.png",
+      "width": 96,
+      "height": 96
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://www.iamdevbox.com/IAMDevBox.com.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "datePublished": "2026-02-05T10:45:00Z",
+  "dateModified": "2026-02-26T21:20:24-05:00",
+  "wordCount":  1233 ,
+  "articleSection": "posts",
+  "keywords": ["password hash migration","bcrypt to argon2 migration","migrate passwords between idp","password hash import keycloak","password hash export auth0","progressive password rehashing","identity provider password migration","bcrypt scrypt argon2 comparison"]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Password Hash Migration Between Identity Platforms: A Practical Guide",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/password-hash-migration-between-identity-platforms\/"
+    }
+  ]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-token-exchange-implementing-oauth-20-token-exchange\/"
+            },
+            "headline": "Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:29:55Z",
+            "dateModified": "2026-03-01T14:30:15Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/go-secretless-with-snowflake-workload-identity-federation-snowflake\/"
+            },
+            "headline": "Go Secretless with Snowflake Workload Identity Federation - Snowflake",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:24:03Z",
+            "dateModified": "2026-03-01T14:24:20Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-algorithm-confusion-attack-cve-2026-developer-guide\/"
+            },
+            "headline": "JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-02-28T18:00:00Z",
+            "dateModified": "2026-03-01T11:21:01-05:00"
+          }
+  ]
+}
+</script>
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    const mermaidBlocks = document.querySelectorAll('.mermaid, pre code.language-mermaid, code.language-mermaid');
+    if (mermaidBlocks.length > 0) {
+        
+        mermaidBlocks.forEach(block => {
+            if (block.tagName === 'CODE') {
+                const pre = block.parentElement;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = block.textContent;
+                if (pre && pre.tagName === 'PRE') {
+                    pre.parentNode.replaceChild(div, pre);
+                } else {
+                    block.parentNode.replaceChild(div, block);
+                }
+            }
+        });
+
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+            const isDark = document.body.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#5a67d8',
+                    
+                    secondaryColor: '#48bb78',
+                    secondaryTextColor: '#ffffff',
+                    secondaryBorderColor: '#38a169',
+                    
+                    tertiaryColor: '#ed8936',
+                    tertiaryTextColor: '#ffffff',
+                    tertiaryBorderColor: '#dd6b20',
+                    
+                    lineColor: '#718096',
+                    
+                    background: isDark ? '#1a202c' : '#ffffff',
+                    mainBkg: isDark ? '#2d3748' : '#f7fafc',
+                    
+                    actorBkg: '#667eea',
+                    actorBorder: '#5a67d8',
+                    actorTextColor: '#ffffff',
+                    actorLineColor: '#718096',
+                    signalColor: '#4a5568',
+                    signalTextColor: '#2d3748',
+                    labelBoxBkgColor: '#edf2f7',
+                    labelBoxBorderColor: '#cbd5e0',
+                    labelTextColor: '#2d3748',
+                    loopTextColor: '#553c9a',
+                    noteBkgColor: '#faf089',
+                    noteTextColor: '#744210',
+                    noteBorderColor: '#d69e2e',
+                    
+                    nodeBkg: '#667eea',
+                    nodeBorder: '#5a67d8',
+                    clusterBkg: '#e2e8f0',
+                    clusterBorder: '#a0aec0',
+                    defaultLinkColor: '#718096',
+                    titleColor: '#2d3748',
+                    edgeLabelBackground: 'transparent',
+                    
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                sequence: {
+                    useMaxWidth: true,
+                    boxMargin: 10,
+                    boxTextMargin: 5,
+                    noteMargin: 10,
+                    messageMargin: 35,
+                    mirrorActors: false
+                }
+            });
+            mermaid.run().then(() => {
+                
+                document.querySelectorAll('.mermaid .node').forEach(node => {
+                    const rect = node.querySelector('rect, circle, ellipse, polygon');
+                    if (rect) {
+                        const fill = rect.getAttribute('fill') || window.getComputedStyle(rect).fill;
+                        
+                        const isDarkBg = fill && (
+                            fill.includes('667eea') || fill.includes('102, 126, 234') ||
+                            fill.includes('48bb78') || fill.includes('72, 187, 120') ||
+                            fill.includes('ed8936') || fill.includes('237, 137, 54') ||
+                            fill.includes('553c9a') || fill.includes('9f7aea') ||
+                            fill.includes('e53e3e') || fill.includes('dd6b20')
+                        );
+                        const textColor = isDarkBg ? '#ffffff' : '#1a202c';
+                        node.querySelectorAll('span, .nodeLabel, text, foreignObject div').forEach(text => {
+                            text.style.color = textColor;
+                            text.style.fill = textColor;
+                        });
+                    }
+                });
+            });
+        };
+        document.head.appendChild(script);
+    }
+
+    
+    const postContent = document.querySelector('.post-content');
+    const isSinglePost = document.querySelector('.post-single');
+    const isToolsPage = window.location.pathname.startsWith('/tools/');
+    if (postContent && isSinglePost && window.innerWidth >= 1400 && !isToolsPage) {
+        const headings = postContent.querySelectorAll('h2, h3');
+        if (headings.length >= 3) {
+            const toc = document.createElement('nav');
+            toc.className = 'floating-toc';
+            toc.innerHTML = '<h4>📑 Contents</h4><ul></ul>';
+            const tocList = toc.querySelector('ul');
+
+            headings.forEach((heading, index) => {
+                const id = heading.id || `section-${index}`;
+                heading.id = id;
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2';
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            document.body.appendChild(toc);
+
+            
+            const tocLinks = toc.querySelectorAll('a');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 150) {
+                        current = heading.id;
+                    }
+                });
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+    }
+
+    
+    if (postContent && isSinglePost && window.innerWidth >= 1200) {
+        const h2s = postContent.querySelectorAll('h2');
+        if (h2s.length >= 2) {
+            const indicator = document.createElement('div');
+            indicator.className = 'section-indicator';
+
+            h2s.forEach((h2, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'section-dot';
+                dot.title = h2.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                dot.addEventListener('click', () => {
+                    h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                indicator.appendChild(dot);
+            });
+
+            document.body.appendChild(indicator);
+
+            
+            window.addEventListener('scroll', () => {
+                const dots = indicator.querySelectorAll('.section-dot');
+                let activeIndex = 0;
+                h2s.forEach((h2, index) => {
+                    if (h2.getBoundingClientRect().top <= 200) {
+                        activeIndex = index;
+                    }
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+    }
+    });
+    </script>
+
+    
+    
+    <script>
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        function loadGA() {
+            if (window.gaLoaded) return;
+            window.gaLoaded = true;
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975';
+            document.head.appendChild(script);
+
+            script.onload = () => {
+                gtag('js', new Date());
+                gtag('config', 'G-B6QCH29975');
+            };
+        }
+
+        
+        ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+            window.addEventListener(event, loadGA, { once: true, passive: true });
+        });
+
+        
+        setTimeout(loadGA, 3000);
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+    
+    <div class="reading-progress" id="reading-progress"></div>
+    <script>
+    window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / docHeight) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+    </script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+            </div>
+        </div><button id="menu-btn" aria-label="Menu" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/categories/trending/" title="Hot IAM topics">
+                    <span>🔥Trending</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+(function() {
+    var btn = document.getElementById('menu-btn');
+    var menu = document.getElementById('menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+        });
+        
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
+</script>
+<main class="main">
+
+
+
+<div class="reading-progress" id="reading-progress"></div>
+<script>
+(function() {
+  const progressBar = document.getElementById('reading-progress');
+  const article = document.querySelector('.post-content');
+
+  if (!progressBar || !article) return;
+
+  function updateProgress() {
+    const articleTop = article.offsetTop;
+    const articleHeight = article.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+
+    
+    const start = articleTop - windowHeight;
+    const end = articleTop + articleHeight;
+    const current = scrollTop - start;
+    const total = end - start;
+
+    const progress = Math.min(Math.max((current / total) * 100, 0), 100);
+    progressBar.style.width = progress + '%';
+  }
+
+  
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  
+  updateProgress();
+})();
+</script>
+
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent" data-pagefind-meta="title">
+      Password Hash Migration Between Identity Platforms: A Practical Guide
+    </h1>
+    <div class="post-meta"><span title='2026-02-05 10:45:00'>Feb 05, 2026</span>&nbsp;·&nbsp;6 min&nbsp;·&nbsp;1233 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+    
+      <div class="post-updated">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Updated: Feb 26, 2026
+      </div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#the-core-problem" aria-label="The Core Problem">The Core Problem</a></li>
+                <li>
+                    <a href="#hash-format-compatibility-matrix" aria-label="Hash Format Compatibility Matrix">Hash Format Compatibility Matrix</a></li>
+                <li>
+                    <a href="#strategy-1-direct-hash-import" aria-label="Strategy 1: Direct Hash Import">Strategy 1: Direct Hash Import</a><ul>
+                        
+                <li>
+                    <a href="#keycloak-hash-import" aria-label="Keycloak Hash Import">Keycloak Hash Import</a></li>
+                <li>
+                    <a href="#auth0-hash-import" aria-label="Auth0 Hash Import">Auth0 Hash Import</a></li></ul>
+                </li>
+                <li>
+                    <a href="#strategy-2-progressive-rehashing" aria-label="Strategy 2: Progressive Rehashing">Strategy 2: Progressive Rehashing</a><ul>
+                        
+                <li>
+                    <a href="#architecture" aria-label="Architecture">Architecture</a></li>
+                <li>
+                    <a href="#implementation-examples" aria-label="Implementation Examples">Implementation Examples</a></li>
+                <li>
+                    <a href="#handling-dormant-accounts" aria-label="Handling Dormant Accounts">Handling Dormant Accounts</a></li></ul>
+                </li>
+                <li>
+                    <a href="#strategy-3-hash-algorithm-upgrade" aria-label="Strategy 3: Hash Algorithm Upgrade">Strategy 3: Hash Algorithm Upgrade</a><ul>
+                        
+                <li>
+                    <a href="#bcrypt--argon2id" aria-label="bcrypt → Argon2id">bcrypt → Argon2id</a></li>
+                <li>
+                    <a href="#cost-factor-updates" aria-label="Cost Factor Updates">Cost Factor Updates</a></li></ul>
+                </li>
+                <li>
+                    <a href="#platform-specific-export-methods" aria-label="Platform-Specific Export Methods">Platform-Specific Export Methods</a><ul>
+                        
+                <li>
+                    <a href="#export-from-keycloak" aria-label="Export from Keycloak">Export from Keycloak</a></li>
+                <li>
+                    <a href="#export-from-auth0" aria-label="Export from Auth0">Export from Auth0</a></li>
+                <li>
+                    <a href="#export-from-ldapad" aria-label="Export from LDAP/AD">Export from LDAP/AD</a></li></ul>
+                </li>
+                <li>
+                    <a href="#migration-timeline" aria-label="Migration Timeline">Migration Timeline</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content" data-pagefind-body><p>Every IAM migration eventually hits the password problem. Users have passwords stored as cryptographic hashes in the old system. You need those users in the new system without forcing all of them to reset their passwords on Day 1. Depending on the source and target platforms, this ranges from straightforward to genuinely painful.</p>
+<h2 id="the-core-problem">The Core Problem<a hidden class="anchor" aria-hidden="true" href="#the-core-problem">#</a></h2>
+<p>Password hashes are one-way functions by design. You can&rsquo;t reverse a bcrypt hash back to the original password. This means you have three options when migrating between identity platforms:</p>
+<ol>
+<li><strong>Import hashes directly</strong> — If the target platform can verify the same hash format</li>
+<li><strong>Progressive rehashing</strong> — Authenticate against the old system, capture the password, re-hash in the new format</li>
+<li><strong>Force password reset</strong> — Nuclear option, simple but terrible UX</li>
+</ol>
+<p>Option 1 is cleanest but depends on hash format compatibility. Option 2 is most common in practice. Option 3 is the last resort.</p>
+<h2 id="hash-format-compatibility-matrix">Hash Format Compatibility Matrix<a hidden class="anchor" aria-hidden="true" href="#hash-format-compatibility-matrix">#</a></h2>
+<p>Before planning your migration, check what your source and target systems support:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Source → Target</th>
+          <th>Keycloak</th>
+          <th>Auth0</th>
+          <th>Okta</th>
+          <th>Entra ID</th>
+          <th>Cognito</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>bcrypt</strong></td>
+          <td>Import ✅</td>
+          <td>Import ✅</td>
+          <td>No import ❌</td>
+          <td>No import ❌</td>
+          <td>Custom Lambda ⚠️</td>
+      </tr>
+      <tr>
+          <td><strong>PBKDF2</strong></td>
+          <td>Import ✅</td>
+          <td>Import ✅</td>
+          <td>No import ❌</td>
+          <td>No import ❌</td>
+          <td>Custom Lambda ⚠️</td>
+      </tr>
+      <tr>
+          <td><strong>scrypt</strong></td>
+          <td>Custom SPI ⚠️</td>
+          <td>Import ✅</td>
+          <td>No import ❌</td>
+          <td>No import ❌</td>
+          <td>Custom Lambda ⚠️</td>
+      </tr>
+      <tr>
+          <td><strong>Argon2</strong></td>
+          <td>Import ✅ (v23+)</td>
+          <td>Custom rule ⚠️</td>
+          <td>No import ❌</td>
+          <td>No import ❌</td>
+          <td>Custom Lambda ⚠️</td>
+      </tr>
+      <tr>
+          <td><strong>SHA-256/512</strong></td>
+          <td>Import ✅</td>
+          <td>Import ✅</td>
+          <td>No import ❌</td>
+          <td>No import ❌</td>
+          <td>Custom Lambda ⚠️</td>
+      </tr>
+      <tr>
+          <td><strong>MD5</strong></td>
+          <td>Import ✅</td>
+          <td>Import ✅</td>
+          <td>No import ❌</td>
+          <td>No import ❌</td>
+          <td>Custom Lambda ⚠️</td>
+      </tr>
+  </tbody>
+</table>
+<p>Notice the pattern: Okta and Entra ID don&rsquo;t support hash import at all. If migrating to either platform, you&rsquo;re forced into progressive rehashing or password reset.</p>
+<h2 id="strategy-1-direct-hash-import">Strategy 1: Direct Hash Import<a hidden class="anchor" aria-hidden="true" href="#strategy-1-direct-hash-import">#</a></h2>
+<p>When the target platform supports your hash format, this is the fastest path.</p>
+<h3 id="keycloak-hash-import">Keycloak Hash Import<a hidden class="anchor" aria-hidden="true" href="#keycloak-hash-import">#</a></h3>
+<p>Keycloak accepts password hashes via the Admin REST API:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Create user with pre-hashed password (bcrypt example)</span>
+</span></span><span style="display:flex;"><span>curl -X POST <span style="color:#e6db74">&#34;https://keycloak.example.com/admin/realms/myrealm/users&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Authorization: Bearer </span>$ACCESS_TOKEN<span style="color:#e6db74">&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -d <span style="color:#e6db74">&#39;{
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;username&#34;: &#34;jdoe&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;email&#34;: &#34;jdoe@example.com&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;enabled&#34;: true,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;credentials&#34;: [{
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      &#34;type&#34;: &#34;password&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      &#34;hashedSaltedValue&#34;: &#34;$2a$12$LJ3m4yv5WGEHzNz...&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      &#34;algorithm&#34;: &#34;bcrypt&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      &#34;hashIterations&#34;: 12
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    }]
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  }&#39;</span>
+</span></span></code></pre></div><p>For bulk import, use the realm import feature with a JSON file:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;users&#34;</span>: [
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;username&#34;</span>: <span style="color:#e6db74">&#34;jdoe&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;email&#34;</span>: <span style="color:#e6db74">&#34;jdoe@example.com&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;credentials&#34;</span>: [{
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;password&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;credentialData&#34;</span>: <span style="color:#e6db74">&#34;{\&#34;algorithm\&#34;:\&#34;bcrypt\&#34;,\&#34;hashIterations\&#34;:12}&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;secretData&#34;</span>: <span style="color:#e6db74">&#34;{\&#34;value\&#34;:\&#34;$2a$12$LJ3m4yv5WGEHzNz...\&#34;}&#34;</span>
+</span></span><span style="display:flex;"><span>      }]
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  ]
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="auth0-hash-import">Auth0 Hash Import<a hidden class="anchor" aria-hidden="true" href="#auth0-hash-import">#</a></h3>
+<p>Auth0 supports bulk user import with password hashes via the Management API:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Create import job</span>
+</span></span><span style="display:flex;"><span>curl -X POST <span style="color:#e6db74">&#34;https://YOUR_DOMAIN.auth0.com/api/v2/jobs/users-imports&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Authorization: Bearer </span>$MGMT_TOKEN<span style="color:#e6db74">&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -F users<span style="color:#f92672">=</span>@users.json <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -F connection_id<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;con_abc123&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -F upsert<span style="color:#f92672">=</span>false
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># users.json format:</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;email&#34;</span>: <span style="color:#e6db74">&#34;jdoe@example.com&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;custom_password_hash&#34;</span>: <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;algorithm&#34;</span>: <span style="color:#e6db74">&#34;bcrypt&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;hash&#34;</span>: <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;value&#34;</span>: <span style="color:#e6db74">&#34;</span>$2<span style="color:#e6db74">b</span>$12$LJ3m4yv5WGEHzNz<span style="color:#e6db74">...&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">]</span>
+</span></span></code></pre></div><p>Auth0 supports bcrypt (<code>$2a$</code>, <code>$2b$</code>), PBKDF2, scrypt, SHA-256, SHA-512, MD5, and custom hash functions via Rules/Actions.</p>
+<h2 id="strategy-2-progressive-rehashing">Strategy 2: Progressive Rehashing<a hidden class="anchor" aria-hidden="true" href="#strategy-2-progressive-rehashing">#</a></h2>
+<p>When direct hash import isn&rsquo;t possible (or when you want to upgrade the hash algorithm during migration), progressive rehashing is the answer.</p>
+<h3 id="architecture">Architecture<a hidden class="anchor" aria-hidden="true" href="#architecture">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>User Login Request
+</span></span><span style="display:flex;"><span>       │
+</span></span><span style="display:flex;"><span>       ▼
+</span></span><span style="display:flex;"><span>┌──────────────────┐     ┌──────────────────┐
+</span></span><span style="display:flex;"><span>│  New IdP         │────→│  Old IdP / DB    │
+</span></span><span style="display:flex;"><span>│  (target)        │     │  (source)        │
+</span></span><span style="display:flex;"><span>│                  │     │                  │
+</span></span><span style="display:flex;"><span>│ 1. Check if user │     │ 3. Validate      │
+</span></span><span style="display:flex;"><span>│    has new hash  │     │    old hash      │
+</span></span><span style="display:flex;"><span>│ 2. If not, proxy │     │ 4. Return success│
+</span></span><span style="display:flex;"><span>│    auth to old   │     │    /failure      │
+</span></span><span style="display:flex;"><span>│ 5. On success,   │     └──────────────────┘
+</span></span><span style="display:flex;"><span>│    re-hash and   │
+</span></span><span style="display:flex;"><span>│    store new hash│
+</span></span><span style="display:flex;"><span>│ 6. Next login    │
+</span></span><span style="display:flex;"><span>│    uses new hash │
+</span></span><span style="display:flex;"><span>└──────────────────┘
+</span></span></code></pre></div><h3 id="implementation-examples">Implementation Examples<a hidden class="anchor" aria-hidden="true" href="#implementation-examples">#</a></h3>
+<p><strong>Keycloak custom authenticator</strong> for progressive rehashing:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">LegacyAuthenticator</span> <span style="color:#66d9ef">implements</span> Authenticator {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">authenticate</span>(AuthenticationFlowContext context) {
+</span></span><span style="display:flex;"><span>        UserModel user <span style="color:#f92672">=</span> context.<span style="color:#a6e22e">getUser</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Check if user already has a Keycloak-native password</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (user.<span style="color:#a6e22e">credentialManager</span>().<span style="color:#a6e22e">isConfiguredFor</span>(PasswordCredentialModel.<span style="color:#a6e22e">TYPE</span>)) {
+</span></span><span style="display:flex;"><span>            context.<span style="color:#a6e22e">success</span>();
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// User doesn&#39;t have a local password — authenticate against legacy system</span>
+</span></span><span style="display:flex;"><span>        String password <span style="color:#f92672">=</span> extractPassword(context);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (validateAgainstLegacy(user.<span style="color:#a6e22e">getUsername</span>(), password)) {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Set the password in Keycloak (hashes with Keycloak&#39;s algorithm)</span>
+</span></span><span style="display:flex;"><span>            user.<span style="color:#a6e22e">credentialManager</span>().<span style="color:#a6e22e">updateCredential</span>(
+</span></span><span style="display:flex;"><span>                UserCredentialModel.<span style="color:#a6e22e">password</span>(password)
+</span></span><span style="display:flex;"><span>            );
+</span></span><span style="display:flex;"><span>            context.<span style="color:#a6e22e">success</span>();
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>            context.<span style="color:#a6e22e">failure</span>(AuthenticationFlowError.<span style="color:#a6e22e">INVALID_CREDENTIALS</span>);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">validateAgainstLegacy</span>(String username, String password) {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Call legacy IdP or validate against imported hash</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// ...</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><strong>Auth0 custom database connection</strong> — Auth0 natively supports this pattern:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// Auth0 Login script (custom database)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">login</span>(<span style="color:#a6e22e">email</span>, <span style="color:#a6e22e">password</span>, <span style="color:#a6e22e">callback</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Try new database first
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">user</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">findUserInNewDB</span>(<span style="color:#a6e22e">email</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">user</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">user</span>.<span style="color:#a6e22e">migrated</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">callback</span>(<span style="color:#66d9ef">null</span>, <span style="color:#a6e22e">user</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Fall back to legacy system
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">legacyResult</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">authenticateAgainstLegacy</span>(<span style="color:#a6e22e">email</span>, <span style="color:#a6e22e">password</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">legacyResult</span>.<span style="color:#a6e22e">success</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// User authenticated — migrate their password
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">migrateUser</span>(<span style="color:#a6e22e">email</span>, <span style="color:#a6e22e">password</span>, <span style="color:#a6e22e">legacyResult</span>.<span style="color:#a6e22e">profile</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">callback</span>(<span style="color:#66d9ef">null</span>, <span style="color:#a6e22e">legacyResult</span>.<span style="color:#a6e22e">profile</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">callback</span>(<span style="color:#66d9ef">new</span> <span style="color:#a6e22e">WrongUsernameOrPasswordError</span>(<span style="color:#a6e22e">email</span>));
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="handling-dormant-accounts">Handling Dormant Accounts<a hidden class="anchor" aria-hidden="true" href="#handling-dormant-accounts">#</a></h3>
+<p>Progressive rehashing only works for users who actually log in. After 90 days of migration, you&rsquo;ll typically see:</p>
+<ul>
+<li>70-85% of active users have been re-hashed</li>
+<li>15-30% of accounts are dormant (haven&rsquo;t logged in)</li>
+</ul>
+<p>For dormant accounts, you have two options:</p>
+<ol>
+<li><strong>Force password reset</strong>: Send an email requiring password reset for accounts that haven&rsquo;t been re-hashed within the migration window</li>
+<li><strong>Keep legacy auth</strong>: Maintain the legacy authentication path for dormant users indefinitely (not recommended — it becomes a maintenance burden)</li>
+</ol>
+<h2 id="strategy-3-hash-algorithm-upgrade">Strategy 3: Hash Algorithm Upgrade<a hidden class="anchor" aria-hidden="true" href="#strategy-3-hash-algorithm-upgrade">#</a></h2>
+<p>Even if you&rsquo;re not changing platforms, upgrading your hash algorithm is a migration event.</p>
+<h3 id="bcrypt--argon2id">bcrypt → Argon2id<a hidden class="anchor" aria-hidden="true" href="#bcrypt--argon2id">#</a></h3>
+<p>The recommended upgrade path in 2026. Argon2id provides memory-hardness (protects against GPU attacks) that bcrypt lacks.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Progressive bcrypt → Argon2id upgrade</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> bcrypt
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> argon2 <span style="color:#f92672">import</span> PasswordHasher
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>ph <span style="color:#f92672">=</span> PasswordHasher(
+</span></span><span style="display:flex;"><span>    time_cost<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>,
+</span></span><span style="display:flex;"><span>    memory_cost<span style="color:#f92672">=</span><span style="color:#ae81ff">19456</span>,   <span style="color:#75715e"># 19 MiB</span>
+</span></span><span style="display:flex;"><span>    parallelism<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>    hash_len<span style="color:#f92672">=</span><span style="color:#ae81ff">32</span>,
+</span></span><span style="display:flex;"><span>    type<span style="color:#f92672">=</span>argon2<span style="color:#f92672">.</span>Type<span style="color:#f92672">.</span>ID
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">verify_and_upgrade</span>(password: str, stored_hash: str) <span style="color:#f92672">-&gt;</span> tuple[bool, str <span style="color:#f92672">|</span> <span style="color:#66d9ef">None</span>]:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Verify password and return upgraded hash if applicable.&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> stored_hash<span style="color:#f92672">.</span>startswith(<span style="color:#e6db74">&#39;$2&#39;</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># bcrypt hash — verify with bcrypt</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> bcrypt<span style="color:#f92672">.</span>checkpw(password<span style="color:#f92672">.</span>encode(), stored_hash<span style="color:#f92672">.</span>encode()):
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># Rehash with Argon2id</span>
+</span></span><span style="display:flex;"><span>            new_hash <span style="color:#f92672">=</span> ph<span style="color:#f92672">.</span>hash(password)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">True</span>, new_hash
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">False</span>, <span style="color:#66d9ef">None</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">elif</span> stored_hash<span style="color:#f92672">.</span>startswith(<span style="color:#e6db74">&#39;$argon2&#39;</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Already Argon2 — verify directly</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> ph<span style="color:#f92672">.</span>verify(stored_hash, password):
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e"># Check if parameters need updating</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> ph<span style="color:#f92672">.</span>check_needs_rehash(stored_hash):
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">True</span>, ph<span style="color:#f92672">.</span>hash(password)
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">True</span>, <span style="color:#66d9ef">None</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">except</span> argon2<span style="color:#f92672">.</span>exceptions<span style="color:#f92672">.</span>VerifyMismatchError:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">False</span>, <span style="color:#66d9ef">None</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">False</span>, <span style="color:#66d9ef">None</span>
+</span></span></code></pre></div><h3 id="cost-factor-updates">Cost Factor Updates<a hidden class="anchor" aria-hidden="true" href="#cost-factor-updates">#</a></h3>
+<p>Even without changing algorithms, increase hash cost factors periodically:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Year</th>
+          <th>bcrypt cost</th>
+          <th>PBKDF2 iterations</th>
+          <th>Argon2id memory</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>2020</td>
+          <td>10</td>
+          <td>100,000</td>
+          <td>37 MiB</td>
+      </tr>
+      <tr>
+          <td>2023</td>
+          <td>12</td>
+          <td>310,000</td>
+          <td>19 MiB</td>
+      </tr>
+      <tr>
+          <td>2025</td>
+          <td>12-13</td>
+          <td>600,000</td>
+          <td>19 MiB</td>
+      </tr>
+      <tr>
+          <td>2026+</td>
+          <td>13-14</td>
+          <td>600,000+</td>
+          <td>46 MiB</td>
+      </tr>
+  </tbody>
+</table>
+<p>Use progressive rehashing to upgrade cost factors transparently — same technique as algorithm migration but within the same algorithm family.</p>
+<h2 id="platform-specific-export-methods">Platform-Specific Export Methods<a hidden class="anchor" aria-hidden="true" href="#platform-specific-export-methods">#</a></h2>
+<h3 id="export-from-keycloak">Export from Keycloak<a hidden class="anchor" aria-hidden="true" href="#export-from-keycloak">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- Direct database query (PostgreSQL)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">SELECT</span> u.username, u.email,
+</span></span><span style="display:flex;"><span>       <span style="color:#66d9ef">c</span>.secret_data<span style="color:#f92672">-&gt;&gt;</span><span style="color:#e6db74">&#39;value&#39;</span> <span style="color:#66d9ef">as</span> password_hash,
+</span></span><span style="display:flex;"><span>       <span style="color:#66d9ef">c</span>.credential_data<span style="color:#f92672">-&gt;&gt;</span><span style="color:#e6db74">&#39;algorithm&#39;</span> <span style="color:#66d9ef">as</span> algorithm,
+</span></span><span style="display:flex;"><span>       <span style="color:#66d9ef">c</span>.credential_data<span style="color:#f92672">-&gt;&gt;</span><span style="color:#e6db74">&#39;hashIterations&#39;</span> <span style="color:#66d9ef">as</span> iterations
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> user_entity u
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">JOIN</span> credential <span style="color:#66d9ef">c</span> <span style="color:#66d9ef">ON</span> <span style="color:#66d9ef">c</span>.user_id <span style="color:#f92672">=</span> u.id
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> <span style="color:#66d9ef">c</span>.<span style="color:#66d9ef">type</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;password&#39;</span>;
+</span></span></code></pre></div><h3 id="export-from-auth0">Export from Auth0<a hidden class="anchor" aria-hidden="true" href="#export-from-auth0">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Create export job</span>
+</span></span><span style="display:flex;"><span>curl -X POST <span style="color:#e6db74">&#34;https://YOUR_DOMAIN.auth0.com/api/v2/jobs/users-exports&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Authorization: Bearer </span>$MGMT_TOKEN<span style="color:#e6db74">&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -d <span style="color:#e6db74">&#39;{
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;format&#34;: &#34;json&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;fields&#34;: [
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      {&#34;name&#34;: &#34;email&#34;},
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      {&#34;name&#34;: &#34;user_id&#34;},
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      {&#34;name&#34;: &#34;custom_password_hash&#34;}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    ]
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  }&#39;</span>
+</span></span></code></pre></div><h3 id="export-from-ldapad">Export from LDAP/AD<a hidden class="anchor" aria-hidden="true" href="#export-from-ldapad">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># OpenLDAP — export userPassword attribute</span>
+</span></span><span style="display:flex;"><span>ldapsearch -x -H ldaps://ldap.corp.local -D <span style="color:#e6db74">&#34;cn=admin,dc=corp,dc=local&#34;</span> -W <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -b <span style="color:#e6db74">&#34;ou=people,dc=corp,dc=local&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#e6db74">&#34;(objectClass=person)&#34;</span> uid mail userPassword
+</span></span></code></pre></div><p>Note: Active Directory does not expose password hashes via LDAP. Use Entra Connect&rsquo;s Password Hash Sync or the DSInternals PowerShell module for offline extraction from ntds.dit backups.</p>
+<h2 id="migration-timeline">Migration Timeline<a hidden class="anchor" aria-hidden="true" href="#migration-timeline">#</a></h2>
+<table>
+  <thead>
+      <tr>
+          <th>Day</th>
+          <th>Activity</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>1-5</td>
+          <td>Audit source hash formats and target compatibility</td>
+      </tr>
+      <tr>
+          <td>6-10</td>
+          <td>Build progressive rehashing integration or bulk import scripts</td>
+      </tr>
+      <tr>
+          <td>11-15</td>
+          <td>Test with 100 pilot users</td>
+      </tr>
+      <tr>
+          <td>16-20</td>
+          <td>Deploy to production, monitor rehash progress</td>
+      </tr>
+      <tr>
+          <td>21-90</td>
+          <td>Progressive rehashing captures active users</td>
+      </tr>
+      <tr>
+          <td>91-95</td>
+          <td>Force password reset for remaining dormant accounts</td>
+      </tr>
+      <tr>
+          <td>96-100</td>
+          <td>Decommission legacy authentication path</td>
+      </tr>
+  </tbody>
+</table>
+<p>The 90-day window isn&rsquo;t arbitrary — it captures approximately 3 monthly login cycles, catching users who log in infrequently. Adjust based on your actual login frequency distribution.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/password-migration/">Password-Migration</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/identity-migration/">Identity-Migration</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/bcrypt/">Bcrypt</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/argon2/">Argon2</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/iam-operations/">Iam-Operations</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/iam-platform-evaluation-framework-choosing-the-right-idp/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>IAM Platform Evaluation Framework: How to Choose Between Keycloak, Auth0, Okta, and Entra ID</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/ciam-architecture-patterns-designing-customer-identity-at-scale/">
+    <span class="title">Next »</span>
+    <br>
+    <span>CIAM Architecture Patterns: Designing Customer Identity for Millions of Users</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+
+<section class="post-feedback">
+  <p class="feedback-question">Was this article helpful?</p>
+  <div class="feedback-buttons">
+    <button class="feedback-btn feedback-yes" onclick="trackFeedback('yes', '\/posts\/password-hash-migration-between-identity-platforms\/')" aria-label="Yes, helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      Yes
+    </button>
+    <button class="feedback-btn feedback-no" onclick="trackFeedback('no', '\/posts\/password-hash-migration-between-identity-platforms\/')" aria-label="No, not helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>
+      No
+    </button>
+  </div>
+  <p class="feedback-thanks" style="display: none;">Thanks for your feedback!</p>
+</section>
+
+
+<section class="author-bio">
+  <div class="author-avatar">
+    <img src="/IAMDevBox.com.jpg" alt="IAMDevBox Author" width="64" height="64" loading="lazy">
+  </div>
+  <div class="author-info">
+    <h4>Written by IAMDevBox</h4>
+    <p>Enterprise IAM architect with 15+ years in identity modernization. Certified across ForgeRock, Ping Identity, SailPoint, AWS, and Azure.</p>
+    <div class="author-links">
+      <a href="https://twitter.com/iamdevbox" target="_blank" rel="noopener" title="Follow on X/Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/iamdevbox" target="_blank" rel="noopener" title="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="/contact/" title="Contact">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function trackFeedback(value, page) {
+  
+  document.querySelector('.feedback-buttons').style.display = 'none';
+  document.querySelector('.feedback-question').style.display = 'none';
+  document.querySelector('.feedback-thanks').style.display = 'block';
+
+  
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'post_feedback', {
+      'feedback_value': value,
+      'page_path': page
+    });
+  }
+
+  
+  localStorage.setItem('feedback_' + page, value);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const page = '\/posts\/password-hash-migration-between-identity-platforms\/';
+  if (localStorage.getItem('feedback_' + page)) {
+    document.querySelector('.feedback-buttons').style.display = 'none';
+    document.querySelector('.feedback-question').textContent = 'Thanks for your feedback!';
+  }
+});
+</script>
+
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-upgrade-guide-migrating-to-version-26/" class="custom-link">
+              Keycloak Major Version Upgrade: Migration Guide from 21 to 26
+            </a>
+            <small class="custom-date">2026-02-05</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/adfs-to-keycloak-migration-open-source-alternative/" class="custom-link">
+              ADFS to Keycloak Migration: Replacing Windows Federation with Open Source IAM
+            </a>
+            <small class="custom-date">2026-02-05</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/adfs-to-microsoft-entra-id-migration-complete-guide/" class="custom-link">
+              ADFS to Microsoft Entra ID Migration: Complete Planning and Execution Guide
+            </a>
+            <small class="custom-date">2026-02-05</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/migrating-from-forgerock-identity-cloud-to-pingone-aic-step-by-step-guide/" class="custom-link">
+              Migrating from ForgeRock Identity Cloud to PingOne AIC: Step-by-Step Guide
+            </a>
+            <small class="custom-date">2026-01-16</small>
+          </li>
+          
+        
+      
+
+      
+    </ul>
+
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+                Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+                Go Secretless with Snowflake Workload Identity Federation - Snowflake
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+                JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+                OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+                Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

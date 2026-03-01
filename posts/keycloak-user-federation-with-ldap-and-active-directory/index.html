@@ -1,0 +1,2860 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Keycloak User Federation with LDAP and Active Directory | IAMDevBox</title>
+<meta name="keywords" content="keycloak ldap setup guide, keycloak active directory integration, keycloak ldap attribute mapper, ldap user sync keycloak, keycloak ad sso configuration, keycloak ldaps connection refused, keycloak user federation troubleshooting, keycloak ldap group mapping, active directory sso keycloak">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/keycloak-user-federation-with-ldap-and-active-directory/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.e24ea479df3e367781fafa20cedde21c7e043c10bed4c8c913ef9261a049a1e2.css" integrity="sha256-4k6ked8&#43;NneB&#43;vogzt3iHH4EPBC&#43;1MjJE&#43;&#43;SYaBJoeI=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/keycloak-user-federation-with-ldap-and-active-directory/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/keycloak-user-federation-with-ldap-and-active-directory/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Keycloak User Federation with LDAP and Active Directory">
+  <meta property="og:description" content="Keycloak LDAP and Active Directory user federation setup guide — connection configuration, attribute mapping, group sync, LDAPS troubleshooting, and security best practices.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-01-18T14:25:10+00:00">
+    <meta property="article:modified_time" content="2026-02-26T21:20:24-05:00">
+    <meta property="article:tag" content="Keycloak">
+    <meta property="article:tag" content="Ldap">
+    <meta property="article:tag" content="Active Directory">
+    <meta property="article:tag" content="User-Federation">
+    <meta property="article:tag" content="Iam">
+    <meta property="og:image" content="https://www.iamdevbox.com/images/posts/keycloak-user-federation-with-ldap-and-active-dire-393a3f9a.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/images/posts/keycloak-user-federation-with-ldap-and-active-dire-393a3f9a.webp">
+<meta name="twitter:title" content="Keycloak User Federation with LDAP and Active Directory">
+<meta name="twitter:description" content="Keycloak LDAP and Active Directory user federation setup guide — connection configuration, attribute mapping, group sync, LDAPS troubleshooting, and security best practices.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Keycloak User Federation with LDAP and Active Directory",
+      "item": "https://www.iamdevbox.com/posts/keycloak-user-federation-with-ldap-and-active-directory/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Keycloak User Federation with LDAP and Active Directory",
+  "name": "Keycloak User Federation with LDAP and Active Directory",
+  "description": "Keycloak LDAP and Active Directory user federation setup guide — connection configuration, attribute mapping, group sync, LDAPS troubleshooting, and security best practices.",
+  "keywords": [
+    "keycloak ldap setup guide", "keycloak active directory integration", "keycloak ldap attribute mapper", "ldap user sync keycloak", "keycloak ad sso configuration", "keycloak ldaps connection refused", "keycloak user federation troubleshooting", "keycloak ldap group mapping", "active directory sso keycloak"
+  ],
+  "articleBody": "Keycloak User Federation with LDAP and Active Directory allows you to leverage existing directory services for user management and authentication. This setup integrates seamlessly with Keycloak, enabling you to centralize user data and simplify identity management across your applications.\nWhat is Keycloak User Federation with LDAP and Active Directory? Keycloak User Federation with LDAP and Active Directory lets you connect your existing LDAP or Active Directory servers to Keycloak. This integration means that user data, including login credentials, roles, and attributes, is managed in your directory service, while Keycloak handles authentication and authorization for your applications. If you’re planning a broader migration from legacy LDAP to modern identity platforms, see our guide on LDAP Directory Modernization and Migration to Cloud Identity.\nWhy use Keycloak User Federation with LDAP and Active Directory? Using Keycloak User Federation with LDAP and Active Directory provides several benefits:\nCentralized User Management: Manage user identities in one place, reducing duplication and improving consistency. Single Sign-On (SSO): Enable SSO across multiple applications using a single set of user credentials. Role-Based Access Control (RBAC): Define roles and permissions in your directory service, which Keycloak can enforce across applications. Scalability: Easily scale your user base without modifying application code. Setting Up Keycloak User Federation with LDAP Let’s walk through the process of setting up Keycloak to federate users from an LDAP server.\nPrerequisites Keycloak instance running LDAP server accessible Admin credentials for LDAP server Network connectivity between Keycloak and LDAP server Step 1: Create a New Realm Log in to the Keycloak admin console. Navigate to Master and click on Add Realm. Enter a name for your realm and click Create. Step 2: Configure LDAP User Storage In the newly created realm, go to User Federation. Click on Add Provider and select ldap. Fill in the required fields: Vendor: Choose Other if your LDAP server is not listed. Connection URL: The LDAP server URL (e.g., ldap://ldap.example.com:389). Users DN: Base DN for user entries (e.g., ou=users,dc=example,dc=com). Bind DN: DN for binding to the LDAP server (e.g., cn=admin,dc=example,dc=com). Bind Credential: Password for the bind DN. ⚠️ Warning: Ensure that the bind DN has read access to the user entries. Step 3: Map LDAP Attributes to Keycloak In the LDAP provider settings, navigate to the Mappers tab. Click on Create to add a new mapper. Configure mappers for essential attributes like username, email, and roles: Username Mapper: Maps LDAP attribute to Keycloak username. Email Mapper: Maps LDAP attribute to Keycloak email. Role Mapper: Maps LDAP groups to Keycloak roles. 📋 Quick Reference usernameMapper - Maps LDAP uid to Keycloak username. emailMapper - Maps LDAP mail to Keycloak email. roleMapper - Maps LDAP memberOf to Keycloak roles. Step 4: Test the Configuration Go back to the User Federation page. Click on the LDAP provider to open its settings. Click on Test Connection to verify connectivity. Click on Test Authentication to ensure user authentication works. ✅ Best Practice: Regularly test your configuration to catch issues early. Common Issues and Troubleshooting Issue: Connection Refused Symptom: javax.naming.CommunicationException: Connection refused\nSolution: Verify network connectivity between Keycloak and LDAP server. Check firewall rules and ensure the LDAP port is open.\nIssue: Invalid Credentials Symptom: javax.naming.AuthenticationException: [LDAP: error code 49 - Invalid Credentials]\nSolution: Double-check the bind DN and password. Ensure the bind DN has the necessary permissions.\nIssue: User Not Found Symptom: javax.naming.NameNotFoundException: [LDAP: error code 32 - No Such Object]\nSolution: Verify the Users DN and search filters. Ensure they match the LDAP directory structure.\n🎯 Key Takeaways Configure LDAP provider with correct connection details Map essential LDAP attributes to Keycloak Regularly test the configuration for connectivity and authentication Setting Up Keycloak User Federation with Active Directory Setting up Keycloak with Active Directory follows a similar process but requires some specific configurations.\nPrerequisites Keycloak instance running Active Directory server accessible Admin credentials for Active Directory Network connectivity between Keycloak and AD server Step 1: Create a New Realm Follow the same steps as in the LDAP setup to create a new realm in Keycloak.\nStep 2: Configure Active Directory User Storage In the newly created realm, go to User Federation. Click on Add Provider and select ldap. Fill in the required fields: Vendor: Choose Microsoft Active Directory. Connection URL: The AD server URL (e.g., ldaps://ad.example.com:636). Users DN: Base DN for user entries (e.g., DC=example,DC=com). Bind DN: DN for binding to the AD server (e.g., CN=Administrator,CN=Users,DC=example,DC=com). Bind Credential: Password for the bind DN. ⚠️ Warning: Use LDAPS for secure connections to AD. Step 3: Map AD Attributes to Keycloak In the AD provider settings, navigate to the Mappers tab. Click on Create to add a new mapper. Configure mappers for essential attributes like username, email, and roles: Username Mapper: Maps AD attribute to Keycloak username. Email Mapper: Maps AD attribute to Keycloak email. Role Mapper: Maps AD groups to Keycloak roles. 📋 Quick Reference usernameMapper - Maps AD sAMAccountName to Keycloak username. emailMapper - Maps AD mail to Keycloak email. roleMapper - Maps AD memberOf to Keycloak roles. Step 4: Test the Configuration Go back to the User Federation page. Click on the AD provider to open its settings. Click on Test Connection to verify connectivity. Click on Test Authentication to ensure user authentication works. ✅ Best Practice: Regularly test your configuration to catch issues early. Common Issues and Troubleshooting Issue: Connection Refused Symptom: javax.naming.CommunicationException: Connection refused\nSolution: Verify network connectivity between Keycloak and AD server. Check firewall rules and ensure the LDAPS port is open.\nIssue: Invalid Credentials Symptom: javax.naming.AuthenticationException: [LDAP: error code 49 - Invalid Credentials]\nSolution: Double-check the bind DN and password. Ensure the bind DN has the necessary permissions.\nIssue: User Not Found Symptom: javax.naming.NameNotFoundException: [LDAP: error code 32 - No Such Object]\nSolution: Verify the Users DN and search filters. Ensure they match the AD directory structure.\n🎯 Key Takeaways Configure AD provider with correct connection details Map essential AD attributes to Keycloak Regularly test the configuration for connectivity and authentication Security Considerations Integrating LDAP and Active Directory with Keycloak involves several security considerations:\nSecure Connections Always use LDAPS (LDAP over SSL/TLS) to encrypt communication between Keycloak and your directory service. This prevents eavesdropping and man-in-the-middle attacks.\n🚨 Security Alert: Never use plain LDAP (`ldap://`) in production environments. Manage Permissions Ensure that the bind DN used by Keycloak has only the necessary permissions. Avoid using administrative accounts for binding, as this increases the risk of unauthorized access.\nRegular Auditing Enable logging and auditing in both Keycloak and your directory service. Regularly review logs to detect and respond to suspicious activities.\nPassword Policies Implement strong password policies in your directory service to protect user accounts. Keycloak can enforce additional policies, such as password expiration and complexity requirements.\n💜 Pro Tip: Use LDAPS certificates signed by a trusted CA to avoid certificate validation errors. Comparison: LDAP vs. Active Directory FeatureLDAPActive Directory StandardizationOpen standardMicrosoft proprietary PlatformCross-platformWindows-based FeaturesBasic user managementAdvanced features (Group Policy, DNS) IntegrationEasy with KeycloakSeamless with Keycloak SecurityRequires LDAPSBuilt-in security features Conclusion Integrating Keycloak with LDAP and Active Directory provides a powerful way to manage user identities and authentication. By following the steps outlined in this guide, you can set up a secure and efficient user federation system. Remember to prioritize security, regularly test your configuration, and map attributes correctly to ensure smooth operation.\nIf you encounter errors during setup, see the Keycloak LDAP Connection Troubleshooting Guide for every known error message with AD-specific sub-codes, TLS certificate fixes, and debug commands.\nGo ahead and implement these steps in your environment. Happy coding!\n",
+  "wordCount" : "1247",
+  "inLanguage": "en",
+  "image":"https://www.iamdevbox.com/images/posts/keycloak-user-federation-with-ldap-and-active-dire-393a3f9a.webp","datePublished": "2026-01-18T14:25:10Z",
+  "dateModified": "2026-02-26T21:20:24-05:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/keycloak-user-federation-with-ldap-and-active-directory/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do I fix 'Connection refused' when connecting Keycloak to LDAP?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Check that your LDAP server is reachable on port 389 (LDAP) or 636 (LDAPS). In Keycloak Admin Console, go to User Federation \u003e LDAP \u003e Connection URL and verify the hostname. For LDAPS, import the LDAP server's CA certificate into Keycloak's truststore using keytool -importcert -keystore /opt/keycloak/conf/truststore.jks."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What LDAP attributes map to Keycloak user fields?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Default mappings: uid → username, mail → email, cn → firstName, sn → lastName. Configure custom mappers in User Federation \u003e LDAP \u003e Mappers tab. For Active Directory, use sAMAccountName → username and userPrincipalName → email."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I sync LDAP groups to Keycloak roles?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Add a 'group-ldap-mapper' in the Mappers tab. Set LDAP Groups DN to your group OU (e.g., ou=groups,dc=example,dc=com), Group Object Classes to 'groupOfNames', and Membership LDAP Attribute to 'member'. Enable 'Preserve Group Inheritance' for nested groups."
+      }
+    }
+  ]
+}
+</script>
+    <meta name="description" content="Keycloak LDAP and Active Directory user federation setup guide — connection configuration, attribute mapping, group sync, LDAPS troubleshooting, and security best practices."><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-user-federation-with-ldap-and-active-directory\/"
+  },
+  "headline": "Keycloak User Federation with LDAP and Active Directory",
+  "description": "Keycloak LDAP and Active Directory user federation setup guide — connection configuration, attribute mapping, group sync, LDAPS troubleshooting, and security best practices.",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon-96x96.png",
+      "width": 96,
+      "height": 96
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://www.iamdevbox.com/IAMDevBox.com.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "datePublished": "2026-01-18T14:25:10Z",
+  "dateModified": "2026-02-26T21:20:24-05:00",
+  "wordCount":  1247 ,
+  "articleSection": "posts",
+  "keywords": ["keycloak ldap setup guide","keycloak active directory integration","keycloak ldap attribute mapper","ldap user sync keycloak","keycloak ad sso configuration","keycloak ldaps connection refused","keycloak user federation troubleshooting","keycloak ldap group mapping","active directory sso keycloak"]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Keycloak User Federation with LDAP and Active Directory",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/keycloak-user-federation-with-ldap-and-active-directory\/"
+    }
+  ]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-token-exchange-implementing-oauth-20-token-exchange\/"
+            },
+            "headline": "Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:29:55Z",
+            "dateModified": "2026-03-01T14:30:15Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/go-secretless-with-snowflake-workload-identity-federation-snowflake\/"
+            },
+            "headline": "Go Secretless with Snowflake Workload Identity Federation - Snowflake",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:24:03Z",
+            "dateModified": "2026-03-01T14:24:20Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-algorithm-confusion-attack-cve-2026-developer-guide\/"
+            },
+            "headline": "JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-02-28T18:00:00Z",
+            "dateModified": "2026-03-01T11:21:01-05:00"
+          }
+  ]
+}
+</script>
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    const mermaidBlocks = document.querySelectorAll('.mermaid, pre code.language-mermaid, code.language-mermaid');
+    if (mermaidBlocks.length > 0) {
+        
+        mermaidBlocks.forEach(block => {
+            if (block.tagName === 'CODE') {
+                const pre = block.parentElement;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = block.textContent;
+                if (pre && pre.tagName === 'PRE') {
+                    pre.parentNode.replaceChild(div, pre);
+                } else {
+                    block.parentNode.replaceChild(div, block);
+                }
+            }
+        });
+
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+            const isDark = document.body.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#5a67d8',
+                    
+                    secondaryColor: '#48bb78',
+                    secondaryTextColor: '#ffffff',
+                    secondaryBorderColor: '#38a169',
+                    
+                    tertiaryColor: '#ed8936',
+                    tertiaryTextColor: '#ffffff',
+                    tertiaryBorderColor: '#dd6b20',
+                    
+                    lineColor: '#718096',
+                    
+                    background: isDark ? '#1a202c' : '#ffffff',
+                    mainBkg: isDark ? '#2d3748' : '#f7fafc',
+                    
+                    actorBkg: '#667eea',
+                    actorBorder: '#5a67d8',
+                    actorTextColor: '#ffffff',
+                    actorLineColor: '#718096',
+                    signalColor: '#4a5568',
+                    signalTextColor: '#2d3748',
+                    labelBoxBkgColor: '#edf2f7',
+                    labelBoxBorderColor: '#cbd5e0',
+                    labelTextColor: '#2d3748',
+                    loopTextColor: '#553c9a',
+                    noteBkgColor: '#faf089',
+                    noteTextColor: '#744210',
+                    noteBorderColor: '#d69e2e',
+                    
+                    nodeBkg: '#667eea',
+                    nodeBorder: '#5a67d8',
+                    clusterBkg: '#e2e8f0',
+                    clusterBorder: '#a0aec0',
+                    defaultLinkColor: '#718096',
+                    titleColor: '#2d3748',
+                    edgeLabelBackground: 'transparent',
+                    
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                sequence: {
+                    useMaxWidth: true,
+                    boxMargin: 10,
+                    boxTextMargin: 5,
+                    noteMargin: 10,
+                    messageMargin: 35,
+                    mirrorActors: false
+                }
+            });
+            mermaid.run().then(() => {
+                
+                document.querySelectorAll('.mermaid .node').forEach(node => {
+                    const rect = node.querySelector('rect, circle, ellipse, polygon');
+                    if (rect) {
+                        const fill = rect.getAttribute('fill') || window.getComputedStyle(rect).fill;
+                        
+                        const isDarkBg = fill && (
+                            fill.includes('667eea') || fill.includes('102, 126, 234') ||
+                            fill.includes('48bb78') || fill.includes('72, 187, 120') ||
+                            fill.includes('ed8936') || fill.includes('237, 137, 54') ||
+                            fill.includes('553c9a') || fill.includes('9f7aea') ||
+                            fill.includes('e53e3e') || fill.includes('dd6b20')
+                        );
+                        const textColor = isDarkBg ? '#ffffff' : '#1a202c';
+                        node.querySelectorAll('span, .nodeLabel, text, foreignObject div').forEach(text => {
+                            text.style.color = textColor;
+                            text.style.fill = textColor;
+                        });
+                    }
+                });
+            });
+        };
+        document.head.appendChild(script);
+    }
+
+    
+    const postContent = document.querySelector('.post-content');
+    const isSinglePost = document.querySelector('.post-single');
+    const isToolsPage = window.location.pathname.startsWith('/tools/');
+    if (postContent && isSinglePost && window.innerWidth >= 1400 && !isToolsPage) {
+        const headings = postContent.querySelectorAll('h2, h3');
+        if (headings.length >= 3) {
+            const toc = document.createElement('nav');
+            toc.className = 'floating-toc';
+            toc.innerHTML = '<h4>📑 Contents</h4><ul></ul>';
+            const tocList = toc.querySelector('ul');
+
+            headings.forEach((heading, index) => {
+                const id = heading.id || `section-${index}`;
+                heading.id = id;
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2';
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            document.body.appendChild(toc);
+
+            
+            const tocLinks = toc.querySelectorAll('a');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 150) {
+                        current = heading.id;
+                    }
+                });
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+    }
+
+    
+    if (postContent && isSinglePost && window.innerWidth >= 1200) {
+        const h2s = postContent.querySelectorAll('h2');
+        if (h2s.length >= 2) {
+            const indicator = document.createElement('div');
+            indicator.className = 'section-indicator';
+
+            h2s.forEach((h2, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'section-dot';
+                dot.title = h2.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                dot.addEventListener('click', () => {
+                    h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                indicator.appendChild(dot);
+            });
+
+            document.body.appendChild(indicator);
+
+            
+            window.addEventListener('scroll', () => {
+                const dots = indicator.querySelectorAll('.section-dot');
+                let activeIndex = 0;
+                h2s.forEach((h2, index) => {
+                    if (h2.getBoundingClientRect().top <= 200) {
+                        activeIndex = index;
+                    }
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+    }
+    });
+    </script>
+
+    
+    
+    <script>
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        function loadGA() {
+            if (window.gaLoaded) return;
+            window.gaLoaded = true;
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975';
+            document.head.appendChild(script);
+
+            script.onload = () => {
+                gtag('js', new Date());
+                gtag('config', 'G-B6QCH29975');
+            };
+        }
+
+        
+        ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+            window.addEventListener(event, loadGA, { once: true, passive: true });
+        });
+
+        
+        setTimeout(loadGA, 3000);
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+    
+    <div class="reading-progress" id="reading-progress"></div>
+    <script>
+    window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / docHeight) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+    </script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+            </div>
+        </div><button id="menu-btn" aria-label="Menu" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/categories/trending/" title="Hot IAM topics">
+                    <span>🔥Trending</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+(function() {
+    var btn = document.getElementById('menu-btn');
+    var menu = document.getElementById('menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+        });
+        
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
+</script>
+<main class="main">
+
+
+
+<div class="reading-progress" id="reading-progress"></div>
+<script>
+(function() {
+  const progressBar = document.getElementById('reading-progress');
+  const article = document.querySelector('.post-content');
+
+  if (!progressBar || !article) return;
+
+  function updateProgress() {
+    const articleTop = article.offsetTop;
+    const articleHeight = article.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+
+    
+    const start = articleTop - windowHeight;
+    const end = articleTop + articleHeight;
+    const current = scrollTop - start;
+    const total = end - start;
+
+    const progress = Math.min(Math.max((current / total) * 100, 0), 100);
+    progressBar.style.width = progress + '%';
+  }
+
+  
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  
+  updateProgress();
+})();
+</script>
+
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent" data-pagefind-meta="title">
+      Keycloak User Federation with LDAP and Active Directory
+    </h1>
+    <div class="post-meta"><span title='2026-01-18 14:25:10'>Jan 18, 2026</span>&nbsp;·&nbsp;6 min&nbsp;·&nbsp;1247 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+    
+      <div class="post-updated">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Updated: Feb 26, 2026
+      </div>
+  </header> 
+<figure class="entry-cover">
+        <img loading="eager" src="https://www.iamdevbox.com/images/posts/keycloak-user-federation-with-ldap-and-active-dire-393a3f9a.webp" alt="Keycloak User Federation with LDAP and Active Directory">
+        
+</figure><div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#what-is-keycloak-user-federation-with-ldap-and-active-directory" aria-label="What is Keycloak User Federation with LDAP and Active Directory?">What is Keycloak User Federation with LDAP and Active Directory?</a></li>
+                <li>
+                    <a href="#why-use-keycloak-user-federation-with-ldap-and-active-directory" aria-label="Why use Keycloak User Federation with LDAP and Active Directory?">Why use Keycloak User Federation with LDAP and Active Directory?</a></li>
+                <li>
+                    <a href="#setting-up-keycloak-user-federation-with-ldap" aria-label="Setting Up Keycloak User Federation with LDAP">Setting Up Keycloak User Federation with LDAP</a><ul>
+                        
+                <li>
+                    <a href="#prerequisites" aria-label="Prerequisites">Prerequisites</a></li>
+                <li>
+                    <a href="#step-1-create-a-new-realm" aria-label="Step 1: Create a New Realm">Step 1: Create a New Realm</a></li>
+                <li>
+                    <a href="#step-2-configure-ldap-user-storage" aria-label="Step 2: Configure LDAP User Storage">Step 2: Configure LDAP User Storage</a></li>
+                <li>
+                    <a href="#step-3-map-ldap-attributes-to-keycloak" aria-label="Step 3: Map LDAP Attributes to Keycloak">Step 3: Map LDAP Attributes to Keycloak</a><ul>
+                        
+                <li>
+                    <a href="#" aria-label="📋 Quick Reference">📋 Quick Reference</a></li></ul>
+                </li>
+                <li>
+                    <a href="#step-4-test-the-configuration" aria-label="Step 4: Test the Configuration">Step 4: Test the Configuration</a></li>
+                <li>
+                    <a href="#common-issues-and-troubleshooting" aria-label="Common Issues and Troubleshooting">Common Issues and Troubleshooting</a><ul>
+                        
+                <li>
+                    <a href="#issue-connection-refused" aria-label="Issue: Connection Refused">Issue: Connection Refused</a></li>
+                <li>
+                    <a href="#issue-invalid-credentials" aria-label="Issue: Invalid Credentials">Issue: Invalid Credentials</a></li>
+                <li>
+                    <a href="#issue-user-not-found" aria-label="Issue: User Not Found">Issue: User Not Found</a></li>
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#setting-up-keycloak-user-federation-with-active-directory" aria-label="Setting Up Keycloak User Federation with Active Directory">Setting Up Keycloak User Federation with Active Directory</a><ul>
+                        
+                <li>
+                    <a href="#prerequisites-1" aria-label="Prerequisites">Prerequisites</a></li>
+                <li>
+                    <a href="#step-1-create-a-new-realm-1" aria-label="Step 1: Create a New Realm">Step 1: Create a New Realm</a></li>
+                <li>
+                    <a href="#step-2-configure-active-directory-user-storage" aria-label="Step 2: Configure Active Directory User Storage">Step 2: Configure Active Directory User Storage</a></li>
+                <li>
+                    <a href="#step-3-map-ad-attributes-to-keycloak" aria-label="Step 3: Map AD Attributes to Keycloak">Step 3: Map AD Attributes to Keycloak</a><ul>
+                        
+                <li>
+                    <a href="#" aria-label="📋 Quick Reference">📋 Quick Reference</a></li></ul>
+                </li>
+                <li>
+                    <a href="#step-4-test-the-configuration-1" aria-label="Step 4: Test the Configuration">Step 4: Test the Configuration</a></li>
+                <li>
+                    <a href="#common-issues-and-troubleshooting-1" aria-label="Common Issues and Troubleshooting">Common Issues and Troubleshooting</a><ul>
+                        
+                <li>
+                    <a href="#issue-connection-refused-1" aria-label="Issue: Connection Refused">Issue: Connection Refused</a></li>
+                <li>
+                    <a href="#issue-invalid-credentials-1" aria-label="Issue: Invalid Credentials">Issue: Invalid Credentials</a></li>
+                <li>
+                    <a href="#issue-user-not-found-1" aria-label="Issue: User Not Found">Issue: User Not Found</a></li>
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#security-considerations" aria-label="Security Considerations">Security Considerations</a><ul>
+                        
+                <li>
+                    <a href="#secure-connections" aria-label="Secure Connections">Secure Connections</a></li>
+                <li>
+                    <a href="#manage-permissions" aria-label="Manage Permissions">Manage Permissions</a></li>
+                <li>
+                    <a href="#regular-auditing" aria-label="Regular Auditing">Regular Auditing</a></li>
+                <li>
+                    <a href="#password-policies" aria-label="Password Policies">Password Policies</a></li></ul>
+                </li>
+                <li>
+                    <a href="#comparison-ldap-vs-active-directory" aria-label="Comparison: LDAP vs. Active Directory">Comparison: LDAP vs. Active Directory</a></li>
+                <li>
+                    <a href="#conclusion" aria-label="Conclusion">Conclusion</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content" data-pagefind-body><p>Keycloak User Federation with LDAP and Active Directory allows you to leverage existing directory services for user management and authentication. This setup integrates seamlessly with Keycloak, enabling you to centralize user data and simplify identity management across your applications.</p>
+<h2 id="what-is-keycloak-user-federation-with-ldap-and-active-directory">What is Keycloak User Federation with LDAP and Active Directory?<a hidden class="anchor" aria-hidden="true" href="#what-is-keycloak-user-federation-with-ldap-and-active-directory">#</a></h2>
+<p>Keycloak User Federation with LDAP and Active Directory lets you connect your existing LDAP or Active Directory servers to Keycloak. This integration means that user data, including login credentials, roles, and attributes, is managed in your directory service, while Keycloak handles authentication and authorization for your applications. If you&rsquo;re planning a broader migration from legacy LDAP to modern identity platforms, see our guide on <a href="/posts/ldap-directory-modernization-migration-to-cloud-identity/">LDAP Directory Modernization and Migration to Cloud Identity</a>.</p>
+<h2 id="why-use-keycloak-user-federation-with-ldap-and-active-directory">Why use Keycloak User Federation with LDAP and Active Directory?<a hidden class="anchor" aria-hidden="true" href="#why-use-keycloak-user-federation-with-ldap-and-active-directory">#</a></h2>
+<p>Using Keycloak User Federation with LDAP and Active Directory provides several benefits:</p>
+<ul>
+<li><strong>Centralized User Management:</strong> Manage user identities in one place, reducing duplication and improving consistency.</li>
+<li><strong>Single Sign-On (SSO):</strong> Enable SSO across multiple applications using a single set of user credentials.</li>
+<li><strong>Role-Based Access Control (RBAC):</strong> Define roles and permissions in your directory service, which Keycloak can enforce across applications.</li>
+<li><strong>Scalability:</strong> Easily scale your user base without modifying application code.</li>
+</ul>
+<h2 id="setting-up-keycloak-user-federation-with-ldap">Setting Up Keycloak User Federation with LDAP<a hidden class="anchor" aria-hidden="true" href="#setting-up-keycloak-user-federation-with-ldap">#</a></h2>
+<p>Let&rsquo;s walk through the process of setting up Keycloak to federate users from an LDAP server.</p>
+<h3 id="prerequisites">Prerequisites<a hidden class="anchor" aria-hidden="true" href="#prerequisites">#</a></h3>
+<ul class="checklist">
+<li class="checked">Keycloak instance running</li>
+<li class="checked">LDAP server accessible</li>
+<li class="checked">Admin credentials for LDAP server</li>
+<li class="checked">Network connectivity between Keycloak and LDAP server</li>
+</ul>
+<h3 id="step-1-create-a-new-realm">Step 1: Create a New Realm<a hidden class="anchor" aria-hidden="true" href="#step-1-create-a-new-realm">#</a></h3>
+<ol>
+<li>Log in to the Keycloak admin console.</li>
+<li>Navigate to <strong>Master</strong> and click on <strong>Add Realm</strong>.</li>
+<li>Enter a name for your realm and click <strong>Create</strong>.</li>
+</ol>
+<h3 id="step-2-configure-ldap-user-storage">Step 2: Configure LDAP User Storage<a hidden class="anchor" aria-hidden="true" href="#step-2-configure-ldap-user-storage">#</a></h3>
+<ol>
+<li>In the newly created realm, go to <strong>User Federation</strong>.</li>
+<li>Click on <strong>Add Provider</strong> and select <strong>ldap</strong>.</li>
+<li>Fill in the required fields:
+<ul>
+<li><strong>Vendor:</strong> Choose <strong>Other</strong> if your LDAP server is not listed.</li>
+<li><strong>Connection URL:</strong> The LDAP server URL (e.g., <code>ldap://ldap.example.com:389</code>).</li>
+<li><strong>Users DN:</strong> Base DN for user entries (e.g., <code>ou=users,dc=example,dc=com</code>).</li>
+<li><strong>Bind DN:</strong> DN for binding to the LDAP server (e.g., <code>cn=admin,dc=example,dc=com</code>).</li>
+<li><strong>Bind Credential:</strong> Password for the bind DN.</li>
+</ul>
+</li>
+</ol>
+<div class="notice warning">⚠️ <strong>Warning:</strong> Ensure that the bind DN has read access to the user entries.</div>
+<h3 id="step-3-map-ldap-attributes-to-keycloak">Step 3: Map LDAP Attributes to Keycloak<a hidden class="anchor" aria-hidden="true" href="#step-3-map-ldap-attributes-to-keycloak">#</a></h3>
+<ol>
+<li>In the LDAP provider settings, navigate to the <strong>Mappers</strong> tab.</li>
+<li>Click on <strong>Create</strong> to add a new mapper.</li>
+<li>Configure mappers for essential attributes like username, email, and roles:
+<ul>
+<li><strong>Username Mapper:</strong> Maps LDAP attribute to Keycloak username.</li>
+<li><strong>Email Mapper:</strong> Maps LDAP attribute to Keycloak email.</li>
+<li><strong>Role Mapper:</strong> Maps LDAP groups to Keycloak roles.</li>
+</ul>
+</li>
+</ol>
+<div class="quick-ref">
+<h4>📋 Quick Reference</h4>
+<ul>
+<li><code>usernameMapper</code> - Maps LDAP <code>uid</code> to Keycloak username.</li>
+<li><code>emailMapper</code> - Maps LDAP <code>mail</code> to Keycloak email.</li>
+<li><code>roleMapper</code> - Maps LDAP <code>memberOf</code> to Keycloak roles.</li>
+</ul>
+</div>
+<h3 id="step-4-test-the-configuration">Step 4: Test the Configuration<a hidden class="anchor" aria-hidden="true" href="#step-4-test-the-configuration">#</a></h3>
+<ol>
+<li>Go back to the <strong>User Federation</strong> page.</li>
+<li>Click on the LDAP provider to open its settings.</li>
+<li>Click on <strong>Test Connection</strong> to verify connectivity.</li>
+<li>Click on <strong>Test Authentication</strong> to ensure user authentication works.</li>
+</ol>
+<div class="notice success">✅ <strong>Best Practice:</strong> Regularly test your configuration to catch issues early.</div>
+<h3 id="common-issues-and-troubleshooting">Common Issues and Troubleshooting<a hidden class="anchor" aria-hidden="true" href="#common-issues-and-troubleshooting">#</a></h3>
+<h4 id="issue-connection-refused">Issue: Connection Refused<a hidden class="anchor" aria-hidden="true" href="#issue-connection-refused">#</a></h4>
+<p><strong>Symptom:</strong> <code>javax.naming.CommunicationException: Connection refused</code></p>
+<p><strong>Solution:</strong> Verify network connectivity between Keycloak and LDAP server. Check firewall rules and ensure the LDAP port is open.</p>
+<h4 id="issue-invalid-credentials">Issue: Invalid Credentials<a hidden class="anchor" aria-hidden="true" href="#issue-invalid-credentials">#</a></h4>
+<p><strong>Symptom:</strong> <code>javax.naming.AuthenticationException: [LDAP: error code 49 - Invalid Credentials]</code></p>
+<p><strong>Solution:</strong> Double-check the bind DN and password. Ensure the bind DN has the necessary permissions.</p>
+<h4 id="issue-user-not-found">Issue: User Not Found<a hidden class="anchor" aria-hidden="true" href="#issue-user-not-found">#</a></h4>
+<p><strong>Symptom:</strong> <code>javax.naming.NameNotFoundException: [LDAP: error code 32 - No Such Object]</code></p>
+<p><strong>Solution:</strong> Verify the Users DN and search filters. Ensure they match the LDAP directory structure.</p>
+<div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>Configure LDAP provider with correct connection details</li>
+<li>Map essential LDAP attributes to Keycloak</li>
+<li>Regularly test the configuration for connectivity and authentication</li>
+</ul>
+</div>
+<h2 id="setting-up-keycloak-user-federation-with-active-directory">Setting Up Keycloak User Federation with Active Directory<a hidden class="anchor" aria-hidden="true" href="#setting-up-keycloak-user-federation-with-active-directory">#</a></h2>
+<p>Setting up Keycloak with Active Directory follows a similar process but requires some specific configurations.</p>
+<h3 id="prerequisites-1">Prerequisites<a hidden class="anchor" aria-hidden="true" href="#prerequisites-1">#</a></h3>
+<ul class="checklist">
+<li class="checked">Keycloak instance running</li>
+<li class="checked">Active Directory server accessible</li>
+<li class="checked">Admin credentials for Active Directory</li>
+<li class="checked">Network connectivity between Keycloak and AD server</li>
+</ul>
+<h3 id="step-1-create-a-new-realm-1">Step 1: Create a New Realm<a hidden class="anchor" aria-hidden="true" href="#step-1-create-a-new-realm-1">#</a></h3>
+<p>Follow the same steps as in the LDAP setup to create a new realm in Keycloak.</p>
+<h3 id="step-2-configure-active-directory-user-storage">Step 2: Configure Active Directory User Storage<a hidden class="anchor" aria-hidden="true" href="#step-2-configure-active-directory-user-storage">#</a></h3>
+<ol>
+<li>In the newly created realm, go to <strong>User Federation</strong>.</li>
+<li>Click on <strong>Add Provider</strong> and select <strong>ldap</strong>.</li>
+<li>Fill in the required fields:
+<ul>
+<li><strong>Vendor:</strong> Choose <strong>Microsoft Active Directory</strong>.</li>
+<li><strong>Connection URL:</strong> The AD server URL (e.g., <code>ldaps://ad.example.com:636</code>).</li>
+<li><strong>Users DN:</strong> Base DN for user entries (e.g., <code>DC=example,DC=com</code>).</li>
+<li><strong>Bind DN:</strong> DN for binding to the AD server (e.g., <code>CN=Administrator,CN=Users,DC=example,DC=com</code>).</li>
+<li><strong>Bind Credential:</strong> Password for the bind DN.</li>
+</ul>
+</li>
+</ol>
+<div class="notice warning">⚠️ <strong>Warning:</strong> Use LDAPS for secure connections to AD.</div>
+<h3 id="step-3-map-ad-attributes-to-keycloak">Step 3: Map AD Attributes to Keycloak<a hidden class="anchor" aria-hidden="true" href="#step-3-map-ad-attributes-to-keycloak">#</a></h3>
+<ol>
+<li>In the AD provider settings, navigate to the <strong>Mappers</strong> tab.</li>
+<li>Click on <strong>Create</strong> to add a new mapper.</li>
+<li>Configure mappers for essential attributes like username, email, and roles:
+<ul>
+<li><strong>Username Mapper:</strong> Maps AD attribute to Keycloak username.</li>
+<li><strong>Email Mapper:</strong> Maps AD attribute to Keycloak email.</li>
+<li><strong>Role Mapper:</strong> Maps AD groups to Keycloak roles.</li>
+</ul>
+</li>
+</ol>
+<div class="quick-ref">
+<h4>📋 Quick Reference</h4>
+<ul>
+<li><code>usernameMapper</code> - Maps AD <code>sAMAccountName</code> to Keycloak username.</li>
+<li><code>emailMapper</code> - Maps AD <code>mail</code> to Keycloak email.</li>
+<li><code>roleMapper</code> - Maps AD <code>memberOf</code> to Keycloak roles.</li>
+</ul>
+</div>
+<h3 id="step-4-test-the-configuration-1">Step 4: Test the Configuration<a hidden class="anchor" aria-hidden="true" href="#step-4-test-the-configuration-1">#</a></h3>
+<ol>
+<li>Go back to the <strong>User Federation</strong> page.</li>
+<li>Click on the AD provider to open its settings.</li>
+<li>Click on <strong>Test Connection</strong> to verify connectivity.</li>
+<li>Click on <strong>Test Authentication</strong> to ensure user authentication works.</li>
+</ol>
+<div class="notice success">✅ <strong>Best Practice:</strong> Regularly test your configuration to catch issues early.</div>
+<h3 id="common-issues-and-troubleshooting-1">Common Issues and Troubleshooting<a hidden class="anchor" aria-hidden="true" href="#common-issues-and-troubleshooting-1">#</a></h3>
+<h4 id="issue-connection-refused-1">Issue: Connection Refused<a hidden class="anchor" aria-hidden="true" href="#issue-connection-refused-1">#</a></h4>
+<p><strong>Symptom:</strong> <code>javax.naming.CommunicationException: Connection refused</code></p>
+<p><strong>Solution:</strong> Verify network connectivity between Keycloak and AD server. Check firewall rules and ensure the LDAPS port is open.</p>
+<h4 id="issue-invalid-credentials-1">Issue: Invalid Credentials<a hidden class="anchor" aria-hidden="true" href="#issue-invalid-credentials-1">#</a></h4>
+<p><strong>Symptom:</strong> <code>javax.naming.AuthenticationException: [LDAP: error code 49 - Invalid Credentials]</code></p>
+<p><strong>Solution:</strong> Double-check the bind DN and password. Ensure the bind DN has the necessary permissions.</p>
+<h4 id="issue-user-not-found-1">Issue: User Not Found<a hidden class="anchor" aria-hidden="true" href="#issue-user-not-found-1">#</a></h4>
+<p><strong>Symptom:</strong> <code>javax.naming.NameNotFoundException: [LDAP: error code 32 - No Such Object]</code></p>
+<p><strong>Solution:</strong> Verify the Users DN and search filters. Ensure they match the AD directory structure.</p>
+<div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>Configure AD provider with correct connection details</li>
+<li>Map essential AD attributes to Keycloak</li>
+<li>Regularly test the configuration for connectivity and authentication</li>
+</ul>
+</div>
+<h2 id="security-considerations">Security Considerations<a hidden class="anchor" aria-hidden="true" href="#security-considerations">#</a></h2>
+<p>Integrating LDAP and Active Directory with Keycloak involves several security considerations:</p>
+<h3 id="secure-connections">Secure Connections<a hidden class="anchor" aria-hidden="true" href="#secure-connections">#</a></h3>
+<p>Always use LDAPS (LDAP over SSL/TLS) to encrypt communication between Keycloak and your directory service. This prevents eavesdropping and man-in-the-middle attacks.</p>
+<div class="notice danger">🚨 <strong>Security Alert:</strong> Never use plain LDAP (`ldap://`) in production environments.</div>
+<h3 id="manage-permissions">Manage Permissions<a hidden class="anchor" aria-hidden="true" href="#manage-permissions">#</a></h3>
+<p>Ensure that the bind DN used by Keycloak has only the necessary permissions. Avoid using administrative accounts for binding, as this increases the risk of unauthorized access.</p>
+<h3 id="regular-auditing">Regular Auditing<a hidden class="anchor" aria-hidden="true" href="#regular-auditing">#</a></h3>
+<p>Enable logging and auditing in both Keycloak and your directory service. Regularly review logs to detect and respond to suspicious activities.</p>
+<h3 id="password-policies">Password Policies<a hidden class="anchor" aria-hidden="true" href="#password-policies">#</a></h3>
+<p>Implement strong password policies in your directory service to protect user accounts. Keycloak can enforce additional policies, such as password expiration and complexity requirements.</p>
+<div class="notice tip">💜 <strong>Pro Tip:</strong> Use LDAPS certificates signed by a trusted CA to avoid certificate validation errors.</div>
+<h2 id="comparison-ldap-vs-active-directory">Comparison: LDAP vs. Active Directory<a hidden class="anchor" aria-hidden="true" href="#comparison-ldap-vs-active-directory">#</a></h2>
+<table class="comparison-table">
+<thead><tr><th>Feature</th><th>LDAP</th><th>Active Directory</th></tr></thead>
+<tbody>
+<tr><td>Standardization</td><td>Open standard</td><td>Microsoft proprietary</td></tr>
+<tr><td>Platform</td><td>Cross-platform</td><td>Windows-based</td></tr>
+<tr><td>Features</td><td>Basic user management</td><td>Advanced features (Group Policy, DNS)</td></tr>
+<tr><td>Integration</td><td>Easy with Keycloak</td><td>Seamless with Keycloak</td></tr>
+<tr><td>Security</td><td>Requires LDAPS</td><td>Built-in security features</td></tr>
+</tbody>
+</table>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>Integrating Keycloak with LDAP and Active Directory provides a powerful way to manage user identities and authentication. By following the steps outlined in this guide, you can set up a secure and efficient user federation system. Remember to prioritize security, regularly test your configuration, and map attributes correctly to ensure smooth operation.</p>
+<p>If you encounter errors during setup, see the <a href="/posts/keycloak-ldap-connection-troubleshooting-complete-guide/">Keycloak LDAP Connection Troubleshooting Guide</a> for every known error message with AD-specific sub-codes, TLS certificate fixes, and debug commands.</p>
+<p>Go ahead and implement these steps in your environment. Happy coding!</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/keycloak/">Keycloak</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/ldap/">Ldap</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/active-directory/">Active Directory</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/user-federation/">User-Federation</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/iam/">Iam</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/bay-state-overhauls-insurance-authorization-rules/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Bay State Overhauls Insurance Authorization Rules</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/can-ai-driven-pam-reduce-stress-for-security-teams/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Can AI-driven PAM Reduce Stress for Security Teams?</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+
+<section class="post-feedback">
+  <p class="feedback-question">Was this article helpful?</p>
+  <div class="feedback-buttons">
+    <button class="feedback-btn feedback-yes" onclick="trackFeedback('yes', '\/posts\/keycloak-user-federation-with-ldap-and-active-directory\/')" aria-label="Yes, helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      Yes
+    </button>
+    <button class="feedback-btn feedback-no" onclick="trackFeedback('no', '\/posts\/keycloak-user-federation-with-ldap-and-active-directory\/')" aria-label="No, not helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>
+      No
+    </button>
+  </div>
+  <p class="feedback-thanks" style="display: none;">Thanks for your feedback!</p>
+</section>
+
+
+<section class="author-bio">
+  <div class="author-avatar">
+    <img src="/IAMDevBox.com.jpg" alt="IAMDevBox Author" width="64" height="64" loading="lazy">
+  </div>
+  <div class="author-info">
+    <h4>Written by IAMDevBox</h4>
+    <p>Enterprise IAM architect with 15+ years in identity modernization. Certified across ForgeRock, Ping Identity, SailPoint, AWS, and Azure.</p>
+    <div class="author-links">
+      <a href="https://twitter.com/iamdevbox" target="_blank" rel="noopener" title="Follow on X/Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/iamdevbox" target="_blank" rel="noopener" title="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="/contact/" title="Contact">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function trackFeedback(value, page) {
+  
+  document.querySelector('.feedback-buttons').style.display = 'none';
+  document.querySelector('.feedback-question').style.display = 'none';
+  document.querySelector('.feedback-thanks').style.display = 'block';
+
+  
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'post_feedback', {
+      'feedback_value': value,
+      'page_path': page
+    });
+  }
+
+  
+  localStorage.setItem('feedback_' + page, value);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const page = '\/posts\/keycloak-user-federation-with-ldap-and-active-directory\/';
+  if (localStorage.getItem('feedback_' + page)) {
+    document.querySelector('.feedback-buttons').style.display = 'none';
+    document.querySelector('.feedback-question').textContent = 'Thanks for your feedback!';
+  }
+});
+</script>
+
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+              Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+            </a>
+            <small class="custom-date">2026-03-01</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/digital-identity-provider-v-key-secures-strategic-investment/" class="custom-link">
+              Digital Identity Provider V-Key Secures Strategic Investment
+            </a>
+            <small class="custom-date">2026-02-24</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-realm-federation-connecting-multiple-identity-sources/" class="custom-link">
+              Keycloak Realm Federation: Connecting Multiple Identity Sources
+            </a>
+            <small class="custom-date">2026-02-20</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/dshield-sensor-detects-credential-stuffing-attack-with-self-propagating-ssh-worm/" class="custom-link">
+              DShield Sensor Detects Credential Stuffing Attack with Self-Propagating SSH Worm
+            </a>
+            <small class="custom-date">2026-02-20</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/military-cyber-leaders-accelerate-zero-trust-modernization-efforts-meritalk/" class="custom-link">
+              Military Cyber Leaders Accelerate Zero Trust, Modernization Efforts - MeriTalk
+            </a>
+            <small class="custom-date">2026-02-14</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+                Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+                Go Secretless with Snowflake Workload Identity Federation - Snowflake
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+                JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+                OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+                Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

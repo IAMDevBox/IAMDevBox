@@ -1,0 +1,2820 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>ADFS to Keycloak Migration: Replacing Windows Federation with Open Source IAM | IAMDevBox</title>
+<meta name="keywords" content="adfs to keycloak migration, replace adfs with keycloak, keycloak saml configuration, adfs alternative open source, migrate adfs to keycloak, keycloak active directory integration, keycloak ldap federation, adfs replacement">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/adfs-to-keycloak-migration-open-source-alternative/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.e24ea479df3e367781fafa20cedde21c7e043c10bed4c8c913ef9261a049a1e2.css" integrity="sha256-4k6ked8&#43;NneB&#43;vogzt3iHH4EPBC&#43;1MjJE&#43;&#43;SYaBJoeI=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/adfs-to-keycloak-migration-open-source-alternative/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/adfs-to-keycloak-migration-open-source-alternative/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="ADFS to Keycloak Migration: Replacing Windows Federation with Open Source IAM">
+  <meta property="og:description" content="Migrate from ADFS to Keycloak with this practical guide covering Active Directory integration, SAML application migration, claim rules translation, and WS-Federation app conversion strategies.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-02-05T09:15:00+00:00">
+    <meta property="article:modified_time" content="2026-02-06T14:43:17+00:00">
+    <meta property="article:tag" content="Adfs-Migration">
+    <meta property="article:tag" content="Keycloak">
+    <meta property="article:tag" content="Open-Source-Iam">
+    <meta property="article:tag" content="Identity-Migration">
+    <meta property="article:tag" content="SAML">
+      <meta property="og:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:title" content="ADFS to Keycloak Migration: Replacing Windows Federation with Open Source IAM">
+<meta name="twitter:description" content="Migrate from ADFS to Keycloak with this practical guide covering Active Directory integration, SAML application migration, claim rules translation, and WS-Federation app conversion strategies.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "ADFS to Keycloak Migration: Replacing Windows Federation with Open Source IAM",
+      "item": "https://www.iamdevbox.com/posts/adfs-to-keycloak-migration-open-source-alternative/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "ADFS to Keycloak Migration: Replacing Windows Federation with Open Source IAM",
+  "name": "ADFS to Keycloak Migration: Replacing Windows Federation with Open Source IAM",
+  "description": "Migrate from ADFS to Keycloak with this practical guide covering Active Directory integration, SAML application migration, claim rules translation, and WS-Federation app conversion strategies.",
+  "keywords": [
+    "adfs to keycloak migration", "replace adfs with keycloak", "keycloak saml configuration", "adfs alternative open source", "migrate adfs to keycloak", "keycloak active directory integration", "keycloak ldap federation", "adfs replacement"
+  ],
+  "articleBody": "Not every organization wants to move from ADFS to Microsoft Entra ID. Some want to stay vendor-neutral, keep identity infrastructure on-premises, or simply avoid per-user licensing costs. Keycloak fills that gap — it handles SAML 2.0, OIDC, and integrates directly with Active Directory via LDAP federation.\nThe migration isn’t trivial, though. ADFS and Keycloak have different architectural models, and some ADFS features don’t have direct Keycloak equivalents. This guide covers the practical steps, common blockers, and configuration patterns you’ll need.\nArchitecture Differences Before diving into migration steps, understand what changes:\nAspect ADFS Keycloak Identity Source Built into AD trust LDAP Federation (connects to AD) SAML Support Native Native WS-Federation Native Community extension only OIDC/OAuth Added in ADFS 2016+ Native, first-class MFA External adapter or Azure MFA Built-in OTP, WebAuthn, conditional Session Management Per-application tokens Centralized SSO sessions Deployment Windows Server role Docker/Kubernetes/bare metal (Java) The fundamental shift: ADFS relies on the Windows domain trust model and is tightly coupled to Active Directory. Keycloak is a standalone identity broker that connects to AD as an external user store.\nStep 1: Set Up Keycloak with AD Integration Deploy Keycloak For production, run Keycloak 26.x on a supported database (PostgreSQL recommended):\n# Docker Compose for initial setup docker run -d --name keycloak \\ -p 8443:8443 \\ -e KC_DB=postgres \\ -e KC_DB_URL=jdbc:postgresql://db:5432/keycloak \\ -e KC_DB_USERNAME=keycloak \\ -e KC_DB_PASSWORD=changeme \\ -e KC_HOSTNAME=idp.yourdomain.com \\ -e KC_HTTPS_CERTIFICATE_FILE=/opt/keycloak/conf/server.crt \\ -e KC_HTTPS_CERTIFICATE_KEY_FILE=/opt/keycloak/conf/server.key \\ quay.io/keycloak/keycloak:26.5.2 start Configure LDAP User Federation In the Keycloak admin console, navigate to your realm → User Federation → Add LDAP provider:\nSetting Value Vendor Active Directory Connection URL ldaps://dc01.corp.local:636 Bind DN CN=svc-keycloak,OU=Service Accounts,DC=corp,DC=local Bind Credential (service account password) Users DN OU=Users,DC=corp,DC=local Username LDAP attribute sAMAccountName UUID LDAP attribute objectGUID User Object Classes person, organizationalPerson, user Search Scope Subtree Key settings that catch people off guard:\nImport Users: Set to ON for the migration period so Keycloak caches user data. You can switch to NO_IMPORT later if you want pure pass-through. Sync Registrations: OFF unless you want Keycloak to write back to AD. Periodic Full Sync: Enable with a 1-hour period during migration to keep users current. Map AD Groups Add a Group LDAP mapper to import AD security groups:\nLDAP Groups DN: OU=Groups,DC=corp,DC=local Group Name LDAP Attribute: cn Membership LDAP Attribute: member Mode: READ_ONLY This gives you AD group membership in Keycloak, which you’ll use for SAML role claims.\nStep 2: Migrate SAML Applications Export ADFS Relying Party Configuration For each SAML relying party in ADFS, grab the essential settings:\nGet-AdfsRelyingPartyTrust -Name \"My App\" | Select-Object ` Identifier, SamlEndpoint, IssuanceTransformRules, ` EncryptClaims, SignedSamlRequestsRequired, TokenLifetime Create Keycloak SAML Client In Keycloak admin console → Clients → Create client:\nClient ID: Use the same Entity ID from ADFS (e.g., https://app.yourdomain.com/saml) Client Protocol: SAML Valid Redirect URIs: The ACS URL from ADFS SAML endpoint Name ID Format: Match your ADFS NameID claim (typically urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress or unspecified) Translate Claim Rules to Protocol Mappers ADFS claim rules become Keycloak Protocol Mappers on the SAML client.\nNameID from email — ADFS rule:\nc:[Type == \"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress\"] =\u003e issue(Type = \"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier\", Value = c.Value); Keycloak mapper: Built-in, just set Name ID Format to email and Force Name ID Format to ON.\nGroup/Role claim — ADFS rule that maps group SID to a role:\nIn Keycloak, create a Role list mapper or a Group Membership mapper:\nMapper Type: Group list Group attribute name: http://schemas.microsoft.com/ws/2008/06/identity/claims/role Full group path: OFF Single Group Attribute: ON Custom attribute claim — ADFS pulling from AD attribute:\nCreate a User Attribute mapper:\nSAML Attribute Name: http://schemas.yourdomain.com/claims/department User Attribute: department (mapped from LDAP federation) Step 3: Handle WS-Federation Apps This is the trickiest part. Keycloak doesn’t support WS-Federation natively.\nOption A: Convert to SAML or OIDC — The cleanest approach. Most WS-Fed apps (especially .NET apps using WIF) can switch to SAML with minimal code changes. In ASP.NET Core:\n// Old: WS-Federation services.AddAuthentication() .AddWsFederation(options =\u003e { options.MetadataAddress = \"https://adfs.corp.local/federationmetadata/...\"; options.Wtrealm = \"https://myapp.corp.local\"; }); // New: SAML via Keycloak services.AddAuthentication() .AddSaml2(options =\u003e { options.SPOptions.EntityId = new EntityId(\"https://myapp.corp.local\"); options.IdentityProviders.Add( new IdentityProvider(new EntityId(\"https://idp.yourdomain.com/realms/corp\"), options.SPOptions) { MetadataLocation = \"https://idp.yourdomain.com/realms/corp/protocol/saml/descriptor\" }); }); Option B: Use the keycloak-wsfed extension — The keycloak-wsfed community extension adds WS-Federation protocol support. Note that it lags behind Keycloak releases — verify compatibility with your Keycloak version before relying on it.\nOption C: Keep ADFS as a bridge — For a small number of WS-Fed apps, you can federate ADFS as a downstream IdP under Keycloak. Keycloak becomes the primary IdP, and ADFS handles only the remaining WS-Fed apps. Not elegant, but pragmatic.\nStep 4: Testing and Cutover Parallel Run Run Keycloak alongside ADFS during testing:\nConfigure your first test application to point to Keycloak’s SAML endpoint instead of ADFS Verify login works with AD credentials (via LDAP federation) Check all claims/attributes are present in the SAML response Test logout — ADFS and Keycloak handle SLO differently Use Keycloak’s SAML Tracer or browser extensions to compare the SAML assertion structure between ADFS and Keycloak.\nDNS Cutover Strategy For a gradual rollout, use DNS-based switching:\nADFS is at sts.corp.local — keep this active Keycloak is at idp.corp.local — new endpoint Migrate apps one by one from the ADFS endpoint to the Keycloak endpoint Once all apps are migrated, optionally point sts.corp.local to Keycloak for any hardcoded references What to Validate User login with AD credentials works MFA enrollment and challenge (if applicable) SAML assertions contain correct NameID format All custom claims/attributes present Group-based role claims match ADFS output Single Logout (SLO) functions correctly Session timeout behavior matches expectations Service account / programmatic token requests work Keycloak Features You Gain After migration, take advantage of capabilities ADFS lacks:\nBuilt-in WebAuthn/Passkey support: No third-party adapter needed Fine-grained authentication flows: Conditional OTP, identity brokering, step-up auth Admin REST API: Full automation of user, client, and realm management Kubernetes-native deployment: Helm charts and the Keycloak Operator for production clusters OIDC as first-class protocol: Modern SPAs and APIs work natively without the OAuth bolt-on that ADFS provides Cost Comparison For a 5,000-user organization:\nItem ADFS Keycloak Software License Included with Windows Server Free (Apache 2.0) Infrastructure 2+ Windows Servers + WAP 2+ containers (Linux) Windows Server CALs ~$20/user Not needed SSL Certificates Required Required Database WID or SQL Server PostgreSQL (free) Support Microsoft Premier/Unified Red Hat SSO or community The infrastructure savings alone often justify the migration, particularly for organizations running ADFS on dedicated Windows Server VMs with SQL Server backend.\nKeycloak isn’t zero-cost — you still need operational expertise and potentially Red Hat support for the commercial build. But the licensing model is fundamentally different: you pay for support, not per-user fees.\n",
+  "wordCount" : "1095",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/IAMDevBox.com.jpg","datePublished": "2026-02-05T09:15:00Z",
+  "dateModified": "2026-02-06T14:43:17Z",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/adfs-to-keycloak-migration-open-source-alternative/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Can Keycloak fully replace ADFS for SAML and WS-Federation?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Keycloak handles SAML 2.0 natively and covers most ADFS SAML use cases. WS-Federation is not natively supported in Keycloak — you'll need to convert WS-Fed apps to SAML or OIDC, or use the keycloak-wsfed community extension. For pure SAML environments, Keycloak is a drop-in replacement."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I sync Active Directory users to Keycloak?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Configure LDAP User Federation in Keycloak pointing to your AD domain controllers. Set the Connection URL to ldaps://dc01.corp.local:636, bind DN to a service account, and configure user mapping. Keycloak syncs users on first login or via periodic full/changed-only sync."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the biggest risk migrating from ADFS to Keycloak?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "WS-Federation app compatibility is the primary risk. ADFS handles both SAML and WS-Fed natively, while Keycloak focuses on SAML and OIDC. Inventory your WS-Fed relying parties first and plan their conversion to SAML or OIDC before starting the migration."
+      }
+    }
+  ]
+}
+</script>
+    <meta name="description" content="Migrate from ADFS to Keycloak with this practical guide covering Active Directory integration, SAML application migration, claim rules translation, and WS-Federation app conversion strategies."><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/adfs-to-keycloak-migration-open-source-alternative\/"
+  },
+  "headline": "ADFS to Keycloak Migration: Replacing Windows Federation with Open Source IAM",
+  "description": "Migrate from ADFS to Keycloak with this practical guide covering Active Directory integration, SAML application migration, claim rules translation, and WS-Federation app conversion strategies.",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon-96x96.png",
+      "width": 96,
+      "height": 96
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://www.iamdevbox.com/IAMDevBox.com.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "datePublished": "2026-02-05T09:15:00Z",
+  "dateModified": "2026-02-06T14:43:17Z",
+  "wordCount":  1095 ,
+  "articleSection": "posts",
+  "keywords": ["adfs to keycloak migration","replace adfs with keycloak","keycloak saml configuration","adfs alternative open source","migrate adfs to keycloak","keycloak active directory integration","keycloak ldap federation","adfs replacement"]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "ADFS to Keycloak Migration: Replacing Windows Federation with Open Source IAM",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/adfs-to-keycloak-migration-open-source-alternative\/"
+    }
+  ]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-token-exchange-implementing-oauth-20-token-exchange\/"
+            },
+            "headline": "Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:29:55Z",
+            "dateModified": "2026-03-01T14:30:15Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/go-secretless-with-snowflake-workload-identity-federation-snowflake\/"
+            },
+            "headline": "Go Secretless with Snowflake Workload Identity Federation - Snowflake",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:24:03Z",
+            "dateModified": "2026-03-01T14:24:20Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-algorithm-confusion-attack-cve-2026-developer-guide\/"
+            },
+            "headline": "JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-02-28T18:00:00Z",
+            "dateModified": "2026-03-01T11:21:01-05:00"
+          }
+  ]
+}
+</script>
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    const mermaidBlocks = document.querySelectorAll('.mermaid, pre code.language-mermaid, code.language-mermaid');
+    if (mermaidBlocks.length > 0) {
+        
+        mermaidBlocks.forEach(block => {
+            if (block.tagName === 'CODE') {
+                const pre = block.parentElement;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = block.textContent;
+                if (pre && pre.tagName === 'PRE') {
+                    pre.parentNode.replaceChild(div, pre);
+                } else {
+                    block.parentNode.replaceChild(div, block);
+                }
+            }
+        });
+
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+            const isDark = document.body.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#5a67d8',
+                    
+                    secondaryColor: '#48bb78',
+                    secondaryTextColor: '#ffffff',
+                    secondaryBorderColor: '#38a169',
+                    
+                    tertiaryColor: '#ed8936',
+                    tertiaryTextColor: '#ffffff',
+                    tertiaryBorderColor: '#dd6b20',
+                    
+                    lineColor: '#718096',
+                    
+                    background: isDark ? '#1a202c' : '#ffffff',
+                    mainBkg: isDark ? '#2d3748' : '#f7fafc',
+                    
+                    actorBkg: '#667eea',
+                    actorBorder: '#5a67d8',
+                    actorTextColor: '#ffffff',
+                    actorLineColor: '#718096',
+                    signalColor: '#4a5568',
+                    signalTextColor: '#2d3748',
+                    labelBoxBkgColor: '#edf2f7',
+                    labelBoxBorderColor: '#cbd5e0',
+                    labelTextColor: '#2d3748',
+                    loopTextColor: '#553c9a',
+                    noteBkgColor: '#faf089',
+                    noteTextColor: '#744210',
+                    noteBorderColor: '#d69e2e',
+                    
+                    nodeBkg: '#667eea',
+                    nodeBorder: '#5a67d8',
+                    clusterBkg: '#e2e8f0',
+                    clusterBorder: '#a0aec0',
+                    defaultLinkColor: '#718096',
+                    titleColor: '#2d3748',
+                    edgeLabelBackground: 'transparent',
+                    
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                sequence: {
+                    useMaxWidth: true,
+                    boxMargin: 10,
+                    boxTextMargin: 5,
+                    noteMargin: 10,
+                    messageMargin: 35,
+                    mirrorActors: false
+                }
+            });
+            mermaid.run().then(() => {
+                
+                document.querySelectorAll('.mermaid .node').forEach(node => {
+                    const rect = node.querySelector('rect, circle, ellipse, polygon');
+                    if (rect) {
+                        const fill = rect.getAttribute('fill') || window.getComputedStyle(rect).fill;
+                        
+                        const isDarkBg = fill && (
+                            fill.includes('667eea') || fill.includes('102, 126, 234') ||
+                            fill.includes('48bb78') || fill.includes('72, 187, 120') ||
+                            fill.includes('ed8936') || fill.includes('237, 137, 54') ||
+                            fill.includes('553c9a') || fill.includes('9f7aea') ||
+                            fill.includes('e53e3e') || fill.includes('dd6b20')
+                        );
+                        const textColor = isDarkBg ? '#ffffff' : '#1a202c';
+                        node.querySelectorAll('span, .nodeLabel, text, foreignObject div').forEach(text => {
+                            text.style.color = textColor;
+                            text.style.fill = textColor;
+                        });
+                    }
+                });
+            });
+        };
+        document.head.appendChild(script);
+    }
+
+    
+    const postContent = document.querySelector('.post-content');
+    const isSinglePost = document.querySelector('.post-single');
+    const isToolsPage = window.location.pathname.startsWith('/tools/');
+    if (postContent && isSinglePost && window.innerWidth >= 1400 && !isToolsPage) {
+        const headings = postContent.querySelectorAll('h2, h3');
+        if (headings.length >= 3) {
+            const toc = document.createElement('nav');
+            toc.className = 'floating-toc';
+            toc.innerHTML = '<h4>📑 Contents</h4><ul></ul>';
+            const tocList = toc.querySelector('ul');
+
+            headings.forEach((heading, index) => {
+                const id = heading.id || `section-${index}`;
+                heading.id = id;
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2';
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            document.body.appendChild(toc);
+
+            
+            const tocLinks = toc.querySelectorAll('a');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 150) {
+                        current = heading.id;
+                    }
+                });
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+    }
+
+    
+    if (postContent && isSinglePost && window.innerWidth >= 1200) {
+        const h2s = postContent.querySelectorAll('h2');
+        if (h2s.length >= 2) {
+            const indicator = document.createElement('div');
+            indicator.className = 'section-indicator';
+
+            h2s.forEach((h2, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'section-dot';
+                dot.title = h2.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                dot.addEventListener('click', () => {
+                    h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                indicator.appendChild(dot);
+            });
+
+            document.body.appendChild(indicator);
+
+            
+            window.addEventListener('scroll', () => {
+                const dots = indicator.querySelectorAll('.section-dot');
+                let activeIndex = 0;
+                h2s.forEach((h2, index) => {
+                    if (h2.getBoundingClientRect().top <= 200) {
+                        activeIndex = index;
+                    }
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+    }
+    });
+    </script>
+
+    
+    
+    <script>
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        function loadGA() {
+            if (window.gaLoaded) return;
+            window.gaLoaded = true;
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975';
+            document.head.appendChild(script);
+
+            script.onload = () => {
+                gtag('js', new Date());
+                gtag('config', 'G-B6QCH29975');
+            };
+        }
+
+        
+        ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+            window.addEventListener(event, loadGA, { once: true, passive: true });
+        });
+
+        
+        setTimeout(loadGA, 3000);
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+    
+    <div class="reading-progress" id="reading-progress"></div>
+    <script>
+    window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / docHeight) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+    </script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+            </div>
+        </div><button id="menu-btn" aria-label="Menu" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/categories/trending/" title="Hot IAM topics">
+                    <span>🔥Trending</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+(function() {
+    var btn = document.getElementById('menu-btn');
+    var menu = document.getElementById('menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+        });
+        
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
+</script>
+<main class="main">
+
+
+
+<div class="reading-progress" id="reading-progress"></div>
+<script>
+(function() {
+  const progressBar = document.getElementById('reading-progress');
+  const article = document.querySelector('.post-content');
+
+  if (!progressBar || !article) return;
+
+  function updateProgress() {
+    const articleTop = article.offsetTop;
+    const articleHeight = article.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+
+    
+    const start = articleTop - windowHeight;
+    const end = articleTop + articleHeight;
+    const current = scrollTop - start;
+    const total = end - start;
+
+    const progress = Math.min(Math.max((current / total) * 100, 0), 100);
+    progressBar.style.width = progress + '%';
+  }
+
+  
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  
+  updateProgress();
+})();
+</script>
+
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent" data-pagefind-meta="title">
+      ADFS to Keycloak Migration: Replacing Windows Federation with Open Source IAM
+    </h1>
+    <div class="post-meta"><span title='2026-02-05 09:15:00'>Feb 05, 2026</span>&nbsp;·&nbsp;6 min&nbsp;·&nbsp;1095 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+    
+      <div class="post-updated">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Updated: Feb 6, 2026
+      </div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#architecture-differences" aria-label="Architecture Differences">Architecture Differences</a></li>
+                <li>
+                    <a href="#step-1-set-up-keycloak-with-ad-integration" aria-label="Step 1: Set Up Keycloak with AD Integration">Step 1: Set Up Keycloak with AD Integration</a><ul>
+                        
+                <li>
+                    <a href="#deploy-keycloak" aria-label="Deploy Keycloak">Deploy Keycloak</a></li>
+                <li>
+                    <a href="#configure-ldap-user-federation" aria-label="Configure LDAP User Federation">Configure LDAP User Federation</a></li>
+                <li>
+                    <a href="#map-ad-groups" aria-label="Map AD Groups">Map AD Groups</a></li></ul>
+                </li>
+                <li>
+                    <a href="#step-2-migrate-saml-applications" aria-label="Step 2: Migrate SAML Applications">Step 2: Migrate SAML Applications</a><ul>
+                        
+                <li>
+                    <a href="#export-adfs-relying-party-configuration" aria-label="Export ADFS Relying Party Configuration">Export ADFS Relying Party Configuration</a></li>
+                <li>
+                    <a href="#create-keycloak-saml-client" aria-label="Create Keycloak SAML Client">Create Keycloak SAML Client</a></li>
+                <li>
+                    <a href="#translate-claim-rules-to-protocol-mappers" aria-label="Translate Claim Rules to Protocol Mappers">Translate Claim Rules to Protocol Mappers</a></li></ul>
+                </li>
+                <li>
+                    <a href="#step-3-handle-ws-federation-apps" aria-label="Step 3: Handle WS-Federation Apps">Step 3: Handle WS-Federation Apps</a></li>
+                <li>
+                    <a href="#step-4-testing-and-cutover" aria-label="Step 4: Testing and Cutover">Step 4: Testing and Cutover</a><ul>
+                        
+                <li>
+                    <a href="#parallel-run" aria-label="Parallel Run">Parallel Run</a></li>
+                <li>
+                    <a href="#dns-cutover-strategy" aria-label="DNS Cutover Strategy">DNS Cutover Strategy</a></li>
+                <li>
+                    <a href="#what-to-validate" aria-label="What to Validate">What to Validate</a></li></ul>
+                </li>
+                <li>
+                    <a href="#keycloak-features-you-gain" aria-label="Keycloak Features You Gain">Keycloak Features You Gain</a></li>
+                <li>
+                    <a href="#cost-comparison" aria-label="Cost Comparison">Cost Comparison</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content" data-pagefind-body><p>Not every organization wants to move from ADFS to Microsoft Entra ID. Some want to stay vendor-neutral, keep identity infrastructure on-premises, or simply avoid per-user licensing costs. Keycloak fills that gap — it handles SAML 2.0, OIDC, and integrates directly with Active Directory via LDAP federation.</p>
+<p>The migration isn&rsquo;t trivial, though. ADFS and Keycloak have different architectural models, and some ADFS features don&rsquo;t have direct Keycloak equivalents. This guide covers the practical steps, common blockers, and configuration patterns you&rsquo;ll need.</p>
+<h2 id="architecture-differences">Architecture Differences<a hidden class="anchor" aria-hidden="true" href="#architecture-differences">#</a></h2>
+<p>Before diving into migration steps, understand what changes:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Aspect</th>
+          <th>ADFS</th>
+          <th>Keycloak</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Identity Source</td>
+          <td>Built into AD trust</td>
+          <td>LDAP Federation (connects to AD)</td>
+      </tr>
+      <tr>
+          <td>SAML Support</td>
+          <td>Native</td>
+          <td>Native</td>
+      </tr>
+      <tr>
+          <td>WS-Federation</td>
+          <td>Native</td>
+          <td>Community extension only</td>
+      </tr>
+      <tr>
+          <td>OIDC/OAuth</td>
+          <td>Added in ADFS 2016+</td>
+          <td>Native, first-class</td>
+      </tr>
+      <tr>
+          <td>MFA</td>
+          <td>External adapter or Azure MFA</td>
+          <td>Built-in OTP, WebAuthn, conditional</td>
+      </tr>
+      <tr>
+          <td>Session Management</td>
+          <td>Per-application tokens</td>
+          <td>Centralized SSO sessions</td>
+      </tr>
+      <tr>
+          <td>Deployment</td>
+          <td>Windows Server role</td>
+          <td>Docker/Kubernetes/bare metal (Java)</td>
+      </tr>
+  </tbody>
+</table>
+<p>The fundamental shift: ADFS relies on the Windows domain trust model and is tightly coupled to Active Directory. Keycloak is a standalone identity broker that connects to AD as an external user store.</p>
+<h2 id="step-1-set-up-keycloak-with-ad-integration">Step 1: Set Up Keycloak with AD Integration<a hidden class="anchor" aria-hidden="true" href="#step-1-set-up-keycloak-with-ad-integration">#</a></h2>
+<h3 id="deploy-keycloak">Deploy Keycloak<a hidden class="anchor" aria-hidden="true" href="#deploy-keycloak">#</a></h3>
+<p>For production, run Keycloak 26.x on a supported database (PostgreSQL recommended):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Docker Compose for initial setup</span>
+</span></span><span style="display:flex;"><span>docker run -d --name keycloak <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -p 8443:8443 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -e KC_DB<span style="color:#f92672">=</span>postgres <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -e KC_DB_URL<span style="color:#f92672">=</span>jdbc:postgresql://db:5432/keycloak <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -e KC_DB_USERNAME<span style="color:#f92672">=</span>keycloak <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -e KC_DB_PASSWORD<span style="color:#f92672">=</span>changeme <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -e KC_HOSTNAME<span style="color:#f92672">=</span>idp.yourdomain.com <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -e KC_HTTPS_CERTIFICATE_FILE<span style="color:#f92672">=</span>/opt/keycloak/conf/server.crt <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -e KC_HTTPS_CERTIFICATE_KEY_FILE<span style="color:#f92672">=</span>/opt/keycloak/conf/server.key <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  quay.io/keycloak/keycloak:26.5.2 start
+</span></span></code></pre></div><h3 id="configure-ldap-user-federation">Configure LDAP User Federation<a hidden class="anchor" aria-hidden="true" href="#configure-ldap-user-federation">#</a></h3>
+<p>In the Keycloak admin console, navigate to your realm → <strong>User Federation → Add LDAP provider</strong>:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Setting</th>
+          <th>Value</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Vendor</td>
+          <td>Active Directory</td>
+      </tr>
+      <tr>
+          <td>Connection URL</td>
+          <td><code>ldaps://dc01.corp.local:636</code></td>
+      </tr>
+      <tr>
+          <td>Bind DN</td>
+          <td><code>CN=svc-keycloak,OU=Service Accounts,DC=corp,DC=local</code></td>
+      </tr>
+      <tr>
+          <td>Bind Credential</td>
+          <td>(service account password)</td>
+      </tr>
+      <tr>
+          <td>Users DN</td>
+          <td><code>OU=Users,DC=corp,DC=local</code></td>
+      </tr>
+      <tr>
+          <td>Username LDAP attribute</td>
+          <td><code>sAMAccountName</code></td>
+      </tr>
+      <tr>
+          <td>UUID LDAP attribute</td>
+          <td><code>objectGUID</code></td>
+      </tr>
+      <tr>
+          <td>User Object Classes</td>
+          <td><code>person, organizationalPerson, user</code></td>
+      </tr>
+      <tr>
+          <td>Search Scope</td>
+          <td>Subtree</td>
+      </tr>
+  </tbody>
+</table>
+<p>Key settings that catch people off guard:</p>
+<ul>
+<li><strong>Import Users</strong>: Set to ON for the migration period so Keycloak caches user data. You can switch to NO_IMPORT later if you want pure pass-through.</li>
+<li><strong>Sync Registrations</strong>: OFF unless you want Keycloak to write back to AD.</li>
+<li><strong>Periodic Full Sync</strong>: Enable with a 1-hour period during migration to keep users current.</li>
+</ul>
+<h3 id="map-ad-groups">Map AD Groups<a hidden class="anchor" aria-hidden="true" href="#map-ad-groups">#</a></h3>
+<p>Add a <strong>Group LDAP mapper</strong> to import AD security groups:</p>
+<ul>
+<li>LDAP Groups DN: <code>OU=Groups,DC=corp,DC=local</code></li>
+<li>Group Name LDAP Attribute: <code>cn</code></li>
+<li>Membership LDAP Attribute: <code>member</code></li>
+<li>Mode: <code>READ_ONLY</code></li>
+</ul>
+<p>This gives you AD group membership in Keycloak, which you&rsquo;ll use for SAML role claims.</p>
+<h2 id="step-2-migrate-saml-applications">Step 2: Migrate SAML Applications<a hidden class="anchor" aria-hidden="true" href="#step-2-migrate-saml-applications">#</a></h2>
+<h3 id="export-adfs-relying-party-configuration">Export ADFS Relying Party Configuration<a hidden class="anchor" aria-hidden="true" href="#export-adfs-relying-party-configuration">#</a></h3>
+<p>For each SAML relying party in ADFS, grab the essential settings:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span>Get-AdfsRelyingPartyTrust -Name <span style="color:#e6db74">&#34;My App&#34;</span> | Select-Object `
+</span></span><span style="display:flex;"><span>    Identifier, SamlEndpoint, IssuanceTransformRules, `
+</span></span><span style="display:flex;"><span>    EncryptClaims, SignedSamlRequestsRequired, TokenLifetime
+</span></span></code></pre></div><h3 id="create-keycloak-saml-client">Create Keycloak SAML Client<a hidden class="anchor" aria-hidden="true" href="#create-keycloak-saml-client">#</a></h3>
+<p>In Keycloak admin console → <strong>Clients → Create client</strong>:</p>
+<ol>
+<li><strong>Client ID</strong>: Use the same Entity ID from ADFS (e.g., <code>https://app.yourdomain.com/saml</code>)</li>
+<li><strong>Client Protocol</strong>: SAML</li>
+<li><strong>Valid Redirect URIs</strong>: The ACS URL from ADFS SAML endpoint</li>
+<li><strong>Name ID Format</strong>: Match your ADFS NameID claim (typically <code>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</code> or <code>unspecified</code>)</li>
+</ol>
+<h3 id="translate-claim-rules-to-protocol-mappers">Translate Claim Rules to Protocol Mappers<a hidden class="anchor" aria-hidden="true" href="#translate-claim-rules-to-protocol-mappers">#</a></h3>
+<p>ADFS claim rules become Keycloak <strong>Protocol Mappers</strong> on the SAML client.</p>
+<p><strong>NameID from email</strong> — ADFS rule:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>c:[Type == &#34;http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress&#34;]
+</span></span><span style="display:flex;"><span> =&gt; issue(Type = &#34;http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier&#34;,
+</span></span><span style="display:flex;"><span>    Value = c.Value);
+</span></span></code></pre></div><p>Keycloak mapper: Built-in, just set <strong>Name ID Format</strong> to <code>email</code> and <strong>Force Name ID Format</strong> to ON.</p>
+<p><strong>Group/Role claim</strong> — ADFS rule that maps group SID to a role:</p>
+<p>In Keycloak, create a <strong>Role list</strong> mapper or a <strong>Group Membership</strong> mapper:</p>
+<ul>
+<li>Mapper Type: <code>Group list</code></li>
+<li>Group attribute name: <code>http://schemas.microsoft.com/ws/2008/06/identity/claims/role</code></li>
+<li>Full group path: OFF</li>
+<li>Single Group Attribute: ON</li>
+</ul>
+<p><strong>Custom attribute claim</strong> — ADFS pulling from AD attribute:</p>
+<p>Create a <strong>User Attribute</strong> mapper:</p>
+<ul>
+<li>SAML Attribute Name: <code>http://schemas.yourdomain.com/claims/department</code></li>
+<li>User Attribute: <code>department</code> (mapped from LDAP federation)</li>
+</ul>
+<h2 id="step-3-handle-ws-federation-apps">Step 3: Handle WS-Federation Apps<a hidden class="anchor" aria-hidden="true" href="#step-3-handle-ws-federation-apps">#</a></h2>
+<p>This is the trickiest part. Keycloak doesn&rsquo;t support WS-Federation natively.</p>
+<p><strong>Option A: Convert to SAML or OIDC</strong> — The cleanest approach. Most WS-Fed apps (especially .NET apps using WIF) can switch to SAML with minimal code changes. In ASP.NET Core:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#75715e">// Old: WS-Federation</span>
+</span></span><span style="display:flex;"><span>services.AddAuthentication()
+</span></span><span style="display:flex;"><span>    .AddWsFederation(options =&gt; {
+</span></span><span style="display:flex;"><span>        options.MetadataAddress = <span style="color:#e6db74">&#34;https://adfs.corp.local/federationmetadata/...&#34;</span>;
+</span></span><span style="display:flex;"><span>        options.Wtrealm = <span style="color:#e6db74">&#34;https://myapp.corp.local&#34;</span>;
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// New: SAML via Keycloak</span>
+</span></span><span style="display:flex;"><span>services.AddAuthentication()
+</span></span><span style="display:flex;"><span>    .AddSaml2(options =&gt; {
+</span></span><span style="display:flex;"><span>        options.SPOptions.EntityId = <span style="color:#66d9ef">new</span> EntityId(<span style="color:#e6db74">&#34;https://myapp.corp.local&#34;</span>);
+</span></span><span style="display:flex;"><span>        options.IdentityProviders.Add(
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">new</span> IdentityProvider(<span style="color:#66d9ef">new</span> EntityId(<span style="color:#e6db74">&#34;https://idp.yourdomain.com/realms/corp&#34;</span>), options.SPOptions)
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>                MetadataLocation = <span style="color:#e6db74">&#34;https://idp.yourdomain.com/realms/corp/protocol/saml/descriptor&#34;</span>
+</span></span><span style="display:flex;"><span>            });
+</span></span><span style="display:flex;"><span>    });
+</span></span></code></pre></div><p><strong>Option B: Use the keycloak-wsfed extension</strong> — The <a href="https://github.com/cloudtrust/keycloak-wsfed">keycloak-wsfed</a> community extension adds WS-Federation protocol support. Note that it lags behind Keycloak releases — verify compatibility with your Keycloak version before relying on it.</p>
+<p><strong>Option C: Keep ADFS as a bridge</strong> — For a small number of WS-Fed apps, you can federate ADFS as a downstream IdP under Keycloak. Keycloak becomes the primary IdP, and ADFS handles only the remaining WS-Fed apps. Not elegant, but pragmatic.</p>
+<h2 id="step-4-testing-and-cutover">Step 4: Testing and Cutover<a hidden class="anchor" aria-hidden="true" href="#step-4-testing-and-cutover">#</a></h2>
+<h3 id="parallel-run">Parallel Run<a hidden class="anchor" aria-hidden="true" href="#parallel-run">#</a></h3>
+<p>Run Keycloak alongside ADFS during testing:</p>
+<ol>
+<li>Configure your first test application to point to Keycloak&rsquo;s SAML endpoint instead of ADFS</li>
+<li>Verify login works with AD credentials (via LDAP federation)</li>
+<li>Check all claims/attributes are present in the SAML response</li>
+<li>Test logout — ADFS and Keycloak handle SLO differently</li>
+</ol>
+<p>Use Keycloak&rsquo;s <strong>SAML Tracer</strong> or browser extensions to compare the SAML assertion structure between ADFS and Keycloak.</p>
+<h3 id="dns-cutover-strategy">DNS Cutover Strategy<a hidden class="anchor" aria-hidden="true" href="#dns-cutover-strategy">#</a></h3>
+<p>For a gradual rollout, use DNS-based switching:</p>
+<ol>
+<li>ADFS is at <code>sts.corp.local</code> — keep this active</li>
+<li>Keycloak is at <code>idp.corp.local</code> — new endpoint</li>
+<li>Migrate apps one by one from the ADFS endpoint to the Keycloak endpoint</li>
+<li>Once all apps are migrated, optionally point <code>sts.corp.local</code> to Keycloak for any hardcoded references</li>
+</ol>
+<h3 id="what-to-validate">What to Validate<a hidden class="anchor" aria-hidden="true" href="#what-to-validate">#</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> User login with AD credentials works</li>
+<li><input disabled="" type="checkbox"> MFA enrollment and challenge (if applicable)</li>
+<li><input disabled="" type="checkbox"> SAML assertions contain correct NameID format</li>
+<li><input disabled="" type="checkbox"> All custom claims/attributes present</li>
+<li><input disabled="" type="checkbox"> Group-based role claims match ADFS output</li>
+<li><input disabled="" type="checkbox"> Single Logout (SLO) functions correctly</li>
+<li><input disabled="" type="checkbox"> Session timeout behavior matches expectations</li>
+<li><input disabled="" type="checkbox"> Service account / programmatic token requests work</li>
+</ul>
+<h2 id="keycloak-features-you-gain">Keycloak Features You Gain<a hidden class="anchor" aria-hidden="true" href="#keycloak-features-you-gain">#</a></h2>
+<p>After migration, take advantage of capabilities ADFS lacks:</p>
+<ul>
+<li><strong>Built-in WebAuthn/Passkey support</strong>: No third-party adapter needed</li>
+<li><strong>Fine-grained authentication flows</strong>: Conditional OTP, identity brokering, step-up auth</li>
+<li><strong>Admin REST API</strong>: Full automation of user, client, and realm management</li>
+<li><strong>Kubernetes-native deployment</strong>: Helm charts and the Keycloak Operator for production clusters</li>
+<li><strong>OIDC as first-class protocol</strong>: Modern SPAs and APIs work natively without the OAuth bolt-on that ADFS provides</li>
+</ul>
+<h2 id="cost-comparison">Cost Comparison<a hidden class="anchor" aria-hidden="true" href="#cost-comparison">#</a></h2>
+<p>For a 5,000-user organization:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Item</th>
+          <th>ADFS</th>
+          <th>Keycloak</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Software License</td>
+          <td>Included with Windows Server</td>
+          <td>Free (Apache 2.0)</td>
+      </tr>
+      <tr>
+          <td>Infrastructure</td>
+          <td>2+ Windows Servers + WAP</td>
+          <td>2+ containers (Linux)</td>
+      </tr>
+      <tr>
+          <td>Windows Server CALs</td>
+          <td>~$20/user</td>
+          <td>Not needed</td>
+      </tr>
+      <tr>
+          <td>SSL Certificates</td>
+          <td>Required</td>
+          <td>Required</td>
+      </tr>
+      <tr>
+          <td>Database</td>
+          <td>WID or SQL Server</td>
+          <td>PostgreSQL (free)</td>
+      </tr>
+      <tr>
+          <td>Support</td>
+          <td>Microsoft Premier/Unified</td>
+          <td>Red Hat SSO or community</td>
+      </tr>
+  </tbody>
+</table>
+<p>The infrastructure savings alone often justify the migration, particularly for organizations running ADFS on dedicated Windows Server VMs with SQL Server backend.</p>
+<p>Keycloak isn&rsquo;t zero-cost — you still need operational expertise and potentially Red Hat support for the commercial build. But the licensing model is fundamentally different: you pay for support, not per-user fees.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/adfs-migration/">Adfs-Migration</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/keycloak/">Keycloak</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/open-source-iam/">Open-Source-Iam</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/identity-migration/">Identity-Migration</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/saml/">SAML</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/keycloak-upgrade-guide-migrating-to-version-26/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Keycloak Major Version Upgrade: Migration Guide from 21 to 26</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/adfs-to-microsoft-entra-id-migration-complete-guide/">
+    <span class="title">Next »</span>
+    <br>
+    <span>ADFS to Microsoft Entra ID Migration: Complete Planning and Execution Guide</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+
+<section class="post-feedback">
+  <p class="feedback-question">Was this article helpful?</p>
+  <div class="feedback-buttons">
+    <button class="feedback-btn feedback-yes" onclick="trackFeedback('yes', '\/posts\/adfs-to-keycloak-migration-open-source-alternative\/')" aria-label="Yes, helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      Yes
+    </button>
+    <button class="feedback-btn feedback-no" onclick="trackFeedback('no', '\/posts\/adfs-to-keycloak-migration-open-source-alternative\/')" aria-label="No, not helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>
+      No
+    </button>
+  </div>
+  <p class="feedback-thanks" style="display: none;">Thanks for your feedback!</p>
+</section>
+
+
+<section class="author-bio">
+  <div class="author-avatar">
+    <img src="/IAMDevBox.com.jpg" alt="IAMDevBox Author" width="64" height="64" loading="lazy">
+  </div>
+  <div class="author-info">
+    <h4>Written by IAMDevBox</h4>
+    <p>Enterprise IAM architect with 15+ years in identity modernization. Certified across ForgeRock, Ping Identity, SailPoint, AWS, and Azure.</p>
+    <div class="author-links">
+      <a href="https://twitter.com/iamdevbox" target="_blank" rel="noopener" title="Follow on X/Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/iamdevbox" target="_blank" rel="noopener" title="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="/contact/" title="Contact">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function trackFeedback(value, page) {
+  
+  document.querySelector('.feedback-buttons').style.display = 'none';
+  document.querySelector('.feedback-question').style.display = 'none';
+  document.querySelector('.feedback-thanks').style.display = 'block';
+
+  
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'post_feedback', {
+      'feedback_value': value,
+      'page_path': page
+    });
+  }
+
+  
+  localStorage.setItem('feedback_' + page, value);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const page = '\/posts\/adfs-to-keycloak-migration-open-source-alternative\/';
+  if (localStorage.getItem('feedback_' + page)) {
+    document.querySelector('.feedback-buttons').style.display = 'none';
+    document.querySelector('.feedback-question').textContent = 'Thanks for your feedback!';
+  }
+});
+</script>
+
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+              Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+            </a>
+            <small class="custom-date">2026-03-01</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-realm-federation-connecting-multiple-identity-sources/" class="custom-link">
+              Keycloak Realm Federation: Connecting Multiple Identity Sources
+            </a>
+            <small class="custom-date">2026-02-20</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-vs-auth0-vs-okta-2026-which-iam-platform-to-choose/" class="custom-link">
+              Keycloak vs Auth0 vs Okta in 2026: Which IAM Platform Should You Choose?
+            </a>
+            <small class="custom-date">2026-02-14</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-complete-guide-open-source-iam-platform/" class="custom-link">
+              Keycloak Complete Guide: Open Source Identity and Access Management Platform
+            </a>
+            <small class="custom-date">2026-02-14</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-admin-rest-api-automating-user-and-realm-management/" class="custom-link">
+              Keycloak Admin REST API: Automating User and Realm Management
+            </a>
+            <small class="custom-date">2026-02-09</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+                Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+                Go Secretless with Snowflake Workload Identity Federation - Snowflake
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+                JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+                OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+                Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

@@ -1,0 +1,3109 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>OAuth invalid_grant Error: Complete Troubleshooting Guide | IAMDevBox</title>
+<meta name="keywords" content="oauth invalid_grant error, invalid_grant fix, keycloak invalid_grant code not valid, oauth token exchange failed, refresh token expired invalid_grant, pkce verification failed, oauth redirect_uri mismatch, auth0 invalid authorization code, azure ad aadsts70008, forgerock invalid_grant troubleshooting">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/oauth-invalid-grant-error-complete-troubleshooting-guide/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.e24ea479df3e367781fafa20cedde21c7e043c10bed4c8c913ef9261a049a1e2.css" integrity="sha256-4k6ked8&#43;NneB&#43;vogzt3iHH4EPBC&#43;1MjJE&#43;&#43;SYaBJoeI=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/oauth-invalid-grant-error-complete-troubleshooting-guide/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/oauth-invalid-grant-error-complete-troubleshooting-guide/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="OAuth invalid_grant Error: Complete Troubleshooting Guide">
+  <meta property="og:description" content="Fix OAuth invalid_grant errors across Keycloak, Auth0, Okta, Azure AD, ForgeRock, and Google. Complete guide with all 18 causes, provider-specific error messages, and debugging commands.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-02-21T10:30:00+00:00">
+    <meta property="article:modified_time" content="2026-02-26T21:20:24-05:00">
+    <meta property="article:tag" content="OAuth 2.0">
+    <meta property="article:tag" content="Troubleshooting">
+    <meta property="article:tag" content="Keycloak">
+    <meta property="article:tag" content="ForgeRock">
+    <meta property="article:tag" content="Identity Management">
+      <meta property="og:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:title" content="OAuth invalid_grant Error: Complete Troubleshooting Guide">
+<meta name="twitter:description" content="Fix OAuth invalid_grant errors across Keycloak, Auth0, Okta, Azure AD, ForgeRock, and Google. Complete guide with all 18 causes, provider-specific error messages, and debugging commands.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "OAuth invalid_grant Error: Complete Troubleshooting Guide",
+      "item": "https://www.iamdevbox.com/posts/oauth-invalid-grant-error-complete-troubleshooting-guide/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "OAuth invalid_grant Error: Complete Troubleshooting Guide",
+  "name": "OAuth invalid_grant Error: Complete Troubleshooting Guide",
+  "description": "Fix OAuth invalid_grant errors across Keycloak, Auth0, Okta, Azure AD, ForgeRock, and Google. Complete guide with all 18 causes, provider-specific error messages, and debugging commands.",
+  "keywords": [
+    "oauth invalid_grant error", "invalid_grant fix", "keycloak invalid_grant code not valid", "oauth token exchange failed", "refresh token expired invalid_grant", "pkce verification failed", "oauth redirect_uri mismatch", "auth0 invalid authorization code", "azure ad aadsts70008", "forgerock invalid_grant troubleshooting"
+  ],
+  "articleBody": "The invalid_grant error is the most common and most confusing OAuth error. It appears during token exchange or refresh token requests, but the same error code covers 18+ different root causes. This guide catalogs every known cause with provider-specific error messages and exact debugging commands.\nQuick Diagnostic Checklist When you encounter invalid_grant, work through this list in order:\nRead the error_description — most providers include specific details Is the authorization code fresh? — Exchange immediately, never retry with the same code Does redirect_uri match exactly? — Check trailing slashes, protocol, port Is the PKCE code_verifier correct? — Verify the stored value matches the challenge Are client credentials correct? — Verify client_id and client_secret for the right environment Is the refresh token still valid? — Check idle timeout, absolute lifetime, rotation Has the user’s password changed? — Password resets invalidate tokens on most providers Is the server clock in sync? — Run ntpdate -q pool.ntp.org Check IdP logs — Keycloak events, Auth0 logs, Azure AD sign-in logs Is Google app in “Testing” mode? — Tokens expire after exactly 7 days All Causes of invalid_grant Authorization Code Issues Expired code — Authorization codes have short lifetimes:\nProvider Default Lifetime Keycloak 2 minutes Auth0 ~60 seconds Okta 5 minutes Google ~10 minutes Azure AD ~10 minutes ForgeRock AM Configurable per OAuth2 Provider Code already used — Authorization codes are single-use. If the same code is exchanged twice (even accidentally from network retries), all subsequent attempts fail. Per RFC 6749, the server SHOULD revoke tokens already issued from that code.\nRedirect URI mismatch — The redirect_uri in the token request must exactly match the authorization request. Watch for:\nTrailing slash: /callback vs /callback/ Protocol: http:// vs https:// Port: localhost:3000 vs localhost:8080 URL encoding differences For a complete guide to all redirect_uri causes with provider-specific fixes, see OAuth redirect_uri Mismatch Error: Complete Fix Guide.\nPKCE Failures code_verifier mismatch — The verifier sent at token exchange must produce the same challenge sent during authorization. Verify with:\n# Generate code_challenge from a code_verifier echo -n \"YOUR_CODE_VERIFIER\" | openssl dgst -sha256 -binary | \\ openssl base64 | tr '+/' '-_' | tr -d '=' # Output must match the code_challenge from the authorization request Common mistakes:\nGenerating a new code_verifier per request instead of reusing from authorization step Losing the stored verifier on page redirect (use sessionStorage, not memory) Using plain method when S256 was specified Refresh Token Issues Expired refresh token — Refresh tokens have finite lifetimes:\nProvider Idle Timeout Absolute Lifetime Keycloak 30 min (SSO Session Idle) 10 hours (SSO Session Max) Auth0 14 days Configurable (up to ~2.6 years) Okta 7 days Unlimited (configurable) Google 6 months inactivity No absolute limit Azure AD 90 days inactivity Configurable Revoked refresh token — Triggers include: user password reset, admin revoking sessions, user removing app access, and security policy changes.\nRotation replay — When refresh token rotation is enabled, using an already-rotated (old) token invalidates the entire token family. Both Auth0 and Okta implement this behavior.\nSession and Credential Issues User session expired — The user’s session on the AS expired between authorization and token exchange.\nWrong client credentials — Incorrect client_id or client_secret. Some providers return invalid_client instead; behavior varies.\nClock skew — Token timestamps (iat, exp, nbf) fail validation when server clocks diverge. Check with:\n# macOS sntp time.apple.com # Linux timedatectl status ntpdate -q pool.ntp.org Provider-Specific Causes Google Testing mode — Apps with OAuth consent screen set to “Testing” have refresh tokens that expire after exactly 7 days. Publish to “Production” to fix.\nGoogle 100-token limit — Google allows a maximum of 100 live refresh tokens per client per user. Oldest tokens are silently invalidated when the limit is exceeded.\nAzure AD tenant mismatch — AADSTS700005: the authorization code was issued for a different tenant than the token request targets.\nAzure AD SPA token lifetime — AADSTS700084: SPA refresh tokens have fixed, non-extendable lifetimes that cannot be renewed.\nKeycloak cache eviction — Session doesn't have required client: client sessions evicted from the Infinispan cache. Increase cache sizes or configure lazy loading for offline sessions.\nProvider Error Message Reference Keycloak error_description Cause Code not valid Expired code, replayed code, redirect_uri mismatch, PKCE failure Session not active User session expired Token is not active Refresh token expired or revoked Session doesn't have required client Cache eviction Invalid user credentials Wrong username/password (ROPC) Enable debug logging:\nbin/kc.sh start --log-level=\"INFO,org.keycloak.protocol.oidc:TRACE\" Check events via Admin REST API:\ncurl -H \"Authorization: Bearer $ADMIN_TOKEN\" \\ \"https://keycloak.example.com/admin/realms/your-realm/events?type=CODE_TO_TOKEN_ERROR\u0026max=10\" Auth0 error_description Cause Invalid authorization code Expired or replayed code Unknown or invalid refresh token. Expired, revoked, or rotated token Failed to verify code verifier PKCE mismatch Wrong email or password. Invalid credentials (ROPC) Check logs: Dashboard \u003e Logs \u003e filter by type feccft (Failed Exchange: Authorization Code for Access Token).\nOkta error_description Cause The authorization code is invalid or has expired. Expired or replayed code The refresh token is invalid or expired. Expired or revoked token PKCE verification failed. code_verifier mismatch The credentials provided were invalid. Wrong credentials Azure AD / Entra ID AADSTS Code Meaning AADSTS50126 Invalid username or password AADSTS50173 Grant expired due to password change/reset AADSTS54005 Authorization code already redeemed AADSTS70008 Refresh token expired due to inactivity AADSTS700005 Code used against wrong tenant AADSTS700082 Refresh token inactive too long AADSTS501481 PKCE code_verifier mismatch Lookup any code: https://login.microsoftonline.com/error?code=XXXXX\nForgeRock AM / PingOne AIC Debug with transaction ID header:\ncurl -v -X POST https://am.example.com/oauth2/access_token \\ -H \"X-ForgeRock-TransactionId: debug-$(date +%s)\" \\ -d \"grant_type=authorization_code\u0026code=CODE\u0026redirect_uri=URI\u0026client_id=ID\" Then grep the transaction ID in debug logs: $AM_HOME/var/debug/OAuth2Provider\nGoogle Google returns a generic message for all causes:\n{\"error\": \"invalid_grant\", \"error_description\": \"Token has been expired or revoked.\"} Check: Testing mode (7-day expiry), password reset, 6-month inactivity, 100-token limit, manual revocation.\nCommon Developer Mistakes Mistake 1: Exchanging the Code Twice React useEffect in StrictMode, network retry middleware, or browser prefetch can fire the token exchange twice. The first succeeds; the second fails with invalid_grant.\nlet exchangeInProgress = false; async function exchangeCode(code) { if (exchangeInProgress) return; // Prevent duplicate exchange exchangeInProgress = true; try { const response = await fetch('/oauth/token', { method: 'POST', body: new URLSearchParams({ grant_type: 'authorization_code', code, redirect_uri: REDIRECT_URI, client_id: CLIENT_ID, code_verifier: sessionStorage.getItem('pkce_code_verifier') }) }); return await response.json(); } finally { exchangeInProgress = false; } } Mistake 2: Losing the PKCE code_verifier The code_verifier must survive the redirect from the authorization server. Store it in sessionStorage (survives redirects within the same tab), NOT in memory.\n// Before redirect to authorization endpoint sessionStorage.setItem('pkce_code_verifier', codeVerifier); // After redirect back (callback) const codeVerifier = sessionStorage.getItem('pkce_code_verifier'); sessionStorage.removeItem('pkce_code_verifier'); Mistake 3: Not Handling Refresh Token Rotation When rotation is enabled, each refresh returns a new refresh token. If you fail to store it, subsequent refreshes use the old (invalidated) token.\nconst tokens = await refreshAccessToken(oldRefreshToken); // CRITICAL: Store the NEW refresh token if (tokens.refresh_token) { secureStorage.setItem('refresh_token', tokens.refresh_token); } Mistake 4: Concurrent Refresh Requests Multiple threads refreshing simultaneously: the first succeeds and rotates the token, subsequent requests fail. Use a mutex:\nlet refreshPromise = null; async function getValidAccessToken() { const token = getStoredAccessToken(); if (token \u0026\u0026 !isExpired(token)) return token; if (!refreshPromise) { refreshPromise = refreshAccessToken(getStoredRefreshToken()) .finally(() =\u003e { refreshPromise = null; }); } const tokens = await refreshPromise; return tokens?.access_token; } Debugging with curl Reproduce the exact token exchange to isolate the issue:\ncurl -v -X POST https://your-idp.com/oauth2/token \\ -H \"Content-Type: application/x-www-form-urlencoded\" \\ -d \"grant_type=authorization_code\" \\ -d \"code=AUTHORIZATION_CODE\" \\ -d \"redirect_uri=https://your-app.com/callback\" \\ -d \"client_id=YOUR_CLIENT_ID\" \\ -d \"client_secret=YOUR_CLIENT_SECRET\" \\ -d \"code_verifier=YOUR_CODE_VERIFIER\" \\ 2\u003e\u00261 | tee token_response.log The -v flag reveals request headers, exact body sent, and full server response including error details some providers add in response headers.\n",
+  "wordCount" : "1258",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/IAMDevBox.com.jpg","datePublished": "2026-02-21T10:30:00Z",
+  "dateModified": "2026-02-26T21:20:24-05:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/oauth-invalid-grant-error-complete-troubleshooting-guide/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What does the OAuth invalid_grant error mean?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The invalid_grant error (RFC 6749 Section 5.2) means the authorization grant or refresh token is invalid, expired, revoked, does not match the redirect_uri, or was issued to a different client. The most common causes are: expired authorization code, code already used, redirect_uri mismatch, PKCE code_verifier mismatch, and expired refresh token."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I fix Keycloak invalid_grant Code not valid?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Keycloak returns \"Code not valid\" for multiple causes: the authorization code expired (default 2 minutes), the code was already exchanged, the redirect_uri does not match exactly, or the PKCE code_verifier is wrong. Check Keycloak events at Admin Console \u003e Events \u003e Login Events, filter by CODE_TO_TOKEN_ERROR. Enable debug logging with: bin/kc.sh start --log-level=\"INFO,org.keycloak.protocol.oidc:TRACE\""
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does Google OAuth return Token has been expired or revoked?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Google returns this generic error for several reasons: the app is in Testing mode (tokens expire after 7 days), the user reset their password (with Gmail scopes), the refresh token was inactive for 6+ months, the per-client limit of 100 refresh tokens was exceeded, or the user manually revoked app access. To fix: publish the app to Production mode and ensure refresh tokens are used within the 6-month window."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I debug PKCE verification failed errors?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Verify your code_verifier matches the code_challenge using this command: echo -n \"YOUR_CODE_VERIFIER\" | openssl dgst -sha256 -binary | openssl base64 | tr '+/' '-_' | tr -d '='. The output must match the code_challenge sent in the authorization request. Common mistakes: generating a new code_verifier for the token request instead of reusing the one from authorization, losing the stored verifier on page redirect, or using plain method when S256 was specified."
+      }
+    }
+  ]
+}
+</script>
+    <meta name="description" content="Fix OAuth invalid_grant errors across Keycloak, Auth0, Okta, Azure AD, ForgeRock, and Google. Complete guide with all 18 causes, provider-specific error messages, and debugging commands."><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/oauth-invalid-grant-error-complete-troubleshooting-guide\/"
+  },
+  "headline": "OAuth invalid_grant Error: Complete Troubleshooting Guide",
+  "description": "Fix OAuth invalid_grant errors across Keycloak, Auth0, Okta, Azure AD, ForgeRock, and Google. Complete guide with all 18 causes, provider-specific error messages, and debugging commands.",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon-96x96.png",
+      "width": 96,
+      "height": 96
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://www.iamdevbox.com/IAMDevBox.com.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "datePublished": "2026-02-21T10:30:00Z",
+  "dateModified": "2026-02-26T21:20:24-05:00",
+  "wordCount":  1258 ,
+  "articleSection": "posts",
+  "keywords": ["oauth invalid_grant error","invalid_grant fix","keycloak invalid_grant code not valid","oauth token exchange failed","refresh token expired invalid_grant","pkce verification failed","oauth redirect_uri mismatch","auth0 invalid authorization code","azure ad aadsts70008","forgerock invalid_grant troubleshooting"]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "OAuth invalid_grant Error: Complete Troubleshooting Guide",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/oauth-invalid-grant-error-complete-troubleshooting-guide\/"
+    }
+  ]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-token-exchange-implementing-oauth-20-token-exchange\/"
+            },
+            "headline": "Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:29:55Z",
+            "dateModified": "2026-03-01T14:30:15Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/go-secretless-with-snowflake-workload-identity-federation-snowflake\/"
+            },
+            "headline": "Go Secretless with Snowflake Workload Identity Federation - Snowflake",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:24:03Z",
+            "dateModified": "2026-03-01T14:24:20Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-algorithm-confusion-attack-cve-2026-developer-guide\/"
+            },
+            "headline": "JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-02-28T18:00:00Z",
+            "dateModified": "2026-03-01T11:21:01-05:00"
+          }
+  ]
+}
+</script>
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    const mermaidBlocks = document.querySelectorAll('.mermaid, pre code.language-mermaid, code.language-mermaid');
+    if (mermaidBlocks.length > 0) {
+        
+        mermaidBlocks.forEach(block => {
+            if (block.tagName === 'CODE') {
+                const pre = block.parentElement;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = block.textContent;
+                if (pre && pre.tagName === 'PRE') {
+                    pre.parentNode.replaceChild(div, pre);
+                } else {
+                    block.parentNode.replaceChild(div, block);
+                }
+            }
+        });
+
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+            const isDark = document.body.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#5a67d8',
+                    
+                    secondaryColor: '#48bb78',
+                    secondaryTextColor: '#ffffff',
+                    secondaryBorderColor: '#38a169',
+                    
+                    tertiaryColor: '#ed8936',
+                    tertiaryTextColor: '#ffffff',
+                    tertiaryBorderColor: '#dd6b20',
+                    
+                    lineColor: '#718096',
+                    
+                    background: isDark ? '#1a202c' : '#ffffff',
+                    mainBkg: isDark ? '#2d3748' : '#f7fafc',
+                    
+                    actorBkg: '#667eea',
+                    actorBorder: '#5a67d8',
+                    actorTextColor: '#ffffff',
+                    actorLineColor: '#718096',
+                    signalColor: '#4a5568',
+                    signalTextColor: '#2d3748',
+                    labelBoxBkgColor: '#edf2f7',
+                    labelBoxBorderColor: '#cbd5e0',
+                    labelTextColor: '#2d3748',
+                    loopTextColor: '#553c9a',
+                    noteBkgColor: '#faf089',
+                    noteTextColor: '#744210',
+                    noteBorderColor: '#d69e2e',
+                    
+                    nodeBkg: '#667eea',
+                    nodeBorder: '#5a67d8',
+                    clusterBkg: '#e2e8f0',
+                    clusterBorder: '#a0aec0',
+                    defaultLinkColor: '#718096',
+                    titleColor: '#2d3748',
+                    edgeLabelBackground: 'transparent',
+                    
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                sequence: {
+                    useMaxWidth: true,
+                    boxMargin: 10,
+                    boxTextMargin: 5,
+                    noteMargin: 10,
+                    messageMargin: 35,
+                    mirrorActors: false
+                }
+            });
+            mermaid.run().then(() => {
+                
+                document.querySelectorAll('.mermaid .node').forEach(node => {
+                    const rect = node.querySelector('rect, circle, ellipse, polygon');
+                    if (rect) {
+                        const fill = rect.getAttribute('fill') || window.getComputedStyle(rect).fill;
+                        
+                        const isDarkBg = fill && (
+                            fill.includes('667eea') || fill.includes('102, 126, 234') ||
+                            fill.includes('48bb78') || fill.includes('72, 187, 120') ||
+                            fill.includes('ed8936') || fill.includes('237, 137, 54') ||
+                            fill.includes('553c9a') || fill.includes('9f7aea') ||
+                            fill.includes('e53e3e') || fill.includes('dd6b20')
+                        );
+                        const textColor = isDarkBg ? '#ffffff' : '#1a202c';
+                        node.querySelectorAll('span, .nodeLabel, text, foreignObject div').forEach(text => {
+                            text.style.color = textColor;
+                            text.style.fill = textColor;
+                        });
+                    }
+                });
+            });
+        };
+        document.head.appendChild(script);
+    }
+
+    
+    const postContent = document.querySelector('.post-content');
+    const isSinglePost = document.querySelector('.post-single');
+    const isToolsPage = window.location.pathname.startsWith('/tools/');
+    if (postContent && isSinglePost && window.innerWidth >= 1400 && !isToolsPage) {
+        const headings = postContent.querySelectorAll('h2, h3');
+        if (headings.length >= 3) {
+            const toc = document.createElement('nav');
+            toc.className = 'floating-toc';
+            toc.innerHTML = '<h4>📑 Contents</h4><ul></ul>';
+            const tocList = toc.querySelector('ul');
+
+            headings.forEach((heading, index) => {
+                const id = heading.id || `section-${index}`;
+                heading.id = id;
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2';
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            document.body.appendChild(toc);
+
+            
+            const tocLinks = toc.querySelectorAll('a');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 150) {
+                        current = heading.id;
+                    }
+                });
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+    }
+
+    
+    if (postContent && isSinglePost && window.innerWidth >= 1200) {
+        const h2s = postContent.querySelectorAll('h2');
+        if (h2s.length >= 2) {
+            const indicator = document.createElement('div');
+            indicator.className = 'section-indicator';
+
+            h2s.forEach((h2, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'section-dot';
+                dot.title = h2.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                dot.addEventListener('click', () => {
+                    h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                indicator.appendChild(dot);
+            });
+
+            document.body.appendChild(indicator);
+
+            
+            window.addEventListener('scroll', () => {
+                const dots = indicator.querySelectorAll('.section-dot');
+                let activeIndex = 0;
+                h2s.forEach((h2, index) => {
+                    if (h2.getBoundingClientRect().top <= 200) {
+                        activeIndex = index;
+                    }
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+    }
+    });
+    </script>
+
+    
+    
+    <script>
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        function loadGA() {
+            if (window.gaLoaded) return;
+            window.gaLoaded = true;
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975';
+            document.head.appendChild(script);
+
+            script.onload = () => {
+                gtag('js', new Date());
+                gtag('config', 'G-B6QCH29975');
+            };
+        }
+
+        
+        ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+            window.addEventListener(event, loadGA, { once: true, passive: true });
+        });
+
+        
+        setTimeout(loadGA, 3000);
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+    
+    <div class="reading-progress" id="reading-progress"></div>
+    <script>
+    window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / docHeight) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+    </script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+            </div>
+        </div><button id="menu-btn" aria-label="Menu" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/categories/trending/" title="Hot IAM topics">
+                    <span>🔥Trending</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+(function() {
+    var btn = document.getElementById('menu-btn');
+    var menu = document.getElementById('menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+        });
+        
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
+</script>
+<main class="main">
+
+
+
+<div class="reading-progress" id="reading-progress"></div>
+<script>
+(function() {
+  const progressBar = document.getElementById('reading-progress');
+  const article = document.querySelector('.post-content');
+
+  if (!progressBar || !article) return;
+
+  function updateProgress() {
+    const articleTop = article.offsetTop;
+    const articleHeight = article.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+
+    
+    const start = articleTop - windowHeight;
+    const end = articleTop + articleHeight;
+    const current = scrollTop - start;
+    const total = end - start;
+
+    const progress = Math.min(Math.max((current / total) * 100, 0), 100);
+    progressBar.style.width = progress + '%';
+  }
+
+  
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  
+  updateProgress();
+})();
+</script>
+
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent" data-pagefind-meta="title">
+      OAuth invalid_grant Error: Complete Troubleshooting Guide
+    </h1>
+    <div class="post-meta"><span title='2026-02-21 10:30:00'>Feb 21, 2026</span>&nbsp;·&nbsp;6 min&nbsp;·&nbsp;1258 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+    
+      <div class="post-updated">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Updated: Feb 26, 2026
+      </div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#quick-diagnostic-checklist" aria-label="Quick Diagnostic Checklist">Quick Diagnostic Checklist</a></li>
+                <li>
+                    <a href="#all-causes-of-invalid_grant" aria-label="All Causes of invalid_grant">All Causes of invalid_grant</a><ul>
+                        
+                <li>
+                    <a href="#authorization-code-issues" aria-label="Authorization Code Issues">Authorization Code Issues</a></li>
+                <li>
+                    <a href="#pkce-failures" aria-label="PKCE Failures">PKCE Failures</a></li>
+                <li>
+                    <a href="#refresh-token-issues" aria-label="Refresh Token Issues">Refresh Token Issues</a></li>
+                <li>
+                    <a href="#session-and-credential-issues" aria-label="Session and Credential Issues">Session and Credential Issues</a></li>
+                <li>
+                    <a href="#provider-specific-causes" aria-label="Provider-Specific Causes">Provider-Specific Causes</a></li></ul>
+                </li>
+                <li>
+                    <a href="#provider-error-message-reference" aria-label="Provider Error Message Reference">Provider Error Message Reference</a><ul>
+                        
+                <li>
+                    <a href="#keycloak" aria-label="Keycloak">Keycloak</a></li>
+                <li>
+                    <a href="#auth0" aria-label="Auth0">Auth0</a></li>
+                <li>
+                    <a href="#okta" aria-label="Okta">Okta</a></li>
+                <li>
+                    <a href="#azure-ad--entra-id" aria-label="Azure AD / Entra ID">Azure AD / Entra ID</a></li>
+                <li>
+                    <a href="#forgerock-am--pingone-aic" aria-label="ForgeRock AM / PingOne AIC">ForgeRock AM / PingOne AIC</a></li>
+                <li>
+                    <a href="#google" aria-label="Google">Google</a></li></ul>
+                </li>
+                <li>
+                    <a href="#common-developer-mistakes" aria-label="Common Developer Mistakes">Common Developer Mistakes</a><ul>
+                        
+                <li>
+                    <a href="#mistake-1-exchanging-the-code-twice" aria-label="Mistake 1: Exchanging the Code Twice">Mistake 1: Exchanging the Code Twice</a></li>
+                <li>
+                    <a href="#mistake-2-losing-the-pkce-code_verifier" aria-label="Mistake 2: Losing the PKCE code_verifier">Mistake 2: Losing the PKCE code_verifier</a></li>
+                <li>
+                    <a href="#mistake-3-not-handling-refresh-token-rotation" aria-label="Mistake 3: Not Handling Refresh Token Rotation">Mistake 3: Not Handling Refresh Token Rotation</a></li>
+                <li>
+                    <a href="#mistake-4-concurrent-refresh-requests" aria-label="Mistake 4: Concurrent Refresh Requests">Mistake 4: Concurrent Refresh Requests</a></li></ul>
+                </li>
+                <li>
+                    <a href="#debugging-with-curl" aria-label="Debugging with curl">Debugging with curl</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content" data-pagefind-body><p>The <code>invalid_grant</code> error is the most common and most confusing OAuth error. It appears during token exchange or refresh token requests, but the same error code covers 18+ different root causes. This guide catalogs every known cause with provider-specific error messages and exact debugging commands.</p>
+<h2 id="quick-diagnostic-checklist">Quick Diagnostic Checklist<a hidden class="anchor" aria-hidden="true" href="#quick-diagnostic-checklist">#</a></h2>
+<p>When you encounter <code>invalid_grant</code>, work through this list in order:</p>
+<ol>
+<li><strong>Read the <code>error_description</code></strong> — most providers include specific details</li>
+<li><strong>Is the authorization code fresh?</strong> — Exchange immediately, never retry with the same code</li>
+<li><strong>Does <code>redirect_uri</code> match exactly?</strong> — Check trailing slashes, protocol, port</li>
+<li><strong>Is the PKCE <code>code_verifier</code> correct?</strong> — Verify the stored value matches the challenge</li>
+<li><strong>Are client credentials correct?</strong> — Verify <code>client_id</code> and <code>client_secret</code> for the right environment</li>
+<li><strong>Is the refresh token still valid?</strong> — Check idle timeout, absolute lifetime, rotation</li>
+<li><strong>Has the user&rsquo;s password changed?</strong> — Password resets invalidate tokens on most providers</li>
+<li><strong>Is the server clock in sync?</strong> — Run <code>ntpdate -q pool.ntp.org</code></li>
+<li><strong>Check IdP logs</strong> — Keycloak events, Auth0 logs, Azure AD sign-in logs</li>
+<li><strong>Is Google app in &ldquo;Testing&rdquo; mode?</strong> — Tokens expire after exactly 7 days</li>
+</ol>
+<h2 id="all-causes-of-invalid_grant">All Causes of invalid_grant<a hidden class="anchor" aria-hidden="true" href="#all-causes-of-invalid_grant">#</a></h2>
+<h3 id="authorization-code-issues">Authorization Code Issues<a hidden class="anchor" aria-hidden="true" href="#authorization-code-issues">#</a></h3>
+<p><strong>Expired code</strong> — Authorization codes have short lifetimes:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Provider</th>
+          <th>Default Lifetime</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Keycloak</td>
+          <td>2 minutes</td>
+      </tr>
+      <tr>
+          <td>Auth0</td>
+          <td>~60 seconds</td>
+      </tr>
+      <tr>
+          <td>Okta</td>
+          <td>5 minutes</td>
+      </tr>
+      <tr>
+          <td>Google</td>
+          <td>~10 minutes</td>
+      </tr>
+      <tr>
+          <td>Azure AD</td>
+          <td>~10 minutes</td>
+      </tr>
+      <tr>
+          <td>ForgeRock AM</td>
+          <td>Configurable per OAuth2 Provider</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Code already used</strong> — Authorization codes are single-use. If the same code is exchanged twice (even accidentally from network retries), all subsequent attempts fail. Per RFC 6749, the server SHOULD revoke tokens already issued from that code.</p>
+<p><strong>Redirect URI mismatch</strong> — The <code>redirect_uri</code> in the token request must exactly match the authorization request. Watch for:</p>
+<ul>
+<li>Trailing slash: <code>/callback</code> vs <code>/callback/</code></li>
+<li>Protocol: <code>http://</code> vs <code>https://</code></li>
+<li>Port: <code>localhost:3000</code> vs <code>localhost:8080</code></li>
+<li>URL encoding differences</li>
+</ul>
+<p>For a complete guide to all redirect_uri causes with provider-specific fixes, see <a href="/posts/oauth-redirect-uri-mismatch-error-fix-guide/">OAuth redirect_uri Mismatch Error: Complete Fix Guide</a>.</p>
+<h3 id="pkce-failures">PKCE Failures<a hidden class="anchor" aria-hidden="true" href="#pkce-failures">#</a></h3>
+<p><strong>code_verifier mismatch</strong> — The verifier sent at token exchange must produce the same challenge sent during authorization. Verify with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Generate code_challenge from a code_verifier</span>
+</span></span><span style="display:flex;"><span>echo -n <span style="color:#e6db74">&#34;YOUR_CODE_VERIFIER&#34;</span> | openssl dgst -sha256 -binary | <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  openssl base64 | tr <span style="color:#e6db74">&#39;+/&#39;</span> <span style="color:#e6db74">&#39;-_&#39;</span> | tr -d <span style="color:#e6db74">&#39;=&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Output must match the code_challenge from the authorization request</span>
+</span></span></code></pre></div><p>Common mistakes:</p>
+<ul>
+<li>Generating a new <code>code_verifier</code> per request instead of reusing from authorization step</li>
+<li>Losing the stored verifier on page redirect (use <code>sessionStorage</code>, not memory)</li>
+<li>Using <code>plain</code> method when <code>S256</code> was specified</li>
+</ul>
+<h3 id="refresh-token-issues">Refresh Token Issues<a hidden class="anchor" aria-hidden="true" href="#refresh-token-issues">#</a></h3>
+<p><strong>Expired refresh token</strong> — Refresh tokens have finite lifetimes:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Provider</th>
+          <th>Idle Timeout</th>
+          <th>Absolute Lifetime</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Keycloak</td>
+          <td>30 min (<a href="/posts/keycloak-session-expired-errors-troubleshooting-and-timeout-configuration/">SSO Session Idle</a>)</td>
+          <td>10 hours (SSO Session Max)</td>
+      </tr>
+      <tr>
+          <td>Auth0</td>
+          <td>14 days</td>
+          <td>Configurable (up to ~2.6 years)</td>
+      </tr>
+      <tr>
+          <td>Okta</td>
+          <td>7 days</td>
+          <td>Unlimited (configurable)</td>
+      </tr>
+      <tr>
+          <td>Google</td>
+          <td>6 months inactivity</td>
+          <td>No absolute limit</td>
+      </tr>
+      <tr>
+          <td>Azure AD</td>
+          <td>90 days inactivity</td>
+          <td>Configurable</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Revoked refresh token</strong> — Triggers include: user password reset, admin revoking sessions, user removing app access, and security policy changes.</p>
+<p><strong>Rotation replay</strong> — When refresh token rotation is enabled, using an already-rotated (old) token invalidates the entire token family. Both Auth0 and Okta implement this behavior.</p>
+<h3 id="session-and-credential-issues">Session and Credential Issues<a hidden class="anchor" aria-hidden="true" href="#session-and-credential-issues">#</a></h3>
+<p><strong>User session expired</strong> — The user&rsquo;s session on the AS expired between authorization and token exchange.</p>
+<p><strong>Wrong client credentials</strong> — Incorrect <code>client_id</code> or <code>client_secret</code>. Some providers return <code>invalid_client</code> instead; behavior varies.</p>
+<p><strong>Clock skew</strong> — Token timestamps (<code>iat</code>, <code>exp</code>, <code>nbf</code>) fail validation when server clocks diverge. Check with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># macOS</span>
+</span></span><span style="display:flex;"><span>sntp time.apple.com
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Linux</span>
+</span></span><span style="display:flex;"><span>timedatectl status
+</span></span><span style="display:flex;"><span>ntpdate -q pool.ntp.org
+</span></span></code></pre></div><h3 id="provider-specific-causes">Provider-Specific Causes<a hidden class="anchor" aria-hidden="true" href="#provider-specific-causes">#</a></h3>
+<p><strong>Google Testing mode</strong> — Apps with OAuth consent screen set to &ldquo;Testing&rdquo; have refresh tokens that expire after exactly 7 days. Publish to &ldquo;Production&rdquo; to fix.</p>
+<p><strong>Google 100-token limit</strong> — Google allows a maximum of 100 live refresh tokens per client per user. Oldest tokens are silently invalidated when the limit is exceeded.</p>
+<p><strong>Azure AD tenant mismatch</strong> — <code>AADSTS700005</code>: the authorization code was issued for a different tenant than the token request targets.</p>
+<p><strong>Azure AD SPA token lifetime</strong> — <code>AADSTS700084</code>: SPA refresh tokens have fixed, non-extendable lifetimes that cannot be renewed.</p>
+<p><strong>Keycloak cache eviction</strong> — <code>Session doesn't have required client</code>: client sessions evicted from the Infinispan cache. Increase cache sizes or configure lazy loading for offline sessions.</p>
+<h2 id="provider-error-message-reference">Provider Error Message Reference<a hidden class="anchor" aria-hidden="true" href="#provider-error-message-reference">#</a></h2>
+<h3 id="keycloak">Keycloak<a hidden class="anchor" aria-hidden="true" href="#keycloak">#</a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>error_description</th>
+          <th>Cause</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>Code not valid</code></td>
+          <td>Expired code, replayed code, redirect_uri mismatch, PKCE failure</td>
+      </tr>
+      <tr>
+          <td><code>Session not active</code></td>
+          <td>User session expired</td>
+      </tr>
+      <tr>
+          <td><code>Token is not active</code></td>
+          <td>Refresh token expired or revoked</td>
+      </tr>
+      <tr>
+          <td><code>Session doesn't have required client</code></td>
+          <td>Cache eviction</td>
+      </tr>
+      <tr>
+          <td><code>Invalid user credentials</code></td>
+          <td>Wrong username/password (ROPC)</td>
+      </tr>
+  </tbody>
+</table>
+<p>Enable debug logging:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>bin/kc.sh start --log-level<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;INFO,org.keycloak.protocol.oidc:TRACE&#34;</span>
+</span></span></code></pre></div><p>Check events via Admin REST API:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -H <span style="color:#e6db74">&#34;Authorization: Bearer </span>$ADMIN_TOKEN<span style="color:#e6db74">&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#e6db74">&#34;https://keycloak.example.com/admin/realms/your-realm/events?type=CODE_TO_TOKEN_ERROR&amp;max=10&#34;</span>
+</span></span></code></pre></div><h3 id="auth0">Auth0<a hidden class="anchor" aria-hidden="true" href="#auth0">#</a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>error_description</th>
+          <th>Cause</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>Invalid authorization code</code></td>
+          <td>Expired or replayed code</td>
+      </tr>
+      <tr>
+          <td><code>Unknown or invalid refresh token.</code></td>
+          <td>Expired, revoked, or rotated token</td>
+      </tr>
+      <tr>
+          <td><code>Failed to verify code verifier</code></td>
+          <td>PKCE mismatch</td>
+      </tr>
+      <tr>
+          <td><code>Wrong email or password.</code></td>
+          <td>Invalid credentials (ROPC)</td>
+      </tr>
+  </tbody>
+</table>
+<p>Check logs: Dashboard &gt; Logs &gt; filter by type <code>feccft</code> (Failed Exchange: Authorization Code for Access Token).</p>
+<h3 id="okta">Okta<a hidden class="anchor" aria-hidden="true" href="#okta">#</a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>error_description</th>
+          <th>Cause</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>The authorization code is invalid or has expired.</code></td>
+          <td>Expired or replayed code</td>
+      </tr>
+      <tr>
+          <td><code>The refresh token is invalid or expired.</code></td>
+          <td>Expired or revoked token</td>
+      </tr>
+      <tr>
+          <td><code>PKCE verification failed.</code></td>
+          <td>code_verifier mismatch</td>
+      </tr>
+      <tr>
+          <td><code>The credentials provided were invalid.</code></td>
+          <td>Wrong credentials</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="azure-ad--entra-id">Azure AD / Entra ID<a hidden class="anchor" aria-hidden="true" href="#azure-ad--entra-id">#</a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>AADSTS Code</th>
+          <th>Meaning</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>AADSTS50126</code></td>
+          <td>Invalid username or password</td>
+      </tr>
+      <tr>
+          <td><code>AADSTS50173</code></td>
+          <td>Grant expired due to password change/reset</td>
+      </tr>
+      <tr>
+          <td><code>AADSTS54005</code></td>
+          <td>Authorization code already redeemed</td>
+      </tr>
+      <tr>
+          <td><code>AADSTS70008</code></td>
+          <td>Refresh token expired due to inactivity</td>
+      </tr>
+      <tr>
+          <td><code>AADSTS700005</code></td>
+          <td>Code used against wrong tenant</td>
+      </tr>
+      <tr>
+          <td><code>AADSTS700082</code></td>
+          <td>Refresh token inactive too long</td>
+      </tr>
+      <tr>
+          <td><code>AADSTS501481</code></td>
+          <td>PKCE code_verifier mismatch</td>
+      </tr>
+  </tbody>
+</table>
+<p>Lookup any code: <code>https://login.microsoftonline.com/error?code=XXXXX</code></p>
+<h3 id="forgerock-am--pingone-aic">ForgeRock AM / PingOne AIC<a hidden class="anchor" aria-hidden="true" href="#forgerock-am--pingone-aic">#</a></h3>
+<p>Debug with transaction ID header:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -v -X POST https://am.example.com/oauth2/access_token <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;X-ForgeRock-TransactionId: debug-</span><span style="color:#66d9ef">$(</span>date +%s<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -d <span style="color:#e6db74">&#34;grant_type=authorization_code&amp;code=CODE&amp;redirect_uri=URI&amp;client_id=ID&#34;</span>
+</span></span></code></pre></div><p>Then grep the transaction ID in debug logs: <code>$AM_HOME/var/debug/OAuth2Provider</code></p>
+<h3 id="google">Google<a hidden class="anchor" aria-hidden="true" href="#google">#</a></h3>
+<p>Google returns a generic message for all causes:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{<span style="color:#f92672">&#34;error&#34;</span>: <span style="color:#e6db74">&#34;invalid_grant&#34;</span>, <span style="color:#f92672">&#34;error_description&#34;</span>: <span style="color:#e6db74">&#34;Token has been expired or revoked.&#34;</span>}
+</span></span></code></pre></div><p>Check: Testing mode (7-day expiry), password reset, 6-month inactivity, 100-token limit, manual revocation.</p>
+<h2 id="common-developer-mistakes">Common Developer Mistakes<a hidden class="anchor" aria-hidden="true" href="#common-developer-mistakes">#</a></h2>
+<h3 id="mistake-1-exchanging-the-code-twice">Mistake 1: Exchanging the Code Twice<a hidden class="anchor" aria-hidden="true" href="#mistake-1-exchanging-the-code-twice">#</a></h3>
+<p>React <code>useEffect</code> in StrictMode, network retry middleware, or browser prefetch can fire the token exchange twice. The first succeeds; the second fails with <code>invalid_grant</code>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">let</span> <span style="color:#a6e22e">exchangeInProgress</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">exchangeCode</span>(<span style="color:#a6e22e">code</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">exchangeInProgress</span>) <span style="color:#66d9ef">return</span>; <span style="color:#75715e">// Prevent duplicate exchange
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#a6e22e">exchangeInProgress</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">response</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">fetch</span>(<span style="color:#e6db74">&#39;/oauth/token&#39;</span>, {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">method</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;POST&#39;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">body</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">URLSearchParams</span>({
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">grant_type</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;authorization_code&#39;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">code</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">redirect_uri</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">REDIRECT_URI</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">client_id</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">CLIENT_ID</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">code_verifier</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">sessionStorage</span>.<span style="color:#a6e22e">getItem</span>(<span style="color:#e6db74">&#39;pkce_code_verifier&#39;</span>)
+</span></span><span style="display:flex;"><span>      })
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">json</span>();
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">finally</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">exchangeInProgress</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="mistake-2-losing-the-pkce-code_verifier">Mistake 2: Losing the PKCE code_verifier<a hidden class="anchor" aria-hidden="true" href="#mistake-2-losing-the-pkce-code_verifier">#</a></h3>
+<p>The <code>code_verifier</code> must survive the redirect from the authorization server. Store it in <code>sessionStorage</code> (survives redirects within the same tab), NOT in memory.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// Before redirect to authorization endpoint
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">sessionStorage</span>.<span style="color:#a6e22e">setItem</span>(<span style="color:#e6db74">&#39;pkce_code_verifier&#39;</span>, <span style="color:#a6e22e">codeVerifier</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// After redirect back (callback)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">codeVerifier</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">sessionStorage</span>.<span style="color:#a6e22e">getItem</span>(<span style="color:#e6db74">&#39;pkce_code_verifier&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sessionStorage</span>.<span style="color:#a6e22e">removeItem</span>(<span style="color:#e6db74">&#39;pkce_code_verifier&#39;</span>);
+</span></span></code></pre></div><h3 id="mistake-3-not-handling-refresh-token-rotation">Mistake 3: Not Handling Refresh Token Rotation<a hidden class="anchor" aria-hidden="true" href="#mistake-3-not-handling-refresh-token-rotation">#</a></h3>
+<p>When rotation is enabled, each refresh returns a new refresh token. If you fail to store it, subsequent refreshes use the old (invalidated) token.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">tokens</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">refreshAccessToken</span>(<span style="color:#a6e22e">oldRefreshToken</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// CRITICAL: Store the NEW refresh token
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">tokens</span>.<span style="color:#a6e22e">refresh_token</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">secureStorage</span>.<span style="color:#a6e22e">setItem</span>(<span style="color:#e6db74">&#39;refresh_token&#39;</span>, <span style="color:#a6e22e">tokens</span>.<span style="color:#a6e22e">refresh_token</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="mistake-4-concurrent-refresh-requests">Mistake 4: Concurrent Refresh Requests<a hidden class="anchor" aria-hidden="true" href="#mistake-4-concurrent-refresh-requests">#</a></h3>
+<p>Multiple threads refreshing simultaneously: the first succeeds and rotates the token, subsequent requests fail. Use a mutex:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">let</span> <span style="color:#a6e22e">refreshPromise</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">getValidAccessToken</span>() {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">token</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">getStoredAccessToken</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">token</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">!</span><span style="color:#a6e22e">isExpired</span>(<span style="color:#a6e22e">token</span>)) <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">token</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">refreshPromise</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">refreshPromise</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">refreshAccessToken</span>(<span style="color:#a6e22e">getStoredRefreshToken</span>())
+</span></span><span style="display:flex;"><span>      .<span style="color:#66d9ef">finally</span>(() =&gt; { <span style="color:#a6e22e">refreshPromise</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span>; });
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">tokens</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">refreshPromise</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">tokens</span><span style="color:#f92672">?</span>.<span style="color:#a6e22e">access_token</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="debugging-with-curl">Debugging with curl<a hidden class="anchor" aria-hidden="true" href="#debugging-with-curl">#</a></h2>
+<p>Reproduce the exact token exchange to isolate the issue:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -v -X POST https://your-idp.com/oauth2/token <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Content-Type: application/x-www-form-urlencoded&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -d <span style="color:#e6db74">&#34;grant_type=authorization_code&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -d <span style="color:#e6db74">&#34;code=AUTHORIZATION_CODE&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -d <span style="color:#e6db74">&#34;redirect_uri=https://your-app.com/callback&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -d <span style="color:#e6db74">&#34;client_id=YOUR_CLIENT_ID&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -d <span style="color:#e6db74">&#34;client_secret=YOUR_CLIENT_SECRET&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -d <span style="color:#e6db74">&#34;code_verifier=YOUR_CODE_VERIFIER&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  2&gt;&amp;<span style="color:#ae81ff">1</span> | tee token_response.log
+</span></span></code></pre></div><p>The <code>-v</code> flag reveals request headers, exact body sent, and full server response including error details some providers add in response headers.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/oauth-2.0/">OAuth 2.0</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/troubleshooting/">Troubleshooting</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/keycloak/">Keycloak</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/forgerock/">ForgeRock</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/identity-management/">Identity Management</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/cors-errors-in-oauth-flows-complete-troubleshooting-guide/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>CORS Errors in OAuth Flows: Complete Troubleshooting Guide</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/mcp-oauth-21-authentication-how-ai-agents-securely-connect-to-tools/">
+    <span class="title">Next »</span>
+    <br>
+    <span>MCP OAuth 2.1 Authentication: How AI Agents Securely Connect to Tools</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+
+<section class="post-feedback">
+  <p class="feedback-question">Was this article helpful?</p>
+  <div class="feedback-buttons">
+    <button class="feedback-btn feedback-yes" onclick="trackFeedback('yes', '\/posts\/oauth-invalid-grant-error-complete-troubleshooting-guide\/')" aria-label="Yes, helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      Yes
+    </button>
+    <button class="feedback-btn feedback-no" onclick="trackFeedback('no', '\/posts\/oauth-invalid-grant-error-complete-troubleshooting-guide\/')" aria-label="No, not helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>
+      No
+    </button>
+  </div>
+  <p class="feedback-thanks" style="display: none;">Thanks for your feedback!</p>
+</section>
+
+
+<section class="author-bio">
+  <div class="author-avatar">
+    <img src="/IAMDevBox.com.jpg" alt="IAMDevBox Author" width="64" height="64" loading="lazy">
+  </div>
+  <div class="author-info">
+    <h4>Written by IAMDevBox</h4>
+    <p>Enterprise IAM architect with 15+ years in identity modernization. Certified across ForgeRock, Ping Identity, SailPoint, AWS, and Azure.</p>
+    <div class="author-links">
+      <a href="https://twitter.com/iamdevbox" target="_blank" rel="noopener" title="Follow on X/Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/iamdevbox" target="_blank" rel="noopener" title="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="/contact/" title="Contact">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function trackFeedback(value, page) {
+  
+  document.querySelector('.feedback-buttons').style.display = 'none';
+  document.querySelector('.feedback-question').style.display = 'none';
+  document.querySelector('.feedback-thanks').style.display = 'block';
+
+  
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'post_feedback', {
+      'feedback_value': value,
+      'page_path': page
+    });
+  }
+
+  
+  localStorage.setItem('feedback_' + page, value);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const page = '\/posts\/oauth-invalid-grant-error-complete-troubleshooting-guide\/';
+  if (localStorage.getItem('feedback_' + page)) {
+    document.querySelector('.feedback-buttons').style.display = 'none';
+    document.querySelector('.feedback-question').textContent = 'Thanks for your feedback!';
+  }
+});
+</script>
+
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+              Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+            </a>
+            <small class="custom-date">2026-02-28</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/pingone-mfa-configuration-push-notifications-totp-and-fido2-setup/" class="custom-link">
+              PingOne MFA Configuration: Push Notifications, TOTP, and FIDO2 Setup
+            </a>
+            <small class="custom-date">2026-02-27</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/perc-announces-single-sign-on-access-to-nfpa-link-for-propane-professionals-phcppros/" class="custom-link">
+              PERC Announces Single Sign-On Access to NFPA LiNK for Propane Professionals - PHCPPros
+            </a>
+            <small class="custom-date">2026-02-27</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/configuring-hosted-login-journey-urls-in-forgerock-identity-cloud/" class="custom-link">
+              Configuring Hosted Login Journey URLs in ForgeRock Identity Cloud
+            </a>
+            <small class="custom-date">2026-02-23</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/forgerock-ds-pkix-path-building-failed-certificate-troubleshooting/" class="custom-link">
+              ForgeRock DS PKIX Path Building Failed: Complete Certificate Troubleshooting Guide
+            </a>
+            <small class="custom-date">2026-02-21</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+                Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+                Go Secretless with Snowflake Workload Identity Federation - Snowflake
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+                JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+                OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+                Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

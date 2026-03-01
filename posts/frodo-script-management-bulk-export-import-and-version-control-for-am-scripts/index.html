@@ -1,0 +1,2700 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Frodo Script Management: Bulk Export Import and Version Control for AM Scripts | IAMDevBox</title>
+<meta name="keywords" content="frodo script management, ci/cd, forgerock, node.js, github actions, role-based access control, rbac, service account, frodo-cli, identity-access-management">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/frodo-script-management-bulk-export-import-and-version-control-for-am-scripts/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.e24ea479df3e367781fafa20cedde21c7e043c10bed4c8c913ef9261a049a1e2.css" integrity="sha256-4k6ked8&#43;NneB&#43;vogzt3iHH4EPBC&#43;1MjJE&#43;&#43;SYaBJoeI=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/frodo-script-management-bulk-export-import-and-version-control-for-am-scripts/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/frodo-script-management-bulk-export-import-and-version-control-for-am-scripts/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Frodo Script Management: Bulk Export Import and Version Control for AM Scripts">
+  <meta property="og:description" content="Learn how to use Frodo Script Management for efficient bulk export, import, and version control of AM scripts. Essential for IAM engineers managing large-scale deployments.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-12-24T14:24:30+00:00">
+    <meta property="article:modified_time" content="2026-02-10T09:19:20-05:00">
+    <meta property="article:tag" content="Frodo-Cli">
+    <meta property="article:tag" content="Identity-Access-Management">
+    <meta property="article:tag" content="Script-Management">
+    <meta property="article:tag" content="Version-Control">
+    <meta property="article:tag" content="Bulk-Export-Import">
+    <meta property="og:image" content="https://www.iamdevbox.com/images/posts/frodo-script-management--bulk-export-import-and-ve-70973fec.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/images/posts/frodo-script-management--bulk-export-import-and-ve-70973fec.webp">
+<meta name="twitter:title" content="Frodo Script Management: Bulk Export Import and Version Control for AM Scripts">
+<meta name="twitter:description" content="Learn how to use Frodo Script Management for efficient bulk export, import, and version control of AM scripts. Essential for IAM engineers managing large-scale deployments.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Frodo Script Management: Bulk Export Import and Version Control for AM Scripts",
+      "item": "https://www.iamdevbox.com/posts/frodo-script-management-bulk-export-import-and-version-control-for-am-scripts/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Frodo Script Management: Bulk Export Import and Version Control for AM Scripts",
+  "name": "Frodo Script Management: Bulk Export Import and Version Control for AM Scripts",
+  "description": "Learn how to use Frodo Script Management for efficient bulk export, import, and version control of AM scripts. Essential for IAM engineers managing large-scale deployments.",
+  "keywords": [
+    "frodo script management", "ci/cd", "forgerock", "node.js", "github actions", "role-based access control", "rbac", "service account", "frodo-cli", "identity-access-management"
+  ],
+  "articleBody": "Frodo Script Management is a powerful toolset for handling scripts in ForgeRock Access Manager (AM). It allows you to efficiently manage, export, import, and version control scripts, making it easier to maintain and audit your IAM configurations. In this post, we’ll dive into how Frodo Script Management works, how to implement it, and best practices for security and efficiency.\nWhat is Frodo Script Management? Frodo Script Management is part of the Frodo CLI, a command-line interface tool designed to simplify the management of ForgeRock Access Manager configurations. Specifically, it provides functionalities for bulk exporting, importing, and version controlling scripts used in AM. This is crucial for maintaining consistency across environments, facilitating backups, and ensuring that script changes are tracked and auditable.\nWhy use Frodo Script Management? Managing scripts manually in AM can be cumbersome, especially in large-scale deployments. Frodo Script Management automates these tasks, saving time and reducing the risk of errors. It also integrates seamlessly with version control systems like Git, allowing you to track changes and collaborate with your team effectively.\nHow do you install Frodo CLI? Before you can use Frodo Script Management, you need to install the Frodo CLI. You can do this via npm, Node.js’s package manager.\nnpm install -g @rockcarver/frodo Once installed, verify the installation by checking the version:\nfrodo --version How do you authenticate to AM using Frodo CLI? To interact with AM, you need to authenticate using Frodo CLI. You can do this by providing the necessary credentials and server details.\nfrodo login -u admin -p password -i https://openam.example.com/am ⚠️ Warning: Avoid hardcoding passwords in scripts. Use environment variables or secure vaults instead. How do you export scripts using Frodo CLI? Exporting scripts is straightforward with Frodo CLI. You can export all scripts or specific ones based on their IDs.\nExport All Scripts frodo script export-all -D ./scripts Export Specific Scripts frodo script export -i script-id-1,script-id-2 -D ./scripts The -D flag specifies the directory where the scripts will be saved.\nHow do you import scripts using Frodo CLI? Importing scripts is equally simple. You can import all scripts from a directory or specific ones.\nImport All Scripts frodo script import-all -D ./scripts Import Specific Scripts frodo script import -i script-id-1,script-id-2 -D ./scripts Ensure that the script files in the directory match the expected format.\nHow do you handle version control with Frodo Script Management? Integrating version control with Frodo Script Management is essential for tracking changes and collaborating with your team. Here’s how you can set it up with Git.\nInitialize a Git Repository Navigate to your scripts directory and initialize a Git repository.\ncd ./scripts git init Commit Changes After exporting scripts, commit them to your repository.\ngit add . git commit -m \"Initial commit of AM scripts\" Push to Remote Repository Push your changes to a remote repository like GitHub or GitLab.\ngit remote add origin https://github.com/your-repo/am-scripts.git git push -u origin master How do you handle conflicts during script imports? Conflicts can arise when multiple people modify the same script. Frodo CLI provides options to handle these conflicts.\nForce Import Force importing a script will overwrite any existing script with the same ID.\nfrodo script import -i script-id-1 -D ./scripts --force 🚨 Security Alert: Use force import cautiously to avoid unintentional data loss. Merge Conflicts If you encounter merge conflicts, resolve them manually before committing changes.\n# Resolve conflicts in script files git add . git commit -m \"Resolved merge conflicts\" How do you automate script management with Frodo CLI? Automating script management can save time and ensure consistency. You can use scripts or CI/CD pipelines to automate exports, imports, and version control.\nExample Script Here’s a simple Bash script to automate the export and import process.\n#!/bin/bash # Export scripts frodo script export-all -D ./scripts # Commit changes cd ./scripts git add . git commit -m \"Automated script export $(date)\" # Push to remote repository git push origin master # Import scripts frodo script import-all -D ./scripts CI/CD Integration You can integrate Frodo CLI with CI/CD tools like Jenkins, GitHub Actions, or GitLab CI/CD.\nGitHub Actions Example Create a .github/workflows/am-script-management.yml file.\nname: AM Script Management on: schedule: - cron: '0 2 * * *' # Run daily at 2 AM jobs: script-management: runs-on: ubuntu-latest steps: - name: Checkout repository uses: actions/checkout@v2 - name: Set up Node.js uses: actions/setup-node@v2 with: node-version: '14' - name: Install Frodo CLI run: npm install -g @rockcarver/frodo - name: Authenticate to AM run: frodo login -u $AM_USERNAME -p $AM_PASSWORD -i $AM_URL env: AM_USERNAME: ${{ secrets.AM_USERNAME }} AM_PASSWORD: ${{ secrets.AM_PASSWORD }} AM_URL: ${{ secrets.AM_URL }} - name: Export scripts run: frodo script export-all -D ./scripts - name: Commit changes run: | cd ./scripts git config user.name github-actions git config user.email github-actions@github.com git add . git commit -m \"Automated script export $(date)\" || true - name: Push to remote repository uses: ad-m/github-push-action@master with: github_token: ${{ secrets.GITHUB_TOKEN }} branch: master - name: Import scripts run: frodo script import-all -D ./scripts Common Errors and Troubleshooting Error: Authentication Failed Ensure that your credentials are correct and that you have the necessary permissions.\nfrodo login -u admin -p password -i https://openam.example.com/am Error: Script Not Found Verify that the script ID is correct and that the script exists in AM.\nfrodo script export -i script-id-1 -D ./scripts Error: Permission Denied Check that your user has the necessary permissions to export and import scripts.\n💜 Pro Tip: Use a dedicated service account with limited permissions for automation. Security Considerations Security is paramount when managing scripts in AM. Here are some best practices:\nSecure Storage Store exported scripts securely. Avoid storing sensitive information in scripts.\nAccess Control Limit access to Frodo CLI and the scripts directory. Use role-based access control (RBAC) in AM.\nRegular Audits Regularly audit script changes and monitor for unauthorized modifications.\nEncryption Encrypt sensitive data in scripts and use secure storage solutions.\nConclusion Frodo Script Management is a powerful tool for managing scripts in ForgeRock Access Manager. By leveraging Frodo CLI, you can automate script exports, imports, and version control, improving efficiency and security. Implement these practices in your IAM workflows to streamline operations and reduce risks.\n🎯 Key Takeaways Frodo Script Management simplifies script management in AM. Use Frodo CLI for bulk exports, imports, and version control. Integrate version control with Git for tracking changes. Automate script management with scripts or CI/CD pipelines. Follow security best practices to protect scripts and configurations. ",
+  "wordCount" : "1062",
+  "inLanguage": "en",
+  "image":"https://www.iamdevbox.com/images/posts/frodo-script-management--bulk-export-import-and-ve-70973fec.webp","datePublished": "2025-12-24T14:24:30Z",
+  "dateModified": "2026-02-10T09:19:20-05:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/frodo-script-management-bulk-export-import-and-version-control-for-am-scripts/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is Frodo Script Management?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Frodo Script Management is a toolset for bulk exporting, importing, and version controlling scripts in ForgeRock Access Manager (AM)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do you implement Frodo Script Management?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Install Frodo CLI, authenticate to AM, and use commands to export, import, and manage scripts with version control."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the security considerations for Frodo Script Management?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Ensure secure storage of exported scripts, limit access to Frodo CLI, and regularly audit script changes."
+      }
+    }
+  ]
+}
+</script>
+    <meta name="description" content="Learn how to use Frodo Script Management for efficient bulk export, import, and version control of AM scripts. Essential for IAM engineers managing large-scale deployments."><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/frodo-script-management-bulk-export-import-and-version-control-for-am-scripts\/"
+  },
+  "headline": "Frodo Script Management: Bulk Export Import and Version Control for AM Scripts",
+  "description": "Learn how to use Frodo Script Management for efficient bulk export, import, and version control of AM scripts. Essential for IAM engineers managing large-scale deployments.",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon-96x96.png",
+      "width": 96,
+      "height": 96
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://www.iamdevbox.com/IAMDevBox.com.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "datePublished": "2025-12-24T14:24:30Z",
+  "dateModified": "2026-02-10T09:19:20-05:00",
+  "wordCount":  1062 ,
+  "articleSection": "posts",
+  "keywords": ["frodo script management","ci/cd","forgerock","node.js","github actions","role-based access control","rbac","service account","frodo-cli","identity-access-management"]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Frodo Script Management: Bulk Export Import and Version Control for AM Scripts",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/frodo-script-management-bulk-export-import-and-version-control-for-am-scripts\/"
+    }
+  ]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-token-exchange-implementing-oauth-20-token-exchange\/"
+            },
+            "headline": "Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:29:55Z",
+            "dateModified": "2026-03-01T14:30:15Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/go-secretless-with-snowflake-workload-identity-federation-snowflake\/"
+            },
+            "headline": "Go Secretless with Snowflake Workload Identity Federation - Snowflake",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:24:03Z",
+            "dateModified": "2026-03-01T14:24:20Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-algorithm-confusion-attack-cve-2026-developer-guide\/"
+            },
+            "headline": "JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-02-28T18:00:00Z",
+            "dateModified": "2026-03-01T11:21:01-05:00"
+          }
+  ]
+}
+</script>
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    const mermaidBlocks = document.querySelectorAll('.mermaid, pre code.language-mermaid, code.language-mermaid');
+    if (mermaidBlocks.length > 0) {
+        
+        mermaidBlocks.forEach(block => {
+            if (block.tagName === 'CODE') {
+                const pre = block.parentElement;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = block.textContent;
+                if (pre && pre.tagName === 'PRE') {
+                    pre.parentNode.replaceChild(div, pre);
+                } else {
+                    block.parentNode.replaceChild(div, block);
+                }
+            }
+        });
+
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+            const isDark = document.body.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#5a67d8',
+                    
+                    secondaryColor: '#48bb78',
+                    secondaryTextColor: '#ffffff',
+                    secondaryBorderColor: '#38a169',
+                    
+                    tertiaryColor: '#ed8936',
+                    tertiaryTextColor: '#ffffff',
+                    tertiaryBorderColor: '#dd6b20',
+                    
+                    lineColor: '#718096',
+                    
+                    background: isDark ? '#1a202c' : '#ffffff',
+                    mainBkg: isDark ? '#2d3748' : '#f7fafc',
+                    
+                    actorBkg: '#667eea',
+                    actorBorder: '#5a67d8',
+                    actorTextColor: '#ffffff',
+                    actorLineColor: '#718096',
+                    signalColor: '#4a5568',
+                    signalTextColor: '#2d3748',
+                    labelBoxBkgColor: '#edf2f7',
+                    labelBoxBorderColor: '#cbd5e0',
+                    labelTextColor: '#2d3748',
+                    loopTextColor: '#553c9a',
+                    noteBkgColor: '#faf089',
+                    noteTextColor: '#744210',
+                    noteBorderColor: '#d69e2e',
+                    
+                    nodeBkg: '#667eea',
+                    nodeBorder: '#5a67d8',
+                    clusterBkg: '#e2e8f0',
+                    clusterBorder: '#a0aec0',
+                    defaultLinkColor: '#718096',
+                    titleColor: '#2d3748',
+                    edgeLabelBackground: 'transparent',
+                    
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                sequence: {
+                    useMaxWidth: true,
+                    boxMargin: 10,
+                    boxTextMargin: 5,
+                    noteMargin: 10,
+                    messageMargin: 35,
+                    mirrorActors: false
+                }
+            });
+            mermaid.run().then(() => {
+                
+                document.querySelectorAll('.mermaid .node').forEach(node => {
+                    const rect = node.querySelector('rect, circle, ellipse, polygon');
+                    if (rect) {
+                        const fill = rect.getAttribute('fill') || window.getComputedStyle(rect).fill;
+                        
+                        const isDarkBg = fill && (
+                            fill.includes('667eea') || fill.includes('102, 126, 234') ||
+                            fill.includes('48bb78') || fill.includes('72, 187, 120') ||
+                            fill.includes('ed8936') || fill.includes('237, 137, 54') ||
+                            fill.includes('553c9a') || fill.includes('9f7aea') ||
+                            fill.includes('e53e3e') || fill.includes('dd6b20')
+                        );
+                        const textColor = isDarkBg ? '#ffffff' : '#1a202c';
+                        node.querySelectorAll('span, .nodeLabel, text, foreignObject div').forEach(text => {
+                            text.style.color = textColor;
+                            text.style.fill = textColor;
+                        });
+                    }
+                });
+            });
+        };
+        document.head.appendChild(script);
+    }
+
+    
+    const postContent = document.querySelector('.post-content');
+    const isSinglePost = document.querySelector('.post-single');
+    const isToolsPage = window.location.pathname.startsWith('/tools/');
+    if (postContent && isSinglePost && window.innerWidth >= 1400 && !isToolsPage) {
+        const headings = postContent.querySelectorAll('h2, h3');
+        if (headings.length >= 3) {
+            const toc = document.createElement('nav');
+            toc.className = 'floating-toc';
+            toc.innerHTML = '<h4>📑 Contents</h4><ul></ul>';
+            const tocList = toc.querySelector('ul');
+
+            headings.forEach((heading, index) => {
+                const id = heading.id || `section-${index}`;
+                heading.id = id;
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2';
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            document.body.appendChild(toc);
+
+            
+            const tocLinks = toc.querySelectorAll('a');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 150) {
+                        current = heading.id;
+                    }
+                });
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+    }
+
+    
+    if (postContent && isSinglePost && window.innerWidth >= 1200) {
+        const h2s = postContent.querySelectorAll('h2');
+        if (h2s.length >= 2) {
+            const indicator = document.createElement('div');
+            indicator.className = 'section-indicator';
+
+            h2s.forEach((h2, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'section-dot';
+                dot.title = h2.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                dot.addEventListener('click', () => {
+                    h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                indicator.appendChild(dot);
+            });
+
+            document.body.appendChild(indicator);
+
+            
+            window.addEventListener('scroll', () => {
+                const dots = indicator.querySelectorAll('.section-dot');
+                let activeIndex = 0;
+                h2s.forEach((h2, index) => {
+                    if (h2.getBoundingClientRect().top <= 200) {
+                        activeIndex = index;
+                    }
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+    }
+    });
+    </script>
+
+    
+    
+    <script>
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        function loadGA() {
+            if (window.gaLoaded) return;
+            window.gaLoaded = true;
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975';
+            document.head.appendChild(script);
+
+            script.onload = () => {
+                gtag('js', new Date());
+                gtag('config', 'G-B6QCH29975');
+            };
+        }
+
+        
+        ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+            window.addEventListener(event, loadGA, { once: true, passive: true });
+        });
+
+        
+        setTimeout(loadGA, 3000);
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+    
+    <div class="reading-progress" id="reading-progress"></div>
+    <script>
+    window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / docHeight) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+    </script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+            </div>
+        </div><button id="menu-btn" aria-label="Menu" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/categories/trending/" title="Hot IAM topics">
+                    <span>🔥Trending</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+(function() {
+    var btn = document.getElementById('menu-btn');
+    var menu = document.getElementById('menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+        });
+        
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
+</script>
+<main class="main">
+
+
+
+<div class="reading-progress" id="reading-progress"></div>
+<script>
+(function() {
+  const progressBar = document.getElementById('reading-progress');
+  const article = document.querySelector('.post-content');
+
+  if (!progressBar || !article) return;
+
+  function updateProgress() {
+    const articleTop = article.offsetTop;
+    const articleHeight = article.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+
+    
+    const start = articleTop - windowHeight;
+    const end = articleTop + articleHeight;
+    const current = scrollTop - start;
+    const total = end - start;
+
+    const progress = Math.min(Math.max((current / total) * 100, 0), 100);
+    progressBar.style.width = progress + '%';
+  }
+
+  
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  
+  updateProgress();
+})();
+</script>
+
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent" data-pagefind-meta="title">
+      Frodo Script Management: Bulk Export Import and Version Control for AM Scripts
+    </h1>
+    <div class="post-meta"><span title='2025-12-24 14:24:30'>Dec 24, 2025</span>&nbsp;·&nbsp;5 min&nbsp;·&nbsp;1062 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+    
+      <div class="post-updated">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Updated: Feb 10, 2026
+      </div>
+  </header> 
+<figure class="entry-cover">
+        <img loading="eager" src="https://www.iamdevbox.com/images/posts/frodo-script-management--bulk-export-import-and-ve-70973fec.webp" alt="Frodo Script Management: Bulk Export Import and Version Control for AM Scripts">
+        
+</figure><div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#what-is-frodo-script-management" aria-label="What is Frodo Script Management?">What is Frodo Script Management?</a></li>
+                <li>
+                    <a href="#why-use-frodo-script-management" aria-label="Why use Frodo Script Management?">Why use Frodo Script Management?</a></li>
+                <li>
+                    <a href="#how-do-you-install-frodo-cli" aria-label="How do you install Frodo CLI?">How do you install Frodo CLI?</a></li>
+                <li>
+                    <a href="#how-do-you-authenticate-to-am-using-frodo-cli" aria-label="How do you authenticate to AM using Frodo CLI?">How do you authenticate to AM using Frodo CLI?</a></li>
+                <li>
+                    <a href="#how-do-you-export-scripts-using-frodo-cli" aria-label="How do you export scripts using Frodo CLI?">How do you export scripts using Frodo CLI?</a><ul>
+                        
+                <li>
+                    <a href="#export-all-scripts" aria-label="Export All Scripts">Export All Scripts</a></li>
+                <li>
+                    <a href="#export-specific-scripts" aria-label="Export Specific Scripts">Export Specific Scripts</a></li></ul>
+                </li>
+                <li>
+                    <a href="#how-do-you-import-scripts-using-frodo-cli" aria-label="How do you import scripts using Frodo CLI?">How do you import scripts using Frodo CLI?</a><ul>
+                        
+                <li>
+                    <a href="#import-all-scripts" aria-label="Import All Scripts">Import All Scripts</a></li>
+                <li>
+                    <a href="#import-specific-scripts" aria-label="Import Specific Scripts">Import Specific Scripts</a></li></ul>
+                </li>
+                <li>
+                    <a href="#how-do-you-handle-version-control-with-frodo-script-management" aria-label="How do you handle version control with Frodo Script Management?">How do you handle version control with Frodo Script Management?</a><ul>
+                        
+                <li>
+                    <a href="#initialize-a-git-repository" aria-label="Initialize a Git Repository">Initialize a Git Repository</a></li>
+                <li>
+                    <a href="#commit-changes" aria-label="Commit Changes">Commit Changes</a></li>
+                <li>
+                    <a href="#push-to-remote-repository" aria-label="Push to Remote Repository">Push to Remote Repository</a></li></ul>
+                </li>
+                <li>
+                    <a href="#how-do-you-handle-conflicts-during-script-imports" aria-label="How do you handle conflicts during script imports?">How do you handle conflicts during script imports?</a><ul>
+                        
+                <li>
+                    <a href="#force-import" aria-label="Force Import">Force Import</a></li>
+                <li>
+                    <a href="#merge-conflicts" aria-label="Merge Conflicts">Merge Conflicts</a></li></ul>
+                </li>
+                <li>
+                    <a href="#how-do-you-automate-script-management-with-frodo-cli" aria-label="How do you automate script management with Frodo CLI?">How do you automate script management with Frodo CLI?</a><ul>
+                        
+                <li>
+                    <a href="#example-script" aria-label="Example Script">Example Script</a></li>
+                <li>
+                    <a href="#cicd-integration" aria-label="CI/CD Integration">CI/CD Integration</a><ul>
+                        
+                <li>
+                    <a href="#github-actions-example" aria-label="GitHub Actions Example">GitHub Actions Example</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#common-errors-and-troubleshooting" aria-label="Common Errors and Troubleshooting">Common Errors and Troubleshooting</a><ul>
+                        
+                <li>
+                    <a href="#error-authentication-failed" aria-label="Error: Authentication Failed">Error: Authentication Failed</a></li>
+                <li>
+                    <a href="#error-script-not-found" aria-label="Error: Script Not Found">Error: Script Not Found</a></li>
+                <li>
+                    <a href="#error-permission-denied" aria-label="Error: Permission Denied">Error: Permission Denied</a></li></ul>
+                </li>
+                <li>
+                    <a href="#security-considerations" aria-label="Security Considerations">Security Considerations</a><ul>
+                        
+                <li>
+                    <a href="#secure-storage" aria-label="Secure Storage">Secure Storage</a></li>
+                <li>
+                    <a href="#access-control" aria-label="Access Control">Access Control</a></li>
+                <li>
+                    <a href="#regular-audits" aria-label="Regular Audits">Regular Audits</a></li>
+                <li>
+                    <a href="#encryption" aria-label="Encryption">Encryption</a></li></ul>
+                </li>
+                <li>
+                    <a href="#conclusion" aria-label="Conclusion">Conclusion</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a>
+                </li>
+            </ul>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content" data-pagefind-body><p>Frodo Script Management is a powerful toolset for handling scripts in ForgeRock Access Manager (AM). It allows you to efficiently manage, export, import, and version control scripts, making it easier to maintain and audit your IAM configurations. In this post, we&rsquo;ll dive into how Frodo Script Management works, how to implement it, and best practices for security and efficiency.</p>
+<h2 id="what-is-frodo-script-management">What is Frodo Script Management?<a hidden class="anchor" aria-hidden="true" href="#what-is-frodo-script-management">#</a></h2>
+<p>Frodo Script Management is part of the Frodo CLI, a command-line interface tool designed to simplify the management of ForgeRock Access Manager configurations. Specifically, it provides functionalities for bulk exporting, importing, and version controlling scripts used in AM. This is crucial for maintaining consistency across environments, facilitating backups, and ensuring that script changes are tracked and auditable.</p>
+<h2 id="why-use-frodo-script-management">Why use Frodo Script Management?<a hidden class="anchor" aria-hidden="true" href="#why-use-frodo-script-management">#</a></h2>
+<p>Managing scripts manually in AM can be cumbersome, especially in large-scale deployments. Frodo Script Management automates these tasks, saving time and reducing the risk of errors. It also integrates seamlessly with version control systems like Git, allowing you to track changes and collaborate with your team effectively.</p>
+<h2 id="how-do-you-install-frodo-cli">How do you install Frodo CLI?<a hidden class="anchor" aria-hidden="true" href="#how-do-you-install-frodo-cli">#</a></h2>
+<p>Before you can use Frodo Script Management, you need to install the Frodo CLI. You can do this via npm, Node.js&rsquo;s package manager.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>npm install -g @rockcarver/frodo
+</span></span></code></pre></div><p>Once installed, verify the installation by checking the version:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>frodo --version
+</span></span></code></pre></div><h2 id="how-do-you-authenticate-to-am-using-frodo-cli">How do you authenticate to AM using Frodo CLI?<a hidden class="anchor" aria-hidden="true" href="#how-do-you-authenticate-to-am-using-frodo-cli">#</a></h2>
+<p>To interact with AM, you need to authenticate using Frodo CLI. You can do this by providing the necessary credentials and server details.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>frodo login -u admin -p password -i https://openam.example.com/am
+</span></span></code></pre></div><div class="notice warning">⚠️ <strong>Warning:</strong> Avoid hardcoding passwords in scripts. Use environment variables or secure vaults instead.</div>
+<h2 id="how-do-you-export-scripts-using-frodo-cli">How do you export scripts using Frodo CLI?<a hidden class="anchor" aria-hidden="true" href="#how-do-you-export-scripts-using-frodo-cli">#</a></h2>
+<p>Exporting scripts is straightforward with Frodo CLI. You can export all scripts or specific ones based on their IDs.</p>
+<h3 id="export-all-scripts">Export All Scripts<a hidden class="anchor" aria-hidden="true" href="#export-all-scripts">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>frodo script export-all -D ./scripts
+</span></span></code></pre></div><h3 id="export-specific-scripts">Export Specific Scripts<a hidden class="anchor" aria-hidden="true" href="#export-specific-scripts">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>frodo script export -i script-id-1,script-id-2 -D ./scripts
+</span></span></code></pre></div><p>The <code>-D</code> flag specifies the directory where the scripts will be saved.</p>
+<h2 id="how-do-you-import-scripts-using-frodo-cli">How do you import scripts using Frodo CLI?<a hidden class="anchor" aria-hidden="true" href="#how-do-you-import-scripts-using-frodo-cli">#</a></h2>
+<p>Importing scripts is equally simple. You can import all scripts from a directory or specific ones.</p>
+<h3 id="import-all-scripts">Import All Scripts<a hidden class="anchor" aria-hidden="true" href="#import-all-scripts">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>frodo script import-all -D ./scripts
+</span></span></code></pre></div><h3 id="import-specific-scripts">Import Specific Scripts<a hidden class="anchor" aria-hidden="true" href="#import-specific-scripts">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>frodo script import -i script-id-1,script-id-2 -D ./scripts
+</span></span></code></pre></div><p>Ensure that the script files in the directory match the expected format.</p>
+<h2 id="how-do-you-handle-version-control-with-frodo-script-management">How do you handle version control with Frodo Script Management?<a hidden class="anchor" aria-hidden="true" href="#how-do-you-handle-version-control-with-frodo-script-management">#</a></h2>
+<p>Integrating version control with Frodo Script Management is essential for tracking changes and collaborating with your team. Here’s how you can set it up with Git.</p>
+<h3 id="initialize-a-git-repository">Initialize a Git Repository<a hidden class="anchor" aria-hidden="true" href="#initialize-a-git-repository">#</a></h3>
+<p>Navigate to your scripts directory and initialize a Git repository.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cd ./scripts
+</span></span><span style="display:flex;"><span>git init
+</span></span></code></pre></div><h3 id="commit-changes">Commit Changes<a hidden class="anchor" aria-hidden="true" href="#commit-changes">#</a></h3>
+<p>After exporting scripts, commit them to your repository.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>git add .
+</span></span><span style="display:flex;"><span>git commit -m <span style="color:#e6db74">&#34;Initial commit of AM scripts&#34;</span>
+</span></span></code></pre></div><h3 id="push-to-remote-repository">Push to Remote Repository<a hidden class="anchor" aria-hidden="true" href="#push-to-remote-repository">#</a></h3>
+<p>Push your changes to a remote repository like GitHub or GitLab.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>git remote add origin https://github.com/your-repo/am-scripts.git
+</span></span><span style="display:flex;"><span>git push -u origin master
+</span></span></code></pre></div><h2 id="how-do-you-handle-conflicts-during-script-imports">How do you handle conflicts during script imports?<a hidden class="anchor" aria-hidden="true" href="#how-do-you-handle-conflicts-during-script-imports">#</a></h2>
+<p>Conflicts can arise when multiple people modify the same script. Frodo CLI provides options to handle these conflicts.</p>
+<h3 id="force-import">Force Import<a hidden class="anchor" aria-hidden="true" href="#force-import">#</a></h3>
+<p>Force importing a script will overwrite any existing script with the same ID.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>frodo script import -i script-id-1 -D ./scripts --force
+</span></span></code></pre></div><div class="notice danger">🚨 <strong>Security Alert:</strong> Use force import cautiously to avoid unintentional data loss.</div>
+<h3 id="merge-conflicts">Merge Conflicts<a hidden class="anchor" aria-hidden="true" href="#merge-conflicts">#</a></h3>
+<p>If you encounter merge conflicts, resolve them manually before committing changes.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Resolve conflicts in script files</span>
+</span></span><span style="display:flex;"><span>git add .
+</span></span><span style="display:flex;"><span>git commit -m <span style="color:#e6db74">&#34;Resolved merge conflicts&#34;</span>
+</span></span></code></pre></div><h2 id="how-do-you-automate-script-management-with-frodo-cli">How do you automate script management with Frodo CLI?<a hidden class="anchor" aria-hidden="true" href="#how-do-you-automate-script-management-with-frodo-cli">#</a></h2>
+<p>Automating script management can save time and ensure consistency. You can use scripts or CI/CD pipelines to automate exports, imports, and version control.</p>
+<h3 id="example-script">Example Script<a hidden class="anchor" aria-hidden="true" href="#example-script">#</a></h3>
+<p>Here’s a simple Bash script to automate the export and import process.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/bash
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Export scripts</span>
+</span></span><span style="display:flex;"><span>frodo script export-all -D ./scripts
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Commit changes</span>
+</span></span><span style="display:flex;"><span>cd ./scripts
+</span></span><span style="display:flex;"><span>git add .
+</span></span><span style="display:flex;"><span>git commit -m <span style="color:#e6db74">&#34;Automated script export </span><span style="color:#66d9ef">$(</span>date<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Push to remote repository</span>
+</span></span><span style="display:flex;"><span>git push origin master
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Import scripts</span>
+</span></span><span style="display:flex;"><span>frodo script import-all -D ./scripts
+</span></span></code></pre></div><h3 id="cicd-integration">CI/CD Integration<a hidden class="anchor" aria-hidden="true" href="#cicd-integration">#</a></h3>
+<p>You can integrate Frodo CLI with CI/CD tools like Jenkins, GitHub Actions, or GitLab CI/CD.</p>
+<h4 id="github-actions-example">GitHub Actions Example<a hidden class="anchor" aria-hidden="true" href="#github-actions-example">#</a></h4>
+<p>Create a <code>.github/workflows/am-script-management.yml</code> file.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">name</span>: <span style="color:#ae81ff">AM Script Management</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">on</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">schedule</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">cron</span>: <span style="color:#e6db74">&#39;0 2 * * *&#39;</span> <span style="color:#75715e"># Run daily at 2 AM</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">jobs</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">script-management</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">runs-on</span>: <span style="color:#ae81ff">ubuntu-latest</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">steps</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Checkout repository</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">uses</span>: <span style="color:#ae81ff">actions/checkout@v2</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Set up Node.js</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">uses</span>: <span style="color:#ae81ff">actions/setup-node@v2</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">with</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">node-version</span>: <span style="color:#e6db74">&#39;14&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Install Frodo CLI</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">run</span>: <span style="color:#ae81ff">npm install -g @rockcarver/frodo</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Authenticate to AM</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">run</span>: <span style="color:#ae81ff">frodo login -u $AM_USERNAME -p $AM_PASSWORD -i $AM_URL</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">env</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">AM_USERNAME</span>: <span style="color:#ae81ff">${{ secrets.AM_USERNAME }}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">AM_PASSWORD</span>: <span style="color:#ae81ff">${{ secrets.AM_PASSWORD }}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">AM_URL</span>: <span style="color:#ae81ff">${{ secrets.AM_URL }}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Export scripts</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">run</span>: <span style="color:#ae81ff">frodo script export-all -D ./scripts</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Commit changes</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">run</span>: |<span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        cd ./scripts
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        git config user.name github-actions
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        git config user.email github-actions@github.com
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        git add .
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        git commit -m &#34;Automated script export $(date)&#34; || true</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Push to remote repository</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">uses</span>: <span style="color:#ae81ff">ad-m/github-push-action@master</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">with</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">github_token</span>: <span style="color:#ae81ff">${{ secrets.GITHUB_TOKEN }}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">branch</span>: <span style="color:#ae81ff">master</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Import scripts</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">run</span>: <span style="color:#ae81ff">frodo script import-all -D ./scripts</span>
+</span></span></code></pre></div><h2 id="common-errors-and-troubleshooting">Common Errors and Troubleshooting<a hidden class="anchor" aria-hidden="true" href="#common-errors-and-troubleshooting">#</a></h2>
+<h3 id="error-authentication-failed">Error: Authentication Failed<a hidden class="anchor" aria-hidden="true" href="#error-authentication-failed">#</a></h3>
+<p>Ensure that your credentials are correct and that you have the necessary permissions.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>frodo login -u admin -p password -i https://openam.example.com/am
+</span></span></code></pre></div><h3 id="error-script-not-found">Error: Script Not Found<a hidden class="anchor" aria-hidden="true" href="#error-script-not-found">#</a></h3>
+<p>Verify that the script ID is correct and that the script exists in AM.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>frodo script export -i script-id-1 -D ./scripts
+</span></span></code></pre></div><h3 id="error-permission-denied">Error: Permission Denied<a hidden class="anchor" aria-hidden="true" href="#error-permission-denied">#</a></h3>
+<p>Check that your user has the necessary permissions to export and import scripts.</p>
+<div class="notice tip">💜 <strong>Pro Tip:</strong> Use a dedicated service account with limited permissions for automation.</div>
+<h2 id="security-considerations">Security Considerations<a hidden class="anchor" aria-hidden="true" href="#security-considerations">#</a></h2>
+<p>Security is paramount when managing scripts in AM. Here are some best practices:</p>
+<h3 id="secure-storage">Secure Storage<a hidden class="anchor" aria-hidden="true" href="#secure-storage">#</a></h3>
+<p>Store exported scripts securely. Avoid storing sensitive information in scripts.</p>
+<h3 id="access-control">Access Control<a hidden class="anchor" aria-hidden="true" href="#access-control">#</a></h3>
+<p>Limit access to Frodo CLI and the scripts directory. Use role-based access control (RBAC) in AM.</p>
+<h3 id="regular-audits">Regular Audits<a hidden class="anchor" aria-hidden="true" href="#regular-audits">#</a></h3>
+<p>Regularly audit script changes and monitor for unauthorized modifications.</p>
+<h3 id="encryption">Encryption<a hidden class="anchor" aria-hidden="true" href="#encryption">#</a></h3>
+<p>Encrypt sensitive data in scripts and use secure storage solutions.</p>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>Frodo Script Management is a powerful tool for managing scripts in ForgeRock Access Manager. By leveraging Frodo CLI, you can automate script exports, imports, and version control, improving efficiency and security. Implement these practices in your IAM workflows to streamline operations and reduce risks.</p>
+<div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>Frodo Script Management simplifies script management in AM.</li>
+<li>Use Frodo CLI for bulk exports, imports, and version control.</li>
+<li>Integrate version control with Git for tracking changes.</li>
+<li>Automate script management with scripts or CI/CD pipelines.</li>
+<li>Follow security best practices to protect scripts and configurations.</li>
+</ul>
+</div>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/frodo-cli/">Frodo-Cli</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/identity-access-management/">Identity-Access-Management</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/script-management/">Script-Management</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/version-control/">Version-Control</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/bulk-export-import/">Bulk-Export-Import</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/mexico-mandates-zero-trust-as-crypto-theft-hits-us-34-billion/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Mexico Mandates Zero Trust as Crypto Theft Hits US$3.4 Billion</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/microsoft-365-account-takeovers-what-you-need-to-know/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Microsoft 365 Account Takeovers: What You Need to Know</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+
+<section class="post-feedback">
+  <p class="feedback-question">Was this article helpful?</p>
+  <div class="feedback-buttons">
+    <button class="feedback-btn feedback-yes" onclick="trackFeedback('yes', '\/posts\/frodo-script-management-bulk-export-import-and-version-control-for-am-scripts\/')" aria-label="Yes, helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      Yes
+    </button>
+    <button class="feedback-btn feedback-no" onclick="trackFeedback('no', '\/posts\/frodo-script-management-bulk-export-import-and-version-control-for-am-scripts\/')" aria-label="No, not helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>
+      No
+    </button>
+  </div>
+  <p class="feedback-thanks" style="display: none;">Thanks for your feedback!</p>
+</section>
+
+
+<section class="author-bio">
+  <div class="author-avatar">
+    <img src="/IAMDevBox.com.jpg" alt="IAMDevBox Author" width="64" height="64" loading="lazy">
+  </div>
+  <div class="author-info">
+    <h4>Written by IAMDevBox</h4>
+    <p>Enterprise IAM architect with 15+ years in identity modernization. Certified across ForgeRock, Ping Identity, SailPoint, AWS, and Azure.</p>
+    <div class="author-links">
+      <a href="https://twitter.com/iamdevbox" target="_blank" rel="noopener" title="Follow on X/Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/iamdevbox" target="_blank" rel="noopener" title="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="/contact/" title="Contact">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function trackFeedback(value, page) {
+  
+  document.querySelector('.feedback-buttons').style.display = 'none';
+  document.querySelector('.feedback-question').style.display = 'none';
+  document.querySelector('.feedback-thanks').style.display = 'block';
+
+  
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'post_feedback', {
+      'feedback_value': value,
+      'page_path': page
+    });
+  }
+
+  
+  localStorage.setItem('feedback_' + page, value);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const page = '\/posts\/frodo-script-management-bulk-export-import-and-version-control-for-am-scripts\/';
+  if (localStorage.getItem('feedback_' + page)) {
+    document.querySelector('.feedback-buttons').style.display = 'none';
+    document.querySelector('.feedback-question').textContent = 'Thanks for your feedback!';
+  }
+});
+</script>
+
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+              Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+            </a>
+            <small class="custom-date">2026-03-01</small>
+          </li>
+          
+        
+      
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/zero-trust-architecture-implementation-a-practical-guide-for-iam-engineers/" class="custom-link">
+              Zero Trust Architecture Implementation: A Practical Guide for IAM Engineers
+            </a>
+            <small class="custom-date">2025-12-19</small>
+          </li>
+          
+        
+      
+
+      
+    </ul>
+
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+                Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+                Go Secretless with Snowflake Workload Identity Federation - Snowflake
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+                JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+                OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+                Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

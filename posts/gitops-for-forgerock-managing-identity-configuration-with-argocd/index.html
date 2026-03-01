@@ -1,0 +1,2915 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>GitOps for ForgeRock: Managing Identity Configuration with ArgoCD | IAMDevBox</title>
+<meta name="keywords" content="GitOps ForgeRock, ArgoCD identity management, how to manage ForgeRock with GitOps, ForgeRock configuration sync, GitOps security best practices, ArgoCD deployment strategy, ForgeRock vs Okta, troubleshooting GitOps issues">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/gitops-for-forgerock-managing-identity-configuration-with-argocd/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.e24ea479df3e367781fafa20cedde21c7e043c10bed4c8c913ef9261a049a1e2.css" integrity="sha256-4k6ked8&#43;NneB&#43;vogzt3iHH4EPBC&#43;1MjJE&#43;&#43;SYaBJoeI=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/gitops-for-forgerock-managing-identity-configuration-with-argocd/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/gitops-for-forgerock-managing-identity-configuration-with-argocd/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="GitOps for ForgeRock: Managing Identity Configuration with ArgoCD">
+  <meta property="og:description" content="Learn how to implement GitOps for ForgeRock using ArgoCD for managing identity configuration. Get best practices, security tips, and practical examples.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-02-11T14:58:21+00:00">
+    <meta property="article:modified_time" content="2026-02-11T14:58:40+00:00">
+    <meta property="article:tag" content="GitOps">
+    <meta property="article:tag" content="ForgeRock">
+    <meta property="article:tag" content="ArgoCD">
+    <meta property="article:tag" content="Identity Management">
+    <meta property="article:tag" content="DevOps">
+    <meta property="og:image" content="https://www.iamdevbox.com/images/posts/gitops-for-forgerock--managing-identity-configurat-0c88980c.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/images/posts/gitops-for-forgerock--managing-identity-configurat-0c88980c.webp">
+<meta name="twitter:title" content="GitOps for ForgeRock: Managing Identity Configuration with ArgoCD">
+<meta name="twitter:description" content="Learn how to implement GitOps for ForgeRock using ArgoCD for managing identity configuration. Get best practices, security tips, and practical examples.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "GitOps for ForgeRock: Managing Identity Configuration with ArgoCD",
+      "item": "https://www.iamdevbox.com/posts/gitops-for-forgerock-managing-identity-configuration-with-argocd/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "GitOps for ForgeRock: Managing Identity Configuration with ArgoCD",
+  "name": "GitOps for ForgeRock: Managing Identity Configuration with ArgoCD",
+  "description": "Learn how to implement GitOps for ForgeRock using ArgoCD for managing identity configuration. Get best practices, security tips, and practical examples.",
+  "keywords": [
+    "GitOps ForgeRock", "ArgoCD identity management", "how to manage ForgeRock with GitOps", "ForgeRock configuration sync", "GitOps security best practices", "ArgoCD deployment strategy", "ForgeRock vs Okta", "troubleshooting GitOps issues"
+  ],
+  "articleBody": "GitOps for ForgeRock is a practice that uses Git as the single source of truth to manage and deploy identity configuration changes. This approach leverages the principles of GitOps, which emphasize declarative infrastructure and continuous delivery, to streamline identity management processes. By integrating GitOps with ArgoCD, you can automate the deployment of ForgeRock configurations, ensuring consistency and reducing the risk of human error.\nWhat is GitOps? GitOps is a set of practices that combines Git, the version control system, with automated operations to manage infrastructure and applications. The core idea is to use Git repositories as the single source of truth for your infrastructure and application configurations. Changes are made through pull requests, and automated tools apply these changes to the live environment.\nWhy use GitOps for ForgeRock? Using GitOps for ForgeRock provides several benefits:\nVersion Control: All configuration changes are tracked in Git, making it easy to review, roll back, and audit changes. Collaboration: Teams can collaborate on configuration changes using standard Git workflows. Automation: Automated tools like ArgoCD can apply changes to the live environment, reducing manual intervention and minimizing errors. Consistency: Ensures that the live environment matches the desired state defined in Git. What is ArgoCD? ArgoCD is a declarative, GitOps continuous delivery tool for Kubernetes applications. It allows you to define your application configurations in Git and automatically synchronizes these configurations to your Kubernetes clusters. ArgoCD supports various deployment strategies, including blue-green deployments and canary releases, making it a powerful tool for managing complex environments.\nHow do you implement GitOps for ForgeRock with ArgoCD? Implementing GitOps for ForgeRock with ArgoCD involves several steps. Below is a detailed guide to help you get started.\nStep 1: Set Up Your Git Repository Create a Git repository to store your ForgeRock configuration files. These files can include JSON, YAML, or other formats used by ForgeRock.\nExample Directory Structure forgeops-config/ ├── am/ │ ├── realms/ │ │ └── root.json │ └── services/ │ └── oauth2.json └── ds/ └── config.ldif Step 2: Define Your Configurations Define your ForgeRock configurations in the Git repository. Ensure that each configuration file is well-documented and follows best practices.\nExample: root.json { \"realmPath\": \"/\", \"name\": \"Root Realm\", \"description\": \"The root realm for ForgeRock AM\", \"parentPath\": \"/\", \"enabled\": true, \"applications\": [ { \"applicationType\": \"web\", \"name\": \"MyWebApp\", \"resources\": [ { \"uri\": \"http://example.com/*\", \"actions\": [\"GET\", \"POST\"] } ] } ] } Step 3: Install ArgoCD Install ArgoCD in your Kubernetes cluster. You can follow the official ArgoCD documentation for detailed installation instructions.\nTerminal Output Terminal $ kubectl create namespace argocd $ kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml Step 4: Configure ArgoCD Application Create an ArgoCD application that points to your Git repository and specifies the target Kubernetes cluster.\nExample: app.yaml apiVersion: argoproj.io/v1alpha1 kind: Application metadata: name: forgerock-app namespace: argocd spec: project: default source: repoURL: 'https://github.com/your-repo/forgeops-config.git' targetRevision: HEAD path: am destination: server: 'https://kubernetes.default.svc' namespace: forgerock syncPolicy: automated: prune: true selfHeal: true Step 5: Apply the Application Configuration Apply the ArgoCD application configuration to your cluster.\nTerminal Output Terminal $ kubectl apply -f app.yaml Step 6: Monitor and Troubleshoot Monitor the ArgoCD dashboard to ensure that your configurations are being applied correctly. If there are any issues, troubleshoot them using the logs and events provided by ArgoCD.\nError Example Terminal $ kubectl get application forgerock-app -n argocd -o jsonpath='{.status.conditions}' [{\"lastTransitionTime\":\"2025-01-23T10:00:00Z\",\"message\":\"application spec is invalid: Invalid resource kind: Unknown Kind \\\"Realm\\\" in version \\\"am.forgerock.io/v1alpha1\\\"\",\"reason\":\"InvalidSpec\",\"status\":\"False\",\"type\":\"Invalid\"}] ⚠️ Warning: Ensure that the custom resource definitions (CRDs) for ForgeRock are installed in your cluster. Security Considerations Implementing GitOps for ForgeRock with ArgoCD comes with several security considerations. Here are some best practices to keep in mind:\nEncrypt Sensitive Data Sensitive data, such as passwords and API keys, should be encrypted before being stored in Git. Tools like Sealed Secrets or Bitnami Sealed Secrets can help encrypt sensitive data.\nExample: Sealed Secrets kubectl -n argocd create secret generic forgerock-secrets \\ --from-literal=AM_PASSWORD=supersecret \\ --dry-run=client -o yaml | kubeseal --controller-name=sealed-secrets --controller-namespace=sealed-secrets -o yaml \u003e sealed-secrets.yaml Restrict Access to Git Repositories Limit access to your Git repositories to authorized personnel only. Use role-based access control (RBAC) to enforce access policies.\nRegularly Audit Changes Regularly audit changes to your Git repositories to detect and prevent unauthorized modifications. Tools like GitHub Actions or GitLab CI/CD can automate this process.\nComparison: GitOps vs Manual Configuration ApproachProsConsUse When GitOpsAutomated, consistent, version-controlledInitial setup complexityLarge-scale, multi-environment deployments Manual ConfigurationSimple, immediate changesError-prone, inconsistentSmall-scale, infrequent changes Quick Reference 📋 Quick Reference kubectl create namespace argocd - Create the ArgoCD namespace kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml - Install ArgoCD kubectl apply -f app.yaml - Deploy the ArgoCD application Key Takeaways 🎯 Key Takeaways GitOps for ForgeRock uses Git as the single source of truth for identity configurations. ArgoCD automates the deployment of configurations to Kubernetes clusters. Encrypt sensitive data and restrict access to Git repositories for security. Regularly audit changes to detect unauthorized modifications. Conclusion Implementing GitOps for ForgeRock with ArgoCD can significantly improve the management of your identity configurations. By leveraging Git as the single source of truth and automating deployments, you can achieve consistency, collaboration, and reduced risk. Follow the steps outlined in this guide to get started with GitOps for ForgeRock today.\n",
+  "wordCount" : "856",
+  "inLanguage": "en",
+  "image":"https://www.iamdevbox.com/images/posts/gitops-for-forgerock--managing-identity-configurat-0c88980c.webp","datePublished": "2026-02-11T14:58:21Z",
+  "dateModified": "2026-02-11T14:58:40Z",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/gitops-for-forgerock-managing-identity-configuration-with-argocd/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is GitOps for ForgeRock?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "GitOps for ForgeRock is a practice that uses Git as the single source of truth to manage and deploy identity configuration changes."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do you implement GitOps for ForgeRock with ArgoCD?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Implement GitOps by defining ForgeRock configurations in Git repositories, using ArgoCD to sync these configurations to the live environment, and automating deployments."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the security considerations for GitOps with ForgeRock?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Ensure sensitive data is encrypted, restrict access to Git repositories, and regularly audit changes for unauthorized modifications."
+      }
+    }
+  ]
+}
+</script>
+    <meta name="description" content="Learn how to implement GitOps for ForgeRock using ArgoCD for managing identity configuration. Get best practices, security tips, and practical examples."><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/gitops-for-forgerock-managing-identity-configuration-with-argocd\/"
+  },
+  "headline": "GitOps for ForgeRock: Managing Identity Configuration with ArgoCD",
+  "description": "Learn how to implement GitOps for ForgeRock using ArgoCD for managing identity configuration. Get best practices, security tips, and practical examples.",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon-96x96.png",
+      "width": 96,
+      "height": 96
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://www.iamdevbox.com/IAMDevBox.com.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "datePublished": "2026-02-11T14:58:21Z",
+  "dateModified": "2026-02-11T14:58:40Z",
+  "wordCount":  856 ,
+  "articleSection": "posts",
+  "keywords": ["GitOps ForgeRock","ArgoCD identity management","how to manage ForgeRock with GitOps","ForgeRock configuration sync","GitOps security best practices","ArgoCD deployment strategy","ForgeRock vs Okta","troubleshooting GitOps issues"]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "GitOps for ForgeRock: Managing Identity Configuration with ArgoCD",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/gitops-for-forgerock-managing-identity-configuration-with-argocd\/"
+    }
+  ]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-token-exchange-implementing-oauth-20-token-exchange\/"
+            },
+            "headline": "Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:29:55Z",
+            "dateModified": "2026-03-01T14:30:15Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/go-secretless-with-snowflake-workload-identity-federation-snowflake\/"
+            },
+            "headline": "Go Secretless with Snowflake Workload Identity Federation - Snowflake",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:24:03Z",
+            "dateModified": "2026-03-01T14:24:20Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-algorithm-confusion-attack-cve-2026-developer-guide\/"
+            },
+            "headline": "JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-02-28T18:00:00Z",
+            "dateModified": "2026-03-01T11:21:01-05:00"
+          }
+  ]
+}
+</script>
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    const mermaidBlocks = document.querySelectorAll('.mermaid, pre code.language-mermaid, code.language-mermaid');
+    if (mermaidBlocks.length > 0) {
+        
+        mermaidBlocks.forEach(block => {
+            if (block.tagName === 'CODE') {
+                const pre = block.parentElement;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = block.textContent;
+                if (pre && pre.tagName === 'PRE') {
+                    pre.parentNode.replaceChild(div, pre);
+                } else {
+                    block.parentNode.replaceChild(div, block);
+                }
+            }
+        });
+
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+            const isDark = document.body.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#5a67d8',
+                    
+                    secondaryColor: '#48bb78',
+                    secondaryTextColor: '#ffffff',
+                    secondaryBorderColor: '#38a169',
+                    
+                    tertiaryColor: '#ed8936',
+                    tertiaryTextColor: '#ffffff',
+                    tertiaryBorderColor: '#dd6b20',
+                    
+                    lineColor: '#718096',
+                    
+                    background: isDark ? '#1a202c' : '#ffffff',
+                    mainBkg: isDark ? '#2d3748' : '#f7fafc',
+                    
+                    actorBkg: '#667eea',
+                    actorBorder: '#5a67d8',
+                    actorTextColor: '#ffffff',
+                    actorLineColor: '#718096',
+                    signalColor: '#4a5568',
+                    signalTextColor: '#2d3748',
+                    labelBoxBkgColor: '#edf2f7',
+                    labelBoxBorderColor: '#cbd5e0',
+                    labelTextColor: '#2d3748',
+                    loopTextColor: '#553c9a',
+                    noteBkgColor: '#faf089',
+                    noteTextColor: '#744210',
+                    noteBorderColor: '#d69e2e',
+                    
+                    nodeBkg: '#667eea',
+                    nodeBorder: '#5a67d8',
+                    clusterBkg: '#e2e8f0',
+                    clusterBorder: '#a0aec0',
+                    defaultLinkColor: '#718096',
+                    titleColor: '#2d3748',
+                    edgeLabelBackground: 'transparent',
+                    
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                sequence: {
+                    useMaxWidth: true,
+                    boxMargin: 10,
+                    boxTextMargin: 5,
+                    noteMargin: 10,
+                    messageMargin: 35,
+                    mirrorActors: false
+                }
+            });
+            mermaid.run().then(() => {
+                
+                document.querySelectorAll('.mermaid .node').forEach(node => {
+                    const rect = node.querySelector('rect, circle, ellipse, polygon');
+                    if (rect) {
+                        const fill = rect.getAttribute('fill') || window.getComputedStyle(rect).fill;
+                        
+                        const isDarkBg = fill && (
+                            fill.includes('667eea') || fill.includes('102, 126, 234') ||
+                            fill.includes('48bb78') || fill.includes('72, 187, 120') ||
+                            fill.includes('ed8936') || fill.includes('237, 137, 54') ||
+                            fill.includes('553c9a') || fill.includes('9f7aea') ||
+                            fill.includes('e53e3e') || fill.includes('dd6b20')
+                        );
+                        const textColor = isDarkBg ? '#ffffff' : '#1a202c';
+                        node.querySelectorAll('span, .nodeLabel, text, foreignObject div').forEach(text => {
+                            text.style.color = textColor;
+                            text.style.fill = textColor;
+                        });
+                    }
+                });
+            });
+        };
+        document.head.appendChild(script);
+    }
+
+    
+    const postContent = document.querySelector('.post-content');
+    const isSinglePost = document.querySelector('.post-single');
+    const isToolsPage = window.location.pathname.startsWith('/tools/');
+    if (postContent && isSinglePost && window.innerWidth >= 1400 && !isToolsPage) {
+        const headings = postContent.querySelectorAll('h2, h3');
+        if (headings.length >= 3) {
+            const toc = document.createElement('nav');
+            toc.className = 'floating-toc';
+            toc.innerHTML = '<h4>📑 Contents</h4><ul></ul>';
+            const tocList = toc.querySelector('ul');
+
+            headings.forEach((heading, index) => {
+                const id = heading.id || `section-${index}`;
+                heading.id = id;
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2';
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            document.body.appendChild(toc);
+
+            
+            const tocLinks = toc.querySelectorAll('a');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 150) {
+                        current = heading.id;
+                    }
+                });
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+    }
+
+    
+    if (postContent && isSinglePost && window.innerWidth >= 1200) {
+        const h2s = postContent.querySelectorAll('h2');
+        if (h2s.length >= 2) {
+            const indicator = document.createElement('div');
+            indicator.className = 'section-indicator';
+
+            h2s.forEach((h2, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'section-dot';
+                dot.title = h2.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                dot.addEventListener('click', () => {
+                    h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                indicator.appendChild(dot);
+            });
+
+            document.body.appendChild(indicator);
+
+            
+            window.addEventListener('scroll', () => {
+                const dots = indicator.querySelectorAll('.section-dot');
+                let activeIndex = 0;
+                h2s.forEach((h2, index) => {
+                    if (h2.getBoundingClientRect().top <= 200) {
+                        activeIndex = index;
+                    }
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+    }
+    });
+    </script>
+
+    
+    
+    <script>
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        function loadGA() {
+            if (window.gaLoaded) return;
+            window.gaLoaded = true;
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975';
+            document.head.appendChild(script);
+
+            script.onload = () => {
+                gtag('js', new Date());
+                gtag('config', 'G-B6QCH29975');
+            };
+        }
+
+        
+        ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+            window.addEventListener(event, loadGA, { once: true, passive: true });
+        });
+
+        
+        setTimeout(loadGA, 3000);
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+    
+    <div class="reading-progress" id="reading-progress"></div>
+    <script>
+    window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / docHeight) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+    </script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+            </div>
+        </div><button id="menu-btn" aria-label="Menu" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/categories/trending/" title="Hot IAM topics">
+                    <span>🔥Trending</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+(function() {
+    var btn = document.getElementById('menu-btn');
+    var menu = document.getElementById('menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+        });
+        
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
+</script>
+<main class="main">
+
+
+
+<div class="reading-progress" id="reading-progress"></div>
+<script>
+(function() {
+  const progressBar = document.getElementById('reading-progress');
+  const article = document.querySelector('.post-content');
+
+  if (!progressBar || !article) return;
+
+  function updateProgress() {
+    const articleTop = article.offsetTop;
+    const articleHeight = article.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+
+    
+    const start = articleTop - windowHeight;
+    const end = articleTop + articleHeight;
+    const current = scrollTop - start;
+    const total = end - start;
+
+    const progress = Math.min(Math.max((current / total) * 100, 0), 100);
+    progressBar.style.width = progress + '%';
+  }
+
+  
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  
+  updateProgress();
+})();
+</script>
+
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent" data-pagefind-meta="title">
+      GitOps for ForgeRock: Managing Identity Configuration with ArgoCD
+    </h1>
+    <div class="post-meta"><span title='2026-02-11 14:58:21'>Feb 11, 2026</span>&nbsp;·&nbsp;5 min&nbsp;·&nbsp;856 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+    
+  </header> 
+<figure class="entry-cover">
+        <img loading="eager" src="https://www.iamdevbox.com/images/posts/gitops-for-forgerock--managing-identity-configurat-0c88980c.webp" alt="GitOps for ForgeRock: Managing Identity Configuration with ArgoCD">
+        
+</figure><div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#what-is-gitops" aria-label="What is GitOps?">What is GitOps?</a></li>
+                <li>
+                    <a href="#why-use-gitops-for-forgerock" aria-label="Why use GitOps for ForgeRock?">Why use GitOps for ForgeRock?</a></li>
+                <li>
+                    <a href="#what-is-argocd" aria-label="What is ArgoCD?">What is ArgoCD?</a></li>
+                <li>
+                    <a href="#how-do-you-implement-gitops-for-forgerock-with-argocd" aria-label="How do you implement GitOps for ForgeRock with ArgoCD?">How do you implement GitOps for ForgeRock with ArgoCD?</a><ul>
+                        
+                <li>
+                    <a href="#step-1-set-up-your-git-repository" aria-label="Step 1: Set Up Your Git Repository">Step 1: Set Up Your Git Repository</a><ul>
+                        
+                <li>
+                    <a href="#example-directory-structure" aria-label="Example Directory Structure">Example Directory Structure</a></li></ul>
+                </li>
+                <li>
+                    <a href="#step-2-define-your-configurations" aria-label="Step 2: Define Your Configurations">Step 2: Define Your Configurations</a><ul>
+                        
+                <li>
+                    <a href="#example-rootjson" aria-label="Example: root.json">Example: root.json</a></li></ul>
+                </li>
+                <li>
+                    <a href="#step-3-install-argocd" aria-label="Step 3: Install ArgoCD">Step 3: Install ArgoCD</a><ul>
+                        
+                <li>
+                    <a href="#terminal-output" aria-label="Terminal Output">Terminal Output</a></li></ul>
+                </li>
+                <li>
+                    <a href="#step-4-configure-argocd-application" aria-label="Step 4: Configure ArgoCD Application">Step 4: Configure ArgoCD Application</a><ul>
+                        
+                <li>
+                    <a href="#example-appyaml" aria-label="Example: app.yaml">Example: app.yaml</a></li></ul>
+                </li>
+                <li>
+                    <a href="#step-5-apply-the-application-configuration" aria-label="Step 5: Apply the Application Configuration">Step 5: Apply the Application Configuration</a><ul>
+                        
+                <li>
+                    <a href="#terminal-output-1" aria-label="Terminal Output">Terminal Output</a></li></ul>
+                </li>
+                <li>
+                    <a href="#step-6-monitor-and-troubleshoot" aria-label="Step 6: Monitor and Troubleshoot">Step 6: Monitor and Troubleshoot</a><ul>
+                        
+                <li>
+                    <a href="#error-example" aria-label="Error Example">Error Example</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#security-considerations" aria-label="Security Considerations">Security Considerations</a><ul>
+                        
+                <li>
+                    <a href="#encrypt-sensitive-data" aria-label="Encrypt Sensitive Data">Encrypt Sensitive Data</a><ul>
+                        
+                <li>
+                    <a href="#example-sealed-secrets" aria-label="Example: Sealed Secrets">Example: Sealed Secrets</a></li></ul>
+                </li>
+                <li>
+                    <a href="#restrict-access-to-git-repositories" aria-label="Restrict Access to Git Repositories">Restrict Access to Git Repositories</a></li>
+                <li>
+                    <a href="#regularly-audit-changes" aria-label="Regularly Audit Changes">Regularly Audit Changes</a></li></ul>
+                </li>
+                <li>
+                    <a href="#comparison-gitops-vs-manual-configuration" aria-label="Comparison: GitOps vs Manual Configuration">Comparison: GitOps vs Manual Configuration</a></li>
+                <li>
+                    <a href="#quick-reference" aria-label="Quick Reference">Quick Reference</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#" aria-label="📋 Quick Reference">📋 Quick Reference</a></li></ul>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#key-takeaways" aria-label="Key Takeaways">Key Takeaways</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#conclusion" aria-label="Conclusion">Conclusion</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content" data-pagefind-body><p>GitOps for ForgeRock is a practice that uses Git as the single source of truth to manage and deploy identity configuration changes. This approach leverages the principles of GitOps, which emphasize declarative infrastructure and continuous delivery, to streamline identity management processes. By integrating GitOps with ArgoCD, you can automate the deployment of ForgeRock configurations, ensuring consistency and reducing the risk of human error.</p>
+<h2 id="what-is-gitops">What is GitOps?<a hidden class="anchor" aria-hidden="true" href="#what-is-gitops">#</a></h2>
+<p>GitOps is a set of practices that combines Git, the version control system, with automated operations to manage infrastructure and applications. The core idea is to use Git repositories as the single source of truth for your infrastructure and application configurations. Changes are made through pull requests, and automated tools apply these changes to the live environment.</p>
+<h2 id="why-use-gitops-for-forgerock">Why use GitOps for ForgeRock?<a hidden class="anchor" aria-hidden="true" href="#why-use-gitops-for-forgerock">#</a></h2>
+<p>Using GitOps for ForgeRock provides several benefits:</p>
+<ul>
+<li><strong>Version Control</strong>: All configuration changes are tracked in Git, making it easy to review, roll back, and audit changes.</li>
+<li><strong>Collaboration</strong>: Teams can collaborate on configuration changes using standard Git workflows.</li>
+<li><strong>Automation</strong>: Automated tools like ArgoCD can apply changes to the live environment, reducing manual intervention and minimizing errors.</li>
+<li><strong>Consistency</strong>: Ensures that the live environment matches the desired state defined in Git.</li>
+</ul>
+<h2 id="what-is-argocd">What is ArgoCD?<a hidden class="anchor" aria-hidden="true" href="#what-is-argocd">#</a></h2>
+<p>ArgoCD is a declarative, GitOps continuous delivery tool for Kubernetes applications. It allows you to define your application configurations in Git and automatically synchronizes these configurations to your Kubernetes clusters. ArgoCD supports various deployment strategies, including blue-green deployments and canary releases, making it a powerful tool for managing complex environments.</p>
+<h2 id="how-do-you-implement-gitops-for-forgerock-with-argocd">How do you implement GitOps for ForgeRock with ArgoCD?<a hidden class="anchor" aria-hidden="true" href="#how-do-you-implement-gitops-for-forgerock-with-argocd">#</a></h2>
+<p>Implementing GitOps for ForgeRock with ArgoCD involves several steps. Below is a detailed guide to help you get started.</p>
+<h3 id="step-1-set-up-your-git-repository">Step 1: Set Up Your Git Repository<a hidden class="anchor" aria-hidden="true" href="#step-1-set-up-your-git-repository">#</a></h3>
+<p>Create a Git repository to store your ForgeRock configuration files. These files can include JSON, YAML, or other formats used by ForgeRock.</p>
+<h4 id="example-directory-structure">Example Directory Structure<a hidden class="anchor" aria-hidden="true" href="#example-directory-structure">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>forgeops-config/
+</span></span><span style="display:flex;"><span>├── am/
+</span></span><span style="display:flex;"><span>│   ├── realms/
+</span></span><span style="display:flex;"><span>│   │   └── root.json
+</span></span><span style="display:flex;"><span>│   └── services/
+</span></span><span style="display:flex;"><span>│       └── oauth2.json
+</span></span><span style="display:flex;"><span>└── ds/
+</span></span><span style="display:flex;"><span>    └── config.ldif
+</span></span></code></pre></div><h3 id="step-2-define-your-configurations">Step 2: Define Your Configurations<a hidden class="anchor" aria-hidden="true" href="#step-2-define-your-configurations">#</a></h3>
+<p>Define your ForgeRock configurations in the Git repository. Ensure that each configuration file is well-documented and follows best practices.</p>
+<h4 id="example-rootjson">Example: <code>root.json</code><a hidden class="anchor" aria-hidden="true" href="#example-rootjson">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;realmPath&#34;</span>: <span style="color:#e6db74">&#34;/&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;Root Realm&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;description&#34;</span>: <span style="color:#e6db74">&#34;The root realm for ForgeRock AM&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;parentPath&#34;</span>: <span style="color:#e6db74">&#34;/&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;enabled&#34;</span>: <span style="color:#66d9ef">true</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;applications&#34;</span>: [
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;applicationType&#34;</span>: <span style="color:#e6db74">&#34;web&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;MyWebApp&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;resources&#34;</span>: [
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">&#34;uri&#34;</span>: <span style="color:#e6db74">&#34;http://example.com/*&#34;</span>,
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">&#34;actions&#34;</span>: [<span style="color:#e6db74">&#34;GET&#34;</span>, <span style="color:#e6db74">&#34;POST&#34;</span>]
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>      ]
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  ]
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="step-3-install-argocd">Step 3: Install ArgoCD<a hidden class="anchor" aria-hidden="true" href="#step-3-install-argocd">#</a></h3>
+<p>Install ArgoCD in your Kubernetes cluster. You can follow the official ArgoCD documentation for detailed installation instructions.</p>
+<h4 id="terminal-output">Terminal Output<a hidden class="anchor" aria-hidden="true" href="#terminal-output">#</a></h4>
+<div class="terminal">
+<div class="terminal-header">
+<span class="terminal-dot red"></span>
+<span class="terminal-dot yellow"></span>
+<span class="terminal-dot green"></span>
+<span class="terminal-title">Terminal</span>
+</div>
+<div class="terminal-body">
+<span class="prompt">$</span> kubectl create namespace argocd
+<span class="prompt">$</span> kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+</div>
+</div>
+<h3 id="step-4-configure-argocd-application">Step 4: Configure ArgoCD Application<a hidden class="anchor" aria-hidden="true" href="#step-4-configure-argocd-application">#</a></h3>
+<p>Create an ArgoCD application that points to your Git repository and specifies the target Kubernetes cluster.</p>
+<h4 id="example-appyaml">Example: <code>app.yaml</code><a hidden class="anchor" aria-hidden="true" href="#example-appyaml">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">argoproj.io/v1alpha1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Application</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">forgerock-app</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">argocd</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">project</span>: <span style="color:#ae81ff">default</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">source</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">repoURL</span>: <span style="color:#e6db74">&#39;https://github.com/your-repo/forgeops-config.git&#39;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">targetRevision</span>: <span style="color:#ae81ff">HEAD</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">path</span>: <span style="color:#ae81ff">am</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">destination</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">server</span>: <span style="color:#e6db74">&#39;https://kubernetes.default.svc&#39;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">forgerock</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">syncPolicy</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">automated</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">prune</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">selfHeal</span>: <span style="color:#66d9ef">true</span>
+</span></span></code></pre></div><h3 id="step-5-apply-the-application-configuration">Step 5: Apply the Application Configuration<a hidden class="anchor" aria-hidden="true" href="#step-5-apply-the-application-configuration">#</a></h3>
+<p>Apply the ArgoCD application configuration to your cluster.</p>
+<h4 id="terminal-output-1">Terminal Output<a hidden class="anchor" aria-hidden="true" href="#terminal-output-1">#</a></h4>
+<div class="terminal">
+<div class="terminal-header">
+<span class="terminal-dot red"></span>
+<span class="terminal-dot yellow"></span>
+<span class="terminal-dot green"></span>
+<span class="terminal-title">Terminal</span>
+</div>
+<div class="terminal-body">
+<span class="prompt">$</span> kubectl apply -f app.yaml
+</div>
+</div>
+<h3 id="step-6-monitor-and-troubleshoot">Step 6: Monitor and Troubleshoot<a hidden class="anchor" aria-hidden="true" href="#step-6-monitor-and-troubleshoot">#</a></h3>
+<p>Monitor the ArgoCD dashboard to ensure that your configurations are being applied correctly. If there are any issues, troubleshoot them using the logs and events provided by ArgoCD.</p>
+<h4 id="error-example">Error Example<a hidden class="anchor" aria-hidden="true" href="#error-example">#</a></h4>
+<div class="terminal">
+<div class="terminal-header">
+<span class="terminal-dot red"></span>
+<span class="terminal-dot yellow"></span>
+<span class="terminal-dot green"></span>
+<span class="terminal-title">Terminal</span>
+</div>
+<div class="terminal-body">
+<span class="prompt">$</span> kubectl get application forgerock-app -n argocd -o jsonpath='{.status.conditions}'
+<span class="output">[{"lastTransitionTime":"2025-01-23T10:00:00Z","message":"application spec is invalid: Invalid resource kind: Unknown Kind \"Realm\" in version \"am.forgerock.io/v1alpha1\"","reason":"InvalidSpec","status":"False","type":"Invalid"}]</span>
+</div>
+</div>
+<div class="notice warning">⚠️ <strong>Warning:</strong> Ensure that the custom resource definitions (CRDs) for ForgeRock are installed in your cluster.</div>
+<h2 id="security-considerations">Security Considerations<a hidden class="anchor" aria-hidden="true" href="#security-considerations">#</a></h2>
+<p>Implementing GitOps for ForgeRock with ArgoCD comes with several security considerations. Here are some best practices to keep in mind:</p>
+<h3 id="encrypt-sensitive-data">Encrypt Sensitive Data<a hidden class="anchor" aria-hidden="true" href="#encrypt-sensitive-data">#</a></h3>
+<p>Sensitive data, such as passwords and API keys, should be encrypted before being stored in Git. Tools like Sealed Secrets or Bitnami Sealed Secrets can help encrypt sensitive data.</p>
+<h4 id="example-sealed-secrets">Example: Sealed Secrets<a hidden class="anchor" aria-hidden="true" href="#example-sealed-secrets">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>kubectl -n argocd create secret generic forgerock-secrets <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --from-literal<span style="color:#f92672">=</span>AM_PASSWORD<span style="color:#f92672">=</span>supersecret <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --dry-run<span style="color:#f92672">=</span>client -o yaml | kubeseal --controller-name<span style="color:#f92672">=</span>sealed-secrets --controller-namespace<span style="color:#f92672">=</span>sealed-secrets -o yaml &gt; sealed-secrets.yaml
+</span></span></code></pre></div><h3 id="restrict-access-to-git-repositories">Restrict Access to Git Repositories<a hidden class="anchor" aria-hidden="true" href="#restrict-access-to-git-repositories">#</a></h3>
+<p>Limit access to your Git repositories to authorized personnel only. Use role-based access control (RBAC) to enforce access policies.</p>
+<h3 id="regularly-audit-changes">Regularly Audit Changes<a hidden class="anchor" aria-hidden="true" href="#regularly-audit-changes">#</a></h3>
+<p>Regularly audit changes to your Git repositories to detect and prevent unauthorized modifications. Tools like GitHub Actions or GitLab CI/CD can automate this process.</p>
+<h2 id="comparison-gitops-vs-manual-configuration">Comparison: GitOps vs Manual Configuration<a hidden class="anchor" aria-hidden="true" href="#comparison-gitops-vs-manual-configuration">#</a></h2>
+<table class="comparison-table">
+<thead><tr><th>Approach</th><th>Pros</th><th>Cons</th><th>Use When</th></tr></thead>
+<tbody>
+<tr><td>GitOps</td><td>Automated, consistent, version-controlled</td><td>Initial setup complexity</td><td>Large-scale, multi-environment deployments</td></tr>
+<tr><td>Manual Configuration</td><td>Simple, immediate changes</td><td>Error-prone, inconsistent</td><td>Small-scale, infrequent changes</td></tr>
+</tbody>
+</table>
+<h2 id="quick-reference">Quick Reference<a hidden class="anchor" aria-hidden="true" href="#quick-reference">#</a></h2>
+<div class="quick-ref">
+<h4>📋 Quick Reference</h4>
+<ul>
+<li><code>kubectl create namespace argocd</code> - Create the ArgoCD namespace</li>
+<li><code>kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml</code> - Install ArgoCD</li>
+<li><code>kubectl apply -f app.yaml</code> - Deploy the ArgoCD application</li>
+</ul>
+</div>
+<h2 id="key-takeaways">Key Takeaways<a hidden class="anchor" aria-hidden="true" href="#key-takeaways">#</a></h2>
+<div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>GitOps for ForgeRock uses Git as the single source of truth for identity configurations.</li>
+<li>ArgoCD automates the deployment of configurations to Kubernetes clusters.</li>
+<li>Encrypt sensitive data and restrict access to Git repositories for security.</li>
+<li>Regularly audit changes to detect unauthorized modifications.</li>
+</ul>
+</div>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>Implementing GitOps for ForgeRock with ArgoCD can significantly improve the management of your identity configurations. By leveraging Git as the single source of truth and automating deployments, you can achieve consistency, collaboration, and reduced risk. Follow the steps outlined in this guide to get started with GitOps for ForgeRock today.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/gitops/">GitOps</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/forgerock/">ForgeRock</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/argocd/">ArgoCD</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/identity-management/">Identity Management</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/devops/">DevOps</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/securing-apis-with-zero-trust-strategies-govcio-media-research/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Securing APIs With Zero Trust Strategies - GovCIO Media &amp; Research</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/fortios-authentication-bypass-vulnerability-allows-attackers-to-bypass-ldap-login/">
+    <span class="title">Next »</span>
+    <br>
+    <span>FortiOS Authentication Bypass Vulnerability Allows Attackers to Bypass LDAP Login</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+
+<section class="post-feedback">
+  <p class="feedback-question">Was this article helpful?</p>
+  <div class="feedback-buttons">
+    <button class="feedback-btn feedback-yes" onclick="trackFeedback('yes', '\/posts\/gitops-for-forgerock-managing-identity-configuration-with-argocd\/')" aria-label="Yes, helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      Yes
+    </button>
+    <button class="feedback-btn feedback-no" onclick="trackFeedback('no', '\/posts\/gitops-for-forgerock-managing-identity-configuration-with-argocd\/')" aria-label="No, not helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>
+      No
+    </button>
+  </div>
+  <p class="feedback-thanks" style="display: none;">Thanks for your feedback!</p>
+</section>
+
+
+<section class="author-bio">
+  <div class="author-avatar">
+    <img src="/IAMDevBox.com.jpg" alt="IAMDevBox Author" width="64" height="64" loading="lazy">
+  </div>
+  <div class="author-info">
+    <h4>Written by IAMDevBox</h4>
+    <p>Enterprise IAM architect with 15+ years in identity modernization. Certified across ForgeRock, Ping Identity, SailPoint, AWS, and Azure.</p>
+    <div class="author-links">
+      <a href="https://twitter.com/iamdevbox" target="_blank" rel="noopener" title="Follow on X/Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/iamdevbox" target="_blank" rel="noopener" title="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="/contact/" title="Contact">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function trackFeedback(value, page) {
+  
+  document.querySelector('.feedback-buttons').style.display = 'none';
+  document.querySelector('.feedback-question').style.display = 'none';
+  document.querySelector('.feedback-thanks').style.display = 'block';
+
+  
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'post_feedback', {
+      'feedback_value': value,
+      'page_path': page
+    });
+  }
+
+  
+  localStorage.setItem('feedback_' + page, value);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const page = '\/posts\/gitops-for-forgerock-managing-identity-configuration-with-argocd\/';
+  if (localStorage.getItem('feedback_' + page)) {
+    document.querySelector('.feedback-buttons').style.display = 'none';
+    document.querySelector('.feedback-question').textContent = 'Thanks for your feedback!';
+  }
+});
+</script>
+
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/pingone-mfa-configuration-push-notifications-totp-and-fido2-setup/" class="custom-link">
+              PingOne MFA Configuration: Push Notifications, TOTP, and FIDO2 Setup
+            </a>
+            <small class="custom-date">2026-02-27</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/perc-announces-single-sign-on-access-to-nfpa-link-for-propane-professionals-phcppros/" class="custom-link">
+              PERC Announces Single Sign-On Access to NFPA LiNK for Propane Professionals - PHCPPros
+            </a>
+            <small class="custom-date">2026-02-27</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/configuring-hosted-login-journey-urls-in-forgerock-identity-cloud/" class="custom-link">
+              Configuring Hosted Login Journey URLs in ForgeRock Identity Cloud
+            </a>
+            <small class="custom-date">2026-02-23</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/forgerock-ds-pkix-path-building-failed-certificate-troubleshooting/" class="custom-link">
+              ForgeRock DS PKIX Path Building Failed: Complete Certificate Troubleshooting Guide
+            </a>
+            <small class="custom-date">2026-02-21</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-vs-ory-open-source-iam-comparison-2026/" class="custom-link">
+              Ory vs Keycloak: Open Source IAM Comparison 2026
+            </a>
+            <small class="custom-date">2026-02-21</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+                Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+                Go Secretless with Snowflake Workload Identity Federation - Snowflake
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+                JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+                OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+                Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

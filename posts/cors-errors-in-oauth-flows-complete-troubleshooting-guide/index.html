@@ -1,0 +1,2997 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>CORS Errors in OAuth Flows: Complete Troubleshooting Guide | IAMDevBox</title>
+<meta name="keywords" content="cors error oauth, cors blocked oauth callback, cors oauth token endpoint, keycloak cors configuration, auth0 cors error, okta cors trusted origins, azure ad cors aadsts9002327, oauth authorize endpoint cors, cors preflight oauth, spa oauth cors fix">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/cors-errors-in-oauth-flows-complete-troubleshooting-guide/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.e24ea479df3e367781fafa20cedde21c7e043c10bed4c8c913ef9261a049a1e2.css" integrity="sha256-4k6ked8&#43;NneB&#43;vogzt3iHH4EPBC&#43;1MjJE&#43;&#43;SYaBJoeI=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/cors-errors-in-oauth-flows-complete-troubleshooting-guide/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/cors-errors-in-oauth-flows-complete-troubleshooting-guide/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="CORS Errors in OAuth Flows: Complete Troubleshooting Guide">
+  <meta property="og:description" content="Fix CORS errors in OAuth 2.0 and OpenID Connect flows across Keycloak, Auth0, Okta, Azure AD, ForgeRock, and Google. Complete guide with all error scenarios, browser error messages, and provider-specific fixes.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-02-21T12:00:00+00:00">
+    <meta property="article:modified_time" content="2026-02-26T21:20:24-05:00">
+    <meta property="article:tag" content="OAuth 2.0">
+    <meta property="article:tag" content="CORS">
+    <meta property="article:tag" content="Troubleshooting">
+    <meta property="article:tag" content="Keycloak">
+    <meta property="article:tag" content="Identity Management">
+      <meta property="og:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:title" content="CORS Errors in OAuth Flows: Complete Troubleshooting Guide">
+<meta name="twitter:description" content="Fix CORS errors in OAuth 2.0 and OpenID Connect flows across Keycloak, Auth0, Okta, Azure AD, ForgeRock, and Google. Complete guide with all error scenarios, browser error messages, and provider-specific fixes.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "CORS Errors in OAuth Flows: Complete Troubleshooting Guide",
+      "item": "https://www.iamdevbox.com/posts/cors-errors-in-oauth-flows-complete-troubleshooting-guide/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "CORS Errors in OAuth Flows: Complete Troubleshooting Guide",
+  "name": "CORS Errors in OAuth Flows: Complete Troubleshooting Guide",
+  "description": "Fix CORS errors in OAuth 2.0 and OpenID Connect flows across Keycloak, Auth0, Okta, Azure AD, ForgeRock, and Google. Complete guide with all error scenarios, browser error messages, and provider-specific fixes.",
+  "keywords": [
+    "cors error oauth", "cors blocked oauth callback", "cors oauth token endpoint", "keycloak cors configuration", "auth0 cors error", "okta cors trusted origins", "azure ad cors aadsts9002327", "oauth authorize endpoint cors", "cors preflight oauth", "spa oauth cors fix"
+  ],
+  "articleBody": "CORS errors are the most frustrating errors in OAuth development. The browser blocks your request, the error message is generic, and the actual cause could be any of 8+ different scenarios. This guide covers every CORS error you’ll encounter in OAuth 2.0 and OIDC flows, with exact browser error messages and provider-specific fixes.\nQuick Diagnostic: Which Error Are You Seeing? Browser Console Error Jump To No 'Access-Control-Allow-Origin' header on /authorize Scenario 1: Calling /authorize via fetch No 'Access-Control-Allow-Origin' header on /token Scenario 2: Token endpoint CORS AADSTS9002327: Cross-origin token redemption Scenario 3: Azure AD SPA registration CORS error only after session timeout Scenario 4: Keycloak error response bug wildcard '*' when credentials mode is 'include' Scenario 5: Wildcard with credentials Response to preflight request doesn't pass Scenario 6: Preflight failures CORS error on /revoke endpoint Scenario 7: Token revocation Everything works except in production Scenario 8: Proxy/CDN stripping headers Which OAuth Endpoints Support CORS? Before debugging, know which endpoints are designed to accept cross-origin requests:\nEndpoint CORS Support Access Method /authorize No Browser redirect (window.location.href) /token (Auth Code + PKCE, public client) Yes fetch from SPA /token (client_credentials) No Server-to-server only /userinfo Yes fetch with Authorization: Bearer /.well-known/openid-configuration Yes fetch /jwks Yes fetch (used by OIDC libraries) /revoke Provider-dependent Prefer server-side /logout No Browser redirect Scenario 1: Calling /authorize via fetch This is the #1 most common CORS error in OAuth. The /authorize endpoint is a browser-navigation endpoint — it responds with a 302 redirect to the login UI.\nAccess to XMLHttpRequest at 'https://auth.example.com/oauth2/authorize?client_id=...' from origin 'https://myapp.example.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. Fix: Never call /authorize via fetch() or XMLHttpRequest. Use a browser redirect:\n// WRONG — will always cause a CORS error const response = await fetch(`${authServerUrl}/authorize?...`); // CORRECT — browser redirect, bypasses CORS entirely window.location.href = `${authServerUrl}/authorize?` + new URLSearchParams({ response_type: 'code', client_id: CLIENT_ID, redirect_uri: REDIRECT_URI, scope: 'openid profile', code_challenge: codeChallenge, code_challenge_method: 'S256', state: state }); This applies to every OAuth provider — Keycloak, Auth0, Okta, Azure AD, Google, ForgeRock, Cognito. No provider enables CORS on the authorize endpoint.\nScenario 2: Token Endpoint CORS Errors The token endpoint /token supports CORS for public client flows (Authorization Code + PKCE) but NOT for confidential client flows (client_credentials).\nProvider CORS Configuration Keycloak: Admin Console → Clients → [Client] → Access Settings → Web Origins\nhttps://myapp.example.com ← exact origin (no trailing slash, no path) + ← shortcut: allow all valid redirect URIs as origins Common mistakes:\nLeaving Web Origins blank (CORS fails for all requests) Adding a trailing slash: https://myapp.example.com/ (invalid) Adding a path: https://myapp.example.com/* (paths not allowed in origins) Okta: Admin Console → Security → API → Trusted Origins\nClick “Add Origin” Enter https://myapp.example.com Check the CORS checkbox Save Auth0: Dashboard → Applications → [App] → Settings → Allowed Origins (CORS)\nhttps://myapp.example.com Also set Allowed Web Origins if using Auth0’s cross-origin authentication.\nForgeRock AM: Configure → Global Services → CORS Service → Accepted Origins\nOr configure per-client via the OAuth 2.0 client’s JavaScript Origins field — ForgeRock AM automatically adds these to the CORS allowlist.\nAWS Cognito: No admin CORS configuration. Cognito’s token endpoint accepts cross-origin requests from any origin for public clients.\nScenario 3: Azure AD SPA Registration AADSTS9002327: Cross-origin token redemption is permitted only for the 'Single-Page Application' client type. Azure AD / Microsoft Entra ID determines CORS eligibility based on the redirect URI platform type in the app registration — not by any CORS configuration setting.\nFix: Go to App Registration → Authentication → Add platform → Single-page application → add your redirect URI. If it’s currently registered under “Web”, move it to “Single-page application”.\nAzure AD also blocks client_credentials from browsers entirely. If a browser sends an Origin header with a confidential flow, Entra rejects it to prevent secrets from leaking in client-side code.\nScenario 4: Keycloak CORS on Error Responses This bug (KEYCLOAK-1886) causes CORS errors that appear only after session expiry (see Keycloak Session Timeout Configuration for session timeout details):\nUser logs in → SPA exchanges code for tokens → works fine (200 with CORS headers) Session expires → SPA tries to refresh → Keycloak returns 400 invalid_grant without CORS headers Browser sees 400 + no Access-Control-Allow-Origin → throws CORS error The SPA never sees the actual invalid_grant — only a CORS error Workaround with nginx:\nlocation /realms/ { proxy_pass http://keycloak:8080; # 'always' ensures CORS headers on ALL responses including 4xx/5xx add_header 'Access-Control-Allow-Origin' 'https://myapp.example.com' always; add_header 'Access-Control-Allow-Credentials' 'true' always; add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always; add_header 'Access-Control-Allow-Headers' 'Authorization, Content-Type' always; if ($request_method = 'OPTIONS') { add_header 'Access-Control-Allow-Origin' 'https://myapp.example.com'; add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS'; add_header 'Access-Control-Allow-Headers' 'Authorization, Content-Type'; add_header 'Access-Control-Max-Age' 86400; return 204; } } The key is the always directive — without it, nginx only adds headers to 2xx responses.\nScenario 5: Wildcard Origin with Credentials The value of the 'Access-Control-Allow-Origin' header in the response must not be the wildcard '*' when the request's credentials mode is 'include'. This happens when:\nThe server returns Access-Control-Allow-Origin: * The client sends credentials: 'include' or withCredentials: true The CORS spec forbids this combination Fix: Replace * with the exact origin and add the credentials header:\nAccess-Control-Allow-Origin: https://myapp.example.com Access-Control-Allow-Credentials: true In Keycloak, this means using the exact origin in Web Origins instead of *.\nScenario 6: Preflight Request Failures A preflight OPTIONS request is triggered when your request uses:\nContent-Type: application/json (not application/x-www-form-urlencoded) Custom headers like Authorization or X-Custom-Header HTTP methods other than GET, HEAD, or POST Key insight: The token endpoint uses Content-Type: application/x-www-form-urlencoded by default. If you accidentally set Content-Type: application/json, you trigger a preflight that many OAuth servers don’t handle:\n// WRONG — triggers unnecessary preflight const response = await fetch(tokenEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ grant_type: 'authorization_code', code, ... }) }); // CORRECT — no preflight needed (simple request) const response = await fetch(tokenEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ grant_type: 'authorization_code', code, ... }) }); Spring Security preflight fix:\nhttp.cors().and() .csrf().disable() .authorizeRequests() .antMatchers(HttpMethod.OPTIONS, \"/**\").permitAll(); Scenario 7: Token Revocation CORS Google’s /revoke endpoint does NOT support CORS. Calling it from a SPA via fetch always fails.\nWorkaround — form POST (bypasses CORS):\nconst form = document.createElement('form'); form.method = 'POST'; form.action = 'https://oauth2.googleapis.com/revoke'; const input = document.createElement('input'); input.type = 'hidden'; input.name = 'token'; input.value = accessToken; form.appendChild(input); document.body.appendChild(form); form.submit(); Auth0’s /oauth/revoke requires the app domain in Allowed Origins (CORS) in the dashboard.\nScenario 8: Proxy or CDN Stripping CORS Headers Everything works locally but fails in production. Common causes:\nCloudFlare / CDN caching a response without CORS headers, then serving it to cross-origin requests nginx/Apache reverse proxy not forwarding the Origin header to the backend Load balancer stripping Access-Control-* headers Debug checklist:\n# Test directly against the OAuth server (bypass proxy) curl -v -H \"Origin: https://myapp.example.com\" \\ https://auth.example.com/realms/myrealm/protocol/openid-connect/token # Check if CORS headers are in the response # Look for: Access-Control-Allow-Origin: https://myapp.example.com # Test through your proxy curl -v -H \"Origin: https://myapp.example.com\" \\ https://your-proxy.example.com/auth/token # Compare the headers — if the proxy response is missing CORS headers, # the proxy is stripping them When CORS Errors Mean Wrong Architecture If you’re hitting CORS errors with client_credentials, on_behalf_of, or any confidential client flow from a SPA — the problem isn’t CORS configuration, it’s your architecture.\nSPAs should NOT:\nHold client_secret in JavaScript Call /token with client_credentials grant Store refresh tokens in localStorage Use the Backend for Frontend (BFF) pattern instead:\nSPA ──(same-origin cookie)──→ BFF ──(server-to-server)──→ OAuth Provider ↓ SPA ←──(same-origin cookie)──── BFF ←──(tokens stored server-side) The BFF handles all OAuth token operations server-side. The SPA only communicates with the BFF using HttpOnly, SameSite cookies. No CORS issues because the SPA and BFF share the same origin.\nFor implementation details, see Integrating OAuth 2.0 with React SPA Using BFF.\nDebugging with Browser DevTools Open DevTools → Network tab Filter by the failing request URL Check the Headers tab: Request Headers: Look for Origin: https://myapp.example.com Response Headers: Look for Access-Control-Allow-Origin If the response has no Access-Control-Allow-Origin, the server isn’t configured for your origin Check the Console tab for the exact CORS error message Look for a preceding OPTIONS request — if it failed or returned non-2xx, the preflight is the problem # Replicate the request with curl to confirm it's a CORS issue (not a server error) curl -v -X POST https://auth.example.com/token \\ -H \"Origin: https://myapp.example.com\" \\ -H \"Content-Type: application/x-www-form-urlencoded\" \\ -d \"grant_type=authorization_code\u0026code=CODE\u0026redirect_uri=URI\u0026client_id=ID\u0026code_verifier=VERIFIER\" If curl succeeds (returns tokens), the server works but is missing CORS headers for your origin. Configure the provider as described above.\n",
+  "wordCount" : "1417",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/IAMDevBox.com.jpg","datePublished": "2026-02-21T12:00:00Z",
+  "dateModified": "2026-02-26T21:20:24-05:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/cors-errors-in-oauth-flows-complete-troubleshooting-guide/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Why does my OAuth login work in Postman but fail in the browser with a CORS error?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Postman and curl do not enforce the browser's Same-Origin Policy — they never send an Origin header, so CORS checks are bypassed entirely. The browser enforces CORS as a security mechanism. To fix: ensure the OAuth provider's CORS configuration includes your app's origin. In Keycloak, set Web Origins in the client settings. In Okta, add a Trusted Origin. In Auth0, configure Allowed Origins (CORS)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I fix CORS errors when calling the OAuth authorize endpoint?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You cannot fix this because the /authorize endpoint intentionally does NOT support CORS. It is a browser-navigation endpoint, not an API endpoint. Never call /authorize via fetch() or XMLHttpRequest. Instead use window.location.href = authorizationUrl to redirect the browser. This applies to all providers: Keycloak, Auth0, Okta, Azure AD, Google, and ForgeRock."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does Keycloak return CORS errors only when the session expires?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "This is a known Keycloak bug (KEYCLOAK-1886): the token endpoint returns CORS headers on successful responses but omits them on error responses (400 Bad Request). When a refresh token expires, the browser sees a 400 without CORS headers and throws a CORS error instead of the actual invalid_grant error. Fix: upgrade Keycloak, or use an nginx reverse proxy with add_header ... always to inject CORS headers on all responses including errors."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the Azure AD AADSTS9002327 error?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "AADSTS9002327 means \"Cross-origin token redemption is permitted only for the Single-Page Application client type.\" In Azure AD / Microsoft Entra ID, the redirect URI must be registered under the \"Single-Page Application\" platform type, not \"Web\". Go to App Registration \u003e Authentication \u003e Add platform \u003e Single-page application, and move your redirect URI there."
+      }
+    }
+  ]
+}
+</script>
+    <meta name="description" content="Fix CORS errors in OAuth 2.0 and OpenID Connect flows across Keycloak, Auth0, Okta, Azure AD, ForgeRock, and Google. Complete guide with all error scenarios, browser error messages, and provider-specific fixes."><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/cors-errors-in-oauth-flows-complete-troubleshooting-guide\/"
+  },
+  "headline": "CORS Errors in OAuth Flows: Complete Troubleshooting Guide",
+  "description": "Fix CORS errors in OAuth 2.0 and OpenID Connect flows across Keycloak, Auth0, Okta, Azure AD, ForgeRock, and Google. Complete guide with all error scenarios, browser error messages, and provider-specific fixes.",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon-96x96.png",
+      "width": 96,
+      "height": 96
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://www.iamdevbox.com/IAMDevBox.com.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "datePublished": "2026-02-21T12:00:00Z",
+  "dateModified": "2026-02-26T21:20:24-05:00",
+  "wordCount":  1417 ,
+  "articleSection": "posts",
+  "keywords": ["cors error oauth","cors blocked oauth callback","cors oauth token endpoint","keycloak cors configuration","auth0 cors error","okta cors trusted origins","azure ad cors aadsts9002327","oauth authorize endpoint cors","cors preflight oauth","spa oauth cors fix"]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "CORS Errors in OAuth Flows: Complete Troubleshooting Guide",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/cors-errors-in-oauth-flows-complete-troubleshooting-guide\/"
+    }
+  ]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-token-exchange-implementing-oauth-20-token-exchange\/"
+            },
+            "headline": "Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:29:55Z",
+            "dateModified": "2026-03-01T14:30:15Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/go-secretless-with-snowflake-workload-identity-federation-snowflake\/"
+            },
+            "headline": "Go Secretless with Snowflake Workload Identity Federation - Snowflake",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:24:03Z",
+            "dateModified": "2026-03-01T14:24:20Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-algorithm-confusion-attack-cve-2026-developer-guide\/"
+            },
+            "headline": "JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-02-28T18:00:00Z",
+            "dateModified": "2026-03-01T11:21:01-05:00"
+          }
+  ]
+}
+</script>
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    const mermaidBlocks = document.querySelectorAll('.mermaid, pre code.language-mermaid, code.language-mermaid');
+    if (mermaidBlocks.length > 0) {
+        
+        mermaidBlocks.forEach(block => {
+            if (block.tagName === 'CODE') {
+                const pre = block.parentElement;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = block.textContent;
+                if (pre && pre.tagName === 'PRE') {
+                    pre.parentNode.replaceChild(div, pre);
+                } else {
+                    block.parentNode.replaceChild(div, block);
+                }
+            }
+        });
+
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+            const isDark = document.body.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#5a67d8',
+                    
+                    secondaryColor: '#48bb78',
+                    secondaryTextColor: '#ffffff',
+                    secondaryBorderColor: '#38a169',
+                    
+                    tertiaryColor: '#ed8936',
+                    tertiaryTextColor: '#ffffff',
+                    tertiaryBorderColor: '#dd6b20',
+                    
+                    lineColor: '#718096',
+                    
+                    background: isDark ? '#1a202c' : '#ffffff',
+                    mainBkg: isDark ? '#2d3748' : '#f7fafc',
+                    
+                    actorBkg: '#667eea',
+                    actorBorder: '#5a67d8',
+                    actorTextColor: '#ffffff',
+                    actorLineColor: '#718096',
+                    signalColor: '#4a5568',
+                    signalTextColor: '#2d3748',
+                    labelBoxBkgColor: '#edf2f7',
+                    labelBoxBorderColor: '#cbd5e0',
+                    labelTextColor: '#2d3748',
+                    loopTextColor: '#553c9a',
+                    noteBkgColor: '#faf089',
+                    noteTextColor: '#744210',
+                    noteBorderColor: '#d69e2e',
+                    
+                    nodeBkg: '#667eea',
+                    nodeBorder: '#5a67d8',
+                    clusterBkg: '#e2e8f0',
+                    clusterBorder: '#a0aec0',
+                    defaultLinkColor: '#718096',
+                    titleColor: '#2d3748',
+                    edgeLabelBackground: 'transparent',
+                    
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                sequence: {
+                    useMaxWidth: true,
+                    boxMargin: 10,
+                    boxTextMargin: 5,
+                    noteMargin: 10,
+                    messageMargin: 35,
+                    mirrorActors: false
+                }
+            });
+            mermaid.run().then(() => {
+                
+                document.querySelectorAll('.mermaid .node').forEach(node => {
+                    const rect = node.querySelector('rect, circle, ellipse, polygon');
+                    if (rect) {
+                        const fill = rect.getAttribute('fill') || window.getComputedStyle(rect).fill;
+                        
+                        const isDarkBg = fill && (
+                            fill.includes('667eea') || fill.includes('102, 126, 234') ||
+                            fill.includes('48bb78') || fill.includes('72, 187, 120') ||
+                            fill.includes('ed8936') || fill.includes('237, 137, 54') ||
+                            fill.includes('553c9a') || fill.includes('9f7aea') ||
+                            fill.includes('e53e3e') || fill.includes('dd6b20')
+                        );
+                        const textColor = isDarkBg ? '#ffffff' : '#1a202c';
+                        node.querySelectorAll('span, .nodeLabel, text, foreignObject div').forEach(text => {
+                            text.style.color = textColor;
+                            text.style.fill = textColor;
+                        });
+                    }
+                });
+            });
+        };
+        document.head.appendChild(script);
+    }
+
+    
+    const postContent = document.querySelector('.post-content');
+    const isSinglePost = document.querySelector('.post-single');
+    const isToolsPage = window.location.pathname.startsWith('/tools/');
+    if (postContent && isSinglePost && window.innerWidth >= 1400 && !isToolsPage) {
+        const headings = postContent.querySelectorAll('h2, h3');
+        if (headings.length >= 3) {
+            const toc = document.createElement('nav');
+            toc.className = 'floating-toc';
+            toc.innerHTML = '<h4>📑 Contents</h4><ul></ul>';
+            const tocList = toc.querySelector('ul');
+
+            headings.forEach((heading, index) => {
+                const id = heading.id || `section-${index}`;
+                heading.id = id;
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2';
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            document.body.appendChild(toc);
+
+            
+            const tocLinks = toc.querySelectorAll('a');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 150) {
+                        current = heading.id;
+                    }
+                });
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+    }
+
+    
+    if (postContent && isSinglePost && window.innerWidth >= 1200) {
+        const h2s = postContent.querySelectorAll('h2');
+        if (h2s.length >= 2) {
+            const indicator = document.createElement('div');
+            indicator.className = 'section-indicator';
+
+            h2s.forEach((h2, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'section-dot';
+                dot.title = h2.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                dot.addEventListener('click', () => {
+                    h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                indicator.appendChild(dot);
+            });
+
+            document.body.appendChild(indicator);
+
+            
+            window.addEventListener('scroll', () => {
+                const dots = indicator.querySelectorAll('.section-dot');
+                let activeIndex = 0;
+                h2s.forEach((h2, index) => {
+                    if (h2.getBoundingClientRect().top <= 200) {
+                        activeIndex = index;
+                    }
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+    }
+    });
+    </script>
+
+    
+    
+    <script>
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        function loadGA() {
+            if (window.gaLoaded) return;
+            window.gaLoaded = true;
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975';
+            document.head.appendChild(script);
+
+            script.onload = () => {
+                gtag('js', new Date());
+                gtag('config', 'G-B6QCH29975');
+            };
+        }
+
+        
+        ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+            window.addEventListener(event, loadGA, { once: true, passive: true });
+        });
+
+        
+        setTimeout(loadGA, 3000);
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+    
+    <div class="reading-progress" id="reading-progress"></div>
+    <script>
+    window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / docHeight) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+    </script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+            </div>
+        </div><button id="menu-btn" aria-label="Menu" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/categories/trending/" title="Hot IAM topics">
+                    <span>🔥Trending</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+(function() {
+    var btn = document.getElementById('menu-btn');
+    var menu = document.getElementById('menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+        });
+        
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
+</script>
+<main class="main">
+
+
+
+<div class="reading-progress" id="reading-progress"></div>
+<script>
+(function() {
+  const progressBar = document.getElementById('reading-progress');
+  const article = document.querySelector('.post-content');
+
+  if (!progressBar || !article) return;
+
+  function updateProgress() {
+    const articleTop = article.offsetTop;
+    const articleHeight = article.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+
+    
+    const start = articleTop - windowHeight;
+    const end = articleTop + articleHeight;
+    const current = scrollTop - start;
+    const total = end - start;
+
+    const progress = Math.min(Math.max((current / total) * 100, 0), 100);
+    progressBar.style.width = progress + '%';
+  }
+
+  
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  
+  updateProgress();
+})();
+</script>
+
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent" data-pagefind-meta="title">
+      CORS Errors in OAuth Flows: Complete Troubleshooting Guide
+    </h1>
+    <div class="post-meta"><span title='2026-02-21 12:00:00'>Feb 21, 2026</span>&nbsp;·&nbsp;7 min&nbsp;·&nbsp;1417 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+    
+      <div class="post-updated">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Updated: Feb 26, 2026
+      </div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#quick-diagnostic-which-error-are-you-seeing" aria-label="Quick Diagnostic: Which Error Are You Seeing?">Quick Diagnostic: Which Error Are You Seeing?</a></li>
+                <li>
+                    <a href="#which-oauth-endpoints-support-cors" aria-label="Which OAuth Endpoints Support CORS?">Which OAuth Endpoints Support CORS?</a></li>
+                <li>
+                    <a href="#scenario-1-calling-authorize-via-fetch" aria-label="Scenario 1: Calling /authorize via fetch">Scenario 1: Calling /authorize via fetch</a></li>
+                <li>
+                    <a href="#scenario-2-token-endpoint-cors-errors" aria-label="Scenario 2: Token Endpoint CORS Errors">Scenario 2: Token Endpoint CORS Errors</a><ul>
+                        
+                <li>
+                    <a href="#provider-cors-configuration" aria-label="Provider CORS Configuration">Provider CORS Configuration</a></li></ul>
+                </li>
+                <li>
+                    <a href="#scenario-3-azure-ad-spa-registration" aria-label="Scenario 3: Azure AD SPA Registration">Scenario 3: Azure AD SPA Registration</a></li>
+                <li>
+                    <a href="#scenario-4-keycloak-cors-on-error-responses" aria-label="Scenario 4: Keycloak CORS on Error Responses">Scenario 4: Keycloak CORS on Error Responses</a></li>
+                <li>
+                    <a href="#scenario-5-wildcard-origin-with-credentials" aria-label="Scenario 5: Wildcard Origin with Credentials">Scenario 5: Wildcard Origin with Credentials</a></li>
+                <li>
+                    <a href="#scenario-6-preflight-request-failures" aria-label="Scenario 6: Preflight Request Failures">Scenario 6: Preflight Request Failures</a></li>
+                <li>
+                    <a href="#scenario-7-token-revocation-cors" aria-label="Scenario 7: Token Revocation CORS">Scenario 7: Token Revocation CORS</a></li>
+                <li>
+                    <a href="#scenario-8-proxy-or-cdn-stripping-cors-headers" aria-label="Scenario 8: Proxy or CDN Stripping CORS Headers">Scenario 8: Proxy or CDN Stripping CORS Headers</a></li>
+                <li>
+                    <a href="#when-cors-errors-mean-wrong-architecture" aria-label="When CORS Errors Mean Wrong Architecture">When CORS Errors Mean Wrong Architecture</a></li>
+                <li>
+                    <a href="#debugging-with-browser-devtools" aria-label="Debugging with Browser DevTools">Debugging with Browser DevTools</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content" data-pagefind-body><p>CORS errors are the most frustrating errors in OAuth development. The browser blocks your request, the error message is generic, and the actual cause could be any of 8+ different scenarios. This guide covers every CORS error you&rsquo;ll encounter in OAuth 2.0 and OIDC flows, with exact browser error messages and provider-specific fixes.</p>
+<h2 id="quick-diagnostic-which-error-are-you-seeing">Quick Diagnostic: Which Error Are You Seeing?<a hidden class="anchor" aria-hidden="true" href="#quick-diagnostic-which-error-are-you-seeing">#</a></h2>
+<table>
+  <thead>
+      <tr>
+          <th>Browser Console Error</th>
+          <th>Jump To</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>No 'Access-Control-Allow-Origin' header</code> on <code>/authorize</code></td>
+          <td><a href="#scenario-1-calling-authorize-via-fetch">Scenario 1: Calling /authorize via fetch</a></td>
+      </tr>
+      <tr>
+          <td><code>No 'Access-Control-Allow-Origin' header</code> on <code>/token</code></td>
+          <td><a href="#scenario-2-token-endpoint-cors-errors">Scenario 2: Token endpoint CORS</a></td>
+      </tr>
+      <tr>
+          <td><code>AADSTS9002327: Cross-origin token redemption</code></td>
+          <td><a href="#scenario-3-azure-ad-spa-registration">Scenario 3: Azure AD SPA registration</a></td>
+      </tr>
+      <tr>
+          <td>CORS error only after session timeout</td>
+          <td><a href="#scenario-4-keycloak-cors-on-error-responses">Scenario 4: Keycloak error response bug</a></td>
+      </tr>
+      <tr>
+          <td><code>wildcard '*' when credentials mode is 'include'</code></td>
+          <td><a href="#scenario-5-wildcard-origin-with-credentials">Scenario 5: Wildcard with credentials</a></td>
+      </tr>
+      <tr>
+          <td><code>Response to preflight request doesn't pass</code></td>
+          <td><a href="#scenario-6-preflight-request-failures">Scenario 6: Preflight failures</a></td>
+      </tr>
+      <tr>
+          <td>CORS error on <code>/revoke</code> endpoint</td>
+          <td><a href="#scenario-7-token-revocation-cors">Scenario 7: Token revocation</a></td>
+      </tr>
+      <tr>
+          <td>Everything works except in production</td>
+          <td><a href="#scenario-8-proxy-or-cdn-stripping-cors-headers">Scenario 8: Proxy/CDN stripping headers</a></td>
+      </tr>
+  </tbody>
+</table>
+<h2 id="which-oauth-endpoints-support-cors">Which OAuth Endpoints Support CORS?<a hidden class="anchor" aria-hidden="true" href="#which-oauth-endpoints-support-cors">#</a></h2>
+<p>Before debugging, know which endpoints are designed to accept cross-origin requests:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Endpoint</th>
+          <th>CORS Support</th>
+          <th>Access Method</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>/authorize</code></td>
+          <td><strong>No</strong></td>
+          <td>Browser redirect (<code>window.location.href</code>)</td>
+      </tr>
+      <tr>
+          <td><code>/token</code> (Auth Code + PKCE, public client)</td>
+          <td><strong>Yes</strong></td>
+          <td><code>fetch</code> from SPA</td>
+      </tr>
+      <tr>
+          <td><code>/token</code> (client_credentials)</td>
+          <td><strong>No</strong></td>
+          <td>Server-to-server only</td>
+      </tr>
+      <tr>
+          <td><code>/userinfo</code></td>
+          <td><strong>Yes</strong></td>
+          <td><code>fetch</code> with <code>Authorization: Bearer</code></td>
+      </tr>
+      <tr>
+          <td><code>/.well-known/openid-configuration</code></td>
+          <td><strong>Yes</strong></td>
+          <td><code>fetch</code></td>
+      </tr>
+      <tr>
+          <td><code>/jwks</code></td>
+          <td><strong>Yes</strong></td>
+          <td><code>fetch</code> (used by OIDC libraries)</td>
+      </tr>
+      <tr>
+          <td><code>/revoke</code></td>
+          <td><strong>Provider-dependent</strong></td>
+          <td>Prefer server-side</td>
+      </tr>
+      <tr>
+          <td><code>/logout</code></td>
+          <td><strong>No</strong></td>
+          <td>Browser redirect</td>
+      </tr>
+  </tbody>
+</table>
+<h2 id="scenario-1-calling-authorize-via-fetch">Scenario 1: Calling /authorize via fetch<a hidden class="anchor" aria-hidden="true" href="#scenario-1-calling-authorize-via-fetch">#</a></h2>
+<p>This is the #1 most common CORS error in OAuth. The <code>/authorize</code> endpoint is a browser-navigation endpoint — it responds with a 302 redirect to the login UI.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dockerfile" data-lang="dockerfile"><span style="display:flex;"><span>Access to XMLHttpRequest at <span style="color:#e6db74">&#39;https://auth.example.com/oauth2/authorize?client_id=...&#39;</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">from</span> <span style="color:#e6db74">origin</span> <span style="color:#e6db74">&#39;https://myapp.example.com&#39;</span> has been blocked by CORS policy:<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>No <span style="color:#e6db74">&#39;Access-Control-Allow-Origin&#39;</span> header is present on the requested resource.<span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p><strong>Fix:</strong> Never call <code>/authorize</code> via <code>fetch()</code> or <code>XMLHttpRequest</code>. Use a browser redirect:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// WRONG — will always cause a CORS error
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">response</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">fetch</span>(<span style="color:#e6db74">`</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">authServerUrl</span><span style="color:#e6db74">}</span><span style="color:#e6db74">/authorize?...`</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// CORRECT — browser redirect, bypasses CORS entirely
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>window.<span style="color:#a6e22e">location</span>.<span style="color:#a6e22e">href</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">`</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">authServerUrl</span><span style="color:#e6db74">}</span><span style="color:#e6db74">/authorize?`</span> <span style="color:#f92672">+</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">URLSearchParams</span>({
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">response_type</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;code&#39;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">client_id</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">CLIENT_ID</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">redirect_uri</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">REDIRECT_URI</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">scope</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;openid profile&#39;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">code_challenge</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">codeChallenge</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">code_challenge_method</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;S256&#39;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">state</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">state</span>
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><p>This applies to <strong>every OAuth provider</strong> — Keycloak, Auth0, Okta, Azure AD, Google, ForgeRock, Cognito. No provider enables CORS on the authorize endpoint.</p>
+<h2 id="scenario-2-token-endpoint-cors-errors">Scenario 2: Token Endpoint CORS Errors<a hidden class="anchor" aria-hidden="true" href="#scenario-2-token-endpoint-cors-errors">#</a></h2>
+<p>The token endpoint <code>/token</code> supports CORS for public client flows (Authorization Code + PKCE) but NOT for confidential client flows (<code>client_credentials</code>).</p>
+<h3 id="provider-cors-configuration">Provider CORS Configuration<a hidden class="anchor" aria-hidden="true" href="#provider-cors-configuration">#</a></h3>
+<p><strong>Keycloak:</strong> Admin Console → Clients → [Client] → Access Settings → <strong>Web Origins</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>https://myapp.example.com    ← exact origin (no trailing slash, no path)
+</span></span><span style="display:flex;"><span>+                            ← shortcut: allow all valid redirect URIs as origins
+</span></span></code></pre></div><p>Common mistakes:</p>
+<ul>
+<li>Leaving Web Origins <strong>blank</strong> (CORS fails for all requests)</li>
+<li>Adding a trailing slash: <code>https://myapp.example.com/</code> (invalid)</li>
+<li>Adding a path: <code>https://myapp.example.com/*</code> (paths not allowed in origins)</li>
+</ul>
+<p><strong>Okta:</strong> Admin Console → Security → API → <strong>Trusted Origins</strong></p>
+<ol>
+<li>Click &ldquo;Add Origin&rdquo;</li>
+<li>Enter <code>https://myapp.example.com</code></li>
+<li>Check the <strong>CORS</strong> checkbox</li>
+<li>Save</li>
+</ol>
+<p><strong>Auth0:</strong> Dashboard → Applications → [App] → Settings → <strong>Allowed Origins (CORS)</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>https://myapp.example.com
+</span></span></code></pre></div><p>Also set <strong>Allowed Web Origins</strong> if using Auth0&rsquo;s cross-origin authentication.</p>
+<p><strong>ForgeRock AM:</strong> Configure → Global Services → <strong>CORS Service</strong> → Accepted Origins</p>
+<p>Or configure per-client via the OAuth 2.0 client&rsquo;s <strong>JavaScript Origins</strong> field — ForgeRock AM automatically adds these to the CORS allowlist.</p>
+<p><strong>AWS Cognito:</strong> No admin CORS configuration. Cognito&rsquo;s token endpoint accepts cross-origin requests from any origin for public clients.</p>
+<h2 id="scenario-3-azure-ad-spa-registration">Scenario 3: Azure AD SPA Registration<a hidden class="anchor" aria-hidden="true" href="#scenario-3-azure-ad-spa-registration">#</a></h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>AADSTS9002327: Cross-origin token redemption is permitted only
+</span></span><span style="display:flex;"><span>for the &#39;Single-Page Application&#39; client type.
+</span></span></code></pre></div><p>Azure AD / Microsoft Entra ID determines CORS eligibility based on the <strong>redirect URI platform type</strong> in the app registration — not by any CORS configuration setting.</p>
+<p><strong>Fix:</strong> Go to App Registration → Authentication → Add platform → <strong>Single-page application</strong> → add your redirect URI. If it&rsquo;s currently registered under &ldquo;Web&rdquo;, move it to &ldquo;Single-page application&rdquo;.</p>
+<p>Azure AD also blocks <code>client_credentials</code> from browsers entirely. If a browser sends an <code>Origin</code> header with a confidential flow, Entra rejects it to prevent secrets from leaking in client-side code.</p>
+<h2 id="scenario-4-keycloak-cors-on-error-responses">Scenario 4: Keycloak CORS on Error Responses<a hidden class="anchor" aria-hidden="true" href="#scenario-4-keycloak-cors-on-error-responses">#</a></h2>
+<p>This bug (<a href="https://issues.redhat.com/browse/KEYCLOAK-1886">KEYCLOAK-1886</a>) causes CORS errors that appear <strong>only after session expiry</strong> (see <a href="/posts/keycloak-session-expired-errors-troubleshooting-and-timeout-configuration/">Keycloak Session Timeout Configuration</a> for session timeout details):</p>
+<ol>
+<li>User logs in → SPA exchanges code for tokens → works fine (200 with CORS headers)</li>
+<li>Session expires → SPA tries to refresh → Keycloak returns 400 <code>invalid_grant</code> <strong>without CORS headers</strong></li>
+<li>Browser sees 400 + no <code>Access-Control-Allow-Origin</code> → throws CORS error</li>
+<li>The SPA never sees the actual <code>invalid_grant</code> — only a CORS error</li>
+</ol>
+<p><strong>Workaround with nginx:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-nginx" data-lang="nginx"><span style="display:flex;"><span><span style="color:#66d9ef">location</span> <span style="color:#e6db74">/realms/</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">proxy_pass</span> <span style="color:#e6db74">http://keycloak:8080</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># &#39;always&#39; ensures CORS headers on ALL responses including 4xx/5xx
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#f92672">add_header</span> <span style="color:#e6db74">&#39;Access-Control-Allow-Origin&#39;</span> <span style="color:#e6db74">&#39;https://myapp.example.com&#39;</span> <span style="color:#e6db74">always</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">add_header</span> <span style="color:#e6db74">&#39;Access-Control-Allow-Credentials&#39;</span> <span style="color:#e6db74">&#39;true&#39;</span> <span style="color:#e6db74">always</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">add_header</span> <span style="color:#e6db74">&#39;Access-Control-Allow-Methods&#39;</span> <span style="color:#e6db74">&#39;GET,</span> <span style="color:#e6db74">POST,</span> <span style="color:#e6db74">OPTIONS&#39;</span> <span style="color:#e6db74">always</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">add_header</span> <span style="color:#e6db74">&#39;Access-Control-Allow-Headers&#39;</span> <span style="color:#e6db74">&#39;Authorization,</span> <span style="color:#e6db74">Content-Type&#39;</span> <span style="color:#e6db74">always</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">if</span> <span style="color:#e6db74">(</span>$request_method = <span style="color:#e6db74">&#39;OPTIONS&#39;)</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">add_header</span> <span style="color:#e6db74">&#39;Access-Control-Allow-Origin&#39;</span> <span style="color:#e6db74">&#39;https://myapp.example.com&#39;</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">add_header</span> <span style="color:#e6db74">&#39;Access-Control-Allow-Methods&#39;</span> <span style="color:#e6db74">&#39;GET,</span> <span style="color:#e6db74">POST,</span> <span style="color:#e6db74">OPTIONS&#39;</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">add_header</span> <span style="color:#e6db74">&#39;Access-Control-Allow-Headers&#39;</span> <span style="color:#e6db74">&#39;Authorization,</span> <span style="color:#e6db74">Content-Type&#39;</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">add_header</span> <span style="color:#e6db74">&#39;Access-Control-Max-Age&#39;</span> <span style="color:#ae81ff">86400</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">return</span> <span style="color:#ae81ff">204</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The key is the <code>always</code> directive — without it, nginx only adds headers to 2xx responses.</p>
+<h2 id="scenario-5-wildcard-origin-with-credentials">Scenario 5: Wildcard Origin with Credentials<a hidden class="anchor" aria-hidden="true" href="#scenario-5-wildcard-origin-with-credentials">#</a></h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>The value of the &#39;Access-Control-Allow-Origin&#39; header in the response must not be
+</span></span><span style="display:flex;"><span>the wildcard &#39;*&#39; when the request&#39;s credentials mode is &#39;include&#39;.
+</span></span></code></pre></div><p>This happens when:</p>
+<ul>
+<li>The server returns <code>Access-Control-Allow-Origin: *</code></li>
+<li>The client sends <code>credentials: 'include'</code> or <code>withCredentials: true</code></li>
+<li>The CORS spec forbids this combination</li>
+</ul>
+<p><strong>Fix:</strong> Replace <code>*</code> with the exact origin and add the credentials header:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>Access-Control-Allow-Origin: https://myapp.example.com
+</span></span><span style="display:flex;"><span>Access-Control-Allow-Credentials: true
+</span></span></code></pre></div><p>In Keycloak, this means using the exact origin in Web Origins instead of <code>*</code>.</p>
+<h2 id="scenario-6-preflight-request-failures">Scenario 6: Preflight Request Failures<a hidden class="anchor" aria-hidden="true" href="#scenario-6-preflight-request-failures">#</a></h2>
+<p>A preflight <code>OPTIONS</code> request is triggered when your request uses:</p>
+<ul>
+<li><code>Content-Type: application/json</code> (not <code>application/x-www-form-urlencoded</code>)</li>
+<li>Custom headers like <code>Authorization</code> or <code>X-Custom-Header</code></li>
+<li>HTTP methods other than GET, HEAD, or POST</li>
+</ul>
+<p><strong>Key insight:</strong> The token endpoint uses <code>Content-Type: application/x-www-form-urlencoded</code> by default. If you accidentally set <code>Content-Type: application/json</code>, you trigger a preflight that many OAuth servers don&rsquo;t handle:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// WRONG — triggers unnecessary preflight
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">response</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">fetch</span>(<span style="color:#a6e22e">tokenEndpoint</span>, {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">method</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;POST&#39;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">headers</span><span style="color:#f92672">:</span> { <span style="color:#e6db74">&#39;Content-Type&#39;</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;application/json&#39;</span> },
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">body</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">JSON</span>.<span style="color:#a6e22e">stringify</span>({ <span style="color:#a6e22e">grant_type</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;authorization_code&#39;</span>, <span style="color:#a6e22e">code</span>, ... })
+</span></span><span style="display:flex;"><span>});
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// CORRECT — no preflight needed (simple request)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">response</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">fetch</span>(<span style="color:#a6e22e">tokenEndpoint</span>, {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">method</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;POST&#39;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">headers</span><span style="color:#f92672">:</span> { <span style="color:#e6db74">&#39;Content-Type&#39;</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;application/x-www-form-urlencoded&#39;</span> },
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">body</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">URLSearchParams</span>({ <span style="color:#a6e22e">grant_type</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;authorization_code&#39;</span>, <span style="color:#a6e22e">code</span>, ... })
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><p><strong>Spring Security preflight fix:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>http.<span style="color:#a6e22e">cors</span>().<span style="color:#a6e22e">and</span>()
+</span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">csrf</span>().<span style="color:#a6e22e">disable</span>()
+</span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">authorizeRequests</span>()
+</span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">antMatchers</span>(HttpMethod.<span style="color:#a6e22e">OPTIONS</span>, <span style="color:#e6db74">&#34;/**&#34;</span>).<span style="color:#a6e22e">permitAll</span>();
+</span></span></code></pre></div><h2 id="scenario-7-token-revocation-cors">Scenario 7: Token Revocation CORS<a hidden class="anchor" aria-hidden="true" href="#scenario-7-token-revocation-cors">#</a></h2>
+<p>Google&rsquo;s <code>/revoke</code> endpoint does NOT support CORS. Calling it from a SPA via <code>fetch</code> always fails.</p>
+<p><strong>Workaround — form POST (bypasses CORS):</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">form</span> <span style="color:#f92672">=</span> document.<span style="color:#a6e22e">createElement</span>(<span style="color:#e6db74">&#39;form&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">form</span>.<span style="color:#a6e22e">method</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;POST&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">form</span>.<span style="color:#a6e22e">action</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;https://oauth2.googleapis.com/revoke&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">input</span> <span style="color:#f92672">=</span> document.<span style="color:#a6e22e">createElement</span>(<span style="color:#e6db74">&#39;input&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">input</span>.<span style="color:#a6e22e">type</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;hidden&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">input</span>.<span style="color:#a6e22e">name</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;token&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">input</span>.<span style="color:#a6e22e">value</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">accessToken</span>;
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">form</span>.<span style="color:#a6e22e">appendChild</span>(<span style="color:#a6e22e">input</span>);
+</span></span><span style="display:flex;"><span>document.<span style="color:#a6e22e">body</span>.<span style="color:#a6e22e">appendChild</span>(<span style="color:#a6e22e">form</span>);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">form</span>.<span style="color:#a6e22e">submit</span>();
+</span></span></code></pre></div><p>Auth0&rsquo;s <code>/oauth/revoke</code> requires the app domain in <strong>Allowed Origins (CORS)</strong> in the dashboard.</p>
+<h2 id="scenario-8-proxy-or-cdn-stripping-cors-headers">Scenario 8: Proxy or CDN Stripping CORS Headers<a hidden class="anchor" aria-hidden="true" href="#scenario-8-proxy-or-cdn-stripping-cors-headers">#</a></h2>
+<p>Everything works locally but fails in production. Common causes:</p>
+<ul>
+<li><strong>CloudFlare / CDN</strong> caching a response without CORS headers, then serving it to cross-origin requests</li>
+<li><strong>nginx/Apache</strong> reverse proxy not forwarding the <code>Origin</code> header to the backend</li>
+<li><strong>Load balancer</strong> stripping <code>Access-Control-*</code> headers</li>
+</ul>
+<p><strong>Debug checklist:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Test directly against the OAuth server (bypass proxy)</span>
+</span></span><span style="display:flex;"><span>curl -v -H <span style="color:#e6db74">&#34;Origin: https://myapp.example.com&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  https://auth.example.com/realms/myrealm/protocol/openid-connect/token
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Check if CORS headers are in the response</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Look for: Access-Control-Allow-Origin: https://myapp.example.com</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Test through your proxy</span>
+</span></span><span style="display:flex;"><span>curl -v -H <span style="color:#e6db74">&#34;Origin: https://myapp.example.com&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  https://your-proxy.example.com/auth/token
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Compare the headers — if the proxy response is missing CORS headers,</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># the proxy is stripping them</span>
+</span></span></code></pre></div><h2 id="when-cors-errors-mean-wrong-architecture">When CORS Errors Mean Wrong Architecture<a hidden class="anchor" aria-hidden="true" href="#when-cors-errors-mean-wrong-architecture">#</a></h2>
+<p>If you&rsquo;re hitting CORS errors with <code>client_credentials</code>, <code>on_behalf_of</code>, or any confidential client flow from a SPA — the problem isn&rsquo;t CORS configuration, it&rsquo;s your architecture.</p>
+<p>SPAs should NOT:</p>
+<ul>
+<li>Hold <code>client_secret</code> in JavaScript</li>
+<li>Call <code>/token</code> with <code>client_credentials</code> grant</li>
+<li>Store refresh tokens in <code>localStorage</code></li>
+</ul>
+<p>Use the <strong>Backend for Frontend (BFF) pattern</strong> instead:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>SPA ──(same-origin cookie)──→ BFF ──(server-to-server)──→ OAuth Provider
+</span></span><span style="display:flex;"><span>                                                              ↓
+</span></span><span style="display:flex;"><span>SPA ←──(same-origin cookie)──── BFF ←──(tokens stored server-side)
+</span></span></code></pre></div><p>The BFF handles all OAuth token operations server-side. The SPA only communicates with the BFF using HttpOnly, SameSite cookies. No CORS issues because the SPA and BFF share the same origin.</p>
+<p>For implementation details, see <a href="/posts/integrating-oauth-20-with-react-spa-using-backend-for-frontend-bff/">Integrating OAuth 2.0 with React SPA Using BFF</a>.</p>
+<h2 id="debugging-with-browser-devtools">Debugging with Browser DevTools<a hidden class="anchor" aria-hidden="true" href="#debugging-with-browser-devtools">#</a></h2>
+<ol>
+<li>Open DevTools → <strong>Network</strong> tab</li>
+<li>Filter by the failing request URL</li>
+<li>Check the <strong>Headers</strong> tab:
+<ul>
+<li><strong>Request Headers</strong>: Look for <code>Origin: https://myapp.example.com</code></li>
+<li><strong>Response Headers</strong>: Look for <code>Access-Control-Allow-Origin</code></li>
+</ul>
+</li>
+<li>If the response has no <code>Access-Control-Allow-Origin</code>, the server isn&rsquo;t configured for your origin</li>
+<li>Check the <strong>Console</strong> tab for the exact CORS error message</li>
+<li>Look for a preceding <code>OPTIONS</code> request — if it failed or returned non-2xx, the preflight is the problem</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Replicate the request with curl to confirm it&#39;s a CORS issue (not a server error)</span>
+</span></span><span style="display:flex;"><span>curl -v -X POST https://auth.example.com/token <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Origin: https://myapp.example.com&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Content-Type: application/x-www-form-urlencoded&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -d <span style="color:#e6db74">&#34;grant_type=authorization_code&amp;code=CODE&amp;redirect_uri=URI&amp;client_id=ID&amp;code_verifier=VERIFIER&#34;</span>
+</span></span></code></pre></div><p>If curl succeeds (returns tokens), the server works but is missing CORS headers for your origin. Configure the provider as described above.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/oauth-2.0/">OAuth 2.0</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/cors/">CORS</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/troubleshooting/">Troubleshooting</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/keycloak/">Keycloak</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/identity-management/">Identity Management</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/the-silent-credential-heist-halcyon/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>The Silent Credential Heist - Halcyon</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/oauth-invalid-grant-error-complete-troubleshooting-guide/">
+    <span class="title">Next »</span>
+    <br>
+    <span>OAuth invalid_grant Error: Complete Troubleshooting Guide</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+
+<section class="post-feedback">
+  <p class="feedback-question">Was this article helpful?</p>
+  <div class="feedback-buttons">
+    <button class="feedback-btn feedback-yes" onclick="trackFeedback('yes', '\/posts\/cors-errors-in-oauth-flows-complete-troubleshooting-guide\/')" aria-label="Yes, helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      Yes
+    </button>
+    <button class="feedback-btn feedback-no" onclick="trackFeedback('no', '\/posts\/cors-errors-in-oauth-flows-complete-troubleshooting-guide\/')" aria-label="No, not helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>
+      No
+    </button>
+  </div>
+  <p class="feedback-thanks" style="display: none;">Thanks for your feedback!</p>
+</section>
+
+
+<section class="author-bio">
+  <div class="author-avatar">
+    <img src="/IAMDevBox.com.jpg" alt="IAMDevBox Author" width="64" height="64" loading="lazy">
+  </div>
+  <div class="author-info">
+    <h4>Written by IAMDevBox</h4>
+    <p>Enterprise IAM architect with 15+ years in identity modernization. Certified across ForgeRock, Ping Identity, SailPoint, AWS, and Azure.</p>
+    <div class="author-links">
+      <a href="https://twitter.com/iamdevbox" target="_blank" rel="noopener" title="Follow on X/Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/iamdevbox" target="_blank" rel="noopener" title="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="/contact/" title="Contact">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function trackFeedback(value, page) {
+  
+  document.querySelector('.feedback-buttons').style.display = 'none';
+  document.querySelector('.feedback-question').style.display = 'none';
+  document.querySelector('.feedback-thanks').style.display = 'block';
+
+  
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'post_feedback', {
+      'feedback_value': value,
+      'page_path': page
+    });
+  }
+
+  
+  localStorage.setItem('feedback_' + page, value);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const page = '\/posts\/cors-errors-in-oauth-flows-complete-troubleshooting-guide\/';
+  if (localStorage.getItem('feedback_' + page)) {
+    document.querySelector('.feedback-buttons').style.display = 'none';
+    document.querySelector('.feedback-question').textContent = 'Thanks for your feedback!';
+  }
+});
+</script>
+
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+              Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+            </a>
+            <small class="custom-date">2026-02-28</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/pingone-mfa-configuration-push-notifications-totp-and-fido2-setup/" class="custom-link">
+              PingOne MFA Configuration: Push Notifications, TOTP, and FIDO2 Setup
+            </a>
+            <small class="custom-date">2026-02-27</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/perc-announces-single-sign-on-access-to-nfpa-link-for-propane-professionals-phcppros/" class="custom-link">
+              PERC Announces Single Sign-On Access to NFPA LiNK for Propane Professionals - PHCPPros
+            </a>
+            <small class="custom-date">2026-02-27</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/forgerock-ds-pkix-path-building-failed-certificate-troubleshooting/" class="custom-link">
+              ForgeRock DS PKIX Path Building Failed: Complete Certificate Troubleshooting Guide
+            </a>
+            <small class="custom-date">2026-02-21</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-vs-ory-open-source-iam-comparison-2026/" class="custom-link">
+              Ory vs Keycloak: Open Source IAM Comparison 2026
+            </a>
+            <small class="custom-date">2026-02-21</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+                Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+                Go Secretless with Snowflake Workload Identity Federation - Snowflake
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+                JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+                OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+                Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

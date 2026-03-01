@@ -1,0 +1,2980 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>ForgeRock Config Promotion: Moving AM IDM Configurations from Dev to Production | IAMDevBox</title>
+<meta name="keywords" content="forgerock config promotion, forgerock, role-based access control, rbac, configuration management, devops, security">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/forgerock-config-promotion-moving-am-idm-configurations-from-dev-to-production/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.e24ea479df3e367781fafa20cedde21c7e043c10bed4c8c913ef9261a049a1e2.css" integrity="sha256-4k6ked8&#43;NneB&#43;vogzt3iHH4EPBC&#43;1MjJE&#43;&#43;SYaBJoeI=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/forgerock-config-promotion-moving-am-idm-configurations-from-dev-to-production/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/forgerock-config-promotion-moving-am-idm-configurations-from-dev-to-production/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="ForgeRock Config Promotion: Moving AM IDM Configurations from Dev to Production">
+  <meta property="og:description" content="Learn how to implement ForgeRock Config Promotion for moving AM IDM configurations from Dev to Production. Get step-by-step guidance with code examples and security best practices.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-01-02T14:26:07+00:00">
+    <meta property="article:modified_time" content="2026-02-21T21:09:17-05:00">
+    <meta property="article:tag" content="ForgeRock">
+    <meta property="article:tag" content="Iam">
+    <meta property="article:tag" content="Configuration Management">
+    <meta property="article:tag" content="DevOps">
+    <meta property="article:tag" content="Security">
+    <meta property="og:image" content="https://www.iamdevbox.com/images/posts/forgerock-config-promotion--moving-am-idm-configur-bbd2b2e9.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/images/posts/forgerock-config-promotion--moving-am-idm-configur-bbd2b2e9.webp">
+<meta name="twitter:title" content="ForgeRock Config Promotion: Moving AM IDM Configurations from Dev to Production">
+<meta name="twitter:description" content="Learn how to implement ForgeRock Config Promotion for moving AM IDM configurations from Dev to Production. Get step-by-step guidance with code examples and security best practices.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "ForgeRock Config Promotion: Moving AM IDM Configurations from Dev to Production",
+      "item": "https://www.iamdevbox.com/posts/forgerock-config-promotion-moving-am-idm-configurations-from-dev-to-production/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "ForgeRock Config Promotion: Moving AM IDM Configurations from Dev to Production",
+  "name": "ForgeRock Config Promotion: Moving AM IDM Configurations from Dev to Production",
+  "description": "Learn how to implement ForgeRock Config Promotion for moving AM IDM configurations from Dev to Production. Get step-by-step guidance with code examples and security best practices.",
+  "keywords": [
+    "forgerock config promotion", "forgerock", "role-based access control", "rbac", "configuration management", "devops", "security"
+  ],
+  "articleBody": "ForgeRock Config Promotion is the process of moving Identity Management (AM and IDM) configurations from a development environment to a production environment using ForgeRock tools. This ensures that your configurations are consistent and reliable across different stages of deployment, reducing the risk of errors and downtime.\nClone the companion repo: All scripts from this guide are available as production-ready versions with validation, dry-run mode, and GitHub Actions CI/CD at IAMDevBox/forgerock-config-promotion. Clone it, configure promotion.env, and run ./scripts/promote_config.sh --source dev --target staging --dry-run.\nWhat is ForgeRock Config Promotion? ForgeRock Config Promotion involves exporting configurations from a development environment, validating them, and then importing them into a production environment. This process is crucial for maintaining consistency and reliability in your IAM setup across different environments.\nWhy is Config Promotion important? Config Promotion is essential for several reasons:\nConsistency: Ensures that configurations in production match those tested in development. Efficiency: Automates the deployment process, saving time and reducing manual errors. Security: Controls the change management process, ensuring that only authorized configurations are promoted. How do you implement ForgeRock Config Promotion? Implementing ForgeRock Config Promotion involves several key steps. Below, I’ll walk you through the process with practical examples and best practices.\nStep 1: Prepare Your Environment Before you start promoting configurations, ensure that your development and production environments are set up correctly.\nChecklist ForgeRock AM and IDM are installed and running in both dev and production environments. You have administrative access to both environments. Backup current configurations in both environments. Step 2: Export Configurations from Development Export the necessary configurations from your development environment. You can use the ForgeRock admin UI or REST APIs for this task.\nUsing the Admin UI Log in to the ForgeRock admin UI. Navigate to the configuration section you want to export. Click on “Export” and save the configuration file. Using REST APIs You can also use REST APIs to export configurations programmatically. Here’s an example using curl:\ncurl -u admin:password -X GET \\ \"https://dev.forgerock.com/openam/json/realms/root/realm-config/services/AuthenticationService?_action=export\" \\ -H \"Accept: application/json\" \\ -o AuthenticationService.json Step 3: Validate Configurations Before promoting configurations to production, validate them to ensure they meet your requirements and do not contain any errors.\nUsing JSON Schema Validation ForgeRock provides JSON schemas for its configurations. You can use these schemas to validate your exported configurations.\njsonschema -i AuthenticationService.json /path/to/AuthenticationService-schema.json Step 4: Import Configurations into Production Once validated, import the configurations into your production environment.\nUsing the Admin UI Log in to the ForgeRock admin UI in the production environment. Navigate to the configuration section where you want to import. Click on “Import” and select the configuration file. Using REST APIs You can also use REST APIs to import configurations programmatically. Here’s an example using curl:\ncurl -u admin:password -X POST \\ \"https://prod.forgerock.com/openam/json/realms/root/realm-config/services/AuthenticationService?_action=import\" \\ -H \"Content-Type: application/json\" \\ -d @AuthenticationService.json Step 5: Verify Configurations in Production After importing, verify that the configurations are applied correctly in the production environment.\nUsing the Admin UI Log in to the ForgeRock admin UI in the production environment. Navigate to the configuration section you imported. Check the settings to ensure they match the expected values. Using REST APIs You can also use REST APIs to verify configurations programmatically. Here’s an example using curl:\ncurl -u admin:password -X GET \\ \"https://prod.forgerock.com/openam/json/realms/root/realm-config/services/AuthenticationService\" \\ -H \"Accept: application/json\" Common Pitfalls and Solutions Here are some common issues you might encounter during Config Promotion and their solutions.\nIssue: Configuration Conflicts Problem: Existing configurations in production may conflict with the ones you’re importing.\nSolution: Review and resolve conflicts manually before importing. Use the admin UI or REST APIs to compare configurations.\nIssue: Incorrect Permissions Problem: Insufficient permissions to export or import configurations.\nSolution: Ensure you have the necessary administrative privileges. Consult your ForgeRock documentation for required roles and permissions.\nIssue: Validation Errors Problem: Configuration validation fails due to schema mismatches or data errors.\nSolution: Correct the errors in the configuration file and revalidate. Refer to the JSON schema documentation for valid formats and values.\nSecurity Considerations Security is paramount when promoting configurations. Follow these best practices to protect your IAM setup.\nEncrypt Configuration Files Ensure that configuration files are encrypted during transit and at rest. Use HTTPS for API calls and encrypt files using tools like GPG.\nRestrict Access Limit access to configuration files and the ForgeRock admin UI to authorized personnel only. Use role-based access control (RBAC) to enforce permissions.\nReview Changes Implement a change management process to review and approve configuration changes before promotion. This helps catch potential issues early.\nBest Practices Adopt these best practices to streamline your Config Promotion process and improve reliability.\nAutomate with Scripts Automate the export, validation, and import processes using scripts. This reduces manual intervention and minimizes errors.\nUse Version Control Store configuration files in a version control system like Git. This allows you to track changes, revert to previous versions if needed, and collaborate with team members.\nDocument Processes Maintain comprehensive documentation for your Config Promotion processes. This includes step-by-step guides, scripts, and any customizations made to configurations.\nComparison of Different Approaches ApproachProsConsUse When Admin UIEasy to useManual processSmall-scale deployments REST APIsAutomatable, scalableRequires scriptingLarger deployments Quick Reference 📋 Quick Reference curl -u admin:password -X GET \"https://dev.forgerock.com/openam/json/realms/root/realm-config/services/AuthenticationService?_action=export\" - Export configuration jsonschema -i AuthenticationService.json /path/to/AuthenticationService-schema.json - Validate configuration curl -u admin:password -X POST \"https://prod.forgerock.com/openam/json/realms/root/realm-config/services/AuthenticationService?_action=import\" -H \"Content-Type: application/json\" -d @AuthenticationService.json - Import configuration Troubleshooting Common Issues Here are some common issues and their troubleshooting steps.\nError: Unauthorized Access Symptom: API calls return a 401 Unauthorized error.\nSolution: Verify your credentials and ensure you have the necessary permissions. Check the ForgeRock documentation for required roles.\nError: Validation Failed Symptom: Configuration validation fails with schema errors.\nSolution: Review the error messages and correct the configuration file. Refer to the JSON schema documentation for valid formats and values.\nError: Import Failed Symptom: API calls return a 500 Internal Server Error during import.\nSolution: Check the server logs for detailed error messages. Ensure that the configuration file is correctly formatted and does not contain any invalid data.\nConclusion ForgeRock Config Promotion is a critical process for maintaining consistency and reliability in your IAM setup across different environments. By following the steps outlined in this guide, you can automate and secure your configuration management workflow. Remember to validate configurations thoroughly and implement robust security measures to protect your IAM setup.\n✅ Best Practice: Regularly update your configuration management processes to incorporate new features and security improvements.",
+  "wordCount" : "1059",
+  "inLanguage": "en",
+  "image":"https://www.iamdevbox.com/images/posts/forgerock-config-promotion--moving-am-idm-configur-bbd2b2e9.webp","datePublished": "2026-01-02T14:26:07Z",
+  "dateModified": "2026-02-21T21:09:17-05:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/forgerock-config-promotion-moving-am-idm-configurations-from-dev-to-production/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is ForgeRock Config Promotion?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "ForgeRock Config Promotion is the process of moving Identity Management (AM and IDM) configurations from a development environment to a production environment using ForgeRock tools."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do you implement ForgeRock Config Promotion?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Implement ForgeRock Config Promotion by exporting configurations from dev, validating them, and then importing them into production using scripts or the ForgeRock admin UI."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the security considerations for ForgeRock Config Promotion?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Ensure that configuration files are encrypted, access is restricted, and changes are reviewed before promotion to prevent unauthorized modifications."
+      }
+    }
+  ]
+}
+</script>
+    <meta name="description" content="Learn how to implement ForgeRock Config Promotion for moving AM IDM configurations from Dev to Production. Get step-by-step guidance with code examples and security best practices."><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/forgerock-config-promotion-moving-am-idm-configurations-from-dev-to-production\/"
+  },
+  "headline": "ForgeRock Config Promotion: Moving AM IDM Configurations from Dev to Production",
+  "description": "Learn how to implement ForgeRock Config Promotion for moving AM IDM configurations from Dev to Production. Get step-by-step guidance with code examples and security best practices.",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon-96x96.png",
+      "width": 96,
+      "height": 96
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://www.iamdevbox.com/IAMDevBox.com.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "datePublished": "2026-01-02T14:26:07Z",
+  "dateModified": "2026-02-21T21:09:17-05:00",
+  "wordCount":  1059 ,
+  "articleSection": "posts",
+  "keywords": ["forgerock config promotion","forgerock","role-based access control","rbac","configuration management","devops","security"]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "ForgeRock Config Promotion: Moving AM IDM Configurations from Dev to Production",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/forgerock-config-promotion-moving-am-idm-configurations-from-dev-to-production\/"
+    }
+  ]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-token-exchange-implementing-oauth-20-token-exchange\/"
+            },
+            "headline": "Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:29:55Z",
+            "dateModified": "2026-03-01T14:30:15Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/go-secretless-with-snowflake-workload-identity-federation-snowflake\/"
+            },
+            "headline": "Go Secretless with Snowflake Workload Identity Federation - Snowflake",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:24:03Z",
+            "dateModified": "2026-03-01T14:24:20Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-algorithm-confusion-attack-cve-2026-developer-guide\/"
+            },
+            "headline": "JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-02-28T18:00:00Z",
+            "dateModified": "2026-03-01T11:21:01-05:00"
+          }
+  ]
+}
+</script>
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    const mermaidBlocks = document.querySelectorAll('.mermaid, pre code.language-mermaid, code.language-mermaid');
+    if (mermaidBlocks.length > 0) {
+        
+        mermaidBlocks.forEach(block => {
+            if (block.tagName === 'CODE') {
+                const pre = block.parentElement;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = block.textContent;
+                if (pre && pre.tagName === 'PRE') {
+                    pre.parentNode.replaceChild(div, pre);
+                } else {
+                    block.parentNode.replaceChild(div, block);
+                }
+            }
+        });
+
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+            const isDark = document.body.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#5a67d8',
+                    
+                    secondaryColor: '#48bb78',
+                    secondaryTextColor: '#ffffff',
+                    secondaryBorderColor: '#38a169',
+                    
+                    tertiaryColor: '#ed8936',
+                    tertiaryTextColor: '#ffffff',
+                    tertiaryBorderColor: '#dd6b20',
+                    
+                    lineColor: '#718096',
+                    
+                    background: isDark ? '#1a202c' : '#ffffff',
+                    mainBkg: isDark ? '#2d3748' : '#f7fafc',
+                    
+                    actorBkg: '#667eea',
+                    actorBorder: '#5a67d8',
+                    actorTextColor: '#ffffff',
+                    actorLineColor: '#718096',
+                    signalColor: '#4a5568',
+                    signalTextColor: '#2d3748',
+                    labelBoxBkgColor: '#edf2f7',
+                    labelBoxBorderColor: '#cbd5e0',
+                    labelTextColor: '#2d3748',
+                    loopTextColor: '#553c9a',
+                    noteBkgColor: '#faf089',
+                    noteTextColor: '#744210',
+                    noteBorderColor: '#d69e2e',
+                    
+                    nodeBkg: '#667eea',
+                    nodeBorder: '#5a67d8',
+                    clusterBkg: '#e2e8f0',
+                    clusterBorder: '#a0aec0',
+                    defaultLinkColor: '#718096',
+                    titleColor: '#2d3748',
+                    edgeLabelBackground: 'transparent',
+                    
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                sequence: {
+                    useMaxWidth: true,
+                    boxMargin: 10,
+                    boxTextMargin: 5,
+                    noteMargin: 10,
+                    messageMargin: 35,
+                    mirrorActors: false
+                }
+            });
+            mermaid.run().then(() => {
+                
+                document.querySelectorAll('.mermaid .node').forEach(node => {
+                    const rect = node.querySelector('rect, circle, ellipse, polygon');
+                    if (rect) {
+                        const fill = rect.getAttribute('fill') || window.getComputedStyle(rect).fill;
+                        
+                        const isDarkBg = fill && (
+                            fill.includes('667eea') || fill.includes('102, 126, 234') ||
+                            fill.includes('48bb78') || fill.includes('72, 187, 120') ||
+                            fill.includes('ed8936') || fill.includes('237, 137, 54') ||
+                            fill.includes('553c9a') || fill.includes('9f7aea') ||
+                            fill.includes('e53e3e') || fill.includes('dd6b20')
+                        );
+                        const textColor = isDarkBg ? '#ffffff' : '#1a202c';
+                        node.querySelectorAll('span, .nodeLabel, text, foreignObject div').forEach(text => {
+                            text.style.color = textColor;
+                            text.style.fill = textColor;
+                        });
+                    }
+                });
+            });
+        };
+        document.head.appendChild(script);
+    }
+
+    
+    const postContent = document.querySelector('.post-content');
+    const isSinglePost = document.querySelector('.post-single');
+    const isToolsPage = window.location.pathname.startsWith('/tools/');
+    if (postContent && isSinglePost && window.innerWidth >= 1400 && !isToolsPage) {
+        const headings = postContent.querySelectorAll('h2, h3');
+        if (headings.length >= 3) {
+            const toc = document.createElement('nav');
+            toc.className = 'floating-toc';
+            toc.innerHTML = '<h4>📑 Contents</h4><ul></ul>';
+            const tocList = toc.querySelector('ul');
+
+            headings.forEach((heading, index) => {
+                const id = heading.id || `section-${index}`;
+                heading.id = id;
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2';
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            document.body.appendChild(toc);
+
+            
+            const tocLinks = toc.querySelectorAll('a');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 150) {
+                        current = heading.id;
+                    }
+                });
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+    }
+
+    
+    if (postContent && isSinglePost && window.innerWidth >= 1200) {
+        const h2s = postContent.querySelectorAll('h2');
+        if (h2s.length >= 2) {
+            const indicator = document.createElement('div');
+            indicator.className = 'section-indicator';
+
+            h2s.forEach((h2, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'section-dot';
+                dot.title = h2.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                dot.addEventListener('click', () => {
+                    h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                indicator.appendChild(dot);
+            });
+
+            document.body.appendChild(indicator);
+
+            
+            window.addEventListener('scroll', () => {
+                const dots = indicator.querySelectorAll('.section-dot');
+                let activeIndex = 0;
+                h2s.forEach((h2, index) => {
+                    if (h2.getBoundingClientRect().top <= 200) {
+                        activeIndex = index;
+                    }
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+    }
+    });
+    </script>
+
+    
+    
+    <script>
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        function loadGA() {
+            if (window.gaLoaded) return;
+            window.gaLoaded = true;
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975';
+            document.head.appendChild(script);
+
+            script.onload = () => {
+                gtag('js', new Date());
+                gtag('config', 'G-B6QCH29975');
+            };
+        }
+
+        
+        ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+            window.addEventListener(event, loadGA, { once: true, passive: true });
+        });
+
+        
+        setTimeout(loadGA, 3000);
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+    
+    <div class="reading-progress" id="reading-progress"></div>
+    <script>
+    window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / docHeight) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+    </script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+            </div>
+        </div><button id="menu-btn" aria-label="Menu" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/categories/trending/" title="Hot IAM topics">
+                    <span>🔥Trending</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+(function() {
+    var btn = document.getElementById('menu-btn');
+    var menu = document.getElementById('menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+        });
+        
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
+</script>
+<main class="main">
+
+
+
+<div class="reading-progress" id="reading-progress"></div>
+<script>
+(function() {
+  const progressBar = document.getElementById('reading-progress');
+  const article = document.querySelector('.post-content');
+
+  if (!progressBar || !article) return;
+
+  function updateProgress() {
+    const articleTop = article.offsetTop;
+    const articleHeight = article.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+
+    
+    const start = articleTop - windowHeight;
+    const end = articleTop + articleHeight;
+    const current = scrollTop - start;
+    const total = end - start;
+
+    const progress = Math.min(Math.max((current / total) * 100, 0), 100);
+    progressBar.style.width = progress + '%';
+  }
+
+  
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  
+  updateProgress();
+})();
+</script>
+
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent" data-pagefind-meta="title">
+      ForgeRock Config Promotion: Moving AM IDM Configurations from Dev to Production
+    </h1>
+    <div class="post-meta"><span title='2026-01-02 14:26:07'>Jan 02, 2026</span>&nbsp;·&nbsp;5 min&nbsp;·&nbsp;1059 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+    
+      <div class="post-updated">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Updated: Feb 21, 2026
+      </div>
+  </header> 
+<figure class="entry-cover">
+        <img loading="eager" src="https://www.iamdevbox.com/images/posts/forgerock-config-promotion--moving-am-idm-configur-bbd2b2e9.webp" alt="ForgeRock Config Promotion: Moving AM IDM Configurations from Dev to Production">
+        
+</figure><div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#what-is-forgerock-config-promotion" aria-label="What is ForgeRock Config Promotion?">What is ForgeRock Config Promotion?</a></li>
+                <li>
+                    <a href="#why-is-config-promotion-important" aria-label="Why is Config Promotion important?">Why is Config Promotion important?</a></li>
+                <li>
+                    <a href="#how-do-you-implement-forgerock-config-promotion" aria-label="How do you implement ForgeRock Config Promotion?">How do you implement ForgeRock Config Promotion?</a><ul>
+                        
+                <li>
+                    <a href="#step-1-prepare-your-environment" aria-label="Step 1: Prepare Your Environment">Step 1: Prepare Your Environment</a><ul>
+                        
+                <li>
+                    <a href="#checklist" aria-label="Checklist">Checklist</a></li></ul>
+                </li>
+                <li>
+                    <a href="#step-2-export-configurations-from-development" aria-label="Step 2: Export Configurations from Development">Step 2: Export Configurations from Development</a><ul>
+                        
+                <li>
+                    <a href="#using-the-admin-ui" aria-label="Using the Admin UI">Using the Admin UI</a></li>
+                <li>
+                    <a href="#using-rest-apis" aria-label="Using REST APIs">Using REST APIs</a></li></ul>
+                </li>
+                <li>
+                    <a href="#step-3-validate-configurations" aria-label="Step 3: Validate Configurations">Step 3: Validate Configurations</a><ul>
+                        
+                <li>
+                    <a href="#using-json-schema-validation" aria-label="Using JSON Schema Validation">Using JSON Schema Validation</a></li></ul>
+                </li>
+                <li>
+                    <a href="#step-4-import-configurations-into-production" aria-label="Step 4: Import Configurations into Production">Step 4: Import Configurations into Production</a><ul>
+                        
+                <li>
+                    <a href="#using-the-admin-ui-1" aria-label="Using the Admin UI">Using the Admin UI</a></li>
+                <li>
+                    <a href="#using-rest-apis-1" aria-label="Using REST APIs">Using REST APIs</a></li></ul>
+                </li>
+                <li>
+                    <a href="#step-5-verify-configurations-in-production" aria-label="Step 5: Verify Configurations in Production">Step 5: Verify Configurations in Production</a><ul>
+                        
+                <li>
+                    <a href="#using-the-admin-ui-2" aria-label="Using the Admin UI">Using the Admin UI</a></li>
+                <li>
+                    <a href="#using-rest-apis-2" aria-label="Using REST APIs">Using REST APIs</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#common-pitfalls-and-solutions" aria-label="Common Pitfalls and Solutions">Common Pitfalls and Solutions</a><ul>
+                        
+                <li>
+                    <a href="#issue-configuration-conflicts" aria-label="Issue: Configuration Conflicts">Issue: Configuration Conflicts</a></li>
+                <li>
+                    <a href="#issue-incorrect-permissions" aria-label="Issue: Incorrect Permissions">Issue: Incorrect Permissions</a></li>
+                <li>
+                    <a href="#issue-validation-errors" aria-label="Issue: Validation Errors">Issue: Validation Errors</a></li></ul>
+                </li>
+                <li>
+                    <a href="#security-considerations" aria-label="Security Considerations">Security Considerations</a><ul>
+                        
+                <li>
+                    <a href="#encrypt-configuration-files" aria-label="Encrypt Configuration Files">Encrypt Configuration Files</a></li>
+                <li>
+                    <a href="#restrict-access" aria-label="Restrict Access">Restrict Access</a></li>
+                <li>
+                    <a href="#review-changes" aria-label="Review Changes">Review Changes</a></li></ul>
+                </li>
+                <li>
+                    <a href="#best-practices" aria-label="Best Practices">Best Practices</a><ul>
+                        
+                <li>
+                    <a href="#automate-with-scripts" aria-label="Automate with Scripts">Automate with Scripts</a></li>
+                <li>
+                    <a href="#use-version-control" aria-label="Use Version Control">Use Version Control</a></li>
+                <li>
+                    <a href="#document-processes" aria-label="Document Processes">Document Processes</a></li></ul>
+                </li>
+                <li>
+                    <a href="#comparison-of-different-approaches" aria-label="Comparison of Different Approaches">Comparison of Different Approaches</a></li>
+                <li>
+                    <a href="#quick-reference" aria-label="Quick Reference">Quick Reference</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#" aria-label="📋 Quick Reference">📋 Quick Reference</a></li></ul>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#troubleshooting-common-issues" aria-label="Troubleshooting Common Issues">Troubleshooting Common Issues</a><ul>
+                        
+                <li>
+                    <a href="#error-unauthorized-access" aria-label="Error: Unauthorized Access">Error: Unauthorized Access</a></li>
+                <li>
+                    <a href="#error-validation-failed" aria-label="Error: Validation Failed">Error: Validation Failed</a></li>
+                <li>
+                    <a href="#error-import-failed" aria-label="Error: Import Failed">Error: Import Failed</a></li></ul>
+                </li>
+                <li>
+                    <a href="#conclusion" aria-label="Conclusion">Conclusion</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content" data-pagefind-body><p>ForgeRock Config Promotion is the process of moving Identity Management (AM and IDM) configurations from a development environment to a production environment using ForgeRock tools. This ensures that your configurations are consistent and reliable across different stages of deployment, reducing the risk of errors and downtime.</p>
+<blockquote>
+<p><strong>Clone the companion repo</strong>: All scripts from this guide are available as production-ready versions with validation, dry-run mode, and GitHub Actions CI/CD at <a href="https://github.com/IAMDevBox/forgerock-config-promotion">IAMDevBox/forgerock-config-promotion</a>. Clone it, configure <code>promotion.env</code>, and run <code>./scripts/promote_config.sh --source dev --target staging --dry-run</code>.</p>
+</blockquote>
+<h2 id="what-is-forgerock-config-promotion">What is ForgeRock Config Promotion?<a hidden class="anchor" aria-hidden="true" href="#what-is-forgerock-config-promotion">#</a></h2>
+<p>ForgeRock Config Promotion involves exporting configurations from a development environment, validating them, and then importing them into a production environment. This process is crucial for maintaining consistency and reliability in your IAM setup across different environments.</p>
+<h2 id="why-is-config-promotion-important">Why is Config Promotion important?<a hidden class="anchor" aria-hidden="true" href="#why-is-config-promotion-important">#</a></h2>
+<p>Config Promotion is essential for several reasons:</p>
+<ul>
+<li><strong>Consistency</strong>: Ensures that configurations in production match those tested in development.</li>
+<li><strong>Efficiency</strong>: Automates the deployment process, saving time and reducing manual errors.</li>
+<li><strong>Security</strong>: Controls the change management process, ensuring that only authorized configurations are promoted.</li>
+</ul>
+<h2 id="how-do-you-implement-forgerock-config-promotion">How do you implement ForgeRock Config Promotion?<a hidden class="anchor" aria-hidden="true" href="#how-do-you-implement-forgerock-config-promotion">#</a></h2>
+<p>Implementing ForgeRock Config Promotion involves several key steps. Below, I&rsquo;ll walk you through the process with practical examples and best practices.</p>
+<h3 id="step-1-prepare-your-environment">Step 1: Prepare Your Environment<a hidden class="anchor" aria-hidden="true" href="#step-1-prepare-your-environment">#</a></h3>
+<p>Before you start promoting configurations, ensure that your development and production environments are set up correctly.</p>
+<h4 id="checklist">Checklist<a hidden class="anchor" aria-hidden="true" href="#checklist">#</a></h4>
+<ul class="checklist">
+<li class="checked">ForgeRock AM and IDM are installed and running in both dev and production environments.</li>
+<li class="checked">You have administrative access to both environments.</li>
+<li class="checked">Backup current configurations in both environments.</li>
+</ul>
+<h3 id="step-2-export-configurations-from-development">Step 2: Export Configurations from Development<a hidden class="anchor" aria-hidden="true" href="#step-2-export-configurations-from-development">#</a></h3>
+<p>Export the necessary configurations from your development environment. You can use the ForgeRock admin UI or REST APIs for this task.</p>
+<h4 id="using-the-admin-ui">Using the Admin UI<a hidden class="anchor" aria-hidden="true" href="#using-the-admin-ui">#</a></h4>
+<ol>
+<li>Log in to the ForgeRock admin UI.</li>
+<li>Navigate to the configuration section you want to export.</li>
+<li>Click on &ldquo;Export&rdquo; and save the configuration file.</li>
+</ol>
+<h4 id="using-rest-apis">Using REST APIs<a hidden class="anchor" aria-hidden="true" href="#using-rest-apis">#</a></h4>
+<p>You can also use REST APIs to export configurations programmatically. Here&rsquo;s an example using <code>curl</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -u admin:password -X GET <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#e6db74">&#34;https://dev.forgerock.com/openam/json/realms/root/realm-config/services/AuthenticationService?_action=export&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Accept: application/json&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -o AuthenticationService.json
+</span></span></code></pre></div><h3 id="step-3-validate-configurations">Step 3: Validate Configurations<a hidden class="anchor" aria-hidden="true" href="#step-3-validate-configurations">#</a></h3>
+<p>Before promoting configurations to production, validate them to ensure they meet your requirements and do not contain any errors.</p>
+<h4 id="using-json-schema-validation">Using JSON Schema Validation<a hidden class="anchor" aria-hidden="true" href="#using-json-schema-validation">#</a></h4>
+<p>ForgeRock provides JSON schemas for its configurations. You can use these schemas to validate your exported configurations.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>jsonschema -i AuthenticationService.json /path/to/AuthenticationService-schema.json
+</span></span></code></pre></div><h3 id="step-4-import-configurations-into-production">Step 4: Import Configurations into Production<a hidden class="anchor" aria-hidden="true" href="#step-4-import-configurations-into-production">#</a></h3>
+<p>Once validated, import the configurations into your production environment.</p>
+<h4 id="using-the-admin-ui-1">Using the Admin UI<a hidden class="anchor" aria-hidden="true" href="#using-the-admin-ui-1">#</a></h4>
+<ol>
+<li>Log in to the ForgeRock admin UI in the production environment.</li>
+<li>Navigate to the configuration section where you want to import.</li>
+<li>Click on &ldquo;Import&rdquo; and select the configuration file.</li>
+</ol>
+<h4 id="using-rest-apis-1">Using REST APIs<a hidden class="anchor" aria-hidden="true" href="#using-rest-apis-1">#</a></h4>
+<p>You can also use REST APIs to import configurations programmatically. Here&rsquo;s an example using <code>curl</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -u admin:password -X POST <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#e6db74">&#34;https://prod.forgerock.com/openam/json/realms/root/realm-config/services/AuthenticationService?_action=import&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -d @AuthenticationService.json
+</span></span></code></pre></div><h3 id="step-5-verify-configurations-in-production">Step 5: Verify Configurations in Production<a hidden class="anchor" aria-hidden="true" href="#step-5-verify-configurations-in-production">#</a></h3>
+<p>After importing, verify that the configurations are applied correctly in the production environment.</p>
+<h4 id="using-the-admin-ui-2">Using the Admin UI<a hidden class="anchor" aria-hidden="true" href="#using-the-admin-ui-2">#</a></h4>
+<ol>
+<li>Log in to the ForgeRock admin UI in the production environment.</li>
+<li>Navigate to the configuration section you imported.</li>
+<li>Check the settings to ensure they match the expected values.</li>
+</ol>
+<h4 id="using-rest-apis-2">Using REST APIs<a hidden class="anchor" aria-hidden="true" href="#using-rest-apis-2">#</a></h4>
+<p>You can also use REST APIs to verify configurations programmatically. Here&rsquo;s an example using <code>curl</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -u admin:password -X GET <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#e6db74">&#34;https://prod.forgerock.com/openam/json/realms/root/realm-config/services/AuthenticationService&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Accept: application/json&#34;</span>
+</span></span></code></pre></div><h2 id="common-pitfalls-and-solutions">Common Pitfalls and Solutions<a hidden class="anchor" aria-hidden="true" href="#common-pitfalls-and-solutions">#</a></h2>
+<p>Here are some common issues you might encounter during Config Promotion and their solutions.</p>
+<h3 id="issue-configuration-conflicts">Issue: Configuration Conflicts<a hidden class="anchor" aria-hidden="true" href="#issue-configuration-conflicts">#</a></h3>
+<p><strong>Problem</strong>: Existing configurations in production may conflict with the ones you&rsquo;re importing.</p>
+<p><strong>Solution</strong>: Review and resolve conflicts manually before importing. Use the admin UI or REST APIs to compare configurations.</p>
+<h3 id="issue-incorrect-permissions">Issue: Incorrect Permissions<a hidden class="anchor" aria-hidden="true" href="#issue-incorrect-permissions">#</a></h3>
+<p><strong>Problem</strong>: Insufficient permissions to export or import configurations.</p>
+<p><strong>Solution</strong>: Ensure you have the necessary administrative privileges. Consult your ForgeRock documentation for required roles and permissions.</p>
+<h3 id="issue-validation-errors">Issue: Validation Errors<a hidden class="anchor" aria-hidden="true" href="#issue-validation-errors">#</a></h3>
+<p><strong>Problem</strong>: Configuration validation fails due to schema mismatches or data errors.</p>
+<p><strong>Solution</strong>: Correct the errors in the configuration file and revalidate. Refer to the JSON schema documentation for valid formats and values.</p>
+<h2 id="security-considerations">Security Considerations<a hidden class="anchor" aria-hidden="true" href="#security-considerations">#</a></h2>
+<p>Security is paramount when promoting configurations. Follow these best practices to protect your IAM setup.</p>
+<h3 id="encrypt-configuration-files">Encrypt Configuration Files<a hidden class="anchor" aria-hidden="true" href="#encrypt-configuration-files">#</a></h3>
+<p>Ensure that configuration files are encrypted during transit and at rest. Use HTTPS for API calls and encrypt files using tools like GPG.</p>
+<h3 id="restrict-access">Restrict Access<a hidden class="anchor" aria-hidden="true" href="#restrict-access">#</a></h3>
+<p>Limit access to configuration files and the ForgeRock admin UI to authorized personnel only. Use role-based access control (RBAC) to enforce permissions.</p>
+<h3 id="review-changes">Review Changes<a hidden class="anchor" aria-hidden="true" href="#review-changes">#</a></h3>
+<p>Implement a change management process to review and approve configuration changes before promotion. This helps catch potential issues early.</p>
+<h2 id="best-practices">Best Practices<a hidden class="anchor" aria-hidden="true" href="#best-practices">#</a></h2>
+<p>Adopt these best practices to streamline your Config Promotion process and improve reliability.</p>
+<h3 id="automate-with-scripts">Automate with Scripts<a hidden class="anchor" aria-hidden="true" href="#automate-with-scripts">#</a></h3>
+<p>Automate the export, validation, and import processes using scripts. This reduces manual intervention and minimizes errors.</p>
+<h3 id="use-version-control">Use Version Control<a hidden class="anchor" aria-hidden="true" href="#use-version-control">#</a></h3>
+<p>Store configuration files in a version control system like Git. This allows you to track changes, revert to previous versions if needed, and collaborate with team members.</p>
+<h3 id="document-processes">Document Processes<a hidden class="anchor" aria-hidden="true" href="#document-processes">#</a></h3>
+<p>Maintain comprehensive documentation for your Config Promotion processes. This includes step-by-step guides, scripts, and any customizations made to configurations.</p>
+<h2 id="comparison-of-different-approaches">Comparison of Different Approaches<a hidden class="anchor" aria-hidden="true" href="#comparison-of-different-approaches">#</a></h2>
+<table class="comparison-table">
+<thead><tr><th>Approach</th><th>Pros</th><th>Cons</th><th>Use When</th></tr></thead>
+<tbody>
+<tr><td>Admin UI</td><td>Easy to use</td><td>Manual process</td><td>Small-scale deployments</td></tr>
+<tr><td>REST APIs</td><td>Automatable, scalable</td><td>Requires scripting</td><td>Larger deployments</td></tr>
+</tbody>
+</table>
+<h2 id="quick-reference">Quick Reference<a hidden class="anchor" aria-hidden="true" href="#quick-reference">#</a></h2>
+<div class="quick-ref">
+<h4>📋 Quick Reference</h4>
+<ul>
+<li><code>curl -u admin:password -X GET &quot;https://dev.forgerock.com/openam/json/realms/root/realm-config/services/AuthenticationService?_action=export&quot;</code> - Export configuration</li>
+<li><code>jsonschema -i AuthenticationService.json /path/to/AuthenticationService-schema.json</code> - Validate configuration</li>
+<li><code>curl -u admin:password -X POST &quot;https://prod.forgerock.com/openam/json/realms/root/realm-config/services/AuthenticationService?_action=import&quot; -H &quot;Content-Type: application/json&quot; -d @AuthenticationService.json</code> - Import configuration</li>
+</ul>
+</div>
+<h2 id="troubleshooting-common-issues">Troubleshooting Common Issues<a hidden class="anchor" aria-hidden="true" href="#troubleshooting-common-issues">#</a></h2>
+<p>Here are some common issues and their troubleshooting steps.</p>
+<h3 id="error-unauthorized-access">Error: Unauthorized Access<a hidden class="anchor" aria-hidden="true" href="#error-unauthorized-access">#</a></h3>
+<p><strong>Symptom</strong>: API calls return a 401 Unauthorized error.</p>
+<p><strong>Solution</strong>: Verify your credentials and ensure you have the necessary permissions. Check the ForgeRock documentation for required roles.</p>
+<h3 id="error-validation-failed">Error: Validation Failed<a hidden class="anchor" aria-hidden="true" href="#error-validation-failed">#</a></h3>
+<p><strong>Symptom</strong>: Configuration validation fails with schema errors.</p>
+<p><strong>Solution</strong>: Review the error messages and correct the configuration file. Refer to the JSON schema documentation for valid formats and values.</p>
+<h3 id="error-import-failed">Error: Import Failed<a hidden class="anchor" aria-hidden="true" href="#error-import-failed">#</a></h3>
+<p><strong>Symptom</strong>: API calls return a 500 Internal Server Error during import.</p>
+<p><strong>Solution</strong>: Check the server logs for detailed error messages. Ensure that the configuration file is correctly formatted and does not contain any invalid data.</p>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>ForgeRock Config Promotion is a critical process for maintaining consistency and reliability in your IAM setup across different environments. By following the steps outlined in this guide, you can automate and secure your configuration management workflow. Remember to validate configurations thoroughly and implement robust security measures to protect your IAM setup.</p>
+<div class="notice success">✅ <strong>Best Practice:</strong> Regularly update your configuration management processes to incorporate new features and security improvements.</div>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/forgerock/">ForgeRock</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/iam/">Iam</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/configuration-management/">Configuration Management</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/devops/">DevOps</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/security/">Security</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/post-quantum-identity-and-access-management-for-ai-agents/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Post-Quantum Identity and Access Management for AI Agents</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/grafana-scim-flaw-allows-admin-impersonation-and-full-takeover/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Grafana SCIM Flaw Allows Admin Impersonation and Full Takeover</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+
+<section class="post-feedback">
+  <p class="feedback-question">Was this article helpful?</p>
+  <div class="feedback-buttons">
+    <button class="feedback-btn feedback-yes" onclick="trackFeedback('yes', '\/posts\/forgerock-config-promotion-moving-am-idm-configurations-from-dev-to-production\/')" aria-label="Yes, helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      Yes
+    </button>
+    <button class="feedback-btn feedback-no" onclick="trackFeedback('no', '\/posts\/forgerock-config-promotion-moving-am-idm-configurations-from-dev-to-production\/')" aria-label="No, not helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>
+      No
+    </button>
+  </div>
+  <p class="feedback-thanks" style="display: none;">Thanks for your feedback!</p>
+</section>
+
+
+<section class="author-bio">
+  <div class="author-avatar">
+    <img src="/IAMDevBox.com.jpg" alt="IAMDevBox Author" width="64" height="64" loading="lazy">
+  </div>
+  <div class="author-info">
+    <h4>Written by IAMDevBox</h4>
+    <p>Enterprise IAM architect with 15+ years in identity modernization. Certified across ForgeRock, Ping Identity, SailPoint, AWS, and Azure.</p>
+    <div class="author-links">
+      <a href="https://twitter.com/iamdevbox" target="_blank" rel="noopener" title="Follow on X/Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/iamdevbox" target="_blank" rel="noopener" title="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="/contact/" title="Contact">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function trackFeedback(value, page) {
+  
+  document.querySelector('.feedback-buttons').style.display = 'none';
+  document.querySelector('.feedback-question').style.display = 'none';
+  document.querySelector('.feedback-thanks').style.display = 'block';
+
+  
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'post_feedback', {
+      'feedback_value': value,
+      'page_path': page
+    });
+  }
+
+  
+  localStorage.setItem('feedback_' + page, value);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const page = '\/posts\/forgerock-config-promotion-moving-am-idm-configurations-from-dev-to-production\/';
+  if (localStorage.getItem('feedback_' + page)) {
+    document.querySelector('.feedback-buttons').style.display = 'none';
+    document.querySelector('.feedback-question').textContent = 'Thanks for your feedback!';
+  }
+});
+</script>
+
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+              Go Secretless with Snowflake Workload Identity Federation - Snowflake
+            </a>
+            <small class="custom-date">2026-03-01</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+              OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+            </a>
+            <small class="custom-date">2026-02-28</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/pingone-mfa-configuration-push-notifications-totp-and-fido2-setup/" class="custom-link">
+              PingOne MFA Configuration: Push Notifications, TOTP, and FIDO2 Setup
+            </a>
+            <small class="custom-date">2026-02-27</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/microsoft-s-entra-oauth-tokens-could-be-exploited-what-you-need-to-know/" class="custom-link">
+              Microsoft’s Entra OAuth Tokens Could Be Exploited - What You Need to Know
+            </a>
+            <small class="custom-date">2026-02-26</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/configuring-hosted-login-journey-urls-in-forgerock-identity-cloud/" class="custom-link">
+              Configuring Hosted Login Journey URLs in ForgeRock Identity Cloud
+            </a>
+            <small class="custom-date">2026-02-23</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+                Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+                Go Secretless with Snowflake Workload Identity Federation - Snowflake
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+                JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+                OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+                Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

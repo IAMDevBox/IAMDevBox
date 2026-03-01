@@ -1,0 +1,2907 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Building an Email OTP Node: HOTP Example and Email Sending Configuration in ForgeRock AM | IAMDevBox</title>
+<meta name="keywords" content="forgerock am email otp node, forgerock custom authentication node, hotp secret key java implementation, forgerock am smtp configuration, email otp rate limiting forgerock, forgerock am 2fa email, build custom node forgerock am, forgerock scripted decision email, authentication, node.js">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/building-an-email-otp-node-hotp-example-and-email-sending-configuration-in-forgerock-am/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.e24ea479df3e367781fafa20cedde21c7e043c10bed4c8c913ef9261a049a1e2.css" integrity="sha256-4k6ked8&#43;NneB&#43;vogzt3iHH4EPBC&#43;1MjJE&#43;&#43;SYaBJoeI=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/building-an-email-otp-node-hotp-example-and-email-sending-configuration-in-forgerock-am/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/building-an-email-otp-node-hotp-example-and-email-sending-configuration-in-forgerock-am/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Building an Email OTP Node: HOTP Example and Email Sending Configuration in ForgeRock AM">
+  <meta property="og:description" content="Learn to build an Email OTP node using HOTP in ForgeRock Access Management. Discover how to configure email sending for secure authentication. Dive in now!">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-09-16T14:53:00+00:00">
+    <meta property="article:modified_time" content="2026-02-26T21:20:24-05:00">
+    <meta property="article:tag" content="ForgeRock AM">
+    <meta property="article:tag" content="Email OTP">
+    <meta property="article:tag" content="HOTP">
+    <meta property="article:tag" content="Two-Factor Authentication">
+    <meta property="article:tag" content="Security">
+    <meta property="og:image" content="https://www.iamdevbox.com/images/posts/building-an-email-otp-node--hotp-example-and-email-84b19483.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/images/posts/building-an-email-otp-node--hotp-example-and-email-84b19483.webp">
+<meta name="twitter:title" content="Building an Email OTP Node: HOTP Example and Email Sending Configuration in ForgeRock AM">
+<meta name="twitter:description" content="Learn to build an Email OTP node using HOTP in ForgeRock Access Management. Discover how to configure email sending for secure authentication. Dive in now!">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Building an Email OTP Node: HOTP Example and Email Sending Configuration in ForgeRock AM",
+      "item": "https://www.iamdevbox.com/posts/building-an-email-otp-node-hotp-example-and-email-sending-configuration-in-forgerock-am/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Building an Email OTP Node: HOTP Example and Email Sending Configuration in ForgeRock AM",
+  "name": "Building an Email OTP Node: HOTP Example and Email Sending Configuration in ForgeRock AM",
+  "description": "Learn to build an Email OTP node using HOTP in ForgeRock Access Management. Discover how to configure email sending for secure authentication. Dive in now!",
+  "keywords": [
+    "forgerock am email otp node", "forgerock custom authentication node", "hotp secret key java implementation", "forgerock am smtp configuration", "email otp rate limiting forgerock", "forgerock am 2fa email", "build custom node forgerock am", "forgerock scripted decision email", "authentication", "node.js"
+  ],
+  "articleBody": "Introduction In the realm of identity and access management, ForgeRock Access Management (AM) stands out as a powerful solution for securing digital assets. One of its key features is the ability to implement two-factor authentication (2FA) through One-Time Passwords (OTPs). This blog post will guide you through building an Email OTP node using the HMAC-Based One-Time Password (HOTP) algorithm in ForgeRock AM. We’ll cover the configuration steps, code implementation, and best practices for secure email OTP delivery.\nPrerequisites Before diving into the implementation, ensure you have the following:\nForgeRock AM Server installed and configured. Java Development Kit (JDK) version 8 or later. SMTP Server configured for sending emails. Basic Understanding of ForgeRock AM’s authentication framework. Building the Email OTP Node Step 1: Create a New Node in ForgeRock AM Access the AM Console: Log in to your ForgeRock AM console. Navigate to Authentication: Go to the “Authentication” section and select “Nodes.” Create a New Node: Click on “Create Node” and select “Custom Node.” Configure the Node: Provide a name for your node (e.g., “Email OTP Node”) and select the appropriate authentication type. Step 2: Implement the HOTP Algorithm The HOTP algorithm generates time-independent OTPs based on a shared secret key. Here’s a Java implementation of the HOTP algorithm:\nimport java.security.MessageDigest; import java.security.NoSuchAlgorithmException; import java.util.Formatter; public class HOTPGenerator { private static final String HMAC_SHA1_ALGORITHM = \"HmacSHA1\"; private static final int DEFAULT_OTP_LENGTH = 6; public String generateOTP(byte[] secretKey, long counter) { try { MessageDigest digest = MessageDigest.getInstance(\"SHA1\"); byte[] hash = digest.digest(getHmac_sha1(secretKey, counter)); int offset = hash[hash.length - 1] \u0026 0xf; long otp = ((hash[offset] \u0026 0x7f) \u003c\u003c 24) | ((hash[offset + 1] \u0026 0xff) \u003c\u003c 16) | ((hash[offset + 2] \u0026 0xff) \u003c\u003c 8) | (hash[offset + 3] \u0026 0xff); return String.format(\"%0\" + DEFAULT_OTP_LENGTH + \"d\", otp % 1000000); } catch (NoSuchAlgorithmException e) { throw new RuntimeException(e); } } private byte[] getHmac_sha1(byte[] keyBytes, long counter) { try { java.util hmac = new javax.crypto.Mac(\"HmacSHA1\"); hmac.init(new javax.crypto.spec.SecretKeySpec(keyBytes, \"HmacSHA1\")); byte[] counterBytes = longToBytes(counter); return hmac.doFinal(counterBytes); } catch (NoSuchAlgorithmException | InvalidKeyException e) { throw new RuntimeException(e); } } private byte[] longToBytes(long value) { return new byte[]{ (byte) (value \u003e\u003e 56), (byte) (value \u003e\u003e 48), (byte) (value \u003e\u003e 40), (byte) (value \u003e\u003e 32), (byte) (value \u003e\u003e 24), (byte) (value \u003e\u003e 16), (byte) (value \u003e\u003e 8), (byte) value}; } } Step 3: Configure Email Sending To send OTPs via email, you need to configure an SMTP server in ForgeRock AM. Here’s how:\nAccess the AM Console: Navigate to “Servers” \u003e “Server Instances” \u003e “Configurations.” Configure SMTP Settings: SMTP Host: Your SMTP server’s hostname (e.g., smtp.example.com). SMTP Port: The port number (e.g., 587 for TLS). SMTP Username: The email account’s username. SMTP Password: The email account’s password. SMTP Use TLS: Enable if required by your SMTP server. Step 4: Implement the Email OTP Logic Create a custom Java class to handle OTP generation and email sending:\nimport com.sun.identity.authentication.spi.AuthModule; import com.sun.identity.authentication.spi.AuthResult; import com.sun.identity.authentication.spi.UserInfo; import com.sun.identity.authentication.util.PasswordValidator; import javax.mail.Message; import javax.mail.MessagingException; import javax.mail.Session; import javax.mail.Transport; import javax.mail.internet.InternetAddress; import javax.mail.internet.MimeMessage; public class EmailOTPNode implements AuthModule { private HOTPGenerator hotpGenerator; private String smtpHost; private int smtpPort; private String smtpUsername; private String smtpPassword; private boolean smtpUseTLS; public void init(String config) { // Parse configuration parameters // Set smtpHost, smtpPort, etc. hotpGenerator = new HOTPGenerator(); } public AuthResult authenticate(UserInfo userInfo, String password) { try { // Extract user's secret key from userInfo byte[] secretKey = extractSecretKey(userInfo); long counter = getCurrentCounter(); // Generate OTP String otp = hotpGenerator.generateOTP(secretKey, counter); // Send OTP via email sendEmail(userInfo.getEmail(), otp); return new AuthResult(AuthResult.SUCCESS, \"OTP sent successfully\"); } catch (Exception e) { return new AuthResult(AuthResult.FAILURE, e.getMessage()); } } private void sendEmail(String to, String otp) throws MessagingException { Session session = Session.getInstance( System.getProperties(), new javax.mail.Authenticator() { protected PasswordAuthentication getPasswordAuthentication() { return new PasswordAuthentication(smtpUsername, smtpPassword); } }); MimeMessage message = new MimeMessage(session); message.setFrom(new InternetAddress(smtpUsername)); message.addRecipient(Message.RecipientType.TO, new InternetAddress(to)); message.setSubject(\"Your One-Time Password\"); message.setText(\"Your OTP is: \" + otp); Transport.send(message); } // Additional helper methods } Step 5: Test the Implementation Test OTP Generation: Ensure the HOTP generator produces valid OTPs. Test Email Sending: Verify that emails are sent successfully to test accounts. Simulate Authentication Flow: Test the complete authentication flow to ensure it works as expected. Flowchart of Email OTP Process +-------------------+ +-------------------+ +-------------------+ | User Request | | Generate OTP | | Send Email | | for OTP | | using HOTP | | via SMTP | +-------------------+ +-------------------+ +-------------------+ | | | | | | +-------------------+ +-------------------+ +-------------------+ | Validate OTP | | Update Counter | | Session | | and Authenticate| | in User Store | | Creation | +-------------------+ +-------------------+ +-------------------+ Best Practices Secure Secret Keys: Ensure that secret keys are stored securely and are not exposed in logs or network traffic. Rate Limiting: Implement rate limiting to prevent brute-force attacks on OTP validation. Email Templates: Use consistent and user-friendly email templates to avoid confusion. Logging: Enable logging for OTP generation and sending to facilitate troubleshooting and auditing. 🎯 Key Takeaways Two-Factor Authentication Security Best Practices How does HOTP ensure security in Email OTP? Conclusion Building an Email OTP node using the HOTP algorithm in ForgeRock AM enhances your organization’s security posture by adding an additional layer of authentication. By following this guide, you can implement a robust and scalable Email OTP solution that meets the needs of your users while maintaining high security standards.\nSEO Tags ForgeRock AM Email OTP HOTP Algorithm Two-Factor Authentication Security Best Practices FAQs How does HOTP ensure security in Email OTP? What are the best practices for Email OTP configuration in ForgeRock AM? Can this setup handle high volumes of OTP requests? ",
+  "wordCount" : "926",
+  "inLanguage": "en",
+  "image":"https://www.iamdevbox.com/images/posts/building-an-email-otp-node--hotp-example-and-email-84b19483.webp","datePublished": "2025-09-16T14:53:00Z",
+  "dateModified": "2026-02-26T21:20:24-05:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/building-an-email-otp-node-hotp-example-and-email-sending-configuration-in-forgerock-am/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How does HOTP ensure security in Email OTP?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "HOTP ensures security by generating time-independent OTPs based on a shared secret key, preventing replay attacks and ensuring that each OTP is unique to a specific counter value."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the best practices for Email OTP configuration in ForgeRock AM?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Best practices include using a secure SMTP server, configuring TLS/SSL for email transmission, and implementing rate limiting to prevent abuse."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can this setup handle high volumes of OTP requests?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "This setup can handle high volumes with proper scaling of the ForgeRock AM server and SMTP infrastructure, ensuring efficient processing and delivery of OTPs."
+      }
+    }
+  ]
+}
+</script>
+    <meta name="description" content="Learn to build an Email OTP node using HOTP in ForgeRock Access Management. Discover how to configure email sending for secure authentication. Dive in now!"><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/building-an-email-otp-node-hotp-example-and-email-sending-configuration-in-forgerock-am\/"
+  },
+  "headline": "Building an Email OTP Node: HOTP Example and Email Sending Configuration in ForgeRock AM",
+  "description": "Learn to build an Email OTP node using HOTP in ForgeRock Access Management. Discover how to configure email sending for secure authentication. Dive in now!",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon-96x96.png",
+      "width": 96,
+      "height": 96
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://www.iamdevbox.com/IAMDevBox.com.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "datePublished": "2025-09-16T14:53:00Z",
+  "dateModified": "2026-02-26T21:20:24-05:00",
+  "wordCount":  926 ,
+  "articleSection": "posts",
+  "keywords": ["forgerock am email otp node","forgerock custom authentication node","hotp secret key java implementation","forgerock am smtp configuration","email otp rate limiting forgerock","forgerock am 2fa email","build custom node forgerock am","forgerock scripted decision email","authentication","node.js"]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Building an Email OTP Node: HOTP Example and Email Sending Configuration in ForgeRock AM",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/building-an-email-otp-node-hotp-example-and-email-sending-configuration-in-forgerock-am\/"
+    }
+  ]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-token-exchange-implementing-oauth-20-token-exchange\/"
+            },
+            "headline": "Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:29:55Z",
+            "dateModified": "2026-03-01T14:30:15Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/go-secretless-with-snowflake-workload-identity-federation-snowflake\/"
+            },
+            "headline": "Go Secretless with Snowflake Workload Identity Federation - Snowflake",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:24:03Z",
+            "dateModified": "2026-03-01T14:24:20Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-algorithm-confusion-attack-cve-2026-developer-guide\/"
+            },
+            "headline": "JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-02-28T18:00:00Z",
+            "dateModified": "2026-03-01T11:21:01-05:00"
+          }
+  ]
+}
+</script>
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    const mermaidBlocks = document.querySelectorAll('.mermaid, pre code.language-mermaid, code.language-mermaid');
+    if (mermaidBlocks.length > 0) {
+        
+        mermaidBlocks.forEach(block => {
+            if (block.tagName === 'CODE') {
+                const pre = block.parentElement;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = block.textContent;
+                if (pre && pre.tagName === 'PRE') {
+                    pre.parentNode.replaceChild(div, pre);
+                } else {
+                    block.parentNode.replaceChild(div, block);
+                }
+            }
+        });
+
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+            const isDark = document.body.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#5a67d8',
+                    
+                    secondaryColor: '#48bb78',
+                    secondaryTextColor: '#ffffff',
+                    secondaryBorderColor: '#38a169',
+                    
+                    tertiaryColor: '#ed8936',
+                    tertiaryTextColor: '#ffffff',
+                    tertiaryBorderColor: '#dd6b20',
+                    
+                    lineColor: '#718096',
+                    
+                    background: isDark ? '#1a202c' : '#ffffff',
+                    mainBkg: isDark ? '#2d3748' : '#f7fafc',
+                    
+                    actorBkg: '#667eea',
+                    actorBorder: '#5a67d8',
+                    actorTextColor: '#ffffff',
+                    actorLineColor: '#718096',
+                    signalColor: '#4a5568',
+                    signalTextColor: '#2d3748',
+                    labelBoxBkgColor: '#edf2f7',
+                    labelBoxBorderColor: '#cbd5e0',
+                    labelTextColor: '#2d3748',
+                    loopTextColor: '#553c9a',
+                    noteBkgColor: '#faf089',
+                    noteTextColor: '#744210',
+                    noteBorderColor: '#d69e2e',
+                    
+                    nodeBkg: '#667eea',
+                    nodeBorder: '#5a67d8',
+                    clusterBkg: '#e2e8f0',
+                    clusterBorder: '#a0aec0',
+                    defaultLinkColor: '#718096',
+                    titleColor: '#2d3748',
+                    edgeLabelBackground: 'transparent',
+                    
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                sequence: {
+                    useMaxWidth: true,
+                    boxMargin: 10,
+                    boxTextMargin: 5,
+                    noteMargin: 10,
+                    messageMargin: 35,
+                    mirrorActors: false
+                }
+            });
+            mermaid.run().then(() => {
+                
+                document.querySelectorAll('.mermaid .node').forEach(node => {
+                    const rect = node.querySelector('rect, circle, ellipse, polygon');
+                    if (rect) {
+                        const fill = rect.getAttribute('fill') || window.getComputedStyle(rect).fill;
+                        
+                        const isDarkBg = fill && (
+                            fill.includes('667eea') || fill.includes('102, 126, 234') ||
+                            fill.includes('48bb78') || fill.includes('72, 187, 120') ||
+                            fill.includes('ed8936') || fill.includes('237, 137, 54') ||
+                            fill.includes('553c9a') || fill.includes('9f7aea') ||
+                            fill.includes('e53e3e') || fill.includes('dd6b20')
+                        );
+                        const textColor = isDarkBg ? '#ffffff' : '#1a202c';
+                        node.querySelectorAll('span, .nodeLabel, text, foreignObject div').forEach(text => {
+                            text.style.color = textColor;
+                            text.style.fill = textColor;
+                        });
+                    }
+                });
+            });
+        };
+        document.head.appendChild(script);
+    }
+
+    
+    const postContent = document.querySelector('.post-content');
+    const isSinglePost = document.querySelector('.post-single');
+    const isToolsPage = window.location.pathname.startsWith('/tools/');
+    if (postContent && isSinglePost && window.innerWidth >= 1400 && !isToolsPage) {
+        const headings = postContent.querySelectorAll('h2, h3');
+        if (headings.length >= 3) {
+            const toc = document.createElement('nav');
+            toc.className = 'floating-toc';
+            toc.innerHTML = '<h4>📑 Contents</h4><ul></ul>';
+            const tocList = toc.querySelector('ul');
+
+            headings.forEach((heading, index) => {
+                const id = heading.id || `section-${index}`;
+                heading.id = id;
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2';
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            document.body.appendChild(toc);
+
+            
+            const tocLinks = toc.querySelectorAll('a');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 150) {
+                        current = heading.id;
+                    }
+                });
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+    }
+
+    
+    if (postContent && isSinglePost && window.innerWidth >= 1200) {
+        const h2s = postContent.querySelectorAll('h2');
+        if (h2s.length >= 2) {
+            const indicator = document.createElement('div');
+            indicator.className = 'section-indicator';
+
+            h2s.forEach((h2, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'section-dot';
+                dot.title = h2.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                dot.addEventListener('click', () => {
+                    h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                indicator.appendChild(dot);
+            });
+
+            document.body.appendChild(indicator);
+
+            
+            window.addEventListener('scroll', () => {
+                const dots = indicator.querySelectorAll('.section-dot');
+                let activeIndex = 0;
+                h2s.forEach((h2, index) => {
+                    if (h2.getBoundingClientRect().top <= 200) {
+                        activeIndex = index;
+                    }
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+    }
+    });
+    </script>
+
+    
+    
+    <script>
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        function loadGA() {
+            if (window.gaLoaded) return;
+            window.gaLoaded = true;
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975';
+            document.head.appendChild(script);
+
+            script.onload = () => {
+                gtag('js', new Date());
+                gtag('config', 'G-B6QCH29975');
+            };
+        }
+
+        
+        ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+            window.addEventListener(event, loadGA, { once: true, passive: true });
+        });
+
+        
+        setTimeout(loadGA, 3000);
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+    
+    <div class="reading-progress" id="reading-progress"></div>
+    <script>
+    window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / docHeight) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+    </script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+            </div>
+        </div><button id="menu-btn" aria-label="Menu" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/categories/trending/" title="Hot IAM topics">
+                    <span>🔥Trending</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+(function() {
+    var btn = document.getElementById('menu-btn');
+    var menu = document.getElementById('menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+        });
+        
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
+</script>
+<main class="main">
+
+
+
+<div class="reading-progress" id="reading-progress"></div>
+<script>
+(function() {
+  const progressBar = document.getElementById('reading-progress');
+  const article = document.querySelector('.post-content');
+
+  if (!progressBar || !article) return;
+
+  function updateProgress() {
+    const articleTop = article.offsetTop;
+    const articleHeight = article.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+
+    
+    const start = articleTop - windowHeight;
+    const end = articleTop + articleHeight;
+    const current = scrollTop - start;
+    const total = end - start;
+
+    const progress = Math.min(Math.max((current / total) * 100, 0), 100);
+    progressBar.style.width = progress + '%';
+  }
+
+  
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  
+  updateProgress();
+})();
+</script>
+
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent" data-pagefind-meta="title">
+      Building an Email OTP Node: HOTP Example and Email Sending Configuration in ForgeRock AM
+    </h1>
+    <div class="post-meta"><span title='2025-09-16 14:53:00'>Sep 16, 2025</span>&nbsp;·&nbsp;5 min&nbsp;·&nbsp;926 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+    
+      <div class="post-updated">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Updated: Feb 26, 2026
+      </div>
+  </header> 
+<figure class="entry-cover">
+        <img loading="eager" src="https://www.iamdevbox.com/images/posts/building-an-email-otp-node--hotp-example-and-email-84b19483.webp" alt="Building an Email OTP Node: HOTP Example and Email Sending Configuration in ForgeRock AM">
+        
+</figure><div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#introduction" aria-label="Introduction">Introduction</a></li>
+                <li>
+                    <a href="#prerequisites" aria-label="Prerequisites">Prerequisites</a></li>
+                <li>
+                    <a href="#building-the-email-otp-node" aria-label="Building the Email OTP Node">Building the Email OTP Node</a><ul>
+                        
+                <li>
+                    <a href="#step-1-create-a-new-node-in-forgerock-am" aria-label="Step 1: Create a New Node in ForgeRock AM">Step 1: Create a New Node in ForgeRock AM</a></li>
+                <li>
+                    <a href="#step-2-implement-the-hotp-algorithm" aria-label="Step 2: Implement the HOTP Algorithm">Step 2: Implement the HOTP Algorithm</a></li>
+                <li>
+                    <a href="#step-3-configure-email-sending" aria-label="Step 3: Configure Email Sending">Step 3: Configure Email Sending</a></li>
+                <li>
+                    <a href="#step-4-implement-the-email-otp-logic" aria-label="Step 4: Implement the Email OTP Logic">Step 4: Implement the Email OTP Logic</a></li>
+                <li>
+                    <a href="#step-5-test-the-implementation" aria-label="Step 5: Test the Implementation">Step 5: Test the Implementation</a></li></ul>
+                </li>
+                <li>
+                    <a href="#flowchart-of-email-otp-process" aria-label="Flowchart of Email OTP Process">Flowchart of Email OTP Process</a></li>
+                <li>
+                    <a href="#best-practices" aria-label="Best Practices">Best Practices</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#conclusion" aria-label="Conclusion">Conclusion</a></li>
+                <li>
+                    <a href="#seo-tags" aria-label="SEO Tags">SEO Tags</a></li>
+                <li>
+                    <a href="#faqs" aria-label="FAQs">FAQs</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content" data-pagefind-body><h2 id="introduction">Introduction<a hidden class="anchor" aria-hidden="true" href="#introduction">#</a></h2>
+<p>In the realm of identity and access management, ForgeRock Access Management (AM) stands out as a powerful solution for securing digital assets. One of its key features is the ability to implement two-factor authentication (2FA) through One-Time Passwords (OTPs). This blog post will guide you through building an Email OTP node using the HMAC-Based One-Time Password (HOTP) algorithm in ForgeRock AM. We’ll cover the configuration steps, code implementation, and best practices for secure email OTP delivery.</p>
+<h2 id="prerequisites">Prerequisites<a hidden class="anchor" aria-hidden="true" href="#prerequisites">#</a></h2>
+<p>Before diving into the implementation, ensure you have the following:</p>
+<ol>
+<li><strong>ForgeRock AM Server</strong> installed and configured.</li>
+<li><strong>Java Development Kit (JDK)</strong> version 8 or later.</li>
+<li><strong>SMTP Server</strong> configured for sending emails.</li>
+<li><strong>Basic Understanding</strong> of ForgeRock AM’s authentication framework.</li>
+</ol>
+<h2 id="building-the-email-otp-node">Building the Email OTP Node<a hidden class="anchor" aria-hidden="true" href="#building-the-email-otp-node">#</a></h2>
+<h3 id="step-1-create-a-new-node-in-forgerock-am">Step 1: Create a New Node in ForgeRock AM<a hidden class="anchor" aria-hidden="true" href="#step-1-create-a-new-node-in-forgerock-am">#</a></h3>
+<ol>
+<li><strong>Access the AM Console</strong>: Log in to your ForgeRock AM console.</li>
+<li><strong>Navigate to Authentication</strong>: Go to the &ldquo;Authentication&rdquo; section and select &ldquo;Nodes.&rdquo;</li>
+<li><strong>Create a New Node</strong>: Click on &ldquo;Create Node&rdquo; and select &ldquo;Custom Node.&rdquo;</li>
+<li><strong>Configure the Node</strong>: Provide a name for your node (e.g., &ldquo;Email OTP Node&rdquo;) and select the appropriate authentication type.</li>
+</ol>
+<h3 id="step-2-implement-the-hotp-algorithm">Step 2: Implement the HOTP Algorithm<a hidden class="anchor" aria-hidden="true" href="#step-2-implement-the-hotp-algorithm">#</a></h3>
+<p>The HOTP algorithm generates time-independent OTPs based on a shared secret key. Here’s a Java implementation of the HOTP algorithm:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#f92672">import</span> java.security.MessageDigest;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.security.NoSuchAlgorithmException;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.util.Formatter;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HOTPGenerator</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> String HMAC_SHA1_ALGORITHM <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;HmacSHA1&#34;</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> DEFAULT_OTP_LENGTH <span style="color:#f92672">=</span> 6;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">generateOTP</span>(<span style="color:#66d9ef">byte</span><span style="color:#f92672">[]</span> secretKey, <span style="color:#66d9ef">long</span> counter) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>            MessageDigest digest <span style="color:#f92672">=</span> MessageDigest.<span style="color:#a6e22e">getInstance</span>(<span style="color:#e6db74">&#34;SHA1&#34;</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">byte</span><span style="color:#f92672">[]</span> hash <span style="color:#f92672">=</span> digest.<span style="color:#a6e22e">digest</span>(getHmac_sha1(secretKey, counter));
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">int</span> offset <span style="color:#f92672">=</span> hash<span style="color:#f92672">[</span>hash.<span style="color:#a6e22e">length</span> <span style="color:#f92672">-</span> 1<span style="color:#f92672">]</span> <span style="color:#f92672">&amp;</span> 0xf;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">long</span> otp <span style="color:#f92672">=</span> ((hash<span style="color:#f92672">[</span>offset<span style="color:#f92672">]</span> <span style="color:#f92672">&amp;</span> 0x7f) <span style="color:#f92672">&lt;&lt;</span> 24) <span style="color:#f92672">|</span> ((hash<span style="color:#f92672">[</span>offset <span style="color:#f92672">+</span> 1<span style="color:#f92672">]</span> <span style="color:#f92672">&amp;</span> 0xff) <span style="color:#f92672">&lt;&lt;</span> 16)
+</span></span><span style="display:flex;"><span>                    <span style="color:#f92672">|</span> ((hash<span style="color:#f92672">[</span>offset <span style="color:#f92672">+</span> 2<span style="color:#f92672">]</span> <span style="color:#f92672">&amp;</span> 0xff) <span style="color:#f92672">&lt;&lt;</span> 8) <span style="color:#f92672">|</span> (hash<span style="color:#f92672">[</span>offset <span style="color:#f92672">+</span> 3<span style="color:#f92672">]</span> <span style="color:#f92672">&amp;</span> 0xff);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> String.<span style="color:#a6e22e">format</span>(<span style="color:#e6db74">&#34;%0&#34;</span> <span style="color:#f92672">+</span> DEFAULT_OTP_LENGTH <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;d&#34;</span>, otp <span style="color:#f92672">%</span> 1000000);
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">catch</span> (NoSuchAlgorithmException e) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> RuntimeException(e);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">byte</span><span style="color:#f92672">[]</span> <span style="color:#a6e22e">getHmac_sha1</span>(<span style="color:#66d9ef">byte</span><span style="color:#f92672">[]</span> keyBytes, <span style="color:#66d9ef">long</span> counter) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>            java.<span style="color:#a6e22e">util</span> hmac <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> javax.<span style="color:#a6e22e">crypto</span>.<span style="color:#a6e22e">Mac</span>(<span style="color:#e6db74">&#34;HmacSHA1&#34;</span>);
+</span></span><span style="display:flex;"><span>            hmac.<span style="color:#a6e22e">init</span>(<span style="color:#66d9ef">new</span> javax.<span style="color:#a6e22e">crypto</span>.<span style="color:#a6e22e">spec</span>.<span style="color:#a6e22e">SecretKeySpec</span>(keyBytes, <span style="color:#e6db74">&#34;HmacSHA1&#34;</span>));
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">byte</span><span style="color:#f92672">[]</span> counterBytes <span style="color:#f92672">=</span> longToBytes(counter);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> hmac.<span style="color:#a6e22e">doFinal</span>(counterBytes);
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">catch</span> (NoSuchAlgorithmException <span style="color:#f92672">|</span> InvalidKeyException e) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> RuntimeException(e);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">byte</span><span style="color:#f92672">[]</span> <span style="color:#a6e22e">longToBytes</span>(<span style="color:#66d9ef">long</span> value) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">byte</span><span style="color:#f92672">[]</span>{
+</span></span><span style="display:flex;"><span>                (<span style="color:#66d9ef">byte</span>) (value <span style="color:#f92672">&gt;&gt;</span> 56),
+</span></span><span style="display:flex;"><span>                (<span style="color:#66d9ef">byte</span>) (value <span style="color:#f92672">&gt;&gt;</span> 48),
+</span></span><span style="display:flex;"><span>                (<span style="color:#66d9ef">byte</span>) (value <span style="color:#f92672">&gt;&gt;</span> 40),
+</span></span><span style="display:flex;"><span>                (<span style="color:#66d9ef">byte</span>) (value <span style="color:#f92672">&gt;&gt;</span> 32),
+</span></span><span style="display:flex;"><span>                (<span style="color:#66d9ef">byte</span>) (value <span style="color:#f92672">&gt;&gt;</span> 24),
+</span></span><span style="display:flex;"><span>                (<span style="color:#66d9ef">byte</span>) (value <span style="color:#f92672">&gt;&gt;</span> 16),
+</span></span><span style="display:flex;"><span>                (<span style="color:#66d9ef">byte</span>) (value <span style="color:#f92672">&gt;&gt;</span> 8),
+</span></span><span style="display:flex;"><span>                (<span style="color:#66d9ef">byte</span>) value};
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="step-3-configure-email-sending">Step 3: Configure Email Sending<a hidden class="anchor" aria-hidden="true" href="#step-3-configure-email-sending">#</a></h3>
+<p>To send OTPs via email, you need to configure an SMTP server in ForgeRock AM. Here’s how:</p>
+<ol>
+<li><strong>Access the AM Console</strong>: Navigate to &ldquo;Servers&rdquo; &gt; &ldquo;Server Instances&rdquo; &gt; &ldquo;Configurations.&rdquo;</li>
+<li><strong>Configure SMTP Settings</strong>:
+<ul>
+<li><strong>SMTP Host</strong>: Your SMTP server’s hostname (e.g., smtp.example.com).</li>
+<li><strong>SMTP Port</strong>: The port number (e.g., 587 for TLS).</li>
+<li><strong>SMTP Username</strong>: The email account’s username.</li>
+<li><strong>SMTP Password</strong>: The email account’s password.</li>
+<li><strong>SMTP Use TLS</strong>: Enable if required by your SMTP server.</li>
+</ul>
+</li>
+</ol>
+<h3 id="step-4-implement-the-email-otp-logic">Step 4: Implement the Email OTP Logic<a hidden class="anchor" aria-hidden="true" href="#step-4-implement-the-email-otp-logic">#</a></h3>
+<p>Create a custom Java class to handle OTP generation and email sending:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#f92672">import</span> com.sun.identity.authentication.spi.AuthModule;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> com.sun.identity.authentication.spi.AuthResult;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> com.sun.identity.authentication.spi.UserInfo;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> com.sun.identity.authentication.util.PasswordValidator;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> javax.mail.Message;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> javax.mail.MessagingException;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> javax.mail.Session;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> javax.mail.Transport;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> javax.mail.internet.InternetAddress;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> javax.mail.internet.MimeMessage;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">EmailOTPNode</span> <span style="color:#66d9ef">implements</span> AuthModule {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> HOTPGenerator hotpGenerator;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> String smtpHost;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> smtpPort;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> String smtpUsername;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> String smtpPassword;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">boolean</span> smtpUseTLS;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">init</span>(String config) {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Parse configuration parameters</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Set smtpHost, smtpPort, etc.</span>
+</span></span><span style="display:flex;"><span>        hotpGenerator <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HOTPGenerator();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> AuthResult <span style="color:#a6e22e">authenticate</span>(UserInfo userInfo, String password) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Extract user&#39;s secret key from userInfo</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">byte</span><span style="color:#f92672">[]</span> secretKey <span style="color:#f92672">=</span> extractSecretKey(userInfo);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">long</span> counter <span style="color:#f92672">=</span> getCurrentCounter();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Generate OTP</span>
+</span></span><span style="display:flex;"><span>            String otp <span style="color:#f92672">=</span> hotpGenerator.<span style="color:#a6e22e">generateOTP</span>(secretKey, counter);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Send OTP via email</span>
+</span></span><span style="display:flex;"><span>            sendEmail(userInfo.<span style="color:#a6e22e">getEmail</span>(), otp);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> AuthResult(AuthResult.<span style="color:#a6e22e">SUCCESS</span>, <span style="color:#e6db74">&#34;OTP sent successfully&#34;</span>);
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">catch</span> (Exception e) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> AuthResult(AuthResult.<span style="color:#a6e22e">FAILURE</span>, e.<span style="color:#a6e22e">getMessage</span>());
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">sendEmail</span>(String to, String otp) <span style="color:#66d9ef">throws</span> MessagingException {
+</span></span><span style="display:flex;"><span>        Session session <span style="color:#f92672">=</span> Session.<span style="color:#a6e22e">getInstance</span>(
+</span></span><span style="display:flex;"><span>                System.<span style="color:#a6e22e">getProperties</span>(),
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">new</span> javax.<span style="color:#a6e22e">mail</span>.<span style="color:#a6e22e">Authenticator</span>() {
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">protected</span> PasswordAuthentication <span style="color:#a6e22e">getPasswordAuthentication</span>() {
+</span></span><span style="display:flex;"><span>                        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> PasswordAuthentication(smtpUsername, smtpPassword);
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        MimeMessage message <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> MimeMessage(session);
+</span></span><span style="display:flex;"><span>        message.<span style="color:#a6e22e">setFrom</span>(<span style="color:#66d9ef">new</span> InternetAddress(smtpUsername));
+</span></span><span style="display:flex;"><span>        message.<span style="color:#a6e22e">addRecipient</span>(Message.<span style="color:#a6e22e">RecipientType</span>.<span style="color:#a6e22e">TO</span>, <span style="color:#66d9ef">new</span> InternetAddress(to));
+</span></span><span style="display:flex;"><span>        message.<span style="color:#a6e22e">setSubject</span>(<span style="color:#e6db74">&#34;Your One-Time Password&#34;</span>);
+</span></span><span style="display:flex;"><span>        message.<span style="color:#a6e22e">setText</span>(<span style="color:#e6db74">&#34;Your OTP is: &#34;</span> <span style="color:#f92672">+</span> otp);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        Transport.<span style="color:#a6e22e">send</span>(message);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Additional helper methods</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="step-5-test-the-implementation">Step 5: Test the Implementation<a hidden class="anchor" aria-hidden="true" href="#step-5-test-the-implementation">#</a></h3>
+<ol>
+<li><strong>Test OTP Generation</strong>: Ensure the HOTP generator produces valid OTPs.</li>
+<li><strong>Test Email Sending</strong>: Verify that emails are sent successfully to test accounts.</li>
+<li><strong>Simulate Authentication Flow</strong>: Test the complete authentication flow to ensure it works as expected.</li>
+</ol>
+<h2 id="flowchart-of-email-otp-process">Flowchart of Email OTP Process<a hidden class="anchor" aria-hidden="true" href="#flowchart-of-email-otp-process">#</a></h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>+-------------------+       +-------------------+       +-------------------+
+</span></span><span style="display:flex;"><span>|   User Request    |       |   Generate OTP    |       |   Send Email      |
+</span></span><span style="display:flex;"><span>|   for OTP         |       |   using HOTP      |       |   via SMTP        |
+</span></span><span style="display:flex;"><span>+-------------------+       +-------------------+       +-------------------+
+</span></span><span style="display:flex;"><span>       |                         |                         |
+</span></span><span style="display:flex;"><span>       |                         |                         |
+</span></span><span style="display:flex;"><span>+-------------------+       +-------------------+       +-------------------+
+</span></span><span style="display:flex;"><span>|   Validate OTP    |       |   Update Counter  |       |   Session         |
+</span></span><span style="display:flex;"><span>|   and Authenticate|       |   in User Store   |       |   Creation        |
+</span></span><span style="display:flex;"><span>+-------------------+       +-------------------+       +-------------------+
+</span></span></code></pre></div><h2 id="best-practices">Best Practices<a hidden class="anchor" aria-hidden="true" href="#best-practices">#</a></h2>
+<ol>
+<li><strong>Secure Secret Keys</strong>: Ensure that secret keys are stored securely and are not exposed in logs or network traffic.</li>
+<li><strong>Rate Limiting</strong>: Implement rate limiting to prevent brute-force attacks on OTP validation.</li>
+<li><strong>Email Templates</strong>: Use consistent and user-friendly email templates to avoid confusion.</li>
+<li><strong>Logging</strong>: Enable logging for OTP generation and sending to facilitate troubleshooting and auditing.</li>
+</ol>
+<div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>Two-Factor Authentication</li>
+<li>Security Best Practices</li>
+<li>How does HOTP ensure security in Email OTP?</li>
+</ul>
+</div>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>Building an Email OTP node using the HOTP algorithm in ForgeRock AM enhances your organization’s security posture by adding an additional layer of authentication. By following this guide, you can implement a robust and scalable Email OTP solution that meets the needs of your users while maintaining high security standards.</p>
+<h2 id="seo-tags">SEO Tags<a hidden class="anchor" aria-hidden="true" href="#seo-tags">#</a></h2>
+<ul>
+<li>ForgeRock AM</li>
+<li>Email OTP</li>
+<li>HOTP Algorithm</li>
+<li>Two-Factor Authentication</li>
+<li>Security Best Practices</li>
+</ul>
+<h2 id="faqs">FAQs<a hidden class="anchor" aria-hidden="true" href="#faqs">#</a></h2>
+<ul>
+<li>How does HOTP ensure security in Email OTP?</li>
+<li>What are the best practices for Email OTP configuration in ForgeRock AM?</li>
+<li>Can this setup handle high volumes of OTP requests?</li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/forgerock-am/">ForgeRock AM</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/email-otp/">Email OTP</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/hotp/">HOTP</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/two-factor-authentication/">Two-Factor Authentication</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/security/">Security</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/webhook-integration-in-forgerock-am-asynchronous-authentication-scenarios/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Webhook Integration in ForgeRock AM: Asynchronous Authentication Scenarios</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/custom-callback-usage-and-extension-techniques-in-forgerock-am/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Custom Callback Usage and Extension Techniques in ForgeRock AM</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+
+<section class="post-feedback">
+  <p class="feedback-question">Was this article helpful?</p>
+  <div class="feedback-buttons">
+    <button class="feedback-btn feedback-yes" onclick="trackFeedback('yes', '\/posts\/building-an-email-otp-node-hotp-example-and-email-sending-configuration-in-forgerock-am\/')" aria-label="Yes, helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      Yes
+    </button>
+    <button class="feedback-btn feedback-no" onclick="trackFeedback('no', '\/posts\/building-an-email-otp-node-hotp-example-and-email-sending-configuration-in-forgerock-am\/')" aria-label="No, not helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>
+      No
+    </button>
+  </div>
+  <p class="feedback-thanks" style="display: none;">Thanks for your feedback!</p>
+</section>
+
+
+<section class="author-bio">
+  <div class="author-avatar">
+    <img src="/IAMDevBox.com.jpg" alt="IAMDevBox Author" width="64" height="64" loading="lazy">
+  </div>
+  <div class="author-info">
+    <h4>Written by IAMDevBox</h4>
+    <p>Enterprise IAM architect with 15+ years in identity modernization. Certified across ForgeRock, Ping Identity, SailPoint, AWS, and Azure.</p>
+    <div class="author-links">
+      <a href="https://twitter.com/iamdevbox" target="_blank" rel="noopener" title="Follow on X/Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/iamdevbox" target="_blank" rel="noopener" title="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="/contact/" title="Contact">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function trackFeedback(value, page) {
+  
+  document.querySelector('.feedback-buttons').style.display = 'none';
+  document.querySelector('.feedback-question').style.display = 'none';
+  document.querySelector('.feedback-thanks').style.display = 'block';
+
+  
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'post_feedback', {
+      'feedback_value': value,
+      'page_path': page
+    });
+  }
+
+  
+  localStorage.setItem('feedback_' + page, value);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const page = '\/posts\/building-an-email-otp-node-hotp-example-and-email-sending-configuration-in-forgerock-am\/';
+  if (localStorage.getItem('feedback_' + page)) {
+    document.querySelector('.feedback-buttons').style.display = 'none';
+    document.querySelector('.feedback-question').textContent = 'Thanks for your feedback!';
+  }
+});
+</script>
+
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+              Go Secretless with Snowflake Workload Identity Federation - Snowflake
+            </a>
+            <small class="custom-date">2026-03-01</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+              OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+            </a>
+            <small class="custom-date">2026-02-28</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/pingone-mfa-configuration-push-notifications-totp-and-fido2-setup/" class="custom-link">
+              PingOne MFA Configuration: Push Notifications, TOTP, and FIDO2 Setup
+            </a>
+            <small class="custom-date">2026-02-27</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/oauth-redirect-uri-mismatch-error-fix-guide/" class="custom-link">
+              OAuth redirect_uri Mismatch Error: Complete Fix Guide
+            </a>
+            <small class="custom-date">2026-02-21</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/nebraska-state-council-gains-strength-ahead-of-midterm-elections-iam-union/" class="custom-link">
+              Nebraska State Council Gains Strength Ahead of Midterm Elections - IAM Union
+            </a>
+            <small class="custom-date">2026-02-19</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+                Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+                Go Secretless with Snowflake Workload Identity Federation - Snowflake
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+                JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+                OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+                Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

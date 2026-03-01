@@ -1,0 +1,2749 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>ADFS to Microsoft Entra ID Migration: Complete Planning and Execution Guide | IAMDevBox</title>
+<meta name="keywords" content="adfs to entra id migration, adfs migration guide, migrate adfs to azure ad, adfs decommission checklist, adfs claim rules to entra id, ad fs application migration, adfs to entra id step by step, replace adfs with entra id">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/adfs-to-microsoft-entra-id-migration-complete-guide/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.e24ea479df3e367781fafa20cedde21c7e043c10bed4c8c913ef9261a049a1e2.css" integrity="sha256-4k6ked8&#43;NneB&#43;vogzt3iHH4EPBC&#43;1MjJE&#43;&#43;SYaBJoeI=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/adfs-to-microsoft-entra-id-migration-complete-guide/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/adfs-to-microsoft-entra-id-migration-complete-guide/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="ADFS to Microsoft Entra ID Migration: Complete Planning and Execution Guide">
+  <meta property="og:description" content="ADFS to Microsoft Entra ID migration guide with step-by-step planning, claim rules mapping, staged rollout strategy, and ADFS decommission checklist for enterprise environments.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-02-05T09:00:00+00:00">
+    <meta property="article:modified_time" content="2026-02-06T14:43:17+00:00">
+    <meta property="article:tag" content="Adfs-Migration">
+    <meta property="article:tag" content="Microsoft Entra ID">
+    <meta property="article:tag" content="Azure-Ad">
+    <meta property="article:tag" content="Identity-Migration">
+    <meta property="article:tag" content="Enterprise-Iam">
+      <meta property="og:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:title" content="ADFS to Microsoft Entra ID Migration: Complete Planning and Execution Guide">
+<meta name="twitter:description" content="ADFS to Microsoft Entra ID migration guide with step-by-step planning, claim rules mapping, staged rollout strategy, and ADFS decommission checklist for enterprise environments.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "ADFS to Microsoft Entra ID Migration: Complete Planning and Execution Guide",
+      "item": "https://www.iamdevbox.com/posts/adfs-to-microsoft-entra-id-migration-complete-guide/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "ADFS to Microsoft Entra ID Migration: Complete Planning and Execution Guide",
+  "name": "ADFS to Microsoft Entra ID Migration: Complete Planning and Execution Guide",
+  "description": "ADFS to Microsoft Entra ID migration guide with step-by-step planning, claim rules mapping, staged rollout strategy, and ADFS decommission checklist for enterprise environments.",
+  "keywords": [
+    "adfs to entra id migration", "adfs migration guide", "migrate adfs to azure ad", "adfs decommission checklist", "adfs claim rules to entra id", "ad fs application migration", "adfs to entra id step by step", "replace adfs with entra id"
+  ],
+  "articleBody": "Microsoft is pushing hard to retire ADFS. The writing has been on the wall since 2023 when they started flagging ADFS deprecation in security advisories, and Windows Server 2025 makes it even clearer — ADFS is maintenance mode, no new features, and the migration tooling keeps getting better. If you’re still running ADFS in production, now is the time to plan your move.\nThis guide walks through the full migration from ADFS to Microsoft Entra ID (formerly Azure AD), covering assessment, claim rules translation, staged rollout, and final decommission.\nWhy ADFS Needs to Go ADFS served its purpose for over a decade, but the operational cost is hard to justify in 2026:\nInfrastructure overhead: ADFS requires at minimum 2 servers (plus WAP proxies for external access), SSL certificates, and regular patching No modern auth features: ADFS doesn’t natively support risk-based conditional access, passwordless authentication, or continuous access evaluation Certificate management burden: Token signing and token decryption certificates need rotation, and getting it wrong means a 3 AM outage Limited MFA options: Native ADFS MFA is basic compared to Entra ID’s passwordless, FIDO2, and Authenticator app integration The security argument alone is compelling. Entra ID conditional access policies can evaluate sign-in risk, device compliance, location, and application sensitivity — things that require third-party plugins or custom code in ADFS.\nPhase 1: Assessment and Inventory Before touching any configuration, you need a complete picture of what ADFS is doing today.\nRun the AD FS Application Activity Report In the Azure portal, navigate to Entra ID → Enterprise applications → AD FS application activity. This report analyzes your ADFS relying party trusts and tells you which apps are migration-ready and which need work.\nFor a more detailed inventory, run this PowerShell on your ADFS server:\n# Export all relying party trusts with claim rules Get-AdfsRelyingPartyTrust | ForEach-Object { [PSCustomObject]@{ Name = $_.Name Identifier = $_.Identifier[0] Protocol = if ($_.WSFedEndpoint) { \"WS-Federation\" } else { \"SAML\" } IssuanceRules = $_.IssuanceTransformRules AuthzRules = $_.IssuanceAuthorizationRules Enabled = $_.Enabled LastAccessed = $_.LastUpdateTime } } | Export-Csv -Path \"adfs-rp-inventory.csv\" -NoTypeInformation Categorize Your Apps Sort relying party trusts into three buckets:\nCategory Criteria Migration Approach Wave 1 — Easy Standard SAML/WS-Fed, simple NameID claim, no custom rules Direct migration with Entra ID Enterprise Apps Wave 2 — Moderate Custom claim rules, group filtering, role claims Claims mapping policies + app roles in Entra ID Wave 3 — Complex Kerberos delegation, custom attribute stores, multi-forest lookups Azure AD Application Proxy or redesign Check for Non-Obvious Dependencies ADFS often handles things people forget about:\nOffice 365 federated domains — These need to convert from federated to managed authentication Partner federation trusts — Any B2B federations using ADFS as the IdP Service accounts — Applications using ADFS OAuth (yes, ADFS 2016+ has OAuth) or token endpoints programmatically Phase 2: Prepare Entra ID Configure Entra Connect Sync If you’re not already syncing identities, set up Entra Connect (or the newer Cloud Sync agent) to synchronize your on-premises Active Directory to Entra ID. This is a prerequisite — users must exist in Entra ID before they can authenticate there.\n# Verify sync is healthy Get-ADSyncScheduler # Should show SyncCycleEnabled: True, SyncCycleInProgress: False Set Up Staged Rollout Staged rollout lets you migrate specific security groups to Entra ID authentication while keeping everyone else on ADFS. This is your safety net.\nIn the Azure portal: Entra ID → Hybrid management → Staged Rollout\nEnable these features selectively:\nPassword Hash Sync authentication — users authenticate against Entra ID directly Seamless SSO — transparent Kerberos SSO for domain-joined devices on the corporate network Passthrough Authentication — if you need on-premises password validation (avoid if possible) Create a pilot group with 20-50 users across different departments. Expand gradually after validating each wave.\nPhase 3: Migrate Applications SAML Application Migration For standard SAML apps, the process is straightforward:\nCreate an Enterprise Application in Entra ID (use the gallery if available, otherwise non-gallery SAML) Configure the SAML settings: Entity ID: Copy from ADFS relying party identifier Reply URL (ACS): Copy from ADFS endpoints Sign-on URL: If applicable Configure claims mapping Here’s where ADFS claim rules translation gets interesting.\nTranslating ADFS Claim Rules Simple NameID mapping — ADFS rule:\nc:[Type == \"http://schemas.microsoft.com/ws/2008/06/identity/claims/windowsaccountname\"] =\u003e issue(Type = \"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier\", Value = c.Value); In Entra ID, this maps to setting the Name ID format to user.onpremisessamaccountname in the SAML token configuration.\nGroup-based role claims — ADFS rule:\nc:[Type == \"http://schemas.microsoft.com/ws/2008/06/identity/claims/groupsid\", Value =~ \"S-1-5-21-.*-1234\"] =\u003e issue(Type = \"http://schemas.microsoft.com/ws/2008/06/identity/claims/role\", Value = \"AppAdmin\"); In Entra ID, create App Roles on the Enterprise Application, then assign the appropriate Entra ID groups to those roles. The role claim emits automatically.\nCustom attribute claims — If ADFS pulls from a SQL attribute store or LDAP lookup, you’ll need to either:\nSync those attributes to Entra ID via Connect Sync custom rules Use Entra ID custom security attributes Implement a claims provider extension (less common) WS-Federation Apps WS-Fed apps work similarly to SAML in Entra ID. Create the Enterprise App, configure the WS-Federation reply URL, and map claims. The main gotcha: some legacy WS-Fed apps expect the old https://sts.yourdomain.com/adfs/ls/ endpoint format — you’ll need to update those to point to https://login.microsoftonline.com/{tenant-id}/wsfed.\nPhase 4: Convert Federated Domains This is the big switch. When you convert a domain from federated (ADFS) to managed (Entra ID), all users in that domain start authenticating against Entra ID instead of ADFS.\n# Check current domain federation status Get-MgDomain -DomainId \"yourdomain.com\" | Select-Object AuthenticationType # Convert from federated to managed (Password Hash Sync) Update-MgDomain -DomainId \"yourdomain.com\" -AuthenticationType \"Managed\" Do this during a maintenance window. Even with staged rollout testing, the domain conversion affects all users simultaneously. Have a rollback plan — you can re-federate the domain if something goes wrong:\n# Emergency rollback to ADFS Set-MsolDomainAuthentication -DomainName \"yourdomain.com\" ` -FederationBrandName \"Your Org\" ` -Authentication Federated ` -ActiveLogOnUri \"https://sts.yourdomain.com/adfs/services/trust/2005/usernamemixed\" ` -PassiveLogOnUri \"https://sts.yourdomain.com/adfs/ls/\" ` -IssuerUri \"http://sts.yourdomain.com/adfs/services/trust\" Phase 5: Decommission ADFS Don’t rush this. After domain conversion, keep ADFS running for 2-4 weeks to catch any missed dependencies.\nDecommission Checklist Verify no active ADFS traffic — Check ADFS event logs (Event ID 411 for token issuance) and confirm zero activity: # Check for recent token issuance events Get-WinEvent -FilterHashtable @{LogName='AD FS/Admin'; ID=411; StartTime=(Get-Date).AddDays(-7)} -ErrorAction SilentlyContinue | Measure-Object Remove DNS records — Delete A/CNAME records for sts.yourdomain.com and WAP endpoints Revoke SSL certificates — Revoke the token signing certificates from your CA Decommission servers — Remove ADFS role from servers, then decommission the VMs Clean up Entra Connect — Remove the ADFS federation configuration from Entra Connect if present Update documentation — Update runbooks, incident response procedures, and architecture diagrams Common Pitfalls Certificate-based authentication (CBA): If you use smart cards or client certificates via ADFS, configure Entra ID CBA before migration. Entra ID supports CBA natively now, but the configuration is different from ADFS.\nToken lifetime differences: ADFS default token lifetime is 60 minutes. Entra ID uses configurable token lifetime policies. Apps that relied on specific ADFS token lifetimes may behave differently.\nClaims passthrough for on-premises apps: If ADFS was fronting on-premises web apps, you’ll need Azure AD Application Proxy to maintain SSO for those applications.\nConditional access gaps: Review your ADFS access control policies. Some may not have direct Entra ID conditional access equivalents — particularly policies based on network location ranges that don’t match your Entra ID named locations.\nTimeline Template Week Activity 1-2 Complete inventory, run compatibility reports 3-4 Configure Entra Connect, set up staged rollout, pilot group 5-8 Migrate Wave 1 apps (standard SAML/WS-Fed) 9-12 Migrate Wave 2 apps (custom claims, roles) 13-16 Migrate Wave 3 apps (Kerberos, complex scenarios) 17-18 Convert federated domains to managed 19-22 Monitoring period, catch missed dependencies 23-24 Decommission ADFS infrastructure The timeline compresses significantly for smaller organizations. A company with 10 relying party trusts and no complex claim rules can realistically finish in 4-6 weeks.\nWhat’s Next After ADFS is gone, take advantage of what Entra ID offers that ADFS never could: passwordless authentication with FIDO2 keys, risk-based conditional access, and continuous access evaluation. The migration is the hard part — once you’re on Entra ID, the security posture improvements come quickly.\n",
+  "wordCount" : "1349",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/IAMDevBox.com.jpg","datePublished": "2026-02-05T09:00:00Z",
+  "dateModified": "2026-02-06T14:43:17Z",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/adfs-to-microsoft-entra-id-migration-complete-guide/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How long does an ADFS to Entra ID migration typically take?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "For a mid-size enterprise with 50-100 relying party trusts, plan 3-6 months from assessment to full ADFS decommission. The actual app migration happens in waves — start with SAML apps using standard claims, then tackle custom claim rules and Kerberos-constrained delegation apps last."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I run ADFS and Entra ID side by side during migration?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, and you should. Configure Entra Connect to sync identities while keeping ADFS active. Use staged rollout in Entra ID to migrate authentication for specific security groups without affecting other users. Both systems can serve authentication simultaneously."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens to custom ADFS claim rules after migration?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Entra ID uses claims mapping policies instead of ADFS claim rules. Simple rules like NameID mapping and group filtering translate directly. Complex rules using custom stores or regex transforms may need Azure AD app roles, conditional access policies, or claims transformation via the Enterprise App configuration."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which ADFS apps cannot be migrated to Entra ID?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Apps using WS-Federation with custom token encryption, ADFS artifact resolution, or apps that require on-premises Kerberos without Azure AD Application Proxy need special handling. Use the AD FS application activity report to identify incompatible apps before migration."
+      }
+    }
+  ]
+}
+</script>
+    <meta name="description" content="ADFS to Microsoft Entra ID migration guide with step-by-step planning, claim rules mapping, staged rollout strategy, and ADFS decommission checklist for enterprise environments."><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/adfs-to-microsoft-entra-id-migration-complete-guide\/"
+  },
+  "headline": "ADFS to Microsoft Entra ID Migration: Complete Planning and Execution Guide",
+  "description": "ADFS to Microsoft Entra ID migration guide with step-by-step planning, claim rules mapping, staged rollout strategy, and ADFS decommission checklist for enterprise environments.",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon-96x96.png",
+      "width": 96,
+      "height": 96
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://www.iamdevbox.com/IAMDevBox.com.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "datePublished": "2026-02-05T09:00:00Z",
+  "dateModified": "2026-02-06T14:43:17Z",
+  "wordCount":  1349 ,
+  "articleSection": "posts",
+  "keywords": ["adfs to entra id migration","adfs migration guide","migrate adfs to azure ad","adfs decommission checklist","adfs claim rules to entra id","ad fs application migration","adfs to entra id step by step","replace adfs with entra id"]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "ADFS to Microsoft Entra ID Migration: Complete Planning and Execution Guide",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/adfs-to-microsoft-entra-id-migration-complete-guide\/"
+    }
+  ]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-token-exchange-implementing-oauth-20-token-exchange\/"
+            },
+            "headline": "Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:29:55Z",
+            "dateModified": "2026-03-01T14:30:15Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/go-secretless-with-snowflake-workload-identity-federation-snowflake\/"
+            },
+            "headline": "Go Secretless with Snowflake Workload Identity Federation - Snowflake",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:24:03Z",
+            "dateModified": "2026-03-01T14:24:20Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-algorithm-confusion-attack-cve-2026-developer-guide\/"
+            },
+            "headline": "JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-02-28T18:00:00Z",
+            "dateModified": "2026-03-01T11:21:01-05:00"
+          }
+  ]
+}
+</script>
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    const mermaidBlocks = document.querySelectorAll('.mermaid, pre code.language-mermaid, code.language-mermaid');
+    if (mermaidBlocks.length > 0) {
+        
+        mermaidBlocks.forEach(block => {
+            if (block.tagName === 'CODE') {
+                const pre = block.parentElement;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = block.textContent;
+                if (pre && pre.tagName === 'PRE') {
+                    pre.parentNode.replaceChild(div, pre);
+                } else {
+                    block.parentNode.replaceChild(div, block);
+                }
+            }
+        });
+
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+            const isDark = document.body.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#5a67d8',
+                    
+                    secondaryColor: '#48bb78',
+                    secondaryTextColor: '#ffffff',
+                    secondaryBorderColor: '#38a169',
+                    
+                    tertiaryColor: '#ed8936',
+                    tertiaryTextColor: '#ffffff',
+                    tertiaryBorderColor: '#dd6b20',
+                    
+                    lineColor: '#718096',
+                    
+                    background: isDark ? '#1a202c' : '#ffffff',
+                    mainBkg: isDark ? '#2d3748' : '#f7fafc',
+                    
+                    actorBkg: '#667eea',
+                    actorBorder: '#5a67d8',
+                    actorTextColor: '#ffffff',
+                    actorLineColor: '#718096',
+                    signalColor: '#4a5568',
+                    signalTextColor: '#2d3748',
+                    labelBoxBkgColor: '#edf2f7',
+                    labelBoxBorderColor: '#cbd5e0',
+                    labelTextColor: '#2d3748',
+                    loopTextColor: '#553c9a',
+                    noteBkgColor: '#faf089',
+                    noteTextColor: '#744210',
+                    noteBorderColor: '#d69e2e',
+                    
+                    nodeBkg: '#667eea',
+                    nodeBorder: '#5a67d8',
+                    clusterBkg: '#e2e8f0',
+                    clusterBorder: '#a0aec0',
+                    defaultLinkColor: '#718096',
+                    titleColor: '#2d3748',
+                    edgeLabelBackground: 'transparent',
+                    
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                sequence: {
+                    useMaxWidth: true,
+                    boxMargin: 10,
+                    boxTextMargin: 5,
+                    noteMargin: 10,
+                    messageMargin: 35,
+                    mirrorActors: false
+                }
+            });
+            mermaid.run().then(() => {
+                
+                document.querySelectorAll('.mermaid .node').forEach(node => {
+                    const rect = node.querySelector('rect, circle, ellipse, polygon');
+                    if (rect) {
+                        const fill = rect.getAttribute('fill') || window.getComputedStyle(rect).fill;
+                        
+                        const isDarkBg = fill && (
+                            fill.includes('667eea') || fill.includes('102, 126, 234') ||
+                            fill.includes('48bb78') || fill.includes('72, 187, 120') ||
+                            fill.includes('ed8936') || fill.includes('237, 137, 54') ||
+                            fill.includes('553c9a') || fill.includes('9f7aea') ||
+                            fill.includes('e53e3e') || fill.includes('dd6b20')
+                        );
+                        const textColor = isDarkBg ? '#ffffff' : '#1a202c';
+                        node.querySelectorAll('span, .nodeLabel, text, foreignObject div').forEach(text => {
+                            text.style.color = textColor;
+                            text.style.fill = textColor;
+                        });
+                    }
+                });
+            });
+        };
+        document.head.appendChild(script);
+    }
+
+    
+    const postContent = document.querySelector('.post-content');
+    const isSinglePost = document.querySelector('.post-single');
+    const isToolsPage = window.location.pathname.startsWith('/tools/');
+    if (postContent && isSinglePost && window.innerWidth >= 1400 && !isToolsPage) {
+        const headings = postContent.querySelectorAll('h2, h3');
+        if (headings.length >= 3) {
+            const toc = document.createElement('nav');
+            toc.className = 'floating-toc';
+            toc.innerHTML = '<h4>📑 Contents</h4><ul></ul>';
+            const tocList = toc.querySelector('ul');
+
+            headings.forEach((heading, index) => {
+                const id = heading.id || `section-${index}`;
+                heading.id = id;
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2';
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            document.body.appendChild(toc);
+
+            
+            const tocLinks = toc.querySelectorAll('a');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 150) {
+                        current = heading.id;
+                    }
+                });
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+    }
+
+    
+    if (postContent && isSinglePost && window.innerWidth >= 1200) {
+        const h2s = postContent.querySelectorAll('h2');
+        if (h2s.length >= 2) {
+            const indicator = document.createElement('div');
+            indicator.className = 'section-indicator';
+
+            h2s.forEach((h2, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'section-dot';
+                dot.title = h2.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                dot.addEventListener('click', () => {
+                    h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                indicator.appendChild(dot);
+            });
+
+            document.body.appendChild(indicator);
+
+            
+            window.addEventListener('scroll', () => {
+                const dots = indicator.querySelectorAll('.section-dot');
+                let activeIndex = 0;
+                h2s.forEach((h2, index) => {
+                    if (h2.getBoundingClientRect().top <= 200) {
+                        activeIndex = index;
+                    }
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+    }
+    });
+    </script>
+
+    
+    
+    <script>
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        function loadGA() {
+            if (window.gaLoaded) return;
+            window.gaLoaded = true;
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975';
+            document.head.appendChild(script);
+
+            script.onload = () => {
+                gtag('js', new Date());
+                gtag('config', 'G-B6QCH29975');
+            };
+        }
+
+        
+        ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+            window.addEventListener(event, loadGA, { once: true, passive: true });
+        });
+
+        
+        setTimeout(loadGA, 3000);
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+    
+    <div class="reading-progress" id="reading-progress"></div>
+    <script>
+    window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / docHeight) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+    </script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+            </div>
+        </div><button id="menu-btn" aria-label="Menu" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/categories/trending/" title="Hot IAM topics">
+                    <span>🔥Trending</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+(function() {
+    var btn = document.getElementById('menu-btn');
+    var menu = document.getElementById('menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+        });
+        
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
+</script>
+<main class="main">
+
+
+
+<div class="reading-progress" id="reading-progress"></div>
+<script>
+(function() {
+  const progressBar = document.getElementById('reading-progress');
+  const article = document.querySelector('.post-content');
+
+  if (!progressBar || !article) return;
+
+  function updateProgress() {
+    const articleTop = article.offsetTop;
+    const articleHeight = article.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+
+    
+    const start = articleTop - windowHeight;
+    const end = articleTop + articleHeight;
+    const current = scrollTop - start;
+    const total = end - start;
+
+    const progress = Math.min(Math.max((current / total) * 100, 0), 100);
+    progressBar.style.width = progress + '%';
+  }
+
+  
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  
+  updateProgress();
+})();
+</script>
+
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent" data-pagefind-meta="title">
+      ADFS to Microsoft Entra ID Migration: Complete Planning and Execution Guide
+    </h1>
+    <div class="post-meta"><span title='2026-02-05 09:00:00'>Feb 05, 2026</span>&nbsp;·&nbsp;7 min&nbsp;·&nbsp;1349 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+    
+      <div class="post-updated">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Updated: Feb 6, 2026
+      </div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#why-adfs-needs-to-go" aria-label="Why ADFS Needs to Go">Why ADFS Needs to Go</a></li>
+                <li>
+                    <a href="#phase-1-assessment-and-inventory" aria-label="Phase 1: Assessment and Inventory">Phase 1: Assessment and Inventory</a><ul>
+                        
+                <li>
+                    <a href="#run-the-ad-fs-application-activity-report" aria-label="Run the AD FS Application Activity Report">Run the AD FS Application Activity Report</a></li>
+                <li>
+                    <a href="#categorize-your-apps" aria-label="Categorize Your Apps">Categorize Your Apps</a></li>
+                <li>
+                    <a href="#check-for-non-obvious-dependencies" aria-label="Check for Non-Obvious Dependencies">Check for Non-Obvious Dependencies</a></li></ul>
+                </li>
+                <li>
+                    <a href="#phase-2-prepare-entra-id" aria-label="Phase 2: Prepare Entra ID">Phase 2: Prepare Entra ID</a><ul>
+                        
+                <li>
+                    <a href="#configure-entra-connect-sync" aria-label="Configure Entra Connect Sync">Configure Entra Connect Sync</a></li>
+                <li>
+                    <a href="#set-up-staged-rollout" aria-label="Set Up Staged Rollout">Set Up Staged Rollout</a></li></ul>
+                </li>
+                <li>
+                    <a href="#phase-3-migrate-applications" aria-label="Phase 3: Migrate Applications">Phase 3: Migrate Applications</a><ul>
+                        
+                <li>
+                    <a href="#saml-application-migration" aria-label="SAML Application Migration">SAML Application Migration</a></li>
+                <li>
+                    <a href="#translating-adfs-claim-rules" aria-label="Translating ADFS Claim Rules">Translating ADFS Claim Rules</a></li>
+                <li>
+                    <a href="#ws-federation-apps" aria-label="WS-Federation Apps">WS-Federation Apps</a></li></ul>
+                </li>
+                <li>
+                    <a href="#phase-4-convert-federated-domains" aria-label="Phase 4: Convert Federated Domains">Phase 4: Convert Federated Domains</a></li>
+                <li>
+                    <a href="#phase-5-decommission-adfs" aria-label="Phase 5: Decommission ADFS">Phase 5: Decommission ADFS</a><ul>
+                        
+                <li>
+                    <a href="#decommission-checklist" aria-label="Decommission Checklist">Decommission Checklist</a></li></ul>
+                </li>
+                <li>
+                    <a href="#common-pitfalls" aria-label="Common Pitfalls">Common Pitfalls</a></li>
+                <li>
+                    <a href="#timeline-template" aria-label="Timeline Template">Timeline Template</a></li>
+                <li>
+                    <a href="#whats-next" aria-label="What&rsquo;s Next">What&rsquo;s Next</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content" data-pagefind-body><p>Microsoft is pushing hard to retire ADFS. The writing has been on the wall since 2023 when they started flagging ADFS deprecation in security advisories, and Windows Server 2025 makes it even clearer — ADFS is maintenance mode, no new features, and the migration tooling keeps getting better. If you&rsquo;re still running ADFS in production, now is the time to plan your move.</p>
+<p>This guide walks through the full migration from ADFS to Microsoft Entra ID (formerly Azure AD), covering assessment, claim rules translation, staged rollout, and final decommission.</p>
+<h2 id="why-adfs-needs-to-go">Why ADFS Needs to Go<a hidden class="anchor" aria-hidden="true" href="#why-adfs-needs-to-go">#</a></h2>
+<p>ADFS served its purpose for over a decade, but the operational cost is hard to justify in 2026:</p>
+<ul>
+<li><strong>Infrastructure overhead</strong>: ADFS requires at minimum 2 servers (plus WAP proxies for external access), SSL certificates, and regular patching</li>
+<li><strong>No modern auth features</strong>: ADFS doesn&rsquo;t natively support risk-based conditional access, passwordless authentication, or continuous access evaluation</li>
+<li><strong>Certificate management burden</strong>: Token signing and token decryption certificates need rotation, and getting it wrong means a 3 AM outage</li>
+<li><strong>Limited MFA options</strong>: Native ADFS MFA is basic compared to Entra ID&rsquo;s passwordless, FIDO2, and Authenticator app integration</li>
+</ul>
+<p>The security argument alone is compelling. Entra ID conditional access policies can evaluate sign-in risk, device compliance, location, and application sensitivity — things that require third-party plugins or custom code in ADFS.</p>
+<h2 id="phase-1-assessment-and-inventory">Phase 1: Assessment and Inventory<a hidden class="anchor" aria-hidden="true" href="#phase-1-assessment-and-inventory">#</a></h2>
+<p>Before touching any configuration, you need a complete picture of what ADFS is doing today.</p>
+<h3 id="run-the-ad-fs-application-activity-report">Run the AD FS Application Activity Report<a hidden class="anchor" aria-hidden="true" href="#run-the-ad-fs-application-activity-report">#</a></h3>
+<p>In the Azure portal, navigate to <strong>Entra ID → Enterprise applications → AD FS application activity</strong>. This report analyzes your ADFS relying party trusts and tells you which apps are migration-ready and which need work.</p>
+<p>For a more detailed inventory, run this PowerShell on your ADFS server:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span><span style="color:#75715e"># Export all relying party trusts with claim rules</span>
+</span></span><span style="display:flex;"><span>Get-AdfsRelyingPartyTrust | ForEach-Object {
+</span></span><span style="display:flex;"><span>    [<span style="color:#66d9ef">PSCustomObject</span>]@{
+</span></span><span style="display:flex;"><span>        Name            = $_.Name
+</span></span><span style="display:flex;"><span>        Identifier      = $_.Identifier[<span style="color:#ae81ff">0</span>]
+</span></span><span style="display:flex;"><span>        Protocol        = <span style="color:#66d9ef">if</span> ($_.WSFedEndpoint) { <span style="color:#e6db74">&#34;WS-Federation&#34;</span> } <span style="color:#66d9ef">else</span> { <span style="color:#e6db74">&#34;SAML&#34;</span> }
+</span></span><span style="display:flex;"><span>        IssuanceRules   = $_.IssuanceTransformRules
+</span></span><span style="display:flex;"><span>        AuthzRules      = $_.IssuanceAuthorizationRules
+</span></span><span style="display:flex;"><span>        Enabled         = $_.Enabled
+</span></span><span style="display:flex;"><span>        LastAccessed    = $_.LastUpdateTime
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>} | Export-Csv -Path <span style="color:#e6db74">&#34;adfs-rp-inventory.csv&#34;</span> -NoTypeInformation
+</span></span></code></pre></div><h3 id="categorize-your-apps">Categorize Your Apps<a hidden class="anchor" aria-hidden="true" href="#categorize-your-apps">#</a></h3>
+<p>Sort relying party trusts into three buckets:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Category</th>
+          <th>Criteria</th>
+          <th>Migration Approach</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>Wave 1 — Easy</strong></td>
+          <td>Standard SAML/WS-Fed, simple NameID claim, no custom rules</td>
+          <td>Direct migration with Entra ID Enterprise Apps</td>
+      </tr>
+      <tr>
+          <td><strong>Wave 2 — Moderate</strong></td>
+          <td>Custom claim rules, group filtering, role claims</td>
+          <td>Claims mapping policies + app roles in Entra ID</td>
+      </tr>
+      <tr>
+          <td><strong>Wave 3 — Complex</strong></td>
+          <td>Kerberos delegation, custom attribute stores, multi-forest lookups</td>
+          <td>Azure AD Application Proxy or redesign</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="check-for-non-obvious-dependencies">Check for Non-Obvious Dependencies<a hidden class="anchor" aria-hidden="true" href="#check-for-non-obvious-dependencies">#</a></h3>
+<p>ADFS often handles things people forget about:</p>
+<ul>
+<li><strong>Office 365 federated domains</strong> — These need to convert from federated to managed authentication</li>
+<li><strong>Partner federation trusts</strong> — Any B2B federations using ADFS as the IdP</li>
+<li><strong>Service accounts</strong> — Applications using ADFS OAuth (yes, ADFS 2016+ has OAuth) or token endpoints programmatically</li>
+</ul>
+<h2 id="phase-2-prepare-entra-id">Phase 2: Prepare Entra ID<a hidden class="anchor" aria-hidden="true" href="#phase-2-prepare-entra-id">#</a></h2>
+<h3 id="configure-entra-connect-sync">Configure Entra Connect Sync<a hidden class="anchor" aria-hidden="true" href="#configure-entra-connect-sync">#</a></h3>
+<p>If you&rsquo;re not already syncing identities, set up Entra Connect (or the newer Cloud Sync agent) to synchronize your on-premises Active Directory to Entra ID. This is a prerequisite — users must exist in Entra ID before they can authenticate there.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span><span style="color:#75715e"># Verify sync is healthy</span>
+</span></span><span style="display:flex;"><span>Get-ADSyncScheduler
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Should show SyncCycleEnabled: True, SyncCycleInProgress: False</span>
+</span></span></code></pre></div><h3 id="set-up-staged-rollout">Set Up Staged Rollout<a hidden class="anchor" aria-hidden="true" href="#set-up-staged-rollout">#</a></h3>
+<p>Staged rollout lets you migrate specific security groups to Entra ID authentication while keeping everyone else on ADFS. This is your safety net.</p>
+<p>In the Azure portal: <strong>Entra ID → Hybrid management → Staged Rollout</strong></p>
+<p>Enable these features selectively:</p>
+<ul>
+<li><strong>Password Hash Sync authentication</strong> — users authenticate against Entra ID directly</li>
+<li><strong>Seamless SSO</strong> — transparent Kerberos SSO for domain-joined devices on the corporate network</li>
+<li><strong>Passthrough Authentication</strong> — if you need on-premises password validation (avoid if possible)</li>
+</ul>
+<p>Create a pilot group with 20-50 users across different departments. Expand gradually after validating each wave.</p>
+<h2 id="phase-3-migrate-applications">Phase 3: Migrate Applications<a hidden class="anchor" aria-hidden="true" href="#phase-3-migrate-applications">#</a></h2>
+<h3 id="saml-application-migration">SAML Application Migration<a hidden class="anchor" aria-hidden="true" href="#saml-application-migration">#</a></h3>
+<p>For standard SAML apps, the process is straightforward:</p>
+<ol>
+<li>Create an Enterprise Application in Entra ID (use the gallery if available, otherwise non-gallery SAML)</li>
+<li>Configure the SAML settings:
+<ul>
+<li><strong>Entity ID</strong>: Copy from ADFS relying party identifier</li>
+<li><strong>Reply URL (ACS)</strong>: Copy from ADFS endpoints</li>
+<li><strong>Sign-on URL</strong>: If applicable</li>
+</ul>
+</li>
+<li>Configure claims mapping</li>
+</ol>
+<p>Here&rsquo;s where ADFS claim rules translation gets interesting.</p>
+<h3 id="translating-adfs-claim-rules">Translating ADFS Claim Rules<a hidden class="anchor" aria-hidden="true" href="#translating-adfs-claim-rules">#</a></h3>
+<p><strong>Simple NameID mapping</strong> — ADFS rule:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>c:[Type == &#34;http://schemas.microsoft.com/ws/2008/06/identity/claims/windowsaccountname&#34;]
+</span></span><span style="display:flex;"><span> =&gt; issue(Type = &#34;http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier&#34;,
+</span></span><span style="display:flex;"><span>    Value = c.Value);
+</span></span></code></pre></div><p>In Entra ID, this maps to setting the <strong>Name ID format</strong> to <code>user.onpremisessamaccountname</code> in the SAML token configuration.</p>
+<p><strong>Group-based role claims</strong> — ADFS rule:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>c:[Type == &#34;http://schemas.microsoft.com/ws/2008/06/identity/claims/groupsid&#34;,
+</span></span><span style="display:flex;"><span>   Value =~ &#34;S-1-5-21-.*-1234&#34;]
+</span></span><span style="display:flex;"><span> =&gt; issue(Type = &#34;http://schemas.microsoft.com/ws/2008/06/identity/claims/role&#34;,
+</span></span><span style="display:flex;"><span>    Value = &#34;AppAdmin&#34;);
+</span></span></code></pre></div><p>In Entra ID, create <strong>App Roles</strong> on the Enterprise Application, then assign the appropriate Entra ID groups to those roles. The role claim emits automatically.</p>
+<p><strong>Custom attribute claims</strong> — If ADFS pulls from a SQL attribute store or LDAP lookup, you&rsquo;ll need to either:</p>
+<ul>
+<li>Sync those attributes to Entra ID via Connect Sync custom rules</li>
+<li>Use Entra ID custom security attributes</li>
+<li>Implement a claims provider extension (less common)</li>
+</ul>
+<h3 id="ws-federation-apps">WS-Federation Apps<a hidden class="anchor" aria-hidden="true" href="#ws-federation-apps">#</a></h3>
+<p>WS-Fed apps work similarly to SAML in Entra ID. Create the Enterprise App, configure the WS-Federation reply URL, and map claims. The main gotcha: some legacy WS-Fed apps expect the old <code>https://sts.yourdomain.com/adfs/ls/</code> endpoint format — you&rsquo;ll need to update those to point to <code>https://login.microsoftonline.com/{tenant-id}/wsfed</code>.</p>
+<h2 id="phase-4-convert-federated-domains">Phase 4: Convert Federated Domains<a hidden class="anchor" aria-hidden="true" href="#phase-4-convert-federated-domains">#</a></h2>
+<p>This is the big switch. When you convert a domain from federated (ADFS) to managed (Entra ID), all users in that domain start authenticating against Entra ID instead of ADFS.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span><span style="color:#75715e"># Check current domain federation status</span>
+</span></span><span style="display:flex;"><span>Get-MgDomain -DomainId <span style="color:#e6db74">&#34;yourdomain.com&#34;</span> | Select-Object AuthenticationType
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Convert from federated to managed (Password Hash Sync)</span>
+</span></span><span style="display:flex;"><span>Update-MgDomain -DomainId <span style="color:#e6db74">&#34;yourdomain.com&#34;</span> -AuthenticationType <span style="color:#e6db74">&#34;Managed&#34;</span>
+</span></span></code></pre></div><p><strong>Do this during a maintenance window.</strong> Even with staged rollout testing, the domain conversion affects all users simultaneously. Have a rollback plan — you can re-federate the domain if something goes wrong:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span><span style="color:#75715e"># Emergency rollback to ADFS</span>
+</span></span><span style="display:flex;"><span>Set-MsolDomainAuthentication -DomainName <span style="color:#e6db74">&#34;yourdomain.com&#34;</span> `
+</span></span><span style="display:flex;"><span>    -FederationBrandName <span style="color:#e6db74">&#34;Your Org&#34;</span> `
+</span></span><span style="display:flex;"><span>    -Authentication Federated `
+</span></span><span style="display:flex;"><span>    -ActiveLogOnUri <span style="color:#e6db74">&#34;https://sts.yourdomain.com/adfs/services/trust/2005/usernamemixed&#34;</span> `
+</span></span><span style="display:flex;"><span>    -PassiveLogOnUri <span style="color:#e6db74">&#34;https://sts.yourdomain.com/adfs/ls/&#34;</span> `
+</span></span><span style="display:flex;"><span>    -IssuerUri <span style="color:#e6db74">&#34;http://sts.yourdomain.com/adfs/services/trust&#34;</span>
+</span></span></code></pre></div><h2 id="phase-5-decommission-adfs">Phase 5: Decommission ADFS<a hidden class="anchor" aria-hidden="true" href="#phase-5-decommission-adfs">#</a></h2>
+<p>Don&rsquo;t rush this. After domain conversion, keep ADFS running for 2-4 weeks to catch any missed dependencies.</p>
+<h3 id="decommission-checklist">Decommission Checklist<a hidden class="anchor" aria-hidden="true" href="#decommission-checklist">#</a></h3>
+<ol>
+<li><strong>Verify no active ADFS traffic</strong> — Check ADFS event logs (Event ID 411 for token issuance) and confirm zero activity:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span><span style="color:#75715e"># Check for recent token issuance events</span>
+</span></span><span style="display:flex;"><span>Get-WinEvent -FilterHashtable @{LogName=<span style="color:#e6db74">&#39;AD FS/Admin&#39;</span>; ID=<span style="color:#ae81ff">411</span>; StartTime=(Get-Date).AddDays(<span style="color:#ae81ff">-7</span>)} -ErrorAction SilentlyContinue | Measure-Object
+</span></span></code></pre></div><ol start="2">
+<li><strong>Remove DNS records</strong> — Delete A/CNAME records for <code>sts.yourdomain.com</code> and WAP endpoints</li>
+<li><strong>Revoke SSL certificates</strong> — Revoke the token signing certificates from your CA</li>
+<li><strong>Decommission servers</strong> — Remove ADFS role from servers, then decommission the VMs</li>
+<li><strong>Clean up Entra Connect</strong> — Remove the ADFS federation configuration from Entra Connect if present</li>
+<li><strong>Update documentation</strong> — Update runbooks, incident response procedures, and architecture diagrams</li>
+</ol>
+<h2 id="common-pitfalls">Common Pitfalls<a hidden class="anchor" aria-hidden="true" href="#common-pitfalls">#</a></h2>
+<p><strong>Certificate-based authentication (CBA)</strong>: If you use smart cards or client certificates via ADFS, configure Entra ID CBA before migration. Entra ID supports CBA natively now, but the configuration is different from ADFS.</p>
+<p><strong>Token lifetime differences</strong>: ADFS default token lifetime is 60 minutes. Entra ID uses configurable token lifetime policies. Apps that relied on specific ADFS token lifetimes may behave differently.</p>
+<p><strong>Claims passthrough for on-premises apps</strong>: If ADFS was fronting on-premises web apps, you&rsquo;ll need Azure AD Application Proxy to maintain SSO for those applications.</p>
+<p><strong>Conditional access gaps</strong>: Review your ADFS access control policies. Some may not have direct Entra ID conditional access equivalents — particularly policies based on network location ranges that don&rsquo;t match your Entra ID named locations.</p>
+<h2 id="timeline-template">Timeline Template<a hidden class="anchor" aria-hidden="true" href="#timeline-template">#</a></h2>
+<table>
+  <thead>
+      <tr>
+          <th>Week</th>
+          <th>Activity</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>1-2</td>
+          <td>Complete inventory, run compatibility reports</td>
+      </tr>
+      <tr>
+          <td>3-4</td>
+          <td>Configure Entra Connect, set up staged rollout, pilot group</td>
+      </tr>
+      <tr>
+          <td>5-8</td>
+          <td>Migrate Wave 1 apps (standard SAML/WS-Fed)</td>
+      </tr>
+      <tr>
+          <td>9-12</td>
+          <td>Migrate Wave 2 apps (custom claims, roles)</td>
+      </tr>
+      <tr>
+          <td>13-16</td>
+          <td>Migrate Wave 3 apps (Kerberos, complex scenarios)</td>
+      </tr>
+      <tr>
+          <td>17-18</td>
+          <td>Convert federated domains to managed</td>
+      </tr>
+      <tr>
+          <td>19-22</td>
+          <td>Monitoring period, catch missed dependencies</td>
+      </tr>
+      <tr>
+          <td>23-24</td>
+          <td>Decommission ADFS infrastructure</td>
+      </tr>
+  </tbody>
+</table>
+<p>The timeline compresses significantly for smaller organizations. A company with 10 relying party trusts and no complex claim rules can realistically finish in 4-6 weeks.</p>
+<h2 id="whats-next">What&rsquo;s Next<a hidden class="anchor" aria-hidden="true" href="#whats-next">#</a></h2>
+<p>After ADFS is gone, take advantage of what Entra ID offers that ADFS never could: passwordless authentication with FIDO2 keys, risk-based conditional access, and continuous access evaluation. The migration is the hard part — once you&rsquo;re on Entra ID, the security posture improvements come quickly.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/adfs-migration/">Adfs-Migration</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/microsoft-entra-id/">Microsoft Entra ID</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/azure-ad/">Azure-Ad</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/identity-migration/">Identity-Migration</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/enterprise-iam/">Enterprise-Iam</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/adfs-to-keycloak-migration-open-source-alternative/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>ADFS to Keycloak Migration: Replacing Windows Federation with Open Source IAM</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/automating-forgerock-ds-replication-setup-with-ansible-playbooks/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Automating ForgeRock DS Replication Setup with Ansible Playbooks</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+
+<section class="post-feedback">
+  <p class="feedback-question">Was this article helpful?</p>
+  <div class="feedback-buttons">
+    <button class="feedback-btn feedback-yes" onclick="trackFeedback('yes', '\/posts\/adfs-to-microsoft-entra-id-migration-complete-guide\/')" aria-label="Yes, helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      Yes
+    </button>
+    <button class="feedback-btn feedback-no" onclick="trackFeedback('no', '\/posts\/adfs-to-microsoft-entra-id-migration-complete-guide\/')" aria-label="No, not helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>
+      No
+    </button>
+  </div>
+  <p class="feedback-thanks" style="display: none;">Thanks for your feedback!</p>
+</section>
+
+
+<section class="author-bio">
+  <div class="author-avatar">
+    <img src="/IAMDevBox.com.jpg" alt="IAMDevBox Author" width="64" height="64" loading="lazy">
+  </div>
+  <div class="author-info">
+    <h4>Written by IAMDevBox</h4>
+    <p>Enterprise IAM architect with 15+ years in identity modernization. Certified across ForgeRock, Ping Identity, SailPoint, AWS, and Azure.</p>
+    <div class="author-links">
+      <a href="https://twitter.com/iamdevbox" target="_blank" rel="noopener" title="Follow on X/Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/iamdevbox" target="_blank" rel="noopener" title="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="/contact/" title="Contact">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function trackFeedback(value, page) {
+  
+  document.querySelector('.feedback-buttons').style.display = 'none';
+  document.querySelector('.feedback-question').style.display = 'none';
+  document.querySelector('.feedback-thanks').style.display = 'block';
+
+  
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'post_feedback', {
+      'feedback_value': value,
+      'page_path': page
+    });
+  }
+
+  
+  localStorage.setItem('feedback_' + page, value);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const page = '\/posts\/adfs-to-microsoft-entra-id-migration-complete-guide\/';
+  if (localStorage.getItem('feedback_' + page)) {
+    document.querySelector('.feedback-buttons').style.display = 'none';
+    document.querySelector('.feedback-question').textContent = 'Thanks for your feedback!';
+  }
+});
+</script>
+
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/hybrid-iam-coexistence-on-premise-and-cloud-identity-in-parallel/" class="custom-link">
+              Hybrid IAM Coexistence: Running On-Premise and Cloud Identity Systems in Parallel
+            </a>
+            <small class="custom-date">2026-02-05</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/password-hash-migration-between-identity-platforms/" class="custom-link">
+              Password Hash Migration Between Identity Platforms: A Practical Guide
+            </a>
+            <small class="custom-date">2026-02-05</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/ciam-architecture-patterns-designing-customer-identity-at-scale/" class="custom-link">
+              CIAM Architecture Patterns: Designing Customer Identity for Millions of Users
+            </a>
+            <small class="custom-date">2026-02-05</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/identity-consolidation-after-mergers-acquisitions-playbook/" class="custom-link">
+              M&amp;A Identity Integration: Merging Multiple Identity Providers After Acquisition
+            </a>
+            <small class="custom-date">2026-02-05</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/on-premise-iam-to-cloud-migration-planning-framework/" class="custom-link">
+              On-Premise IAM to Cloud Migration: Planning Framework and Execution Strategy
+            </a>
+            <small class="custom-date">2026-02-05</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+                Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+                Go Secretless with Snowflake Workload Identity Federation - Snowflake
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+                JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+                OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+                Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

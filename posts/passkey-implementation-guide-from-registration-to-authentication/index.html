@@ -1,0 +1,2896 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Passkey Implementation Guide: From Registration to Authentication | IAMDevBox</title>
+<meta name="keywords" content="passkey implementation guide, from registration to authentication, passkey, webauthn, biometric, passwordless, passkeys, security, authentication">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/passkey-implementation-guide-from-registration-to-authentication/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.e24ea479df3e367781fafa20cedde21c7e043c10bed4c8c913ef9261a049a1e2.css" integrity="sha256-4k6ked8&#43;NneB&#43;vogzt3iHH4EPBC&#43;1MjJE&#43;&#43;SYaBJoeI=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/passkey-implementation-guide-from-registration-to-authentication/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/passkey-implementation-guide-from-registration-to-authentication/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="Passkey Implementation Guide: From Registration to Authentication">
+  <meta property="og:description" content="Learn how to implement passkeys using WebAuthn for secure, passwordless authentication. This guide covers registration, authentication, and security best practices.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-01-14T14:30:20+00:00">
+    <meta property="article:modified_time" content="2026-02-10T09:19:20-05:00">
+    <meta property="article:tag" content="Passkeys">
+    <meta property="article:tag" content="Iam">
+    <meta property="article:tag" content="Webauthn">
+    <meta property="article:tag" content="Security">
+    <meta property="article:tag" content="Authentication">
+    <meta property="og:image" content="https://www.iamdevbox.com/images/posts/passkey-implementation-guide--from-registration-to-37f82bda.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/images/posts/passkey-implementation-guide--from-registration-to-37f82bda.webp">
+<meta name="twitter:title" content="Passkey Implementation Guide: From Registration to Authentication">
+<meta name="twitter:description" content="Learn how to implement passkeys using WebAuthn for secure, passwordless authentication. This guide covers registration, authentication, and security best practices.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Passkey Implementation Guide: From Registration to Authentication",
+      "item": "https://www.iamdevbox.com/posts/passkey-implementation-guide-from-registration-to-authentication/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Passkey Implementation Guide: From Registration to Authentication",
+  "name": "Passkey Implementation Guide: From Registration to Authentication",
+  "description": "Learn how to implement passkeys using WebAuthn for secure, passwordless authentication. This guide covers registration, authentication, and security best practices.",
+  "keywords": [
+    "passkey implementation guide", "from registration to authentication", "passkey", "webauthn", "biometric", "passwordless", "passkeys", "security", "authentication"
+  ],
+  "articleBody": "Passkeys are a modern, passwordless authentication method that leverages public key cryptography and biometric data or a PIN to authenticate users securely. They are part of the Web Authentication (WebAuthn) standard and are designed to replace traditional passwords, offering enhanced security and a better user experience.\nWhat is a passkey? A passkey is a strong, passwordless authentication method that uses public key cryptography and biometric data or a PIN. Unlike passwords, passkeys cannot be stolen or guessed, making them a more secure option for user authentication.\nHow do passkeys work? Passkeys work by utilizing the Web Authentication (WebAuthn) standard, which allows websites and apps to register and authenticate users without relying on passwords. The process involves creating a public/private key pair on the user’s device and storing the public key on the server.\nWhat are the benefits of using passkeys? Using passkeys offers several benefits:\nSecurity: Passkeys are resistant to phishing attacks and brute-force attempts. Convenience: Users can log in using biometrics (fingerprint, face ID) or a PIN without entering a password. Scalability: Passkeys can be used across different devices and platforms. What are the security considerations for passkeys? When implementing passkeys, consider the following security measures:\nSecure Storage: Ensure that public keys are stored securely on the server. Phishing Protection: Implement measures to prevent phishing attacks, such as verifying domain names. Attestation Validation: Validate attestation statements to ensure the authenticity of the authenticator. Quick Answer: How to implement passkeys? To implement passkeys, follow these steps:\nRegister the passkey: Use the WebAuthn API to create a public/private key pair and store the public key on the server. Authenticate the user: Use the WebAuthn API to verify the user’s identity during login by signing a challenge with the private key. What is WebAuthn? WebAuthn is a W3C standard that enables strong authentication without passwords. It allows websites and apps to register and authenticate users using public key cryptography and various authenticators, including biometric sensors and hardware tokens.\nHow do I register a passkey? Registering a passkey involves creating a public/private key pair and storing the public key on the server. Here’s how you can do it using the WebAuthn API:\nStep-by-step Guide Create a credential creation options object This object contains parameters for the passkey registration process. ```javascript const publicKey = { rp: { name: \"Example Corp\", id: \"example.com\" }, user: { id: new TextEncoder().encode(user.id), name: user.email, displayName: user.name }, pubKeyCredParams: [{ alg: -7, type: \"public-key\" }], attestation: \"direct\", authenticatorSelection: { residentKey: \"required\", userVerification: \"required\" } }; ``` Create a new credential Use the `navigator.credentials.create()` method to generate the key pair. ```javascript try { const credential = await navigator.credentials.create({ publicKey }); // Send the credential to the server } catch (error) { console.error(\"Registration failed:\", error); } ``` Send the credential to the server The server should store the public key and other necessary data. ```javascript const response = await fetch('/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: credential.id, rawId: btoa(String.fromCharCode(...new Uint8Array(credential.rawId))), type: credential.type, response: { attestationObject: btoa(String.fromCharCode(...new Uint8Array(credential.response.attestationObject))), clientDataJSON: btoa(String.fromCharCode(...new Uint8Array(credential.response.clientDataJSON))) } }) }); ``` Common Errors TypeError: Failed to execute ‘create’ on ‘CredentialsContainer’: Ensure that the publicKey object is correctly formatted and that the browser supports WebAuthn. NotAllowedError: The operation either timed out or was not allowed. User gesture is required.: Passkey registration requires a user gesture, such as a button click. How do I authenticate a user with a passkey? Authenticating a user with a passkey involves verifying their identity using the private key stored on their device. Here’s how you can implement this using the WebAuthn API:\nStep-by-step Guide Create a credential request options object This object contains parameters for the authentication process. ```javascript const publicKey = { challenge: new TextEncoder().encode(challengeFromServer), allowCredentials: [ { type: \"public-key\", id: new Uint8Array(base64ToArrayBuffer(userId)) } ], userVerification: \"required\" }; ``` Get the assertion from the user Use the `navigator.credentials.get()` method to obtain the assertion. ```javascript try { const assertion = await navigator.credentials.get({ publicKey }); // Send the assertion to the server } catch (error) { console.error(\"Authentication failed:\", error); } ``` Send the assertion to the server The server should verify the assertion to confirm the user's identity. ```javascript const response = await fetch('/authenticate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: assertion.id, rawId: btoa(String.fromCharCode(...new Uint8Array(assertion.rawId))), type: assertion.type, response: { authenticatorData: btoa(String.fromCharCode(...new Uint8Array(assertion.response.authenticatorData))), clientDataJSON: btoa(String.fromCharCode(...new Uint8Array(assertion.response.clientDataJSON))), signature: btoa(String.fromCharCode(...new Uint8Array(assertion.response.signature))), userHandle: btoa(String.fromCharCode(...new Uint8Array(assertion.response.userHandle))) } }) }); ``` Common Errors InvalidStateError: The operation either timed out or was not allowed. User gesture is required.: Authentication requires a user gesture, such as a button click. NotAllowedError: The operation either timed out or was not allowed.: Ensure that the user has registered a passkey and that the browser supports WebAuthn. What are the best practices for implementing passkeys? Implementing passkeys requires careful consideration of best practices to ensure security and usability. Here are some key recommendations:\nSecure Storage of Public Keys Store public keys securely on the server. Avoid storing sensitive data unnecessarily and ensure that your database is protected against unauthorized access.\nPhishing Protection Implement measures to prevent phishing attacks, such as verifying domain names and using HTTPS. Educate users about the importance of recognizing phishing attempts.\nAttestation Validation Validate attestation statements to ensure the authenticity of the authenticator. This step helps verify that the passkey was created on a trusted device.\nUser Verification Require user verification during authentication to prevent unauthorized access. Options include biometric data, PINs, or passwords.\nError Handling Implement robust error handling to provide meaningful feedback to users and developers. Handle common errors gracefully and log errors for further analysis.\nComparison of Password-Based and Passkey-Based Authentication AspectPassword-BasedPasskey-Based SecurityVulnerable to phishing, brute-force attacksResistant to phishing, strong cryptographic security User ExperienceRequires memorizing and managing passwordsUses biometrics or PINs for easy login ScalabilityLimited to single deviceCan be used across multiple devices MaintenanceRegular password changes, password reset processesNo need for password changes or resets Quick Reference 📋 Quick Reference navigator.credentials.create({ publicKey }) - Creates a new passkey. navigator.credentials.get({ publicKey }) - Authenticates a user with a passkey. btoa() - Encodes binary data to base64. Security Considerations ⚠️ Warning: Always validate attestation statements to ensure the authenticity of the authenticator. 🚨 Security Alert: Never store private keys on the server. They should remain on the user's device. ✅ Best Practice: Require user verification during authentication to prevent unauthorized access. Key Takeaways 🎯 Key Takeaways Passkeys offer strong, passwordless authentication using public key cryptography. Implement passkeys using the WebAuthn API for registration and authentication. Consider security best practices, such as secure storage and attestation validation. Conclusion Implementing passkeys provides a secure and convenient authentication method for your users. By following the steps outlined in this guide, you can integrate passkeys into your application and enhance your security posture. Get this right and you’ll sleep better knowing your users are protected.\n💜 Pro Tip: Test your passkey implementation thoroughly across different devices and browsers to ensure compatibility.",
+  "wordCount" : "1144",
+  "inLanguage": "en",
+  "image":"https://www.iamdevbox.com/images/posts/passkey-implementation-guide--from-registration-to-37f82bda.webp","datePublished": "2026-01-14T14:30:20Z",
+  "dateModified": "2026-02-10T09:19:20-05:00",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/passkey-implementation-guide-from-registration-to-authentication/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is a passkey?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A passkey is a strong, passwordless authentication method that uses public key cryptography and biometric data or a PIN."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do you implement passkeys?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Implement passkeys by integrating WebAuthn APIs for registration and authentication processes."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the security considerations for passkeys?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Ensure secure storage of public keys, protect against phishing, and validate attestation statements."
+      }
+    }
+  ]
+}
+</script>
+    <meta name="description" content="Learn how to implement passkeys using WebAuthn for secure, passwordless authentication. This guide covers registration, authentication, and security best practices."><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/passkey-implementation-guide-from-registration-to-authentication\/"
+  },
+  "headline": "Passkey Implementation Guide: From Registration to Authentication",
+  "description": "Learn how to implement passkeys using WebAuthn for secure, passwordless authentication. This guide covers registration, authentication, and security best practices.",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon-96x96.png",
+      "width": 96,
+      "height": 96
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://www.iamdevbox.com/IAMDevBox.com.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "datePublished": "2026-01-14T14:30:20Z",
+  "dateModified": "2026-02-10T09:19:20-05:00",
+  "wordCount":  1144 ,
+  "articleSection": "posts",
+  "keywords": ["passkey implementation guide","from registration to authentication","passkey","webauthn","biometric","passwordless","passkeys","security","authentication"]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Passkey Implementation Guide: From Registration to Authentication",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/passkey-implementation-guide-from-registration-to-authentication\/"
+    }
+  ]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-token-exchange-implementing-oauth-20-token-exchange\/"
+            },
+            "headline": "Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:29:55Z",
+            "dateModified": "2026-03-01T14:30:15Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/go-secretless-with-snowflake-workload-identity-federation-snowflake\/"
+            },
+            "headline": "Go Secretless with Snowflake Workload Identity Federation - Snowflake",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:24:03Z",
+            "dateModified": "2026-03-01T14:24:20Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-algorithm-confusion-attack-cve-2026-developer-guide\/"
+            },
+            "headline": "JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-02-28T18:00:00Z",
+            "dateModified": "2026-03-01T11:21:01-05:00"
+          }
+  ]
+}
+</script>
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    const mermaidBlocks = document.querySelectorAll('.mermaid, pre code.language-mermaid, code.language-mermaid');
+    if (mermaidBlocks.length > 0) {
+        
+        mermaidBlocks.forEach(block => {
+            if (block.tagName === 'CODE') {
+                const pre = block.parentElement;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = block.textContent;
+                if (pre && pre.tagName === 'PRE') {
+                    pre.parentNode.replaceChild(div, pre);
+                } else {
+                    block.parentNode.replaceChild(div, block);
+                }
+            }
+        });
+
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+            const isDark = document.body.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#5a67d8',
+                    
+                    secondaryColor: '#48bb78',
+                    secondaryTextColor: '#ffffff',
+                    secondaryBorderColor: '#38a169',
+                    
+                    tertiaryColor: '#ed8936',
+                    tertiaryTextColor: '#ffffff',
+                    tertiaryBorderColor: '#dd6b20',
+                    
+                    lineColor: '#718096',
+                    
+                    background: isDark ? '#1a202c' : '#ffffff',
+                    mainBkg: isDark ? '#2d3748' : '#f7fafc',
+                    
+                    actorBkg: '#667eea',
+                    actorBorder: '#5a67d8',
+                    actorTextColor: '#ffffff',
+                    actorLineColor: '#718096',
+                    signalColor: '#4a5568',
+                    signalTextColor: '#2d3748',
+                    labelBoxBkgColor: '#edf2f7',
+                    labelBoxBorderColor: '#cbd5e0',
+                    labelTextColor: '#2d3748',
+                    loopTextColor: '#553c9a',
+                    noteBkgColor: '#faf089',
+                    noteTextColor: '#744210',
+                    noteBorderColor: '#d69e2e',
+                    
+                    nodeBkg: '#667eea',
+                    nodeBorder: '#5a67d8',
+                    clusterBkg: '#e2e8f0',
+                    clusterBorder: '#a0aec0',
+                    defaultLinkColor: '#718096',
+                    titleColor: '#2d3748',
+                    edgeLabelBackground: 'transparent',
+                    
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                sequence: {
+                    useMaxWidth: true,
+                    boxMargin: 10,
+                    boxTextMargin: 5,
+                    noteMargin: 10,
+                    messageMargin: 35,
+                    mirrorActors: false
+                }
+            });
+            mermaid.run().then(() => {
+                
+                document.querySelectorAll('.mermaid .node').forEach(node => {
+                    const rect = node.querySelector('rect, circle, ellipse, polygon');
+                    if (rect) {
+                        const fill = rect.getAttribute('fill') || window.getComputedStyle(rect).fill;
+                        
+                        const isDarkBg = fill && (
+                            fill.includes('667eea') || fill.includes('102, 126, 234') ||
+                            fill.includes('48bb78') || fill.includes('72, 187, 120') ||
+                            fill.includes('ed8936') || fill.includes('237, 137, 54') ||
+                            fill.includes('553c9a') || fill.includes('9f7aea') ||
+                            fill.includes('e53e3e') || fill.includes('dd6b20')
+                        );
+                        const textColor = isDarkBg ? '#ffffff' : '#1a202c';
+                        node.querySelectorAll('span, .nodeLabel, text, foreignObject div').forEach(text => {
+                            text.style.color = textColor;
+                            text.style.fill = textColor;
+                        });
+                    }
+                });
+            });
+        };
+        document.head.appendChild(script);
+    }
+
+    
+    const postContent = document.querySelector('.post-content');
+    const isSinglePost = document.querySelector('.post-single');
+    const isToolsPage = window.location.pathname.startsWith('/tools/');
+    if (postContent && isSinglePost && window.innerWidth >= 1400 && !isToolsPage) {
+        const headings = postContent.querySelectorAll('h2, h3');
+        if (headings.length >= 3) {
+            const toc = document.createElement('nav');
+            toc.className = 'floating-toc';
+            toc.innerHTML = '<h4>📑 Contents</h4><ul></ul>';
+            const tocList = toc.querySelector('ul');
+
+            headings.forEach((heading, index) => {
+                const id = heading.id || `section-${index}`;
+                heading.id = id;
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2';
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            document.body.appendChild(toc);
+
+            
+            const tocLinks = toc.querySelectorAll('a');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 150) {
+                        current = heading.id;
+                    }
+                });
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+    }
+
+    
+    if (postContent && isSinglePost && window.innerWidth >= 1200) {
+        const h2s = postContent.querySelectorAll('h2');
+        if (h2s.length >= 2) {
+            const indicator = document.createElement('div');
+            indicator.className = 'section-indicator';
+
+            h2s.forEach((h2, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'section-dot';
+                dot.title = h2.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                dot.addEventListener('click', () => {
+                    h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                indicator.appendChild(dot);
+            });
+
+            document.body.appendChild(indicator);
+
+            
+            window.addEventListener('scroll', () => {
+                const dots = indicator.querySelectorAll('.section-dot');
+                let activeIndex = 0;
+                h2s.forEach((h2, index) => {
+                    if (h2.getBoundingClientRect().top <= 200) {
+                        activeIndex = index;
+                    }
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+    }
+    });
+    </script>
+
+    
+    
+    <script>
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        function loadGA() {
+            if (window.gaLoaded) return;
+            window.gaLoaded = true;
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975';
+            document.head.appendChild(script);
+
+            script.onload = () => {
+                gtag('js', new Date());
+                gtag('config', 'G-B6QCH29975');
+            };
+        }
+
+        
+        ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+            window.addEventListener(event, loadGA, { once: true, passive: true });
+        });
+
+        
+        setTimeout(loadGA, 3000);
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+    
+    <div class="reading-progress" id="reading-progress"></div>
+    <script>
+    window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / docHeight) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+    </script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+            </div>
+        </div><button id="menu-btn" aria-label="Menu" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/categories/trending/" title="Hot IAM topics">
+                    <span>🔥Trending</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+(function() {
+    var btn = document.getElementById('menu-btn');
+    var menu = document.getElementById('menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+        });
+        
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
+</script>
+<main class="main">
+
+
+
+<div class="reading-progress" id="reading-progress"></div>
+<script>
+(function() {
+  const progressBar = document.getElementById('reading-progress');
+  const article = document.querySelector('.post-content');
+
+  if (!progressBar || !article) return;
+
+  function updateProgress() {
+    const articleTop = article.offsetTop;
+    const articleHeight = article.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+
+    
+    const start = articleTop - windowHeight;
+    const end = articleTop + articleHeight;
+    const current = scrollTop - start;
+    const total = end - start;
+
+    const progress = Math.min(Math.max((current / total) * 100, 0), 100);
+    progressBar.style.width = progress + '%';
+  }
+
+  
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  
+  updateProgress();
+})();
+</script>
+
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent" data-pagefind-meta="title">
+      Passkey Implementation Guide: From Registration to Authentication
+    </h1>
+    <div class="post-meta"><span title='2026-01-14 14:30:20'>Jan 14, 2026</span>&nbsp;·&nbsp;6 min&nbsp;·&nbsp;1144 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+    
+      <div class="post-updated">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Updated: Feb 10, 2026
+      </div>
+  </header> 
+<figure class="entry-cover">
+        <img loading="eager" src="https://www.iamdevbox.com/images/posts/passkey-implementation-guide--from-registration-to-37f82bda.webp" alt="Passkey Implementation Guide: From Registration to Authentication">
+        
+</figure><div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#what-is-a-passkey" aria-label="What is a passkey?">What is a passkey?</a></li>
+                <li>
+                    <a href="#how-do-passkeys-work" aria-label="How do passkeys work?">How do passkeys work?</a></li>
+                <li>
+                    <a href="#what-are-the-benefits-of-using-passkeys" aria-label="What are the benefits of using passkeys?">What are the benefits of using passkeys?</a></li>
+                <li>
+                    <a href="#what-are-the-security-considerations-for-passkeys" aria-label="What are the security considerations for passkeys?">What are the security considerations for passkeys?</a></li>
+                <li>
+                    <a href="#quick-answer-how-to-implement-passkeys" aria-label="Quick Answer: How to implement passkeys?">Quick Answer: How to implement passkeys?</a></li>
+                <li>
+                    <a href="#what-is-webauthn" aria-label="What is WebAuthn?">What is WebAuthn?</a></li>
+                <li>
+                    <a href="#how-do-i-register-a-passkey" aria-label="How do I register a passkey?">How do I register a passkey?</a><ul>
+                        
+                <li>
+                    <a href="#step-by-step-guide" aria-label="Step-by-step Guide">Step-by-step Guide</a><ul>
+                        
+                <li>
+                    <a href="#" aria-label="Create a credential creation options object">Create a credential creation options object</a></li>
+                <li>
+                    <a href="#" aria-label="Create a new credential">Create a new credential</a></li>
+                <li>
+                    <a href="#" aria-label="Send the credential to the server">Send the credential to the server</a></li></ul>
+                </li>
+                <li>
+                    <a href="#common-errors" aria-label="Common Errors">Common Errors</a></li></ul>
+                </li>
+                <li>
+                    <a href="#how-do-i-authenticate-a-user-with-a-passkey" aria-label="How do I authenticate a user with a passkey?">How do I authenticate a user with a passkey?</a><ul>
+                        
+                <li>
+                    <a href="#step-by-step-guide-1" aria-label="Step-by-step Guide">Step-by-step Guide</a><ul>
+                        
+                <li>
+                    <a href="#" aria-label="Create a credential request options object">Create a credential request options object</a></li>
+                <li>
+                    <a href="#" aria-label="Get the assertion from the user">Get the assertion from the user</a></li>
+                <li>
+                    <a href="#" aria-label="Send the assertion to the server">Send the assertion to the server</a></li></ul>
+                </li>
+                <li>
+                    <a href="#common-errors-1" aria-label="Common Errors">Common Errors</a></li></ul>
+                </li>
+                <li>
+                    <a href="#what-are-the-best-practices-for-implementing-passkeys" aria-label="What are the best practices for implementing passkeys?">What are the best practices for implementing passkeys?</a><ul>
+                        
+                <li>
+                    <a href="#secure-storage-of-public-keys" aria-label="Secure Storage of Public Keys">Secure Storage of Public Keys</a></li>
+                <li>
+                    <a href="#phishing-protection" aria-label="Phishing Protection">Phishing Protection</a></li>
+                <li>
+                    <a href="#attestation-validation" aria-label="Attestation Validation">Attestation Validation</a></li>
+                <li>
+                    <a href="#user-verification" aria-label="User Verification">User Verification</a></li>
+                <li>
+                    <a href="#error-handling" aria-label="Error Handling">Error Handling</a></li></ul>
+                </li>
+                <li>
+                    <a href="#comparison-of-password-based-and-passkey-based-authentication" aria-label="Comparison of Password-Based and Passkey-Based Authentication">Comparison of Password-Based and Passkey-Based Authentication</a></li>
+                <li>
+                    <a href="#quick-reference" aria-label="Quick Reference">Quick Reference</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#" aria-label="📋 Quick Reference">📋 Quick Reference</a></li></ul>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#security-considerations" aria-label="Security Considerations">Security Considerations</a></li>
+                <li>
+                    <a href="#key-takeaways" aria-label="Key Takeaways">Key Takeaways</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#" aria-label="🎯 Key Takeaways">🎯 Key Takeaways</a></li></ul>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#conclusion" aria-label="Conclusion">Conclusion</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content" data-pagefind-body><p>Passkeys are a modern, passwordless authentication method that leverages public key cryptography and biometric data or a PIN to authenticate users securely. They are part of the Web Authentication (WebAuthn) standard and are designed to replace traditional passwords, offering enhanced security and a better user experience.</p>
+<h2 id="what-is-a-passkey">What is a passkey?<a hidden class="anchor" aria-hidden="true" href="#what-is-a-passkey">#</a></h2>
+<p>A passkey is a strong, passwordless authentication method that uses public key cryptography and biometric data or a PIN. Unlike passwords, passkeys cannot be stolen or guessed, making them a more secure option for user authentication.</p>
+<h2 id="how-do-passkeys-work">How do passkeys work?<a hidden class="anchor" aria-hidden="true" href="#how-do-passkeys-work">#</a></h2>
+<p>Passkeys work by utilizing the Web Authentication (WebAuthn) standard, which allows websites and apps to register and authenticate users without relying on passwords. The process involves creating a public/private key pair on the user&rsquo;s device and storing the public key on the server.</p>
+<h2 id="what-are-the-benefits-of-using-passkeys">What are the benefits of using passkeys?<a hidden class="anchor" aria-hidden="true" href="#what-are-the-benefits-of-using-passkeys">#</a></h2>
+<p>Using passkeys offers several benefits:</p>
+<ul>
+<li><strong>Security</strong>: Passkeys are resistant to phishing attacks and brute-force attempts.</li>
+<li><strong>Convenience</strong>: Users can log in using biometrics (fingerprint, face ID) or a PIN without entering a password.</li>
+<li><strong>Scalability</strong>: Passkeys can be used across different devices and platforms.</li>
+</ul>
+<h2 id="what-are-the-security-considerations-for-passkeys">What are the security considerations for passkeys?<a hidden class="anchor" aria-hidden="true" href="#what-are-the-security-considerations-for-passkeys">#</a></h2>
+<p>When implementing passkeys, consider the following security measures:</p>
+<ul>
+<li><strong>Secure Storage</strong>: Ensure that public keys are stored securely on the server.</li>
+<li><strong>Phishing Protection</strong>: Implement measures to prevent phishing attacks, such as verifying domain names.</li>
+<li><strong>Attestation Validation</strong>: Validate attestation statements to ensure the authenticity of the authenticator.</li>
+</ul>
+<h2 id="quick-answer-how-to-implement-passkeys">Quick Answer: How to implement passkeys?<a hidden class="anchor" aria-hidden="true" href="#quick-answer-how-to-implement-passkeys">#</a></h2>
+<p>To implement passkeys, follow these steps:</p>
+<ol>
+<li><strong>Register the passkey</strong>: Use the WebAuthn API to create a public/private key pair and store the public key on the server.</li>
+<li><strong>Authenticate the user</strong>: Use the WebAuthn API to verify the user&rsquo;s identity during login by signing a challenge with the private key.</li>
+</ol>
+<h2 id="what-is-webauthn">What is WebAuthn?<a hidden class="anchor" aria-hidden="true" href="#what-is-webauthn">#</a></h2>
+<p>WebAuthn is a W3C standard that enables strong authentication without passwords. It allows websites and apps to register and authenticate users using public key cryptography and various authenticators, including biometric sensors and hardware tokens.</p>
+<h2 id="how-do-i-register-a-passkey">How do I register a passkey?<a hidden class="anchor" aria-hidden="true" href="#how-do-i-register-a-passkey">#</a></h2>
+<p>Registering a passkey involves creating a public/private key pair and storing the public key on the server. Here’s how you can do it using the WebAuthn API:</p>
+<h3 id="step-by-step-guide">Step-by-step Guide<a hidden class="anchor" aria-hidden="true" href="#step-by-step-guide">#</a></h3>
+<div class="step-guide">
+<div class="step-item"><div class="step-content">
+<h4>Create a credential creation options object</h4>
+This object contains parameters for the passkey registration process.
+```javascript
+const publicKey = {
+  rp: {
+    name: "Example Corp",
+    id: "example.com"
+  },
+  user: {
+    id: new TextEncoder().encode(user.id),
+    name: user.email,
+    displayName: user.name
+  },
+  pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+  attestation: "direct",
+  authenticatorSelection: {
+    residentKey: "required",
+    userVerification: "required"
+  }
+};
+```
+</div></div>
+<div class="step-item"><div class="step-content">
+<h4>Create a new credential</h4>
+Use the `navigator.credentials.create()` method to generate the key pair.
+```javascript
+try {
+  const credential = await navigator.credentials.create({ publicKey });
+  // Send the credential to the server
+} catch (error) {
+  console.error("Registration failed:", error);
+}
+```
+</div></div>
+<div class="step-item"><div class="step-content">
+<h4>Send the credential to the server</h4>
+The server should store the public key and other necessary data.
+```javascript
+const response = await fetch('/register', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    id: credential.id,
+    rawId: btoa(String.fromCharCode(...new Uint8Array(credential.rawId))),
+    type: credential.type,
+    response: {
+      attestationObject: btoa(String.fromCharCode(...new Uint8Array(credential.response.attestationObject))),
+      clientDataJSON: btoa(String.fromCharCode(...new Uint8Array(credential.response.clientDataJSON)))
+    }
+  })
+});
+```
+</div></div>
+</div>
+<h3 id="common-errors">Common Errors<a hidden class="anchor" aria-hidden="true" href="#common-errors">#</a></h3>
+<ul>
+<li><strong>TypeError: Failed to execute &lsquo;create&rsquo; on &lsquo;CredentialsContainer&rsquo;</strong>: Ensure that the <code>publicKey</code> object is correctly formatted and that the browser supports WebAuthn.</li>
+<li><strong>NotAllowedError: The operation either timed out or was not allowed. User gesture is required.</strong>: Passkey registration requires a user gesture, such as a button click.</li>
+</ul>
+<h2 id="how-do-i-authenticate-a-user-with-a-passkey">How do I authenticate a user with a passkey?<a hidden class="anchor" aria-hidden="true" href="#how-do-i-authenticate-a-user-with-a-passkey">#</a></h2>
+<p>Authenticating a user with a passkey involves verifying their identity using the private key stored on their device. Here’s how you can implement this using the WebAuthn API:</p>
+<h3 id="step-by-step-guide-1">Step-by-step Guide<a hidden class="anchor" aria-hidden="true" href="#step-by-step-guide-1">#</a></h3>
+<div class="step-guide">
+<div class="step-item"><div class="step-content">
+<h4>Create a credential request options object</h4>
+This object contains parameters for the authentication process.
+```javascript
+const publicKey = {
+  challenge: new TextEncoder().encode(challengeFromServer),
+  allowCredentials: [
+    {
+      type: "public-key",
+      id: new Uint8Array(base64ToArrayBuffer(userId))
+    }
+  ],
+  userVerification: "required"
+};
+```
+</div></div>
+<div class="step-item"><div class="step-content">
+<h4>Get the assertion from the user</h4>
+Use the `navigator.credentials.get()` method to obtain the assertion.
+```javascript
+try {
+  const assertion = await navigator.credentials.get({ publicKey });
+  // Send the assertion to the server
+} catch (error) {
+  console.error("Authentication failed:", error);
+}
+```
+</div></div>
+<div class="step-item"><div class="step-content">
+<h4>Send the assertion to the server</h4>
+The server should verify the assertion to confirm the user's identity.
+```javascript
+const response = await fetch('/authenticate', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    id: assertion.id,
+    rawId: btoa(String.fromCharCode(...new Uint8Array(assertion.rawId))),
+    type: assertion.type,
+    response: {
+      authenticatorData: btoa(String.fromCharCode(...new Uint8Array(assertion.response.authenticatorData))),
+      clientDataJSON: btoa(String.fromCharCode(...new Uint8Array(assertion.response.clientDataJSON))),
+      signature: btoa(String.fromCharCode(...new Uint8Array(assertion.response.signature))),
+      userHandle: btoa(String.fromCharCode(...new Uint8Array(assertion.response.userHandle)))
+    }
+  })
+});
+```
+</div></div>
+</div>
+<h3 id="common-errors-1">Common Errors<a hidden class="anchor" aria-hidden="true" href="#common-errors-1">#</a></h3>
+<ul>
+<li><strong>InvalidStateError: The operation either timed out or was not allowed. User gesture is required.</strong>: Authentication requires a user gesture, such as a button click.</li>
+<li><strong>NotAllowedError: The operation either timed out or was not allowed.</strong>: Ensure that the user has registered a passkey and that the browser supports WebAuthn.</li>
+</ul>
+<h2 id="what-are-the-best-practices-for-implementing-passkeys">What are the best practices for implementing passkeys?<a hidden class="anchor" aria-hidden="true" href="#what-are-the-best-practices-for-implementing-passkeys">#</a></h2>
+<p>Implementing passkeys requires careful consideration of best practices to ensure security and usability. Here are some key recommendations:</p>
+<h3 id="secure-storage-of-public-keys">Secure Storage of Public Keys<a hidden class="anchor" aria-hidden="true" href="#secure-storage-of-public-keys">#</a></h3>
+<p>Store public keys securely on the server. Avoid storing sensitive data unnecessarily and ensure that your database is protected against unauthorized access.</p>
+<h3 id="phishing-protection">Phishing Protection<a hidden class="anchor" aria-hidden="true" href="#phishing-protection">#</a></h3>
+<p>Implement measures to prevent phishing attacks, such as verifying domain names and using HTTPS. Educate users about the importance of recognizing phishing attempts.</p>
+<h3 id="attestation-validation">Attestation Validation<a hidden class="anchor" aria-hidden="true" href="#attestation-validation">#</a></h3>
+<p>Validate attestation statements to ensure the authenticity of the authenticator. This step helps verify that the passkey was created on a trusted device.</p>
+<h3 id="user-verification">User Verification<a hidden class="anchor" aria-hidden="true" href="#user-verification">#</a></h3>
+<p>Require user verification during authentication to prevent unauthorized access. Options include biometric data, PINs, or passwords.</p>
+<h3 id="error-handling">Error Handling<a hidden class="anchor" aria-hidden="true" href="#error-handling">#</a></h3>
+<p>Implement robust error handling to provide meaningful feedback to users and developers. Handle common errors gracefully and log errors for further analysis.</p>
+<h2 id="comparison-of-password-based-and-passkey-based-authentication">Comparison of Password-Based and Passkey-Based Authentication<a hidden class="anchor" aria-hidden="true" href="#comparison-of-password-based-and-passkey-based-authentication">#</a></h2>
+<table class="comparison-table">
+<thead><tr><th>Aspect</th><th>Password-Based</th><th>Passkey-Based</th></th>
+<tbody>
+<tr><td>Security</td><td>Vulnerable to phishing, brute-force attacks</td><td>Resistant to phishing, strong cryptographic security</td></tr>
+<tr><td>User Experience</td><td>Requires memorizing and managing passwords</td><td>Uses biometrics or PINs for easy login</td></tr>
+<tr><td>Scalability</td><td>Limited to single device</td><td>Can be used across multiple devices</td></tr>
+<tr><td>Maintenance</td><td>Regular password changes, password reset processes</td><td>No need for password changes or resets</td></tr>
+</tbody>
+</table>
+<h2 id="quick-reference">Quick Reference<a hidden class="anchor" aria-hidden="true" href="#quick-reference">#</a></h2>
+<div class="quick-ref">
+<h4>📋 Quick Reference</h4>
+<ul>
+<li><code>navigator.credentials.create({ publicKey })</code> - Creates a new passkey.</li>
+<li><code>navigator.credentials.get({ publicKey })</code> - Authenticates a user with a passkey.</li>
+<li><code>btoa()</code> - Encodes binary data to base64.</li>
+</ul>
+</div>
+<h2 id="security-considerations">Security Considerations<a hidden class="anchor" aria-hidden="true" href="#security-considerations">#</a></h2>
+<div class="notice warning">⚠️ <strong>Warning:</strong> Always validate attestation statements to ensure the authenticity of the authenticator.</div>
+<div class="notice danger">🚨 <strong>Security Alert:</strong> Never store private keys on the server. They should remain on the user's device.</div>
+<div class="notice success">✅ <strong>Best Practice:</strong> Require user verification during authentication to prevent unauthorized access.</div>
+<h2 id="key-takeaways">Key Takeaways<a hidden class="anchor" aria-hidden="true" href="#key-takeaways">#</a></h2>
+<div class="key-takeaway">
+<h4>🎯 Key Takeaways</h4>
+<ul>
+<li>Passkeys offer strong, passwordless authentication using public key cryptography.</li>
+<li>Implement passkeys using the WebAuthn API for registration and authentication.</li>
+<li>Consider security best practices, such as secure storage and attestation validation.</li>
+</ul>
+</div>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>Implementing passkeys provides a secure and convenient authentication method for your users. By following the steps outlined in this guide, you can integrate passkeys into your application and enhance your security posture. Get this right and you&rsquo;ll sleep better knowing your users are protected.</p>
+<div class="notice tip">💜 <strong>Pro Tip:</strong> Test your passkey implementation thoroughly across different devices and browsers to ensure compatibility.</div>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/passkeys/">Passkeys</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/iam/">Iam</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/webauthn/">Webauthn</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/security/">Security</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/authentication/">Authentication</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/multi-brand-identity-simplified-with-auth0-multiple-custom-domains/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Multi-Brand Identity Simplified with Auth0 Multiple Custom Domains</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/identity-dark-matter-the-massive-hidden-cost-of-your-iam-program/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Identity Dark Matter: The Massive Hidden Cost of Your IAM Program</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+
+<section class="post-feedback">
+  <p class="feedback-question">Was this article helpful?</p>
+  <div class="feedback-buttons">
+    <button class="feedback-btn feedback-yes" onclick="trackFeedback('yes', '\/posts\/passkey-implementation-guide-from-registration-to-authentication\/')" aria-label="Yes, helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      Yes
+    </button>
+    <button class="feedback-btn feedback-no" onclick="trackFeedback('no', '\/posts\/passkey-implementation-guide-from-registration-to-authentication\/')" aria-label="No, not helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>
+      No
+    </button>
+  </div>
+  <p class="feedback-thanks" style="display: none;">Thanks for your feedback!</p>
+</section>
+
+
+<section class="author-bio">
+  <div class="author-avatar">
+    <img src="/IAMDevBox.com.jpg" alt="IAMDevBox Author" width="64" height="64" loading="lazy">
+  </div>
+  <div class="author-info">
+    <h4>Written by IAMDevBox</h4>
+    <p>Enterprise IAM architect with 15+ years in identity modernization. Certified across ForgeRock, Ping Identity, SailPoint, AWS, and Azure.</p>
+    <div class="author-links">
+      <a href="https://twitter.com/iamdevbox" target="_blank" rel="noopener" title="Follow on X/Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/iamdevbox" target="_blank" rel="noopener" title="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="/contact/" title="Contact">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function trackFeedback(value, page) {
+  
+  document.querySelector('.feedback-buttons').style.display = 'none';
+  document.querySelector('.feedback-question').style.display = 'none';
+  document.querySelector('.feedback-thanks').style.display = 'block';
+
+  
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'post_feedback', {
+      'feedback_value': value,
+      'page_path': page
+    });
+  }
+
+  
+  localStorage.setItem('feedback_' + page, value);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const page = '\/posts\/passkey-implementation-guide-from-registration-to-authentication\/';
+  if (localStorage.getItem('feedback_' + page)) {
+    document.querySelector('.feedback-buttons').style.display = 'none';
+    document.querySelector('.feedback-question').textContent = 'Thanks for your feedback!';
+  }
+});
+</script>
+
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+              Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+            </a>
+            <small class="custom-date">2026-03-01</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+              JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+            </a>
+            <small class="custom-date">2026-02-28</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/cross-device-passkey-authentication-hybrid-flow-implementation/" class="custom-link">
+              Cross-Device Passkey Authentication: Hybrid Flow Implementation
+            </a>
+            <small class="custom-date">2026-02-25</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/digital-identity-provider-v-key-secures-strategic-investment/" class="custom-link">
+              Digital Identity Provider V-Key Secures Strategic Investment
+            </a>
+            <small class="custom-date">2026-02-24</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/building-complete-oidc-login-flow-urls-in-forgerock-identity-cloud/" class="custom-link">
+              Building Complete OIDC Login Flow URLs in ForgeRock Identity Cloud
+            </a>
+            <small class="custom-date">2026-02-22</small>
+          </li>
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+                Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+                Go Secretless with Snowflake Workload Identity Federation - Snowflake
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+                JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+                OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+                Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

@@ -1,0 +1,2786 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>CIAM Architecture Patterns: Designing Customer Identity for Millions of Users | IAMDevBox</title>
+<meta name="keywords" content="ciam architecture, customer identity at scale, ciam design patterns, ciam vs iam, ciam data residency, scalable identity architecture, customer identity management, ciam progressive profiling">
+<meta name="author" content="IAMDevBox">
+<link rel="canonical" href="https://www.iamdevbox.com/posts/ciam-architecture-patterns-designing-customer-identity-at-scale/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.e24ea479df3e367781fafa20cedde21c7e043c10bed4c8c913ef9261a049a1e2.css" integrity="sha256-4k6ked8&#43;NneB&#43;vogzt3iHH4EPBC&#43;1MjJE&#43;&#43;SYaBJoeI=" rel="preload stylesheet" as="style">
+
+
+<link rel="icon" href="https://www.iamdevbox.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.iamdevbox.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.iamdevbox.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.iamdevbox.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.iamdevbox.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.iamdevbox.com/posts/ciam-architecture-patterns-designing-customer-identity-at-scale/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+
+<link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/css/custom.min.9919a2af1f8aeacf183517511ddc86a20d159eec58d357af3e9b872f5ba8f0b2.css"></noscript>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta property="og:url" content="https://www.iamdevbox.com/posts/ciam-architecture-patterns-designing-customer-identity-at-scale/">
+  <meta property="og:site_name" content="IAMDevBox">
+  <meta property="og:title" content="CIAM Architecture Patterns: Designing Customer Identity for Millions of Users">
+  <meta property="og:description" content="CIAM architecture design patterns for millions of users covering distributed identity storage, progressive profiling, consent management, regional data residency, and platform selection between Auth0, Cognito, and Keycloak.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-02-05T10:30:00+00:00">
+    <meta property="article:modified_time" content="2026-02-06T14:43:17+00:00">
+    <meta property="article:tag" content="CIAM">
+    <meta property="article:tag" content="Identity-Architecture">
+    <meta property="article:tag" content="Customer-Identity">
+    <meta property="article:tag" content="Scalability">
+    <meta property="article:tag" content="Enterprise-Iam">
+      <meta property="og:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.iamdevbox.com/IAMDevBox.com.jpg">
+<meta name="twitter:title" content="CIAM Architecture Patterns: Designing Customer Identity for Millions of Users">
+<meta name="twitter:description" content="CIAM architecture design patterns for millions of users covering distributed identity storage, progressive profiling, consent management, regional data residency, and platform selection between Auth0, Cognito, and Keycloak.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "All posts",
+      "item": "https://www.iamdevbox.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "CIAM Architecture Patterns: Designing Customer Identity for Millions of Users",
+      "item": "https://www.iamdevbox.com/posts/ciam-architecture-patterns-designing-customer-identity-at-scale/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "CIAM Architecture Patterns: Designing Customer Identity for Millions of Users",
+  "name": "CIAM Architecture Patterns: Designing Customer Identity for Millions of Users",
+  "description": "CIAM architecture design patterns for millions of users covering distributed identity storage, progressive profiling, consent management, regional data residency, and platform selection between Auth0, Cognito, and Keycloak.",
+  "keywords": [
+    "ciam architecture", "customer identity at scale", "ciam design patterns", "ciam vs iam", "ciam data residency", "scalable identity architecture", "customer identity management", "ciam progressive profiling"
+  ],
+  "articleBody": "Workforce IAM and CIAM look similar on a whiteboard — both authenticate users and manage access. But the architecture is fundamentally different when your user base goes from 5,000 employees to 5 million customers. The scaling problems, the UX requirements, and the regulatory constraints all change.\nThis guide covers the architectural patterns that make CIAM work at scale, drawn from real deployments.\nWhy CIAM Needs Different Architecture Concern Workforce IAM CIAM User count 1K - 100K 100K - 100M+ Registration IT-provisioned Self-service Identity source Corporate directory Social + email + phone Session duration 8-hour workday Weeks to months Latency tolerance 500ms acceptable 100ms expected Consent management Minimal GDPR/CCPA mandatory Branding Consistent corporate Per-product customization Availability target 99.9% 99.99%+ You can’t take an Okta workforce deployment, add more users, and call it CIAM. The data model, the session architecture, and the user experience are structurally different.\nPattern 1: Centralized CIAM Hub The simplest architecture — a single CIAM instance serves all applications and user populations.\n┌─────────────────┐ Mobile App ─────────│ │ Web App ─────────│ CIAM Hub │──── User DB (PostgreSQL) Partner API ────────│ (Auth0/Okta) │──── Session Store (Redis) IoT Device ─────────│ │──── Audit Log └─────────────────┘ When to use: Under 5M users, single geographic region, 2-10 applications.\nAdvantages: Simple operations, single source of truth, easy to reason about.\nLimitations: Single point of failure, no data residency support, latency for geographically distributed users, vendor pricing scales linearly with users.\nPattern 2: Federated CIAM with Regional Instances For global deployments, run separate CIAM instances per region with a routing layer.\n┌─────────────────┐ Global CDN ─────────│ Routing Layer │ │ (by geo/email) │ └───┬────┬────┬───┘ │ │ │ ┌────┘ │ └────┐ ▼ ▼ ▼ ┌────────┐ ┌────────┐ ┌────────┐ │CIAM EU │ │CIAM US │ │CIAM AP │ │(Ireland)│ │(Oregon)│ │(Tokyo) │ └────┬───┘ └────┬───┘ └────┬───┘ │ │ │ ┌────┴───┐ ┌───┴────┐ ┌──┴─────┐ │ DB EU │ │ DB US │ │ DB AP │ └────────┘ └────────┘ └────────┘ When to use: Over 5M users, GDPR/data sovereignty requirements, global user base.\nRouting logic: The routing layer determines which regional instance handles a user. Options:\nBy email domain: @company.de → EU instance By IP geolocation: First request determines region, stored in a lightweight global index By user preference: User chooses their data region during registration Cross-region challenges: If a user registers in EU but travels to the US, do they authenticate against the EU instance (latency) or the US instance (data residency violation)? The common solution: authenticate locally using a cached session token, but user data stays in the home region.\nPattern 3: Identity Broker with External IdPs For applications with social login, enterprise SSO, and phone-based auth:\n┌────────────────────┐ │ Identity Broker │ │ (CIAM Platform) │ └───┬───┬───┬───┬───┘ │ │ │ │ ┌────────┘ │ │ └─────────┐ ▼ ▼ ▼ ▼ ┌─────────┐ ┌──────┐ ┌──────┐ ┌────────┐ │ Google │ │Apple │ │ SMS │ │Enterprise│ │ Login │ │Sign-In│ │ OTP │ │ SAML │ └─────────┘ └──────┘ └──────┘ └────────┘ The CIAM platform acts as a broker — users authenticate via their preferred method, and the broker normalizes the identity into a unified profile.\nAccount linking: When a user signs in with Google on their laptop and Apple Sign-In on their phone, the broker links both external identities to a single internal profile. This requires:\nEmail matching (most common) Phone number matching Explicit user action (“Link this account to your existing profile”) Scaling Considerations Database Architecture The user store is the bottleneck at scale. Options:\nApproach Users Latency Complexity Single PostgreSQL \u003c 2M Low Low PostgreSQL + read replicas 2-10M Low Medium PostgreSQL with partitioning 10-50M Medium High DynamoDB / Cosmos DB 50M+ Very low Medium Custom sharded store 100M+ Very low Very high At 10M+ users, you’ll also need to think about:\nCredential lookup performance: Password hash verification is CPU-intensive (bcrypt at cost 12 = ~250ms). At 100 logins/second, that’s 25 CPU cores just for password checks. Session store sizing: Redis cluster with 1M concurrent sessions ≈ 2-4 GB RAM. Plan for peaks — Black Friday traffic spikes can be 10x normal. Token signing throughput: RSA-2048 signature ≈ 0.5ms. At 10K token requests/second, that’s 5 CPU seconds — use EC keys (P-256 is 10x faster) or pre-sign JWTs in batches. Caching Strategy CIAM at scale requires aggressive caching:\nSession cache: Redis/Memcached for active sessions — avoid hitting the database on every request User profile cache: Cache frequently-accessed user attributes with a short TTL (5-15 minutes) Token cache: Cache introspection results for opaque tokens (30-60 seconds TTL) Rate limiting cache: Track per-user and per-IP request rates in Redis Authentication Flow Latency Budget Target: \u003c 200ms total for the authentication round-trip.\nStep Budget DNS + TLS handshake 50ms User lookup 10ms (cached) / 50ms (DB) Password verification 100ms (bcrypt cost 10) Token generation 5ms Audit logging (async) 0ms (non-blocking) Total 165-205ms If you’re running bcrypt at cost 14 (1 second), your login latency will be dominated by password hashing. Consider Argon2id with tuned parameters for better performance/security ratio.\nProgressive Profiling CIAM registration should collect minimal information upfront and gather more data over time:\nRegistration: Email + password (or social login). Nothing else.\nFirst login: Ask for name and preferred language.\nFirst purchase: Ask for shipping address and phone number.\nAfter 30 days: Ask for communication preferences.\nArchitecturally, this means your user profile schema must be almost entirely optional fields. The CIAM platform should support conditional UI that shows different profile completion prompts based on user state.\nConsent Management Architecture GDPR, CCPA, and similar regulations require explicit user consent for data processing. CIAM needs built-in consent tracking:\n{ \"user_id\": \"usr_abc123\", \"consents\": [ { \"purpose\": \"marketing_email\", \"granted\": true, \"timestamp\": \"2026-01-15T10:30:00Z\", \"version\": \"privacy-policy-v3.2\", \"source\": \"registration_form\" }, { \"purpose\": \"analytics\", \"granted\": false, \"timestamp\": \"2026-01-15T10:30:00Z\", \"version\": \"privacy-policy-v3.2\", \"source\": \"cookie_banner\" } ] } Key requirements:\nConsent must be versioned — when you update your privacy policy, existing consents under the old version may need re-confirmation Users must be able to withdraw consent at any time Consent records must be immutable for audit purposes (append-only log) Downstream systems need real-time consent status to stop processing data when consent is withdrawn Platform Selection Platform Strengths Limitations Best For Auth0 Developer UX, Actions extensibility, social login Cost at scale (per-MAU pricing), limited data residency B2C SaaS, up to 10M users AWS Cognito AWS integration, cheap at scale, Lambda triggers Limited customization, poor admin UI AWS-native apps, cost-sensitive Azure AD B2C Microsoft ecosystem, custom policies Steep learning curve (IEF/XML policies), slow iteration Microsoft shops, complex B2B2C Keycloak Full control, no per-user cost, LDAP integration Operational overhead, limited built-in social login On-prem or regulated industries Ory Open source, cloud-native, API-first Young ecosystem, smaller community Developer-centric, microservices No platform is universally best. The decision depends on your user scale, regulatory requirements, development team expertise, and whether you’re willing to pay per-MAU or invest in operational overhead.\n",
+  "wordCount" : "1126",
+  "inLanguage": "en",
+  "image": "https://www.iamdevbox.com/IAMDevBox.com.jpg","datePublished": "2026-02-05T10:30:00Z",
+  "dateModified": "2026-02-06T14:43:17Z",
+  "author":{
+    "@type": "Person",
+    "name": "IAMDevBox"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.iamdevbox.com/posts/ciam-architecture-patterns-designing-customer-identity-at-scale/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon.ico"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the difference between CIAM and workforce IAM architecture?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Workforce IAM handles thousands of employees with complex RBAC and strict compliance. CIAM handles millions of customers with self-service registration, consent management, progressive profiling, and social login. The key architectural difference is scale — CIAM needs distributed identity stores, regional data residency, and sub-100ms authentication latency."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which CIAM platform handles the most concurrent users?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Auth0 by Okta, AWS Cognito, and Azure AD B2C each claim 100M+ user support. Keycloak can handle millions with proper clustering but requires more operational investment. The bottleneck is usually the database — PostgreSQL with read replicas handles 5-10M users comfortably, beyond that you need purpose-built identity stores or DynamoDB/Cosmos DB."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do you implement data residency for CIAM in multi-region deployments?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Deploy separate CIAM instances per region (EU, US, APAC) with isolated databases. Use a global routing layer that directs users to the correct regional instance based on their origin or preference. Cross-region user lookup uses a lightweight global index with just email-to-region mapping, not full user data. This satisfies GDPR Article 44 data transfer restrictions."
+      }
+    }
+  ]
+}
+</script>
+    <meta name="description" content="CIAM architecture design patterns for millions of users covering distributed identity storage, progressive profiling, consent management, regional data residency, and platform selection between Auth0, Cognito, and Keycloak."><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/www.iamdevbox.com\/posts\/ciam-architecture-patterns-designing-customer-identity-at-scale\/"
+  },
+  "headline": "CIAM Architecture Patterns: Designing Customer Identity for Millions of Users",
+  "description": "CIAM architecture design patterns for millions of users covering distributed identity storage, progressive profiling, consent management, regional data residency, and platform selection between Auth0, Cognito, and Keycloak.",
+  "author": {
+    "@type": "Person",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IAMDevBox",
+    "url": "https://www.iamdevbox.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.iamdevbox.com/favicon-96x96.png",
+      "width": 96,
+      "height": 96
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://www.iamdevbox.com/IAMDevBox.com.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "datePublished": "2026-02-05T10:30:00Z",
+  "dateModified": "2026-02-06T14:43:17Z",
+  "wordCount":  1126 ,
+  "articleSection": "posts",
+  "keywords": ["ciam architecture","customer identity at scale","ciam design patterns","ciam vs iam","ciam data residency","scalable identity architecture","customer identity management","ciam progressive profiling"]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https:\/\/www.iamdevbox.com\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "CIAM Architecture Patterns: Designing Customer Identity for Millions of Users",
+      "item": "https:\/\/www.iamdevbox.com\/posts\/ciam-architecture-patterns-designing-customer-identity-at-scale\/"
+    }
+  ]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/keycloak-token-exchange-implementing-oauth-20-token-exchange\/"
+            },
+            "headline": "Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:29:55Z",
+            "dateModified": "2026-03-01T14:30:15Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/go-secretless-with-snowflake-workload-identity-federation-snowflake\/"
+            },
+            "headline": "Go Secretless with Snowflake Workload Identity Federation - Snowflake",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-03-01T14:24:03Z",
+            "dateModified": "2026-03-01T14:24:20Z"
+          },
+          {
+            "@type": "Article",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https:\/\/www.iamdevbox.com\/posts\/jwt-algorithm-confusion-attack-cve-2026-developer-guide\/"
+            },
+            "headline": "JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them",
+            "author": {
+              "@type": "Person",
+              "name": "IAMDevBox"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "IAMDevBox",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.iamdevbox.com/favicon-96x96.png"
+              }
+            },
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://www.iamdevbox.com/favicon-96x96.png"
+            },
+            "datePublished": "2026-02-28T18:00:00Z",
+            "dateModified": "2026-03-01T11:21:01-05:00"
+          }
+  ]
+}
+</script>
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    const mermaidBlocks = document.querySelectorAll('.mermaid, pre code.language-mermaid, code.language-mermaid');
+    if (mermaidBlocks.length > 0) {
+        
+        mermaidBlocks.forEach(block => {
+            if (block.tagName === 'CODE') {
+                const pre = block.parentElement;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = block.textContent;
+                if (pre && pre.tagName === 'PRE') {
+                    pre.parentNode.replaceChild(div, pre);
+                } else {
+                    block.parentNode.replaceChild(div, block);
+                }
+            }
+        });
+
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+        script.onload = () => {
+            const isDark = document.body.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#5a67d8',
+                    
+                    secondaryColor: '#48bb78',
+                    secondaryTextColor: '#ffffff',
+                    secondaryBorderColor: '#38a169',
+                    
+                    tertiaryColor: '#ed8936',
+                    tertiaryTextColor: '#ffffff',
+                    tertiaryBorderColor: '#dd6b20',
+                    
+                    lineColor: '#718096',
+                    
+                    background: isDark ? '#1a202c' : '#ffffff',
+                    mainBkg: isDark ? '#2d3748' : '#f7fafc',
+                    
+                    actorBkg: '#667eea',
+                    actorBorder: '#5a67d8',
+                    actorTextColor: '#ffffff',
+                    actorLineColor: '#718096',
+                    signalColor: '#4a5568',
+                    signalTextColor: '#2d3748',
+                    labelBoxBkgColor: '#edf2f7',
+                    labelBoxBorderColor: '#cbd5e0',
+                    labelTextColor: '#2d3748',
+                    loopTextColor: '#553c9a',
+                    noteBkgColor: '#faf089',
+                    noteTextColor: '#744210',
+                    noteBorderColor: '#d69e2e',
+                    
+                    nodeBkg: '#667eea',
+                    nodeBorder: '#5a67d8',
+                    clusterBkg: '#e2e8f0',
+                    clusterBorder: '#a0aec0',
+                    defaultLinkColor: '#718096',
+                    titleColor: '#2d3748',
+                    edgeLabelBackground: 'transparent',
+                    
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                sequence: {
+                    useMaxWidth: true,
+                    boxMargin: 10,
+                    boxTextMargin: 5,
+                    noteMargin: 10,
+                    messageMargin: 35,
+                    mirrorActors: false
+                }
+            });
+            mermaid.run().then(() => {
+                
+                document.querySelectorAll('.mermaid .node').forEach(node => {
+                    const rect = node.querySelector('rect, circle, ellipse, polygon');
+                    if (rect) {
+                        const fill = rect.getAttribute('fill') || window.getComputedStyle(rect).fill;
+                        
+                        const isDarkBg = fill && (
+                            fill.includes('667eea') || fill.includes('102, 126, 234') ||
+                            fill.includes('48bb78') || fill.includes('72, 187, 120') ||
+                            fill.includes('ed8936') || fill.includes('237, 137, 54') ||
+                            fill.includes('553c9a') || fill.includes('9f7aea') ||
+                            fill.includes('e53e3e') || fill.includes('dd6b20')
+                        );
+                        const textColor = isDarkBg ? '#ffffff' : '#1a202c';
+                        node.querySelectorAll('span, .nodeLabel, text, foreignObject div').forEach(text => {
+                            text.style.color = textColor;
+                            text.style.fill = textColor;
+                        });
+                    }
+                });
+            });
+        };
+        document.head.appendChild(script);
+    }
+
+    
+    const postContent = document.querySelector('.post-content');
+    const isSinglePost = document.querySelector('.post-single');
+    const isToolsPage = window.location.pathname.startsWith('/tools/');
+    if (postContent && isSinglePost && window.innerWidth >= 1400 && !isToolsPage) {
+        const headings = postContent.querySelectorAll('h2, h3');
+        if (headings.length >= 3) {
+            const toc = document.createElement('nav');
+            toc.className = 'floating-toc';
+            toc.innerHTML = '<h4>📑 Contents</h4><ul></ul>';
+            const tocList = toc.querySelector('ul');
+
+            headings.forEach((heading, index) => {
+                const id = heading.id || `section-${index}`;
+                heading.id = id;
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2';
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            document.body.appendChild(toc);
+
+            
+            const tocLinks = toc.querySelectorAll('a');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 150) {
+                        current = heading.id;
+                    }
+                });
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+    }
+
+    
+    if (postContent && isSinglePost && window.innerWidth >= 1200) {
+        const h2s = postContent.querySelectorAll('h2');
+        if (h2s.length >= 2) {
+            const indicator = document.createElement('div');
+            indicator.className = 'section-indicator';
+
+            h2s.forEach((h2, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'section-dot';
+                dot.title = h2.textContent.replace(/^[▸→•]\s*/, '').replace(/#$/, '').trim();
+                dot.addEventListener('click', () => {
+                    h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                indicator.appendChild(dot);
+            });
+
+            document.body.appendChild(indicator);
+
+            
+            window.addEventListener('scroll', () => {
+                const dots = indicator.querySelectorAll('.section-dot');
+                let activeIndex = 0;
+                h2s.forEach((h2, index) => {
+                    if (h2.getBoundingClientRect().top <= 200) {
+                        activeIndex = index;
+                    }
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+    }
+    });
+    </script>
+
+    
+    
+    <script>
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        function loadGA() {
+            if (window.gaLoaded) return;
+            window.gaLoaded = true;
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B6QCH29975';
+            document.head.appendChild(script);
+
+            script.onload = () => {
+                gtag('js', new Date());
+                gtag('config', 'G-B6QCH29975');
+            };
+        }
+
+        
+        ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+            window.addEventListener(event, loadGA, { once: true, passive: true });
+        });
+
+        
+        setTimeout(loadGA, 3000);
+    </script>
+    
+    
+</head>
+
+<body class="" id="top">
+    
+    <div class="reading-progress" id="reading-progress"></div>
+    <script>
+    window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / docHeight) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+    </script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.iamdevbox.com/" accesskey="h" title="IAMDevBox (Alt + H)">IAMDevBox</a>
+            <div class="logo-switches">
+            </div>
+        </div><button id="menu-btn" aria-label="Menu" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <ul id="menu">
+            <li>
+                <a href="https://www.iamdevbox.com/posts/" title="Read articles and updates">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/categories/trending/" title="Hot IAM topics">
+                    <span>🔥Trending</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/tools/" title="Explore developer tools">
+                    <span>🧰Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/contact/" title="Contact">
+                    <span>Contact</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.iamdevbox.com/search/" title="Search this site">
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+(function() {
+    var btn = document.getElementById('menu-btn');
+    var menu = document.getElementById('menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+        });
+        
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
+</script>
+<main class="main">
+
+
+
+<div class="reading-progress" id="reading-progress"></div>
+<script>
+(function() {
+  const progressBar = document.getElementById('reading-progress');
+  const article = document.querySelector('.post-content');
+
+  if (!progressBar || !article) return;
+
+  function updateProgress() {
+    const articleTop = article.offsetTop;
+    const articleHeight = article.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+
+    
+    const start = articleTop - windowHeight;
+    const end = articleTop + articleHeight;
+    const current = scrollTop - start;
+    const total = end - start;
+
+    const progress = Math.min(Math.max((current / total) * 100, 0), 100);
+    progressBar.style.width = progress + '%';
+  }
+
+  
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  
+  updateProgress();
+})();
+</script>
+
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://www.iamdevbox.com/">Home</a>&nbsp;»&nbsp;<a href="https://www.iamdevbox.com/posts/">All posts</a></div>
+    <h1 class="post-title entry-hint-parent" data-pagefind-meta="title">
+      CIAM Architecture Patterns: Designing Customer Identity for Millions of Users
+    </h1>
+    <div class="post-meta"><span title='2026-02-05 10:30:00'>Feb 05, 2026</span>&nbsp;·&nbsp;6 min&nbsp;·&nbsp;1126 words&nbsp;·&nbsp;IAMDevBox
+
+</div>
+    
+      <div class="post-updated">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Updated: Feb 6, 2026
+      </div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#why-ciam-needs-different-architecture" aria-label="Why CIAM Needs Different Architecture">Why CIAM Needs Different Architecture</a></li>
+                <li>
+                    <a href="#pattern-1-centralized-ciam-hub" aria-label="Pattern 1: Centralized CIAM Hub">Pattern 1: Centralized CIAM Hub</a></li>
+                <li>
+                    <a href="#pattern-2-federated-ciam-with-regional-instances" aria-label="Pattern 2: Federated CIAM with Regional Instances">Pattern 2: Federated CIAM with Regional Instances</a></li>
+                <li>
+                    <a href="#pattern-3-identity-broker-with-external-idps" aria-label="Pattern 3: Identity Broker with External IdPs">Pattern 3: Identity Broker with External IdPs</a></li>
+                <li>
+                    <a href="#scaling-considerations" aria-label="Scaling Considerations">Scaling Considerations</a><ul>
+                        
+                <li>
+                    <a href="#database-architecture" aria-label="Database Architecture">Database Architecture</a></li>
+                <li>
+                    <a href="#caching-strategy" aria-label="Caching Strategy">Caching Strategy</a></li>
+                <li>
+                    <a href="#authentication-flow-latency-budget" aria-label="Authentication Flow Latency Budget">Authentication Flow Latency Budget</a></li></ul>
+                </li>
+                <li>
+                    <a href="#progressive-profiling" aria-label="Progressive Profiling">Progressive Profiling</a></li>
+                <li>
+                    <a href="#consent-management-architecture" aria-label="Consent Management Architecture">Consent Management Architecture</a></li>
+                <li>
+                    <a href="#platform-selection" aria-label="Platform Selection">Platform Selection</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content" data-pagefind-body><p>Workforce IAM and CIAM look similar on a whiteboard — both authenticate users and manage access. But the architecture is fundamentally different when your user base goes from 5,000 employees to 5 million customers. The scaling problems, the UX requirements, and the regulatory constraints all change.</p>
+<p>This guide covers the architectural patterns that make CIAM work at scale, drawn from real deployments.</p>
+<h2 id="why-ciam-needs-different-architecture">Why CIAM Needs Different Architecture<a hidden class="anchor" aria-hidden="true" href="#why-ciam-needs-different-architecture">#</a></h2>
+<table>
+  <thead>
+      <tr>
+          <th>Concern</th>
+          <th>Workforce IAM</th>
+          <th>CIAM</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>User count</td>
+          <td>1K - 100K</td>
+          <td>100K - 100M+</td>
+      </tr>
+      <tr>
+          <td>Registration</td>
+          <td>IT-provisioned</td>
+          <td>Self-service</td>
+      </tr>
+      <tr>
+          <td>Identity source</td>
+          <td>Corporate directory</td>
+          <td>Social + email + phone</td>
+      </tr>
+      <tr>
+          <td>Session duration</td>
+          <td>8-hour workday</td>
+          <td>Weeks to months</td>
+      </tr>
+      <tr>
+          <td>Latency tolerance</td>
+          <td>500ms acceptable</td>
+          <td>100ms expected</td>
+      </tr>
+      <tr>
+          <td>Consent management</td>
+          <td>Minimal</td>
+          <td>GDPR/CCPA mandatory</td>
+      </tr>
+      <tr>
+          <td>Branding</td>
+          <td>Consistent corporate</td>
+          <td>Per-product customization</td>
+      </tr>
+      <tr>
+          <td>Availability target</td>
+          <td>99.9%</td>
+          <td>99.99%+</td>
+      </tr>
+  </tbody>
+</table>
+<p>You can&rsquo;t take an Okta workforce deployment, add more users, and call it CIAM. The data model, the session architecture, and the user experience are structurally different.</p>
+<h2 id="pattern-1-centralized-ciam-hub">Pattern 1: Centralized CIAM Hub<a hidden class="anchor" aria-hidden="true" href="#pattern-1-centralized-ciam-hub">#</a></h2>
+<p>The simplest architecture — a single CIAM instance serves all applications and user populations.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>                    ┌─────────────────┐
+</span></span><span style="display:flex;"><span>Mobile App ─────────│                 │
+</span></span><span style="display:flex;"><span>Web App    ─────────│   CIAM Hub      │──── User DB (PostgreSQL)
+</span></span><span style="display:flex;"><span>Partner API ────────│  (Auth0/Okta)   │──── Session Store (Redis)
+</span></span><span style="display:flex;"><span>IoT Device ─────────│                 │──── Audit Log
+</span></span><span style="display:flex;"><span>                    └─────────────────┘
+</span></span></code></pre></div><p><strong>When to use</strong>: Under 5M users, single geographic region, 2-10 applications.</p>
+<p><strong>Advantages</strong>: Simple operations, single source of truth, easy to reason about.</p>
+<p><strong>Limitations</strong>: Single point of failure, no data residency support, latency for geographically distributed users, vendor pricing scales linearly with users.</p>
+<h2 id="pattern-2-federated-ciam-with-regional-instances">Pattern 2: Federated CIAM with Regional Instances<a hidden class="anchor" aria-hidden="true" href="#pattern-2-federated-ciam-with-regional-instances">#</a></h2>
+<p>For global deployments, run separate CIAM instances per region with a routing layer.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>                    ┌─────────────────┐
+</span></span><span style="display:flex;"><span>Global CDN ─────────│  Routing Layer  │
+</span></span><span style="display:flex;"><span>                    │  (by geo/email) │
+</span></span><span style="display:flex;"><span>                    └───┬────┬────┬───┘
+</span></span><span style="display:flex;"><span>                        │    │    │
+</span></span><span style="display:flex;"><span>                   ┌────┘    │    └────┐
+</span></span><span style="display:flex;"><span>                   ▼         ▼         ▼
+</span></span><span style="display:flex;"><span>              ┌────────┐ ┌────────┐ ┌────────┐
+</span></span><span style="display:flex;"><span>              │CIAM EU │ │CIAM US │ │CIAM AP │
+</span></span><span style="display:flex;"><span>              │(Ireland)│ │(Oregon)│ │(Tokyo) │
+</span></span><span style="display:flex;"><span>              └────┬───┘ └────┬───┘ └────┬───┘
+</span></span><span style="display:flex;"><span>                   │         │         │
+</span></span><span style="display:flex;"><span>              ┌────┴───┐ ┌───┴────┐ ┌──┴─────┐
+</span></span><span style="display:flex;"><span>              │ DB EU  │ │ DB US  │ │ DB AP  │
+</span></span><span style="display:flex;"><span>              └────────┘ └────────┘ └────────┘
+</span></span></code></pre></div><p><strong>When to use</strong>: Over 5M users, GDPR/data sovereignty requirements, global user base.</p>
+<p><strong>Routing logic</strong>: The routing layer determines which regional instance handles a user. Options:</p>
+<ul>
+<li><strong>By email domain</strong>: <code>@company.de</code> → EU instance</li>
+<li><strong>By IP geolocation</strong>: First request determines region, stored in a lightweight global index</li>
+<li><strong>By user preference</strong>: User chooses their data region during registration</li>
+</ul>
+<p><strong>Cross-region challenges</strong>: If a user registers in EU but travels to the US, do they authenticate against the EU instance (latency) or the US instance (data residency violation)? The common solution: authenticate locally using a cached session token, but user data stays in the home region.</p>
+<h2 id="pattern-3-identity-broker-with-external-idps">Pattern 3: Identity Broker with External IdPs<a hidden class="anchor" aria-hidden="true" href="#pattern-3-identity-broker-with-external-idps">#</a></h2>
+<p>For applications with social login, enterprise SSO, and phone-based auth:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>                    ┌────────────────────┐
+</span></span><span style="display:flex;"><span>                    │   Identity Broker  │
+</span></span><span style="display:flex;"><span>                    │  (CIAM Platform)   │
+</span></span><span style="display:flex;"><span>                    └───┬───┬───┬───┬───┘
+</span></span><span style="display:flex;"><span>                        │   │   │   │
+</span></span><span style="display:flex;"><span>               ┌────────┘   │   │   └─────────┐
+</span></span><span style="display:flex;"><span>               ▼            ▼   ▼              ▼
+</span></span><span style="display:flex;"><span>          ┌─────────┐  ┌──────┐ ┌──────┐  ┌────────┐
+</span></span><span style="display:flex;"><span>          │ Google  │  │Apple │ │ SMS  │  │Enterprise│
+</span></span><span style="display:flex;"><span>          │ Login   │  │Sign-In│ │ OTP │  │  SAML   │
+</span></span><span style="display:flex;"><span>          └─────────┘  └──────┘ └──────┘  └────────┘
+</span></span></code></pre></div><p>The CIAM platform acts as a broker — users authenticate via their preferred method, and the broker normalizes the identity into a unified profile.</p>
+<p><strong>Account linking</strong>: When a user signs in with Google on their laptop and Apple Sign-In on their phone, the broker links both external identities to a single internal profile. This requires:</p>
+<ul>
+<li>Email matching (most common)</li>
+<li>Phone number matching</li>
+<li>Explicit user action (&ldquo;Link this account to your existing profile&rdquo;)</li>
+</ul>
+<h2 id="scaling-considerations">Scaling Considerations<a hidden class="anchor" aria-hidden="true" href="#scaling-considerations">#</a></h2>
+<h3 id="database-architecture">Database Architecture<a hidden class="anchor" aria-hidden="true" href="#database-architecture">#</a></h3>
+<p>The user store is the bottleneck at scale. Options:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Approach</th>
+          <th>Users</th>
+          <th>Latency</th>
+          <th>Complexity</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Single PostgreSQL</td>
+          <td>&lt; 2M</td>
+          <td>Low</td>
+          <td>Low</td>
+      </tr>
+      <tr>
+          <td>PostgreSQL + read replicas</td>
+          <td>2-10M</td>
+          <td>Low</td>
+          <td>Medium</td>
+      </tr>
+      <tr>
+          <td>PostgreSQL with partitioning</td>
+          <td>10-50M</td>
+          <td>Medium</td>
+          <td>High</td>
+      </tr>
+      <tr>
+          <td>DynamoDB / Cosmos DB</td>
+          <td>50M+</td>
+          <td>Very low</td>
+          <td>Medium</td>
+      </tr>
+      <tr>
+          <td>Custom sharded store</td>
+          <td>100M+</td>
+          <td>Very low</td>
+          <td>Very high</td>
+      </tr>
+  </tbody>
+</table>
+<p>At 10M+ users, you&rsquo;ll also need to think about:</p>
+<ul>
+<li><strong>Credential lookup performance</strong>: Password hash verification is CPU-intensive (bcrypt at cost 12 = ~250ms). At 100 logins/second, that&rsquo;s 25 CPU cores just for password checks.</li>
+<li><strong>Session store sizing</strong>: Redis cluster with 1M concurrent sessions ≈ 2-4 GB RAM. Plan for peaks — Black Friday traffic spikes can be 10x normal.</li>
+<li><strong>Token signing throughput</strong>: RSA-2048 signature ≈ 0.5ms. At 10K token requests/second, that&rsquo;s 5 CPU seconds — use EC keys (P-256 is 10x faster) or pre-sign JWTs in batches.</li>
+</ul>
+<h3 id="caching-strategy">Caching Strategy<a hidden class="anchor" aria-hidden="true" href="#caching-strategy">#</a></h3>
+<p>CIAM at scale requires aggressive caching:</p>
+<ul>
+<li><strong>Session cache</strong>: Redis/Memcached for active sessions — avoid hitting the database on every request</li>
+<li><strong>User profile cache</strong>: Cache frequently-accessed user attributes with a short TTL (5-15 minutes)</li>
+<li><strong>Token cache</strong>: Cache introspection results for opaque tokens (30-60 seconds TTL)</li>
+<li><strong>Rate limiting cache</strong>: Track per-user and per-IP request rates in Redis</li>
+</ul>
+<h3 id="authentication-flow-latency-budget">Authentication Flow Latency Budget<a hidden class="anchor" aria-hidden="true" href="#authentication-flow-latency-budget">#</a></h3>
+<p>Target: &lt; 200ms total for the authentication round-trip.</p>
+<table>
+  <thead>
+      <tr>
+          <th>Step</th>
+          <th>Budget</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>DNS + TLS handshake</td>
+          <td>50ms</td>
+      </tr>
+      <tr>
+          <td>User lookup</td>
+          <td>10ms (cached) / 50ms (DB)</td>
+      </tr>
+      <tr>
+          <td>Password verification</td>
+          <td>100ms (bcrypt cost 10)</td>
+      </tr>
+      <tr>
+          <td>Token generation</td>
+          <td>5ms</td>
+      </tr>
+      <tr>
+          <td>Audit logging (async)</td>
+          <td>0ms (non-blocking)</td>
+      </tr>
+      <tr>
+          <td><strong>Total</strong></td>
+          <td><strong>165-205ms</strong></td>
+      </tr>
+  </tbody>
+</table>
+<p>If you&rsquo;re running bcrypt at cost 14 (1 second), your login latency will be dominated by password hashing. Consider Argon2id with tuned parameters for better performance/security ratio.</p>
+<h2 id="progressive-profiling">Progressive Profiling<a hidden class="anchor" aria-hidden="true" href="#progressive-profiling">#</a></h2>
+<p>CIAM registration should collect minimal information upfront and gather more data over time:</p>
+<p><strong>Registration</strong>: Email + password (or social login). Nothing else.</p>
+<p><strong>First login</strong>: Ask for name and preferred language.</p>
+<p><strong>First purchase</strong>: Ask for shipping address and phone number.</p>
+<p><strong>After 30 days</strong>: Ask for communication preferences.</p>
+<p>Architecturally, this means your user profile schema must be almost entirely optional fields. The CIAM platform should support conditional UI that shows different profile completion prompts based on user state.</p>
+<h2 id="consent-management-architecture">Consent Management Architecture<a hidden class="anchor" aria-hidden="true" href="#consent-management-architecture">#</a></h2>
+<p>GDPR, CCPA, and similar regulations require explicit user consent for data processing. CIAM needs built-in consent tracking:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;user_id&#34;</span>: <span style="color:#e6db74">&#34;usr_abc123&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;consents&#34;</span>: [
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;purpose&#34;</span>: <span style="color:#e6db74">&#34;marketing_email&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;granted&#34;</span>: <span style="color:#66d9ef">true</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;timestamp&#34;</span>: <span style="color:#e6db74">&#34;2026-01-15T10:30:00Z&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;version&#34;</span>: <span style="color:#e6db74">&#34;privacy-policy-v3.2&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;source&#34;</span>: <span style="color:#e6db74">&#34;registration_form&#34;</span>
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;purpose&#34;</span>: <span style="color:#e6db74">&#34;analytics&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;granted&#34;</span>: <span style="color:#66d9ef">false</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;timestamp&#34;</span>: <span style="color:#e6db74">&#34;2026-01-15T10:30:00Z&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;version&#34;</span>: <span style="color:#e6db74">&#34;privacy-policy-v3.2&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;source&#34;</span>: <span style="color:#e6db74">&#34;cookie_banner&#34;</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  ]
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Key requirements:</p>
+<ul>
+<li>Consent must be versioned — when you update your privacy policy, existing consents under the old version may need re-confirmation</li>
+<li>Users must be able to withdraw consent at any time</li>
+<li>Consent records must be immutable for audit purposes (append-only log)</li>
+<li>Downstream systems need real-time consent status to stop processing data when consent is withdrawn</li>
+</ul>
+<h2 id="platform-selection">Platform Selection<a hidden class="anchor" aria-hidden="true" href="#platform-selection">#</a></h2>
+<table>
+  <thead>
+      <tr>
+          <th>Platform</th>
+          <th>Strengths</th>
+          <th>Limitations</th>
+          <th>Best For</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>Auth0</strong></td>
+          <td>Developer UX, Actions extensibility, social login</td>
+          <td>Cost at scale (per-MAU pricing), limited data residency</td>
+          <td>B2C SaaS, up to 10M users</td>
+      </tr>
+      <tr>
+          <td><strong>AWS Cognito</strong></td>
+          <td>AWS integration, cheap at scale, Lambda triggers</td>
+          <td>Limited customization, poor admin UI</td>
+          <td>AWS-native apps, cost-sensitive</td>
+      </tr>
+      <tr>
+          <td><strong>Azure AD B2C</strong></td>
+          <td>Microsoft ecosystem, custom policies</td>
+          <td>Steep learning curve (IEF/XML policies), slow iteration</td>
+          <td>Microsoft shops, complex B2B2C</td>
+      </tr>
+      <tr>
+          <td><strong>Keycloak</strong></td>
+          <td>Full control, no per-user cost, LDAP integration</td>
+          <td>Operational overhead, limited built-in social login</td>
+          <td>On-prem or regulated industries</td>
+      </tr>
+      <tr>
+          <td><strong>Ory</strong></td>
+          <td>Open source, cloud-native, API-first</td>
+          <td>Young ecosystem, smaller community</td>
+          <td>Developer-centric, microservices</td>
+      </tr>
+  </tbody>
+</table>
+<p>No platform is universally best. The decision depends on your user scale, regulatory requirements, development team expertise, and whether you&rsquo;re willing to pay per-MAU or invest in operational overhead.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.iamdevbox.com/tags/ciam/">CIAM</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/identity-architecture/">Identity-Architecture</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/customer-identity/">Customer-Identity</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/scalability/">Scalability</a></li>
+      <li><a href="https://www.iamdevbox.com/tags/enterprise-iam/">Enterprise-Iam</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://www.iamdevbox.com/posts/password-hash-migration-between-identity-platforms/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Password Hash Migration Between Identity Platforms: A Practical Guide</span>
+  </a>
+  <a class="next" href="https://www.iamdevbox.com/posts/ldap-directory-modernization-migration-to-cloud-identity/">
+    <span class="title">Next »</span>
+    <br>
+    <span>LDAP Directory Modernization: Migrating from Legacy Directory Services to Cloud Identity</span>
+  </a>
+</nav>
+
+  </footer>
+
+  
+  
+
+
+<section class="post-feedback">
+  <p class="feedback-question">Was this article helpful?</p>
+  <div class="feedback-buttons">
+    <button class="feedback-btn feedback-yes" onclick="trackFeedback('yes', '\/posts\/ciam-architecture-patterns-designing-customer-identity-at-scale\/')" aria-label="Yes, helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      Yes
+    </button>
+    <button class="feedback-btn feedback-no" onclick="trackFeedback('no', '\/posts\/ciam-architecture-patterns-designing-customer-identity-at-scale\/')" aria-label="No, not helpful">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>
+      No
+    </button>
+  </div>
+  <p class="feedback-thanks" style="display: none;">Thanks for your feedback!</p>
+</section>
+
+
+<section class="author-bio">
+  <div class="author-avatar">
+    <img src="/IAMDevBox.com.jpg" alt="IAMDevBox Author" width="64" height="64" loading="lazy">
+  </div>
+  <div class="author-info">
+    <h4>Written by IAMDevBox</h4>
+    <p>Enterprise IAM architect with 15+ years in identity modernization. Certified across ForgeRock, Ping Identity, SailPoint, AWS, and Azure.</p>
+    <div class="author-links">
+      <a href="https://twitter.com/iamdevbox" target="_blank" rel="noopener" title="Follow on X/Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/iamdevbox" target="_blank" rel="noopener" title="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="/contact/" title="Contact">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function trackFeedback(value, page) {
+  
+  document.querySelector('.feedback-buttons').style.display = 'none';
+  document.querySelector('.feedback-question').style.display = 'none';
+  document.querySelector('.feedback-thanks').style.display = 'block';
+
+  
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'post_feedback', {
+      'feedback_value': value,
+      'page_path': page
+    });
+  }
+
+  
+  localStorage.setItem('feedback_' + page, value);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const page = '\/posts\/ciam-architecture-patterns-designing-customer-identity-at-scale\/';
+  if (localStorage.getItem('feedback_' + page)) {
+    document.querySelector('.feedback-buttons').style.display = 'none';
+    document.querySelector('.feedback-question').textContent = 'Thanks for your feedback!';
+  }
+});
+</script>
+
+
+  
+  
+
+  
+  <section class="post-related-articles custom-section">
+    <h2 class="custom-section-title">
+      Related Articles
+    </h2>
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/hybrid-iam-coexistence-on-premise-and-cloud-identity-in-parallel/" class="custom-link">
+              Hybrid IAM Coexistence: Running On-Premise and Cloud Identity Systems in Parallel
+            </a>
+            <small class="custom-date">2026-02-05</small>
+          </li>
+          
+        
+      
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/identity-consolidation-after-mergers-acquisitions-playbook/" class="custom-link">
+              M&amp;A Identity Integration: Merging Multiple Identity Providers After Acquisition
+            </a>
+            <small class="custom-date">2026-02-05</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/on-premise-iam-to-cloud-migration-planning-framework/" class="custom-link">
+              On-Premise IAM to Cloud Migration: Planning Framework and Execution Strategy
+            </a>
+            <small class="custom-date">2026-02-05</small>
+          </li>
+          
+        
+      
+        
+          <li class="custom-list-item">
+            <a href="/posts/adfs-to-microsoft-entra-id-migration-complete-guide/" class="custom-link">
+              ADFS to Microsoft Entra ID Migration: Complete Planning and Execution Guide
+            </a>
+            <small class="custom-date">2026-02-05</small>
+          </li>
+          
+        
+      
+
+      
+    </ul>
+
+    
+  </section>
+  
+
+  <section class="post-recent-articles custom-section-alt">
+    <h2 class="custom-section-title">
+      Latest Articles
+    </h2>
+    
+    
+    
+    <ul class="custom-list">
+      
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-token-exchange-implementing-oauth-20-token-exchange/" class="custom-link">
+                Keycloak Token Exchange: Implementing OAuth 2.0 Token Exchange
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/go-secretless-with-snowflake-workload-identity-federation-snowflake/" class="custom-link">
+                Go Secretless with Snowflake Workload Identity Federation - Snowflake
+              </a>
+              <small class="custom-date">2026-03-01</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/jwt-algorithm-confusion-attack-cve-2026-developer-guide/" class="custom-link">
+                JWT Algorithm Confusion Attacks: How CVE-2026-22817, CVE-2026-27804, and CVE-2026-23552 Work and How to Fix Them
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/oauth-permissions-in-microsoft-entra-id-enable-stealthy-corporate-email-access/" class="custom-link">
+                OAuth Permissions in Microsoft Entra ID Enable Stealthy Corporate Email Access
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+            <li class="custom-list-item">
+              <a href="/posts/keycloak-spring-boot-oauth2-integration-complete-guide/" class="custom-link">
+                Keycloak Spring Boot OAuth2 Integration: Complete Developer Guide
+              </a>
+              <small class="custom-date">2026-02-28</small>
+            </li>
+            
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+    </ul>
+
+    
+      <div class="custom-more">
+        <a href="/posts/" class="custom-link">
+          More &raquo;
+        </a>
+      </div>
+    
+  </section>
+</article>
+    </main>
+    
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://www.iamdevbox.com/">IAMDevBox</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        window.requestAnimationFrame(() => {
+            const savedScroll = localStorage.getItem("menu-scroll-position");
+            if (savedScroll !== null) {
+            menu.scrollLeft = savedScroll;
+            }
+        });
+
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        };
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
