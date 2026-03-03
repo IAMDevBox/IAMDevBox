@@ -1,39 +1,52 @@
 #!/bin/bash
 #
-# DS Upgrade Script: 7.1.1 → 7.5.3
+# DS Upgrade Script: 7.1 → 7.5
 #
-# Usage:
-#   ./ds-upgrade-7.5.sh backup    # Step 1: Backup current state (run once before first upgrade)
+# Usage (standalone):
+#   ./ds-upgrade-7.5.sh backup    # Step 1: Backup current state (run once)
 #   ./ds-upgrade-7.5.sh upgrade   # Step 2: Perform Java + DS upgrade
 #   ./ds-upgrade-7.5.sh verify    # Step 3: Post-upgrade verification
 #   ./ds-upgrade-7.5.sh restore   # Restore to pre-upgrade state (for re-testing)
 #
+# Usage (Ansible / Harness):
+#   ansible-playbook ds-upgrade-7.5.yml -e "action=backup"
+#   ansible-playbook ds-upgrade-7.5.yml -e "action=upgrade"
+#   ansible-playbook ds-upgrade-7.5.yml -e "action=verify"
+#   ansible-playbook ds-upgrade-7.5.yml -e "action=restore"
+#
 # Test cycle:
 #   backup → upgrade → verify → restore → upgrade → verify → restore → ...
 #
+# Configuration:
+#   All config variables below support environment variable override:
+#     DS_HOME=/opt/app/forgerock/opendj ./ds-upgrade-7.5.sh upgrade
+#   When running via Ansible, set them in the playbook's environment: block.
+#   When running standalone, edit the defaults in the Configuration section.
+#
 # Prerequisites:
-#   - DS-7.5.3.zip in ${INSTALL_DIR}
+#   - DS 7.5 zip in ${INSTALL_DIR}
 #   - Java 17 installed at ${JAVA_17}
 #   - Upgrade one server at a time (do NOT upgrade all replicas simultaneously)
 
 set -euo pipefail
 
 ###############################################################################
-# Configuration — adjust these for your environment
+# Configuration — override via environment variables, or edit defaults below
 ###############################################################################
-DS_HOME="/opt/app/forgerock/opendj"
-JAVA_11="/opt/app/java/jdk-11"
-JAVA_17="/opt/app/java/jdk-17.0.12"
-BACKUP_DIR="/opt/app/backup"
-INSTALL_DIR="/opt/app/install/opendj"
-BASE_DN="dc=example,dc=com"
-DS_ADMIN_PORT=4444
-DS_LDAPS_PORT=6036
+DS_HOME="${DS_HOME:-/opt/app/forgerock/opendj}"
+JAVA_11="${JAVA_11:-/opt/app/java/jdk-11}"
+JAVA_17="${JAVA_17:-/opt/app/java/jdk-17}"
+BACKUP_DIR="${BACKUP_DIR:-/opt/app/backup}"
+INSTALL_DIR="${INSTALL_DIR:-/opt/app/install/opendj}"
+BASE_DN="${BASE_DN:-dc=example,dc=com}"
+DS_ZIP_FILE="${DS_ZIP_FILE:-DS-7.5.3.zip}"
+DS_ADMIN_PORT="${DS_ADMIN_PORT:-4444}"
+DS_LDAPS_PORT="${DS_LDAPS_PORT:-6036}"
 
 # dsrepl connection settings
-DSREPL_HOST="ds.example.com"
-DSREPL_BIND_DN="cn=dsadmin"
-DSREPL_BIND_PASSWORD="password"
+DSREPL_HOST="${DSREPL_HOST:-ds.example.com}"
+DSREPL_BIND_DN="${DSREPL_BIND_DN:-cn=dsadmin}"
+DSREPL_BIND_PASSWORD="${DSREPL_BIND_PASSWORD:-password}"
 
 # Backup tag — used for backup/restore pairing
 BACKUP_TAG="ds_upgrade"
@@ -45,8 +58,8 @@ BACKUP_CACERTS="${BACKUP_DIR}/cacerts_java17_original_${BACKUP_TAG}"
 # Derived from DS_HOME — unzip target (parent of opendj/)
 DS_EXTRACT_DIR="${DS_HOME%/opendj}"  # e.g., /opt/app/forgerock
 
-# DS upgrade zip file
-DS_ZIP="${INSTALL_DIR}/DS-7.5.3.zip"
+# DS upgrade zip file (full path)
+DS_ZIP="${INSTALL_DIR}/${DS_ZIP_FILE}"
 
 # Log directory for each run
 RUN_ID=$(date +%Y%m%d_%H%M%S)
@@ -217,19 +230,19 @@ do_restore() {
 
   echo ""
   echo "========================================="
-  echo " Restore Complete — back to DS 7.1.1"
+  echo " Restore Complete — back to DS 7.1"
   echo " Next: ./ds-upgrade-7.5.sh upgrade"
   echo "========================================="
 }
 
 ###############################################################################
-# upgrade — Perform Java 17 + DS 7.5.3 upgrade
+# upgrade — Perform Java 17 + DS 7.5 upgrade
 ###############################################################################
 do_upgrade() {
   setup_logging "upgrade"
 
   echo "========================================="
-  echo " DS Upgrade 7.1.1 → 7.5.3"
+  echo " DS Upgrade 7.1 → 7.5"
   echo " Date: $(date)"
   echo " Server: $(hostname)"
   echo " Logs: ${LOG_DIR}"
@@ -447,7 +460,7 @@ case "${ACTION}" in
     echo "Usage: $0 {backup|upgrade|verify|restore}"
     echo ""
     echo "  backup   Save current state (run once before first upgrade)"
-    echo "  upgrade  Perform Java 17 + DS 7.5.3 upgrade"
+    echo "  upgrade  Perform Java 17 + DS 7.5 upgrade"
     echo "  verify   Post-upgrade verification"
     echo "  restore  Restore to pre-upgrade state (for re-testing)"
     echo ""
