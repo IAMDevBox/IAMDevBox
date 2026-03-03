@@ -53,6 +53,13 @@ RUN_ID=$(date +%Y%m%d_%H%M%S)
 LOG_DIR="${BACKUP_DIR}/upgrade_logs_${RUN_ID}"
 
 ###############################################################################
+# Pre-flight — ensure required directories exist
+###############################################################################
+mkdir -p "${BACKUP_DIR}"
+mkdir -p "${INSTALL_DIR}"
+mkdir -p "${LOG_DIR}"
+
+###############################################################################
 # Global logging — all output goes to both screen and log file
 ###############################################################################
 setup_logging() {
