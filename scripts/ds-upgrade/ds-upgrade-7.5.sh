@@ -56,7 +56,6 @@ LOG_DIR="${BACKUP_DIR}/upgrade_logs_${RUN_ID}"
 # Pre-flight — ensure required directories exist
 ###############################################################################
 mkdir -p "${BACKUP_DIR}"
-mkdir -p "${INSTALL_DIR}"
 mkdir -p "${LOG_DIR}"
 
 ###############################################################################
@@ -64,7 +63,6 @@ mkdir -p "${LOG_DIR}"
 ###############################################################################
 setup_logging() {
   local action="$1"
-  mkdir -p "${LOG_DIR}"
   FULL_LOG="${LOG_DIR}/${action}_${RUN_ID}.log"
   exec > >(tee -a "${FULL_LOG}") 2>&1
   echo "[INFO] Full log: ${FULL_LOG}"
@@ -135,6 +133,12 @@ do_backup() {
     return 0
   fi
 
+  # Verify DS_HOME exists
+  if [ ! -d "${DS_HOME}" ]; then
+    echo "[FAIL] DS_HOME not found: ${DS_HOME}"
+    exit 1
+  fi
+
   # Backup bash_profile and bashrc
   cp ~/.bash_profile "${BACKUP_BASH_PROFILE}"
   cp ~/.bashrc "${BACKUP_BASHRC}"
@@ -191,6 +195,7 @@ do_restore() {
   echo "[INFO] bash_profile and bashrc restored"
 
   # Switch back to Java 11
+  echo "--- Switch to Java 11 ---"
   export JAVA_HOME="${JAVA_11}"
   export PATH="${JAVA_HOME}/bin:${PATH}"
   hash -r
@@ -200,9 +205,15 @@ do_restore() {
   # Start DS with old version
   start_ds
 
-  # Verify
+  # Verify restore
+  echo "--- Verify DS version ---"
+  "${DS_HOME}/bin/start-ds" --version 2>&1 || true
+
   echo "--- Verify LDAP alive ---"
   check_ldap_alive || echo "[WARN] LDAP check failed after restore"
+
+  echo "--- Verify Replication ---"
+  check_replication || echo "[WARN] Replication check returned non-zero (may still be converging)"
 
   echo ""
   echo "========================================="
@@ -313,6 +324,13 @@ BASHRC_EOF
   # Extract new version
   unzip -o "${DS_ZIP}" -d "${DS_EXTRACT_DIR}"
 
+  # Verify upgrade command exists after extraction
+  if [ ! -f "${DS_HOME}/upgrade" ]; then
+    echo "[FAIL] Upgrade command not found: ${DS_HOME}/upgrade"
+    echo "[FAIL] Check zip file structure (expected opendj/upgrade in zip root)"
+    exit 1
+  fi
+
   # Run upgrade
   "${DS_HOME}/upgrade" --no-prompt --force 2>&1 | tee "${LOG_DIR}/upgrade_output.log"
 
@@ -358,6 +376,8 @@ do_verify() {
   if [ -f "${DS_HOME}/logs/upgrade.log" ]; then
     cp "${DS_HOME}/logs/upgrade.log" "${UPGRADE_LOG}/upgrade.log"
     cat "${UPGRADE_LOG}/upgrade.log"
+  else
+    echo "[WARN] No upgrade.log found at ${DS_HOME}/logs/upgrade.log"
   fi
 
   # DS version
@@ -365,12 +385,13 @@ do_verify() {
   "${DS_HOME}/bin/start-ds" --version 2>&1 | tee "${UPGRADE_LOG}/post_ds_version.log" || true
 
   # LDAP alive
+  VERIFY_FAILED=0
   echo "--- LDAP alive check ---"
   if check_ldap_alive | tee "${UPGRADE_LOG}/post_ldap_alive.log"; then
     echo "[PASS] LDAP is responding after upgrade"
   else
     echo "[FAIL] LDAP is NOT responding after upgrade"
-    exit 1
+    VERIFY_FAILED=1
   fi
 
   # Replication
@@ -379,9 +400,15 @@ do_verify() {
 
   # Summary
   echo ""
-  echo "========================================="
-  echo " Verification Complete"
-  echo "========================================="
+  if [ "${VERIFY_FAILED}" -eq 1 ]; then
+    echo "========================================="
+    echo " Verification FAILED"
+    echo "========================================="
+  else
+    echo "========================================="
+    echo " Verification Complete"
+    echo "========================================="
+  fi
   echo ""
   if [ -f "${UPGRADE_LOG}/pre_java_version.log" ]; then
     echo " Pre/Post comparison:"
@@ -392,6 +419,10 @@ do_verify() {
   echo ""
   echo " To re-test: ./ds-upgrade-7.5.sh restore"
   echo "========================================="
+
+  if [ "${VERIFY_FAILED}" -eq 1 ]; then
+    exit 1
+  fi
 }
 
 ###############################################################################
