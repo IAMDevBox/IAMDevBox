@@ -307,7 +307,7 @@ BASHRC_EOF
   unzip -o "${DS_ZIP}" -d "${DS_EXTRACT_DIR}"
 
   # Run upgrade
-  "${DS_HOME}/bin/upgrade" --no-prompt --force 2>&1 | tee "${LOG_DIR}/upgrade_output.log"
+  "${DS_HOME}/upgrade" --no-prompt --force 2>&1 | tee "${LOG_DIR}/upgrade_output.log"
 
   # Rebuild indexes
   "${DS_HOME}/bin/rebuild-index" \
