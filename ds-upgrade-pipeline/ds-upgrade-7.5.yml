@@ -2,26 +2,18 @@
 # DS Upgrade Playbook: 7.1 → 7.5
 #
 # Usage:
-#   ansible-playbook ds-upgrade-7.5.yml -e "action=backup"
-#   ansible-playbook ds-upgrade-7.5.yml -e "action=upgrade"
-#   ansible-playbook ds-upgrade-7.5.yml -e "action=verify"
-#   ansible-playbook ds-upgrade-7.5.yml -e "action=restore"
-#
-# Test cycle:
-#   backup → upgrade → verify → restore → upgrade → verify → ...
+#   ansible-playbook ds-upgrade-7.5.yml
 #
 # Required files:
-#   inventory                        — define ds_servers host group
-#   group_vars/ds_servers/vault.yml  — store vault_dsrepl_password (ansible-vault encrypted)
-#   group_vars/<env>/vars.yml        — per-environment overrides (ds_home, base_dn, etc.)
+#   inventory                    — define ds_servers host group
+#   group_vars/<env>/vars.yml    — per-environment overrides (ds_home, base_dn, etc.)
 #
 # Per-environment override example (group_vars/dev/vars.yml):
 #   ds_home: /opt/app/forgerock/opendj
 #   base_dn: dc=example,dc=com
-#   dsrepl_host: ds1.example.com
 
-- name: "DS Upgrade ({{ action }})"
-  hosts: "{{ inventory_host_vars | default('ds_servers') }}"
+- name: DS Upgrade
+  hosts: "{{ inventory_host_vars }}"
   serial: 1
   gather_facts: true
   become: true
