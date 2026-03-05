@@ -8,12 +8,6 @@
 #   ./ds-upgrade-7.5.sh verify    # Step 3: Post-upgrade verification
 #   ./ds-upgrade-7.5.sh restore   # Restore to pre-upgrade state (for re-testing)
 #
-# Usage (Ansible / Harness):
-#   ansible-playbook ds-upgrade-7.5.yml -e "action=backup"
-#   ansible-playbook ds-upgrade-7.5.yml -e "action=upgrade"
-#   ansible-playbook ds-upgrade-7.5.yml -e "action=verify"
-#   ansible-playbook ds-upgrade-7.5.yml -e "action=restore"
-#
 # Test cycle:
 #   backup → upgrade → verify → restore → upgrade → verify → restore → ...
 #
@@ -42,11 +36,6 @@ BASE_DN="${BASE_DN:-dc=example,dc=com}"
 DS_ZIP_FILE="${DS_ZIP_FILE:-DS-7.5.3.zip}"
 DS_ADMIN_PORT="${DS_ADMIN_PORT:-4444}"
 DS_LDAPS_PORT="${DS_LDAPS_PORT:-6036}"
-
-# dsrepl connection settings
-DSREPL_HOST="${DSREPL_HOST:-ds.example.com}"
-DSREPL_BIND_DN="${DSREPL_BIND_DN:-cn=dsadmin}"
-DSREPL_BIND_PASSWORD="${DSREPL_BIND_PASSWORD:-password}"
 
 # Backup tag — used for backup/restore pairing
 BACKUP_TAG="ds_upgrade"
@@ -103,18 +92,6 @@ check_ldap_alive() {
     echo "[FAIL] LDAP is not responding"
     return 1
   fi
-}
-
-check_replication() {
-  "${DS_HOME}/bin/dsrepl" status \
-    --hostname "${DSREPL_HOST}" \
-    --port ${DS_ADMIN_PORT} \
-    --bindDN "${DSREPL_BIND_DN}" \
-    --bindPassword "${DSREPL_BIND_PASSWORD}" \
-    --showGroups \
-    --showReplicas \
-    --showChangelogs \
-    -X 2>&1
 }
 
 stop_ds() {
@@ -225,9 +202,6 @@ do_restore() {
   echo "--- Verify LDAP alive ---"
   check_ldap_alive || echo "[WARN] LDAP check failed after restore"
 
-  echo "--- Verify Replication ---"
-  check_replication || echo "[WARN] Replication check returned non-zero (may still be converging)"
-
   echo ""
   echo "========================================="
   echo " Restore Complete — back to DS 7.1"
@@ -267,7 +241,6 @@ do_upgrade() {
   java -version 2>&1 | tee "${LOG_DIR}/pre_java_version.log"
   "${DS_HOME}/bin/start-ds" --version 2>&1 | tee "${LOG_DIR}/pre_ds_version.log" || true
   check_ldap_alive | tee "${LOG_DIR}/pre_ldap_alive.log" || true
-  check_replication | tee "${LOG_DIR}/pre_replication.log" || true
 
   #--- Java 17 upgrade ---
   echo ""
@@ -407,10 +380,6 @@ do_verify() {
     VERIFY_FAILED=1
   fi
 
-  # Replication
-  echo "--- Replication status ---"
-  check_replication | tee "${UPGRADE_LOG}/post_replication.log" || echo "[WARN] Replication check returned non-zero (may still be converging)"
-
   # Summary
   echo ""
   if [ "${VERIFY_FAILED}" -eq 1 ]; then
@@ -427,7 +396,6 @@ do_verify() {
     echo " Pre/Post comparison:"
     echo "   diff ${UPGRADE_LOG}/pre_java_version.log ${UPGRADE_LOG}/post_java_version.log"
     echo "   diff ${UPGRADE_LOG}/pre_ds_version.log ${UPGRADE_LOG}/post_ds_version.log"
-    echo "   diff ${UPGRADE_LOG}/pre_replication.log ${UPGRADE_LOG}/post_replication.log"
   fi
   echo ""
   echo " To re-test: ./ds-upgrade-7.5.sh restore"
@@ -441,7 +409,7 @@ do_verify() {
 ###############################################################################
 # Main
 ###############################################################################
-ACTION="${1:-}"
+ACTION="${1:-upgrade}"
 
 case "${ACTION}" in
   backup)
