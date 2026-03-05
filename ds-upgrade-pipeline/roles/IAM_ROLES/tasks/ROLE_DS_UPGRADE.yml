@@ -1,14 +1,9 @@
 ---
 # ROLE_DS_UPGRADE — DS upgrade via shell script
 #
-# Required variables:
-#   action                — backup | upgrade | verify | restore
-#   vault_dsrepl_password — dsrepl bind password (from ansible-vault)
-#
 # Optional overrides (via group_vars or -e):
 #   ds_home, java_11, java_17, backup_dir, install_dir,
-#   base_dn, ds_zip_file, ds_admin_port, ds_ldaps_port,
-#   dsrepl_host, dsrepl_bind_dn
+#   base_dn, ds_zip_file, ds_admin_port, ds_ldaps_port
 
 - name: Set DS upgrade defaults
   set_fact:
@@ -21,17 +16,7 @@
     ds_zip_file: "{{ ds_zip_file | default('DS-7.5.3.zip') }}"
     ds_admin_port: "{{ ds_admin_port | default('4444') }}"
     ds_ldaps_port: "{{ ds_ldaps_port | default('6036') }}"
-    dsrepl_host: "{{ dsrepl_host | default(inventory_hostname) }}"
-    dsrepl_bind_dn: "{{ dsrepl_bind_dn | default('cn=dsadmin') }}"
-    dsrepl_bind_password: "{{ dsrepl_bind_password | default(vault_dsrepl_password) }}"
     ds_script_dest: "{{ ds_script_dest | default('/opt/app/install/ds-upgrade-7.5.sh') }}"
-
-- name: Validate action parameter
-  assert:
-    that:
-      - action is defined
-      - action in ['backup', 'upgrade', 'verify', 'restore']
-    fail_msg: "action must be one of: backup, upgrade, verify, restore (got '{{ action | default('undefined') }}')"
 
 - name: Upload DS upgrade script
   copy:
@@ -39,8 +24,8 @@
     dest: "{{ ds_script_dest }}"
     mode: '0755'
 
-- name: "Run DS upgrade — {{ action }}"
-  shell: "{{ ds_script_dest }} {{ action }}"
+- name: Run DS upgrade
+  shell: "{{ ds_script_dest }}"
   args:
     executable: /bin/bash
   environment:
@@ -53,9 +38,6 @@
     DS_ZIP_FILE: "{{ ds_zip_file }}"
     DS_ADMIN_PORT: "{{ ds_admin_port }}"
     DS_LDAPS_PORT: "{{ ds_ldaps_port }}"
-    DSREPL_HOST: "{{ dsrepl_host }}"
-    DSREPL_BIND_DN: "{{ dsrepl_bind_dn }}"
-    DSREPL_BIND_PASSWORD: "{{ dsrepl_bind_password }}"
   register: ds_result
 
 - name: Show output
