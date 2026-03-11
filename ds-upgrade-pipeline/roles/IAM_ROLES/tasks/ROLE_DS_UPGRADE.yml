@@ -3,10 +3,11 @@
 #
 # Optional overrides (via group_vars or -e):
 #   ds_home, java_11, java_17, backup_dir, install_dir,
-#   base_dn, ds_zip_file, ds_admin_port, ds_ldaps_port
+#   base_dn, ds_zip_file, ds_ldaps_port
 
 - name: Set DS upgrade defaults
   set_fact:
+    platform: "{{ PLATFORM | default('DEV') }}"
     ds_home: "{{ ds_home | default('/opt/app/forgerock/opendj') }}"
     java_11: "{{ java_11 | default('/opt/app/java/jdk-11') }}"
     java_17: "{{ java_17 | default('/opt/app/java/jdk-17') }}"
@@ -14,13 +15,12 @@
     install_dir: "{{ install_dir | default('/opt/app/install/opendj') }}"
     base_dn: "{{ base_dn | default('dc=example,dc=com') }}"
     ds_zip_file: "{{ ds_zip_file | default('DS-7.5.3.zip') }}"
-    ds_admin_port: "{{ ds_admin_port | default('4444') }}"
     ds_ldaps_port: "{{ ds_ldaps_port | default('6036') }}"
     ds_script_dest: "{{ ds_script_dest | default('/opt/app/install/ds-upgrade-7.5.sh') }}"
 
 - name: Upload DS upgrade script
   copy:
-    src: ds-upgrade-7.5.sh
+    src: scripts/ds-upgrade-7.5.sh
     dest: "{{ ds_script_dest }}"
     mode: '0755'
 
@@ -29,6 +29,7 @@
   args:
     executable: /bin/bash
   environment:
+    PLATFORM: "{{ platform }}"
     DS_HOME: "{{ ds_home }}"
     JAVA_11: "{{ java_11 }}"
     JAVA_17: "{{ java_17 }}"
@@ -36,7 +37,6 @@
     INSTALL_DIR: "{{ install_dir }}"
     BASE_DN: "{{ base_dn }}"
     DS_ZIP_FILE: "{{ ds_zip_file }}"
-    DS_ADMIN_PORT: "{{ ds_admin_port }}"
     DS_LDAPS_PORT: "{{ ds_ldaps_port }}"
   register: ds_result
 
