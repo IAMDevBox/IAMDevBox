@@ -27,7 +27,10 @@ set -euo pipefail
 ###############################################################################
 # Platform detection — set defaults based on PLATFORM (from Harness/Ansible)
 ###############################################################################
-PLATFORM="${PLATFORM:-DEV}"
+if [ -z "${PLATFORM:-}" ]; then
+  echo "[FATAL] PLATFORM is required (DEV, TEST, or PROD)"
+  exit 1
+fi
 
 case "${PLATFORM}" in
   DEV)

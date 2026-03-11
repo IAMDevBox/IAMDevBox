@@ -5,9 +5,14 @@
 #   ds_home, java_11, java_17, backup_dir, install_dir,
 #   base_dn, ds_zip_file, ds_ldaps_port
 
+- name: Verify PLATFORM is provided
+  fail:
+    msg: "PLATFORM variable is required (DEV, TEST, or PROD)"
+  when: PLATFORM is not defined or PLATFORM == ''
+
 - name: Set DS upgrade defaults
   set_fact:
-    platform: "{{ PLATFORM | default('DEV') }}"
+    platform: "{{ PLATFORM }}"
     ds_home: "{{ ds_home | default('/opt/app/forgerock/opendj') }}"
     java_11: "{{ java_11 | default('/opt/app/java/jdk-11') }}"
     java_17: "{{ java_17 | default('/opt/app/java/jdk-17') }}"
