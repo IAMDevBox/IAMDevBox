@@ -19,7 +19,7 @@
 #
 # Prerequisites:
 #   - DS 7.5 zip in ${INSTALL_DIR}
-#   - Java 17 installed at ${JAVA_17}
+#   - JDK 17 tar.gz in ${INSTALL_DIR} (or already installed at ${JAVA_17})
 #   - Upgrade one server at a time (do NOT upgrade all replicas simultaneously)
 
 set -euo pipefail
@@ -37,30 +37,36 @@ case "${PLATFORM}" in
     _DEF_DS_HOME="/opt/app/forgerock/opendj"
     _DEF_JAVA_11="/opt/app/java/jdk-11"
     _DEF_JAVA_17="/opt/app/java/jdk-17"
+    _DEF_JAVA_BASE="/opt/app/java"
     _DEF_BACKUP_DIR="/opt/app/backup"
     _DEF_INSTALL_DIR="/opt/app/install/opendj"
     _DEF_BASE_DN="dc=example,dc=com"
     _DEF_DS_ZIP_FILE="DS-7.5.3.zip"
+    _DEF_JDK_TAR_FILE="openjdk-17.0.2_linux-x64_bin.tar.gz"
     _DEF_DS_LDAPS_PORT="6036"
     ;;
   TEST)
     _DEF_DS_HOME="/opt/app/forgerock/opendj"
     _DEF_JAVA_11="/opt/app/java/jdk-11"
     _DEF_JAVA_17="/opt/app/java/jdk-17"
+    _DEF_JAVA_BASE="/opt/app/java"
     _DEF_BACKUP_DIR="/opt/app/backup"
     _DEF_INSTALL_DIR="/opt/app/install/opendj"
     _DEF_BASE_DN="dc=example,dc=com"
     _DEF_DS_ZIP_FILE="DS-7.5.3.zip"
+    _DEF_JDK_TAR_FILE="openjdk-17.0.2_linux-x64_bin.tar.gz"
     _DEF_DS_LDAPS_PORT="6036"
     ;;
   PROD)
     _DEF_DS_HOME="/opt/app/forgerock/opendj"
     _DEF_JAVA_11="/opt/app/java/jdk-11"
     _DEF_JAVA_17="/opt/app/java/jdk-17"
+    _DEF_JAVA_BASE="/opt/app/java"
     _DEF_BACKUP_DIR="/opt/app/backup"
     _DEF_INSTALL_DIR="/opt/app/install/opendj"
     _DEF_BASE_DN="dc=example,dc=com"
     _DEF_DS_ZIP_FILE="DS-7.5.3.zip"
+    _DEF_JDK_TAR_FILE="openjdk-17.0.2_linux-x64_bin.tar.gz"
     _DEF_DS_LDAPS_PORT="6036"
     ;;
   *)
@@ -79,6 +85,8 @@ BACKUP_DIR="${BACKUP_DIR:-${_DEF_BACKUP_DIR}}"
 INSTALL_DIR="${INSTALL_DIR:-${_DEF_INSTALL_DIR}}"
 BASE_DN="${BASE_DN:-${_DEF_BASE_DN}}"
 DS_ZIP_FILE="${DS_ZIP_FILE:-${_DEF_DS_ZIP_FILE}}"
+JDK_TAR_FILE="${JDK_TAR_FILE:-${_DEF_JDK_TAR_FILE}}"
+JAVA_BASE="${JAVA_BASE:-${_DEF_JAVA_BASE}}"
 DS_LDAPS_PORT="${DS_LDAPS_PORT:-${_DEF_DS_LDAPS_PORT}}"
 
 # Backup tag — used for backup/restore pairing
@@ -91,8 +99,9 @@ BACKUP_CACERTS="${BACKUP_DIR}/cacerts_java17_original_${BACKUP_TAG}"
 # Derived from DS_HOME — unzip target (parent of opendj/)
 DS_EXTRACT_DIR="${DS_HOME%/opendj}"  # e.g., /opt/app/forgerock
 
-# DS upgrade zip file (full path)
+# Package paths (full path)
 DS_ZIP="${INSTALL_DIR}/${DS_ZIP_FILE}"
+JDK_TAR="${INSTALL_DIR}/${JDK_TAR_FILE}"
 
 # Log directory for each run
 RUN_ID=$(date +%Y%m%d_%H%M%S)
@@ -148,6 +157,47 @@ start_ds() {
   echo "--- Starting DS ---"
   "${DS_HOME}/bin/start-ds"
   echo "[INFO] DS started"
+}
+
+###############################################################################
+# install_jdk17 — Install JDK 17 if not already present
+###############################################################################
+install_jdk17() {
+  if [ -x "${JAVA_17}/bin/java" ]; then
+    echo "[INFO] JDK 17 already installed at ${JAVA_17}"
+    "${JAVA_17}/bin/java" -version 2>&1
+    return 0
+  fi
+
+  echo "--- Installing JDK 17 ---"
+
+  if [ ! -f "${JDK_TAR}" ]; then
+    echo "[FAIL] JDK 17 package not found: ${JDK_TAR}"
+    exit 1
+  fi
+
+  mkdir -p "${JAVA_BASE}"
+
+  # Extract — tar.gz contains jdk-17.0.2/ directory
+  tar -xzf "${JDK_TAR}" -C "${JAVA_BASE}"
+
+  # Determine extracted directory name
+  JDK_EXTRACTED=$(tar -tzf "${JDK_TAR}" | head -1 | cut -d/ -f1)
+
+  # Create symlink if JAVA_17 path differs from extracted path
+  if [ "${JAVA_BASE}/${JDK_EXTRACTED}" != "${JAVA_17}" ]; then
+    ln -sfn "${JAVA_BASE}/${JDK_EXTRACTED}" "${JAVA_17}"
+    echo "[INFO] Symlink created: ${JAVA_17} -> ${JDK_EXTRACTED}"
+  fi
+
+  # Verify
+  if [ ! -x "${JAVA_17}/bin/java" ]; then
+    echo "[FAIL] JDK 17 installation failed — ${JAVA_17}/bin/java not found"
+    exit 1
+  fi
+
+  "${JAVA_17}/bin/java" -version 2>&1
+  echo "[INFO] JDK 17 installed at ${JAVA_17}"
 }
 
 ###############################################################################
@@ -289,9 +339,11 @@ do_upgrade() {
   "${DS_HOME}/bin/start-ds" --version 2>&1 | tee "${LOG_DIR}/pre_ds_version.log" || true
   check_ldap_alive | tee "${LOG_DIR}/pre_ldap_alive.log" || true
 
-  #--- Java 17 upgrade ---
+  #--- Java 17 install + upgrade ---
   echo ""
-  echo "=== Java 17 Upgrade ==="
+  echo "=== Java 17 Setup ==="
+
+  install_jdk17
 
   export JAVA_HOME="${JAVA_17}"
   export OPENDJ_JAVA_HOME="${JAVA_17}"
@@ -380,6 +432,9 @@ BASHRC_EOF
   echo " Upgrade Complete"
   echo " Logs: ${LOG_DIR}"
   echo " Next: ./ds-upgrade-7.5.sh verify"
+  echo ""
+  echo " NOTE: Run 'source ~/.bash_profile' or re-login"
+  echo "       to activate Java 17 in your current session."
   echo "========================================="
 }
 

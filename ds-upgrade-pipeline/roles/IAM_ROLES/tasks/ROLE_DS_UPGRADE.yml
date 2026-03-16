@@ -2,8 +2,8 @@
 # ROLE_DS_UPGRADE — DS upgrade via shell script
 #
 # Optional overrides (via group_vars or -e):
-#   ds_home, java_11, java_17, backup_dir, install_dir,
-#   base_dn, ds_zip_file, ds_ldaps_port
+#   ds_home, java_11, java_17, java_base, backup_dir, install_dir,
+#   base_dn, ds_zip_file, jdk_tar_file, ds_ldaps_port
 
 - name: Verify PLATFORM is provided
   fail:
@@ -16,12 +16,36 @@
     ds_home: "{{ ds_home | default('/opt/app/forgerock/opendj') }}"
     java_11: "{{ java_11 | default('/opt/app/java/jdk-11') }}"
     java_17: "{{ java_17 | default('/opt/app/java/jdk-17') }}"
+    java_base: "{{ java_base | default('/opt/app/java') }}"
     backup_dir: "{{ backup_dir | default('/opt/app/backup') }}"
     install_dir: "{{ install_dir | default('/opt/app/install/opendj') }}"
     base_dn: "{{ base_dn | default('dc=example,dc=com') }}"
     ds_zip_file: "{{ ds_zip_file | default('DS-7.5.3.zip') }}"
+    jdk_tar_file: "{{ jdk_tar_file | default('openjdk-17.0.2_linux-x64_bin.tar.gz') }}"
     ds_ldaps_port: "{{ ds_ldaps_port | default('6036') }}"
     ds_script_dest: "{{ ds_script_dest | default('/opt/app/install/ds-upgrade-7.5.sh') }}"
+
+# --- Upload packages ---
+
+- name: Ensure install directory exists
+  file:
+    path: "{{ install_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Upload JDK 17 package
+  copy:
+    src: "{{ jdk_tar_file }}"
+    dest: "{{ install_dir }}/{{ jdk_tar_file }}"
+    mode: '0644'
+
+- name: Upload DS 7.5.3 zip
+  copy:
+    src: "{{ ds_zip_file }}"
+    dest: "{{ install_dir }}/{{ ds_zip_file }}"
+    mode: '0644'
+
+# --- Upload and run upgrade script ---
 
 - name: Upload DS upgrade script
   copy:
@@ -38,10 +62,12 @@
     DS_HOME: "{{ ds_home }}"
     JAVA_11: "{{ java_11 }}"
     JAVA_17: "{{ java_17 }}"
+    JAVA_BASE: "{{ java_base }}"
     BACKUP_DIR: "{{ backup_dir }}"
     INSTALL_DIR: "{{ install_dir }}"
     BASE_DN: "{{ base_dn }}"
     DS_ZIP_FILE: "{{ ds_zip_file }}"
+    JDK_TAR_FILE: "{{ jdk_tar_file }}"
     DS_LDAPS_PORT: "{{ ds_ldaps_port }}"
   register: ds_result
 
