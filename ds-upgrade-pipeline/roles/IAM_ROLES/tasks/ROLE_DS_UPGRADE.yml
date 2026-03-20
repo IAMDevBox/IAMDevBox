@@ -33,11 +33,13 @@
     state: directory
     mode: '0755'
 
-- name: Upload JDK 17 package
+- name: Upload JDK 17 package parts (split to bypass GitHub 100MB limit)
   copy:
-    src: "{{ jdk_tar_file }}"
-    dest: "{{ install_dir }}/{{ jdk_tar_file }}"
+    src: "{{ item }}"
+    dest: "{{ install_dir }}/{{ item | basename }}"
     mode: '0644'
+  with_fileglob:
+    - "{{ jdk_tar_file }}.part*"
 
 - name: Upload DS 7.5.3 zip
   copy:
