@@ -34,12 +34,12 @@ fi
 
 case "${PLATFORM}" in
   DEV)
-    _DEF_DS_HOME="/opt/app/forgerock/opendj"
-    _DEF_JAVA_11="/opt/app/java/jdk-11"
-    _DEF_JAVA_17="/opt/app/java/jdk-17"
-    _DEF_JAVA_BASE="/opt/app/java"
-    _DEF_BACKUP_DIR="/opt/app/backup"
-    _DEF_INSTALL_DIR="/opt/app/install/opendj"
+    _DEF_DS_HOME="/opt/sso/forgerock/opendj"
+    _DEF_JAVA_11="/opt/sso/java/jdk-11.0.12+7"
+    _DEF_JAVA_17="/opt/sso/java/jdk-17.0.2"
+    _DEF_JAVA_BASE="/opt/sso/java"
+    _DEF_BACKUP_DIR="/opt/sso/backup/opendj_upgrade_backup"
+    _DEF_INSTALL_DIR="/opt/sso/install"
     _DEF_BASE_DN="dc=example,dc=com"
     _DEF_DS_ZIP_FILE="DS-7.5.3.zip"
     _DEF_JDK_TAR_FILE="openjdk-17.0.2_linux-x64_bin.tar.gz"
@@ -51,7 +51,7 @@ case "${PLATFORM}" in
     _DEF_JAVA_17="/opt/app/java/jdk-17"
     _DEF_JAVA_BASE="/opt/app/java"
     _DEF_BACKUP_DIR="/opt/app/backup"
-    _DEF_INSTALL_DIR="/opt/app/install/opendj"
+    _DEF_INSTALL_DIR="/opt/app/install"
     _DEF_BASE_DN="dc=example,dc=com"
     _DEF_DS_ZIP_FILE="DS-7.5.3.zip"
     _DEF_JDK_TAR_FILE="openjdk-17.0.2_linux-x64_bin.tar.gz"
@@ -63,7 +63,7 @@ case "${PLATFORM}" in
     _DEF_JAVA_17="/opt/app/java/jdk-17"
     _DEF_JAVA_BASE="/opt/app/java"
     _DEF_BACKUP_DIR="/opt/app/backup"
-    _DEF_INSTALL_DIR="/opt/app/install/opendj"
+    _DEF_INSTALL_DIR="/opt/app/install"
     _DEF_BASE_DN="dc=example,dc=com"
     _DEF_DS_ZIP_FILE="DS-7.5.3.zip"
     _DEF_JDK_TAR_FILE="openjdk-17.0.2_linux-x64_bin.tar.gz"
@@ -89,12 +89,11 @@ JDK_TAR_FILE="${JDK_TAR_FILE:-${_DEF_JDK_TAR_FILE}}"
 JAVA_BASE="${JAVA_BASE:-${_DEF_JAVA_BASE}}"
 DS_LDAPS_PORT="${DS_LDAPS_PORT:-${_DEF_DS_LDAPS_PORT}}"
 
-# Backup tag — used for backup/restore pairing
-BACKUP_TAG="ds_upgrade"
-BACKUP_DS="${BACKUP_DIR}/opendj_${BACKUP_TAG}"
-BACKUP_BASH_PROFILE="${BACKUP_DIR}/bash_profile_${BACKUP_TAG}"
-BACKUP_BASHRC="${BACKUP_DIR}/bashrc_${BACKUP_TAG}"
-BACKUP_CACERTS="${BACKUP_DIR}/cacerts_java17_original_${BACKUP_TAG}"
+# Backup paths — all under BACKUP_DIR
+BACKUP_DS="${BACKUP_DIR}/opendj"
+BACKUP_BASH_PROFILE="${BACKUP_DIR}/bash_profile"
+BACKUP_BASHRC="${BACKUP_DIR}/bashrc"
+BACKUP_CACERTS="${BACKUP_DIR}/cacerts_java17_original"
 
 # Derived from DS_HOME — unzip target (parent of opendj/)
 DS_EXTRACT_DIR="${DS_HOME%/opendj}"  # e.g., /opt/app/forgerock
@@ -150,6 +149,14 @@ check_ldap_alive() {
 stop_ds() {
   echo "--- Stopping DS ---"
   "${DS_HOME}/bin/stop-ds" 2>&1 || echo "[WARN] stop-ds returned non-zero (DS may not have been running)"
+  # Wait for ports to be released (up to 30 seconds)
+  for _w in $(seq 1 30); do
+    if ! ss -tlnp 2>/dev/null | grep -qE ":4444|:${DS_LDAPS_PORT}" ; then
+      break
+    fi
+    echo "[INFO] Waiting for DS ports to be released... (${_w}s)"
+    sleep 1
+  done
   echo "[INFO] DS stopped"
 }
 
@@ -171,6 +178,22 @@ install_jdk17() {
 
   echo "--- Installing JDK 17 ---"
 
+  # If JDK tar.gz was split into parts (to bypass GitHub 100MB limit), merge them.
+  # Split on Windows (PowerShell):
+  #   $file = "openjdk-17.0.2_linux-x64_bin.tar.gz"
+  #   $bytes = [IO.File]::ReadAllBytes($file)
+  #   $s = 95MB
+  #   for ($i = 0; $i * $s -lt $bytes.Length; $i++) {
+  #     $start = $i * $s
+  #     $end = [Math]::Min(($i + 1) * $s - 1, $bytes.Length - 1)
+  #     [IO.File]::WriteAllBytes("$file.part$i", $bytes[$start..$end])
+  #   }
+  if [ ! -f "${JDK_TAR}" ] && ls "${JDK_TAR}.part"* >/dev/null 2>&1; then
+    echo "[INFO] Merging split JDK parts: ${JDK_TAR}.part*"
+    cat "${JDK_TAR}.part"* > "${JDK_TAR}"
+    echo "[INFO] Merged into ${JDK_TAR} ($(du -h "${JDK_TAR}" | cut -f1))"
+  fi
+
   if [ ! -f "${JDK_TAR}" ]; then
     echo "[FAIL] JDK 17 package not found: ${JDK_TAR}"
     exit 1
@@ -179,16 +202,9 @@ install_jdk17() {
   mkdir -p "${JAVA_BASE}"
 
   # Extract — tar.gz contains jdk-17.0.2/ directory
+  echo "[INFO] Extracting $(du -h "${JDK_TAR}" | cut -f1) to ${JAVA_BASE} ..."
   tar -xzf "${JDK_TAR}" -C "${JAVA_BASE}"
-
-  # Determine extracted directory name
-  JDK_EXTRACTED=$(tar -tzf "${JDK_TAR}" | head -1 | cut -d/ -f1)
-
-  # Create symlink if JAVA_17 path differs from extracted path
-  if [ "${JAVA_BASE}/${JDK_EXTRACTED}" != "${JAVA_17}" ]; then
-    ln -sfn "${JAVA_BASE}/${JDK_EXTRACTED}" "${JAVA_17}"
-    echo "[INFO] Symlink created: ${JAVA_17} -> ${JDK_EXTRACTED}"
-  fi
+  echo "[INFO] Extraction complete"
 
   # Verify
   if [ ! -x "${JAVA_17}/bin/java" ]; then
@@ -319,10 +335,10 @@ do_upgrade() {
   echo " Logs: ${LOG_DIR}"
   echo "========================================="
 
-  # Verify backup exists
+  # Auto-backup if not done yet
   if [ ! -d "${BACKUP_DS}" ]; then
-    echo "[FAIL] No backup found. Run './ds-upgrade-7.5.sh backup' first"
-    exit 1
+    echo "[INFO] No backup found — running backup automatically..."
+    do_backup
   fi
 
   # Verify zip file exists before starting
