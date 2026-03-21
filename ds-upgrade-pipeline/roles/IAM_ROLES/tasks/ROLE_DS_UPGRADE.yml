@@ -1,9 +1,9 @@
 ---
 # ROLE_DS_UPGRADE — DS upgrade via shell script
 #
-# Optional overrides (via group_vars or -e):
-#   ds_home, java_11, java_17, java_base, backup_dir, install_dir,
-#   base_dn, ds_zip_file, jdk_tar_file, ds_ldaps_port
+# Only PLATFORM is required. All other config is determined by the script
+# based on PLATFORM (DEV, TEST, PROD). Override via group_vars or -e only
+# if you need non-default values.
 
 - name: Verify PLATFORM is provided
   fail:
@@ -13,17 +13,10 @@
 - name: Set DS upgrade defaults
   set_fact:
     platform: "{{ PLATFORM }}"
-    ds_home: "{{ ds_home | default('/opt/app/forgerock/opendj') }}"
-    java_11: "{{ java_11 | default('/opt/app/java/jdk-11') }}"
-    java_17: "{{ java_17 | default('/opt/app/java/jdk-17') }}"
-    java_base: "{{ java_base | default('/opt/app/java') }}"
-    backup_dir: "{{ backup_dir | default('/opt/app/backup') }}"
-    install_dir: "{{ install_dir | default('/opt/app/install/opendj') }}"
-    base_dn: "{{ base_dn | default('dc=example,dc=com') }}"
-    ds_zip_file: "{{ ds_zip_file | default('DS-7.5.3.zip') }}"
+    install_dir: "{{ install_dir | default('/opt/sso/install') }}"
     jdk_tar_file: "{{ jdk_tar_file | default('openjdk-17.0.2_linux-x64_bin.tar.gz') }}"
-    ds_ldaps_port: "{{ ds_ldaps_port | default('6036') }}"
-    ds_script_dest: "{{ ds_script_dest | default('/opt/app/install/ds-upgrade-7.5.sh') }}"
+    ds_zip_file: "{{ ds_zip_file | default('DS-7.5.3.zip') }}"
+    ds_script_dest: "{{ ds_script_dest | default('/opt/sso/install/ds-upgrade-7.5.sh') }}"
 
 # --- Upload packages ---
 
@@ -61,16 +54,6 @@
     executable: /bin/bash
   environment:
     PLATFORM: "{{ platform }}"
-    DS_HOME: "{{ ds_home }}"
-    JAVA_11: "{{ java_11 }}"
-    JAVA_17: "{{ java_17 }}"
-    JAVA_BASE: "{{ java_base }}"
-    BACKUP_DIR: "{{ backup_dir }}"
-    INSTALL_DIR: "{{ install_dir }}"
-    BASE_DN: "{{ base_dn }}"
-    DS_ZIP_FILE: "{{ ds_zip_file }}"
-    JDK_TAR_FILE: "{{ jdk_tar_file }}"
-    DS_LDAPS_PORT: "{{ ds_ldaps_port }}"
   register: ds_result
 
 - name: Show output
