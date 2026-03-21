@@ -299,9 +299,11 @@ do_restore() {
   # Switch back to Java 11
   echo "--- Switch to Java 11 ---"
   export JAVA_HOME="${JAVA_11}"
+  export OPENDJ_JAVA_HOME="${JAVA_11}"
   export PATH="${JAVA_HOME}/bin:${PATH}"
   hash -r
   echo "[INFO] JAVA_HOME set to ${JAVA_11}"
+  echo "[INFO] OPENDJ_JAVA_HOME set to ${JAVA_11}"
   java -version 2>&1
 
   # Start DS with old version
