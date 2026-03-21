@@ -291,19 +291,35 @@ do_restore() {
   cp -r "${BACKUP_DS}" "${DS_HOME}"
   echo "[INFO] DS installation restored from ${BACKUP_DS}"
 
-  # Restore bash_profile and bashrc
+  # Restore bash_profile and bashrc, then force Java 11 settings
+  # (backup may already contain Java 17 from a previous upgrade)
   cp "${BACKUP_BASH_PROFILE}" ~/.bash_profile
   cp "${BACKUP_BASHRC}" ~/.bashrc
-  echo "[INFO] bash_profile and bashrc restored"
+  echo "[INFO] bash_profile and bashrc restored from backup"
 
-  # Switch back to Java 11
+  # Remove any Java 17 references and set Java 11
   echo "--- Switch to Java 11 ---"
+  for _rc in ~/.bash_profile ~/.bashrc; do
+    # Remove lines containing Java 17 paths (jdk-17, jdk17, etc.)
+    sed -i '/[Jj]dk.17/d' "$_rc"
+    sed -i '/OPENDJ_JAVA_BIN/d' "$_rc"
+    sed -i '/OPENDJ_JAVA_HOME/d' "$_rc"
+  done
+  # Ensure Java 11 is set
+  if ! grep -q "JAVA_HOME=${JAVA_11}" ~/.bash_profile 2>/dev/null; then
+    cat >> ~/.bash_profile << RESTORE_EOF
+export JAVA_HOME=${JAVA_11}
+export PATH=\$JAVA_HOME/bin:\$PATH
+RESTORE_EOF
+  fi
+  echo "[INFO] Java 11 settings applied to ~/.bash_profile"
+
   export JAVA_HOME="${JAVA_11}"
   export OPENDJ_JAVA_HOME="${JAVA_11}"
+  unset OPENDJ_JAVA_BIN
   export PATH="${JAVA_HOME}/bin:${PATH}"
   hash -r
-  echo "[INFO] JAVA_HOME set to ${JAVA_11}"
-  echo "[INFO] OPENDJ_JAVA_HOME set to ${JAVA_11}"
+  echo "[INFO] JAVA_HOME=${JAVA_11}"
   java -version 2>&1
 
   # Start DS with old version
