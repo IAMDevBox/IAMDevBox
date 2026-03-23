@@ -36,11 +36,10 @@ case "${PLATFORM}" in
   DEV)
     _DEF_DS_HOME="/opt/sso/forgerock/opendj"
     _DEF_JAVA_11="/opt/sso/java/jdk-11.0.12+7"
-    _DEF_JAVA_17="/opt/sso/java/jdk-17.0.2"
+    _DEF_JAVA_17="/opt/sso/java/jdk-17"
     _DEF_JAVA_BASE="/opt/sso/java"
     _DEF_BACKUP_DIR="/opt/sso/backup/opendj_upgrade_backup"
     _DEF_INSTALL_DIR="/opt/sso/install"
-    _DEF_BASE_DN="dc=example,dc=com"
     _DEF_DS_ZIP_FILE="DS-7.5.3.zip"
     _DEF_JDK_TAR_FILE="openjdk-17.0.2_linux-x64_bin.tar.gz"
     _DEF_DS_LDAPS_PORT="6036"
@@ -52,7 +51,6 @@ case "${PLATFORM}" in
     _DEF_JAVA_BASE="/opt/app/java"
     _DEF_BACKUP_DIR="/opt/app/backup"
     _DEF_INSTALL_DIR="/opt/app/install"
-    _DEF_BASE_DN="dc=example,dc=com"
     _DEF_DS_ZIP_FILE="DS-7.5.3.zip"
     _DEF_JDK_TAR_FILE="openjdk-17.0.2_linux-x64_bin.tar.gz"
     _DEF_DS_LDAPS_PORT="6036"
@@ -64,7 +62,6 @@ case "${PLATFORM}" in
     _DEF_JAVA_BASE="/opt/app/java"
     _DEF_BACKUP_DIR="/opt/app/backup"
     _DEF_INSTALL_DIR="/opt/app/install"
-    _DEF_BASE_DN="dc=example,dc=com"
     _DEF_DS_ZIP_FILE="DS-7.5.3.zip"
     _DEF_JDK_TAR_FILE="openjdk-17.0.2_linux-x64_bin.tar.gz"
     _DEF_DS_LDAPS_PORT="6036"
@@ -83,7 +80,7 @@ JAVA_11="${JAVA_11:-${_DEF_JAVA_11}}"
 JAVA_17="${JAVA_17:-${_DEF_JAVA_17}}"
 BACKUP_DIR="${BACKUP_DIR:-${_DEF_BACKUP_DIR}}"
 INSTALL_DIR="${INSTALL_DIR:-${_DEF_INSTALL_DIR}}"
-BASE_DN="${BASE_DN:-${_DEF_BASE_DN}}"
+BASE_DN=""  # auto-detected on demand via detect_base_dn
 DS_ZIP_FILE="${DS_ZIP_FILE:-${_DEF_DS_ZIP_FILE}}"
 JDK_TAR_FILE="${JDK_TAR_FILE:-${_DEF_JDK_TAR_FILE}}"
 JAVA_BASE="${JAVA_BASE:-${_DEF_JAVA_BASE}}"
@@ -125,6 +122,20 @@ setup_logging() {
 ###############################################################################
 # Helper functions
 ###############################################################################
+###############################################################################
+# detect_base_dn — Auto-detect BASE_DN from DS status (only DB backends)
+###############################################################################
+detect_base_dn() {
+  if [ -n "${BASE_DN}" ]; then return 0; fi
+  BASE_DN=$("${DS_HOME}/bin/status" --offline 2>/dev/null \
+    | awk '/^>>>> Local backends/,/^>>>> /{if($NF=="DB") print $1}' | head -1)
+  if [ -z "${BASE_DN}" ]; then
+    echo "[FATAL] Cannot auto-detect BASE_DN from ${DS_HOME}/bin/status --offline"
+    exit 1
+  fi
+  echo "[INFO] Detected BASE_DN: ${BASE_DN}"
+}
+
 check_ldap_alive() {
   local result
   result=$("${DS_HOME}/bin/ldapsearch" \
@@ -201,10 +212,17 @@ install_jdk17() {
 
   mkdir -p "${JAVA_BASE}"
 
-  # Extract — tar.gz contains jdk-17.0.2/ directory
+  # Extract — tar.gz contains jdk-17.x.x/ directory
   echo "[INFO] Extracting $(du -h "${JDK_TAR}" | cut -f1) to ${JAVA_BASE} ..."
   tar -xzf "${JDK_TAR}" -C "${JAVA_BASE}"
   echo "[INFO] Extraction complete"
+
+  # Rename extracted jdk-17.* directory to the generic JAVA_17 path
+  _extracted=$(ls -d "${JAVA_BASE}"/jdk-17.* 2>/dev/null | head -1)
+  if [ -n "${_extracted}" ] && [ "${_extracted}" != "${JAVA_17}" ]; then
+    echo "[INFO] Renaming ${_extracted} → ${JAVA_17}"
+    mv "${_extracted}" "${JAVA_17}"
+  fi
 
   # Verify
   if [ ! -x "${JAVA_17}/bin/java" ]; then
@@ -352,6 +370,9 @@ do_upgrade() {
   echo " Server: $(hostname)"
   echo " Logs: ${LOG_DIR}"
   echo "========================================="
+
+  # Pre-requisites
+  detect_base_dn
 
   # Auto-backup if not done yet
   if [ ! -d "${BACKUP_DS}" ]; then
