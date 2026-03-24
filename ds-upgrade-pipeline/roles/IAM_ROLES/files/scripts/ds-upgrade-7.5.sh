@@ -128,7 +128,7 @@ setup_logging() {
 detect_base_dn() {
   if [ -n "${BASE_DN}" ]; then return 0; fi
   BASE_DN=$("${DS_HOME}/bin/status" --offline 2>/dev/null \
-    | awk '/^>>>> Local backends/,/^>>>> /{if($NF=="DB") print $1}' | head -1)
+    | grep ': DB' | awk '{print $1}' | head -1)
   if [ -z "${BASE_DN}" ]; then
     echo "[FATAL] Cannot auto-detect BASE_DN from ${DS_HOME}/bin/status --offline"
     exit 1
