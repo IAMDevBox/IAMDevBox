@@ -127,8 +127,11 @@ setup_logging() {
 ###############################################################################
 detect_base_dn() {
   if [ -n "${BASE_DN}" ]; then return 0; fi
-  BASE_DN=$("${DS_HOME}/bin/status" --offline 2>/dev/null \
-    | grep ': DB' | awk '{print $1}' | head -1)
+  # Ensure Java 11 is available for DS status command
+  export JAVA_HOME="${JAVA_11}"
+  export PATH="${JAVA_HOME}/bin:${PATH}"
+  BASE_DN=$("${DS_HOME}/bin/status" --offline \
+    | grep ': DB' | awk '{print $1}' | head -1 || true)
   if [ -z "${BASE_DN}" ]; then
     echo "[FATAL] Cannot auto-detect BASE_DN from ${DS_HOME}/bin/status --offline"
     exit 1
