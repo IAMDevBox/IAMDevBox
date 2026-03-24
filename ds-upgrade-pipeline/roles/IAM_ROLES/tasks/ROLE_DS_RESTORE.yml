@@ -1,0 +1,27 @@
+---
+# ROLE_DS_RESTORE — Restore DS to pre-upgrade state
+#
+# Only PLATFORM is required. The script must already be on the server
+# (uploaded by ROLE_DS_UPGRADE).
+
+- name: Verify PLATFORM is provided
+  fail:
+    msg: "PLATFORM variable is required (DEV, TEST, or PROD)"
+  when: PLATFORM is not defined or PLATFORM == ''
+
+- name: Set DS restore defaults
+  set_fact:
+    platform: "{{ PLATFORM }}"
+    ds_script_dest: "{{ ds_script_dest | default('/opt/sso/install/ds-upgrade-7.5.sh') }}"
+
+- name: Run DS restore
+  shell: "{{ ds_script_dest }} restore"
+  args:
+    executable: /bin/bash
+  environment:
+    PLATFORM: "{{ platform }}"
+  register: ds_restore_result
+
+- name: Show output
+  debug:
+    var: ds_restore_result.stdout_lines
