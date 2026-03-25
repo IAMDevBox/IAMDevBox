@@ -60,17 +60,12 @@ do_upgrade() {
   "${JAVA_17}/bin/java" -version 2>&1
   echo "[INFO] JDK 17 installed at ${JAVA_17}"
 
-  # Remove old Java references and add Java 17 to bash_profile
-  for _rc in ~/.bash_profile ~/.bashrc; do
-    [ -f "$_rc" ] || continue
-    sed -i '/JAVA_HOME/d' "$_rc"
-    sed -i '/jdk-11/d' "$_rc"
-  done
-  if ! grep -q "JAVA_HOME=${JAVA_17}" ~/.bash_profile 2>/dev/null; then
-    cat >> ~/.bash_profile << UPGRADE_EOF
-export JAVA_HOME=${JAVA_17}
-export PATH=\$JAVA_HOME/bin:\$PATH
-UPGRADE_EOF
+  # Update JAVA_HOME in bash_profile
+  if grep -q '^export JAVA_HOME=' ~/.bash_profile 2>/dev/null; then
+    sed -i "s|^export JAVA_HOME=.*|export JAVA_HOME=${JAVA_17}|" ~/.bash_profile
+  else
+    echo "export JAVA_HOME=${JAVA_17}" >> ~/.bash_profile
+    echo 'export PATH=$JAVA_HOME/bin:$PATH' >> ~/.bash_profile
   fi
   echo "[INFO] Java 17 settings applied to ~/.bash_profile"
   echo ""
@@ -83,18 +78,12 @@ UPGRADE_EOF
 do_restore() {
   echo "--- Rollback to Java 11 ---"
 
-  # Remove any Java 17 references from bash_profile and bashrc
-  for _rc in ~/.bash_profile ~/.bashrc; do
-    [ -f "$_rc" ] || continue
-    sed -i '/[Jj]dk.17/d' "$_rc"
-  done
-
-  # Ensure Java 11 is set
-  if ! grep -q "JAVA_HOME=${JAVA_11}" ~/.bash_profile 2>/dev/null; then
-    cat >> ~/.bash_profile << RESTORE_EOF
-export JAVA_HOME=${JAVA_11}
-export PATH=\$JAVA_HOME/bin:\$PATH
-RESTORE_EOF
+  # Update JAVA_HOME back to Java 11 in bash_profile
+  if grep -q '^export JAVA_HOME=' ~/.bash_profile 2>/dev/null; then
+    sed -i "s|^export JAVA_HOME=.*|export JAVA_HOME=${JAVA_11}|" ~/.bash_profile
+  else
+    echo "export JAVA_HOME=${JAVA_11}" >> ~/.bash_profile
+    echo 'export PATH=$JAVA_HOME/bin:$PATH' >> ~/.bash_profile
   fi
   echo "[INFO] Java 11 settings applied to ~/.bash_profile"
 

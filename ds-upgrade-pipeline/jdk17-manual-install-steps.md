@@ -22,13 +22,8 @@ mv /opt/sso/java/jdk-17.0.2 /opt/sso/java/jdk-17
 # 4. Verify
 /opt/sso/java/jdk-17/bin/java -version
 
-# 5. Remove old Java references and add Java 17
-sed -i '/JAVA_HOME/d' ~/.bash_profile
-sed -i '/jdk-11/d' ~/.bash_profile
-cat >> ~/.bash_profile << 'EOF'
-export JAVA_HOME=/opt/sso/java/jdk-17
-export PATH=$JAVA_HOME/bin:$PATH
-EOF
+# 5. Update JAVA_HOME in bash_profile
+sed -i 's|^export JAVA_HOME=.*|export JAVA_HOME=/opt/sso/java/jdk-17|' ~/.bash_profile
 
 # 6. Activate
 source ~/.bash_profile
@@ -40,9 +35,8 @@ java -version
 ## Restore (Rollback to JDK 11)
 
 ```bash
-# 1. Remove Java 17 references from bash_profile and bashrc
+# 1. Remove Java 17 references from bash_profile
 sed -i '/[Jj]dk.17/d' ~/.bash_profile
-sed -i '/[Jj]dk.17/d' ~/.bashrc
 
 # 2. Add Java 11 back
 cat >> ~/.bash_profile << 'EOF'
