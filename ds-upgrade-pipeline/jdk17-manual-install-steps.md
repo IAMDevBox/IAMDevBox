@@ -22,7 +22,9 @@ mv /opt/sso/java/jdk-17.0.2 /opt/sso/java/jdk-17
 # 4. Verify
 /opt/sso/java/jdk-17/bin/java -version
 
-# 5. Update bash_profile
+# 5. Remove old Java references and add Java 17
+sed -i '/JAVA_HOME/d' ~/.bash_profile
+sed -i '/jdk-11/d' ~/.bash_profile
 cat >> ~/.bash_profile << 'EOF'
 export JAVA_HOME=/opt/sso/java/jdk-17
 export PATH=$JAVA_HOME/bin:$PATH
