@@ -1,8 +1,7 @@
 ---
 # ROLE_DS_BACKUP — Backup DS state before upgrade
 #
-# Only PLATFORM is required. The script must already be on the server
-# (uploaded by ROLE_DS_UPGRADE).
+# Only PLATFORM is required.
 
 - name: Verify PLATFORM is provided
   fail:
@@ -13,6 +12,12 @@
   set_fact:
     platform: "{{ PLATFORM }}"
     ds_script_dest: "{{ ds_script_dest | default('/opt/sso/install/ds-upgrade-7.5.sh') }}"
+
+- name: Upload DS upgrade script
+  copy:
+    src: scripts/ds-upgrade-7.5.sh
+    dest: "{{ ds_script_dest }}"
+    mode: '0755'
 
 - name: Run DS backup
   shell: "{{ ds_script_dest }} backup"
