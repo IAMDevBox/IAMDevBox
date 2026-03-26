@@ -14,8 +14,6 @@ Scans an IG instance directory to:
 3. Validate route JSON configs for common misconfigurations
 """
 
-from __future__ import annotations
-
 import argparse
 import json
 import os
@@ -148,11 +146,11 @@ REQUIRED_FIELDS = {
 # ---------------------------------------------------------------------------
 # File discovery
 # ---------------------------------------------------------------------------
-def find_groovy_files(base_dir: Path) -> list[Path]:
+def find_groovy_files(base_dir):
     return sorted(base_dir.rglob("*.groovy"))
 
 
-def find_config_files(base_dir: Path) -> list[Path]:
+def find_config_files(base_dir):
     files = []
     files.extend(sorted(base_dir.rglob("*.json")))
     files.extend(sorted(base_dir.rglob("*.groovy")))
@@ -160,7 +158,7 @@ def find_config_files(base_dir: Path) -> list[Path]:
     return files
 
 
-def find_route_files(base_dir: Path) -> list[Path]:
+def find_route_files(base_dir):
     routes = []
     for d in base_dir.rglob("routes"):
         if d.is_dir():
@@ -171,7 +169,7 @@ def find_route_files(base_dir: Path) -> list[Path]:
 # ---------------------------------------------------------------------------
 # Script reference extraction
 # ---------------------------------------------------------------------------
-def extract_script_refs(config_file: Path) -> list[str]:
+def extract_script_refs(config_file):
     refs = []
     try:
         with open(config_file, "r", encoding="utf-8") as f:
@@ -191,7 +189,7 @@ def extract_script_refs(config_file: Path) -> list[str]:
 # ---------------------------------------------------------------------------
 # Comment stripping for Groovy files
 # ---------------------------------------------------------------------------
-def strip_comments(lines: list[str]) -> list[tuple[int, str]]:
+def strip_comments(lines):
     result = []
     in_block = False
     for line_num, line in enumerate(lines, 1):
@@ -233,7 +231,7 @@ def strip_comments(lines: list[str]) -> list[tuple[int, str]]:
 # ---------------------------------------------------------------------------
 # Groovy script analysis
 # ---------------------------------------------------------------------------
-def analyze_script(script_path: Path, min_severity: int = 0) -> list[dict]:
+def analyze_script(script_path, min_severity=0):
     findings = []
     try:
         with open(script_path, "r", encoding="utf-8", errors="replace") as f:
@@ -304,7 +302,7 @@ def _deep_get(obj, path):
     return current
 
 
-def analyze_route(route_path: Path, all_route_names: dict, min_severity: int = 0) -> list[dict]:
+def analyze_route(route_path, all_route_names, min_severity=0):
     """Analyze a route JSON for config issues."""
     findings = []
     try:
@@ -417,20 +415,20 @@ def analyze_route(route_path: Path, all_route_names: dict, min_severity: int = 0
 # ---------------------------------------------------------------------------
 # Data collection (separated from formatting)
 # ---------------------------------------------------------------------------
-def collect_analysis(base_dir: Path, min_severity: int = 0) -> dict:
+def collect_analysis(base_dir, min_severity=0):
     groovy_files = find_groovy_files(base_dir)
     config_files = find_config_files(base_dir)
     route_files = find_route_files(base_dir)
 
     # Collect script references
-    all_refs: dict[str, list[str]] = {}
+    all_refs = {}
     for cf in config_files:
         for ref in extract_script_refs(cf):
             all_refs.setdefault(ref, []).append(cf.name)
 
     # Classify scripts as used/unused
-    used_scripts: dict[str, list[str]] = {}  # path_str -> [referencing files]
-    unused_scripts: list[str] = []
+    used_scripts = {}
+    unused_scripts = []
 
     for gf in groovy_files:
         matched = False
@@ -445,20 +443,20 @@ def collect_analysis(base_dir: Path, min_severity: int = 0) -> dict:
             unused_scripts.append(str(gf))
 
     # Analyze scripts
-    script_findings: dict[str, list[dict]] = {}
+    script_findings = {}
     for gf_str in used_scripts:
         findings = analyze_script(Path(gf_str), min_severity)
         if findings:
             script_findings[gf_str] = findings
 
-    unused_findings: dict[str, list[dict]] = {}
+    unused_findings = {}
     for gf_str in unused_scripts:
         findings = analyze_script(Path(gf_str), min_severity)
         if findings:
             unused_findings[gf_str] = findings
 
     # Analyze routes
-    all_route_names: dict[str, str] = {}
+    all_route_names = {}
     for rf in route_files:
         try:
             with open(rf, "r", encoding="utf-8") as f:
@@ -469,7 +467,7 @@ def collect_analysis(base_dir: Path, min_severity: int = 0) -> dict:
         except (json.JSONDecodeError, OSError):
             pass
 
-    route_findings: dict[str, list[dict]] = {}
+    route_findings = {}
     for rf in route_files:
         findings = analyze_route(rf, all_route_names, min_severity)
         if findings:
@@ -511,7 +509,7 @@ def collect_analysis(base_dir: Path, min_severity: int = 0) -> dict:
 # ---------------------------------------------------------------------------
 # Markdown report formatter
 # ---------------------------------------------------------------------------
-def format_markdown(data: dict) -> str:
+def format_markdown(data):
     lines = []
     lines.append("# IG Migration Analysis Report")
     lines.append(f"\n**Directory:** `{data['directory']}`")
@@ -627,7 +625,7 @@ def format_markdown(data: dict) -> str:
 # ---------------------------------------------------------------------------
 # JSON report formatter
 # ---------------------------------------------------------------------------
-def format_json(data: dict) -> str:
+def format_json(data):
     output = {
         "directory": data["directory"],
         "summary": {
