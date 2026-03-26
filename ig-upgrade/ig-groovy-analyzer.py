@@ -51,10 +51,10 @@ RULES = [
      "Change to: import groovy.ant.AntBuilder"),
 
     # --- Groovy 4 semantic changes ---
-    ("G4-005", "WARN",
-     r"\b(?!isActive|isEmpty|isNull|isEnabled|isValid|isOpen|isConnected|isDirectory|isFile|isAbsolute|isBlank|isSecure|isConfidential|isRooted|isClosed)is[A-Z]\w+\(\)",
+    ("G4-005", "INFO",
+     r"\b(?!isActive|isEmpty|isNull|isEnabled|isValid|isOpen|isConnected|isDirectory|isFile|isAbsolute|isBlank|isSecure|isConfidential|isRooted|isClosed|isHttp|isHttps|isTrue|isFalse|isSet|isPresent|isAvailable|isRunning|isAlive|isReady|isComplete|isFinished|isDone|isLoaded|isLocked|isWritable|isReadable|isHidden|isRelative|isAuthent)is[A-Z]\w+\(\)",
      "isFoo() accessor only works for primitive boolean in Groovy 4, not Boolean wrapper",
-     "If property is Boolean (wrapper), use getFoo() instead"),
+     "Review: if property is Boolean (wrapper), use getFoo() instead"),
 
     ("G4-006", "WARN", r"\.intersect\(",
      "intersect() now draws elements from 1st collection (was 2nd in Groovy 3)",
