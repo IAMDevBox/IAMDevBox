@@ -98,7 +98,7 @@ RULES = [
      "Use .thenOnResult() or .thenAsync() instead"),
 
     ("IG-005", "WARN", r"\"matches\"\s*:|'matches'\s*:",
-     "matches() function is deprecated in config",
+     "matches() deprecated in 2024.11, removed in 2025.x",
      "Replace with find() or matchesWithRegex()"),
 
     ("IG-006", "WARN", r"\bldap\b\s*\.|LdapClient",
@@ -126,7 +126,7 @@ RULES = [
      "Use IdpSelectionLoginContext instead"),
 
     ("IG-012", "WARN", r"\bmatches\s*\(\s*request\.",
-     "matches() function deprecated in Groovy scripts",
+     "matches() deprecated in 2024.11, removed in 2025.x",
      "Replace with find() or matchesWithRegex()"),
 ]
 
@@ -377,7 +377,7 @@ def analyze_route(route_path, all_route_names, min_severity=0):
             findings.append({
                 "rule": "RT-005", "severity": "WARN",
                 "line": 0, "text": f'"condition": "{condition}"',
-                "description": "Deprecated matches() in route condition",
+                "description": "matches() deprecated in 2024.11, removed in 2025.x (route condition)",
                 "fix": "Replace matches() with find() or matchesWithRegex()",
             })
 
@@ -389,7 +389,7 @@ def analyze_route(route_path, all_route_names, min_severity=0):
                 findings.append({
                     "rule": "RT-006", "severity": "WARN",
                     "line": 0, "text": f"${{{expr}}}",
-                    "description": "Deprecated matches() in inline expression",
+                    "description": "matches() deprecated in 2024.11, removed in 2025.x (inline expression)",
                     "fix": "Replace matches() with find() or matchesWithRegex()",
                 })
             if '.get()' in expr:
@@ -473,21 +473,29 @@ def collect_analysis(base_dir, min_severity=0):
         if findings:
             route_findings[str(rf)] = findings
 
-    # Aggregate counts
-    all_findings = (
-        list(script_findings.values())
-        + list(unused_findings.values())
-        + list(route_findings.values())
-    )
-    total_errors = sum(sum(1 for f in fl if f["severity"] == "ERROR") for fl in all_findings)
-    total_warnings = sum(sum(1 for f in fl if f["severity"] == "WARN") for fl in all_findings)
-    total_info = sum(sum(1 for f in fl if f["severity"] == "INFO") for fl in all_findings)
+    # Aggregate counts — separate script vs route
+    script_all = list(script_findings.values()) + list(unused_findings.values())
+    route_all = list(route_findings.values())
+
+    def _count(findings_list, sev):
+        return sum(sum(1 for f in fl if f["severity"] == sev) for fl in findings_list)
 
     # Rule counts
     rule_counts = Counter()
-    for fl in all_findings:
+    for fl in script_all + route_all:
         for f in fl:
             rule_counts[f["rule"]] += 1
+
+    # Sort findings by severity (ERROR first, then WARN, then INFO)
+    def _sort_findings(findings_dict):
+        for k in findings_dict:
+            findings_dict[k] = sorted(findings_dict[k],
+                key=lambda f: -SEVERITY_ORDER.get(f["severity"], 0))
+        return findings_dict
+
+    _sort_findings(script_findings)
+    _sort_findings(unused_findings)
+    _sort_findings(route_findings)
 
     return {
         "directory": str(base_dir),
@@ -499,9 +507,12 @@ def collect_analysis(base_dir, min_severity=0):
         "script_findings": script_findings,
         "unused_findings": unused_findings,
         "route_findings": route_findings,
-        "total_errors": total_errors,
-        "total_warnings": total_warnings,
-        "total_info": total_info,
+        "script_errors": _count(script_all, "ERROR"),
+        "script_warnings": _count(script_all, "WARN"),
+        "script_info": _count(script_all, "INFO"),
+        "route_errors": _count(route_all, "ERROR"),
+        "route_warnings": _count(route_all, "WARN"),
+        "route_info": _count(route_all, "INFO"),
         "rule_counts": dict(rule_counts),
     }
 
@@ -515,7 +526,8 @@ def format_markdown(data):
     lines.append(f"\n**Directory:** `{data['directory']}`")
     lines.append(f"**Groovy files:** {data['groovy_count']} | **Config files:** {data['config_count']} | **Route files:** {data['route_count']}")
     lines.append(f"**Used scripts:** {len(data['used_scripts'])} | **Unused scripts:** {len(data['unused_scripts'])}")
-    lines.append(f"**Findings:** {data['total_errors']} errors, {data['total_warnings']} warnings, {data['total_info']} info")
+    lines.append(f"**Script findings:** {data['script_errors']} errors, {data['script_warnings']} warnings, {data['script_info']} info")
+    lines.append(f"**Route findings:** {data['route_errors']} errors, {data['route_warnings']} warnings, {data['route_info']} info")
 
     # --- Used Scripts Summary ---
     if data["used_scripts"]:
@@ -634,9 +646,10 @@ def format_json(data):
             "route_files": data["route_count"],
             "used_scripts": len(data["used_scripts"]),
             "unused_scripts": len(data["unused_scripts"]),
-            "errors": data["total_errors"],
-            "warnings": data["total_warnings"],
-            "info": data["total_info"],
+            "script_errors": data["script_errors"],
+            "script_warnings": data["script_warnings"],
+            "route_errors": data["route_errors"],
+            "route_warnings": data["route_warnings"],
         },
         "script_findings": data["script_findings"],
         "unused_findings": data["unused_findings"],
@@ -681,7 +694,8 @@ def main():
     else:
         print(report)
 
-    sys.exit(1 if data["total_errors"] > 0 else 0)
+    total_errors = data["script_errors"] + data["route_errors"]
+    sys.exit(1 if total_errors > 0 else 0)
 
 
 if __name__ == "__main__":
