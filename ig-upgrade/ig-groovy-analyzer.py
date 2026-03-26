@@ -52,7 +52,7 @@ RULES = [
 
     # --- Groovy 4 semantic changes ---
     ("G4-005", "WARN",
-     r"\bis[A-Z]\w+\(\)(?!.*\b(?:isActive|isEmpty|isNull|isEnabled|isValid|isOpen|isConnected|isDirectory|isFile|isAbsolute|isBlank)\b)",
+     r"\b(?!isActive|isEmpty|isNull|isEnabled|isValid|isOpen|isConnected|isDirectory|isFile|isAbsolute|isBlank|isSecure|isConfidential|isRooted|isClosed)is[A-Z]\w+\(\)",
      "isFoo() accessor only works for primitive boolean in Groovy 4, not Boolean wrapper",
      "If property is Boolean (wrapper), use getFoo() instead"),
 
@@ -76,7 +76,7 @@ RULES = [
      "Private field access in closures may break in Groovy 4",
      "Use @CompileStatic or change to protected"),
 
-    ("G4-011", "WARN", r"(?:Object\s*\[\s*\]|def\s+\w+)\s*=\s*\w+\s*\+\s*\w+",
+    ("G4-011", "WARN", r"(?:Object\s*\[\s*\]\s+\w+|def\s+\w+)\s*=\s*\w+\s*\+\s*\w+",
      "Array addition (b + c) now returns same type as b, was Object[] in Groovy 3",
      "Verify array concatenation results; use explicit typing or .union()"),
 

@@ -43,10 +43,10 @@
 
 | Rule | Deprecated | Since | Replacement |
 |---|---|---|---|
-| IG-005 | `matches()` in route conditions | — | Use `find()` or `matchesWithRegex()` |
+| IG-005 | `matches()` in route conditions | — | Use `find()` or `matchesWithRegex()` (removed in 2025.x) |
 | IG-008 | `"Session"` config key (uppercase) | 2024.11 | Lowercase `"session"` property |
-| IG-012 | `matches()` in Groovy scripts | — | Use `find()` or `matchesWithRegex()` |
-| RT-005 | `matches()` in `${...}` expressions | — | Use `find()` or `matchesWithRegex()` |
+| IG-012 | `matches()` in Groovy scripts | — | Use `find()` or `matchesWithRegex()` (removed in 2025.x) |
+| RT-005 | `matches()` in `${...}` expressions | — | Use `find()` or `matchesWithRegex()` (removed in 2025.x) |
 
 ## Route Config Checks
 
