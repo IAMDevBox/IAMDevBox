@@ -14,6 +14,8 @@ Scans an IG instance directory to:
 3. Validate route JSON configs for common misconfigurations
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 import os
