@@ -16,7 +16,6 @@ Scans an IG instance directory to:
 
 import argparse
 import json
-import os
 import re
 import sys
 from collections import Counter
@@ -302,6 +301,29 @@ def _deep_get(obj, path):
     return current
 
 
+def _find_line(raw_text, needle):
+    """Find the line number of a needle in raw text. Returns 0 if not found."""
+    for i, line in enumerate(raw_text.splitlines(), 1):
+        if needle in line:
+            return i
+    return 0
+
+
+def _find_all_conditions(obj, path=""):
+    """Recursively find all 'condition' values in nested dict/list."""
+    results = []
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            current = "{}/{}".format(path, k) if path else k
+            if k == "condition" and isinstance(v, str):
+                results.append((current, v))
+            results.extend(_find_all_conditions(v, current))
+    elif isinstance(obj, list):
+        for i, item in enumerate(obj):
+            results.extend(_find_all_conditions(item, "{}[{}]".format(path, i)))
+    return results
+
+
 def analyze_route(route_path, all_route_names, min_severity=0):
     """Analyze a route JSON for config issues."""
     findings = []
@@ -311,6 +333,8 @@ def analyze_route(route_path, all_route_names, min_severity=0):
     except OSError:
         return findings
 
+    raw_lines = raw_text.splitlines()
+
     # --- RT-001: Duplicate keys ---
     dup_keys = []
     def dup_hook(pairs):
@@ -318,12 +342,8 @@ def analyze_route(route_path, all_route_names, min_severity=0):
         for k, v in pairs:
             if k in seen:
                 dup_keys.append(k)
-            seen[k] = v if not isinstance(v, list) else v
-            if isinstance(v, str):
-                seen[k] = v
-            else:
-                seen[k] = v
-        return dict(pairs)
+            seen[k] = v
+        return seen
 
     try:
         parsed = json.loads(raw_text, object_pairs_hook=dup_hook)
@@ -332,10 +352,19 @@ def analyze_route(route_path, all_route_names, min_severity=0):
 
     if dup_keys and SEVERITY_ORDER["ERROR"] >= min_severity:
         for dk in dup_keys:
+            # Find second occurrence
+            count = 0
+            line_num = 0
+            for i, line in enumerate(raw_lines, 1):
+                if '"{}"'.format(dk) in line:
+                    count += 1
+                    if count == 2:
+                        line_num = i
+                        break
             findings.append({
                 "rule": "RT-001", "severity": "ERROR",
-                "line": 0, "text": "",
-                "description": f"Duplicate key '{dk}' in route JSON",
+                "line": line_num, "text": raw_lines[line_num - 1].strip() if line_num else "",
+                "description": "Duplicate key '{}' in route JSON".format(dk),
                 "fix": "Remove or rename the duplicate key",
             })
 
@@ -352,59 +381,75 @@ def analyze_route(route_path, all_route_names, min_severity=0):
                     continue
                 for req in REQUIRED_FIELDS[type_val]:
                     if _deep_get(parent, req) is None:
+                        line_num = _find_line(raw_text, '"type"')
                         findings.append({
                             "rule": "RT-002", "severity": "ERROR",
-                            "line": 0, "text": "",
-                            "description": f"{type_val} missing required field: {req}",
-                            "fix": f"Add '{req.split('/')[-1]}' to {type_val} config",
+                            "line": line_num,
+                            "text": raw_lines[line_num - 1].strip() if line_num else "",
+                            "description": "{} missing required field: {}".format(type_val, req),
+                            "fix": "Add '{}' to {} config".format(req.split('/')[-1], type_val),
                         })
 
     # --- RT-003: Duplicate route name/ID ---
     route_name = parsed.get("name", "")
     if route_name and SEVERITY_ORDER["WARN"] >= min_severity:
         if route_name in all_route_names and all_route_names[route_name] != str(route_path):
+            line_num = _find_line(raw_text, '"name"')
             findings.append({
                 "rule": "RT-003", "severity": "WARN",
-                "line": 0, "text": "",
-                "description": f"Duplicate route name '{route_name}' (also in {all_route_names[route_name]})",
+                "line": line_num,
+                "text": raw_lines[line_num - 1].strip() if line_num else "",
+                "description": "Duplicate route name '{}' (also in {})".format(
+                    route_name, Path(all_route_names[route_name]).name),
                 "fix": "Rename one of the routes to avoid conflicts",
             })
 
-    # --- RT-005: Deprecated matches() in condition ---
-    condition = parsed.get("condition", "")
-    if isinstance(condition, str) and "matches(" in condition:
-        if SEVERITY_ORDER["WARN"] >= min_severity:
-            findings.append({
-                "rule": "RT-005", "severity": "WARN",
-                "line": 0, "text": f'"condition": "{condition}"',
-                "description": "matches() deprecated in 2024.11, removed in 2025.x (route condition)",
-                "fix": "Replace matches() with find() or matchesWithRegex()",
-            })
-
-    # --- RT-006: Deprecated expressions in ${...} ---
+    # --- RT-005: Deprecated matches() in all conditions (recursive) ---
     if SEVERITY_ORDER["WARN"] >= min_severity:
+        conditions = _find_all_conditions(parsed)
+        for _, cond_val in conditions:
+            if "matches(" in cond_val:
+                line_num = _find_line(raw_text, cond_val[:40])
+                findings.append({
+                    "rule": "RT-005", "severity": "WARN",
+                    "line": line_num,
+                    "text": raw_lines[line_num - 1].strip() if line_num else "",
+                    "description": "matches() deprecated in 2024.11, removed in 2025.x",
+                    "fix": "Replace matches() with find() or matchesWithRegex()",
+                })
+
+    # --- RT-006: Deprecated expressions in ${...} (skip if already caught by RT-005) ---
+    if SEVERITY_ORDER["WARN"] >= min_severity:
+        rt005_lines = set(f["line"] for f in findings if f["rule"] == "RT-005")
         for m in re.finditer(r'\$\{([^}]+)\}', raw_text):
             expr = m.group(1)
-            if 'matches(' in expr and "RT-005" not in [f["rule"] for f in findings]:
+            pos = raw_text[:m.start()].count('\n') + 1
+            if pos in rt005_lines:
+                continue
+            if 'matches(' in expr:
                 findings.append({
                     "rule": "RT-006", "severity": "WARN",
-                    "line": 0, "text": f"${{{expr}}}",
+                    "line": pos,
+                    "text": raw_lines[pos - 1].strip() if pos <= len(raw_lines) else "",
                     "description": "matches() deprecated in 2024.11, removed in 2025.x (inline expression)",
                     "fix": "Replace matches() with find() or matchesWithRegex()",
                 })
             if '.get()' in expr:
                 findings.append({
                     "rule": "RT-006", "severity": "INFO",
-                    "line": 0, "text": f"${{{expr}}}",
+                    "line": pos,
+                    "text": raw_lines[pos - 1].strip() if pos <= len(raw_lines) else "",
                     "description": "Potential blocking .get() in inline expression",
                     "fix": "Review if this is a Promise.get() call",
                 })
 
     # --- IG-008: Uppercase Session key ---
     if '"Session"' in raw_text and SEVERITY_ORDER["WARN"] >= min_severity:
+        line_num = _find_line(raw_text, '"Session"')
         findings.append({
             "rule": "IG-008", "severity": "WARN",
-            "line": 0, "text": "",
+            "line": line_num,
+            "text": raw_lines[line_num - 1].strip() if line_num else "",
             "description": "Uppercase 'Session' config key deprecated in 2024.11",
             "fix": "Use lowercase 'session' property instead",
         })
@@ -514,6 +559,7 @@ def collect_analysis(base_dir, min_severity=0):
         "route_warnings": _count(route_all, "WARN"),
         "route_info": _count(route_all, "INFO"),
         "rule_counts": dict(rule_counts),
+        "_severity_filter": min_severity > 0,
     }
 
 
@@ -524,10 +570,37 @@ def format_markdown(data):
     lines = []
     lines.append("# IG Migration Analysis Report")
     lines.append(f"\n**Directory:** `{data['directory']}`")
-    lines.append(f"**Groovy files:** {data['groovy_count']} | **Config files:** {data['config_count']} | **Route files:** {data['route_count']}")
-    lines.append(f"**Used scripts:** {len(data['used_scripts'])} | **Unused scripts:** {len(data['unused_scripts'])}")
-    lines.append(f"**Script findings:** {data['script_errors']} errors, {data['script_warnings']} warnings, {data['script_info']} info")
-    lines.append(f"**Route findings:** {data['route_errors']} errors, {data['route_warnings']} warnings, {data['route_info']} info")
+    lines.append("")
+    lines.append("## Overview\n")
+    lines.append("| Category | Count |")
+    lines.append("|---|---|")
+    lines.append(f"| Groovy files | {data['groovy_count']} |")
+    lines.append(f"| Config files scanned | {data['config_count']} |")
+    lines.append(f"| Route files | {data['route_count']} |")
+    lines.append(f"| Used scripts | {len(data['used_scripts'])} |")
+    lines.append(f"| Unused scripts | {len(data['unused_scripts'])} |")
+    se, sw, si = data['script_errors'], data['script_warnings'], data['script_info']
+    re_, rw, ri = data['route_errors'], data['route_warnings'], data['route_info']
+    # Build columns based on what's visible at current severity filter
+    cols = []
+    if se + re_ > 0 or not data.get('_severity_filter'):
+        cols.append(('Errors', se, re_, se + re_))
+    if sw + rw > 0 or not data.get('_severity_filter'):
+        cols.append(('Warnings', sw, rw, sw + rw))
+    if si + ri > 0 or not data.get('_severity_filter'):
+        cols.append(('Info', si, ri, si + ri))
+    if cols:
+        lines.append("")
+        header = "| |" + "|".join(f" {c[0]} " for c in cols) + "|"
+        sep = "|---|" + "|".join("---|" for _ in cols)
+        script_row = "| **Groovy scripts** |" + "|".join(f" {c[1]} " for c in cols) + "|"
+        route_row = "| **Route configs** |" + "|".join(f" {c[2]} " for c in cols) + "|"
+        total_row = "| **Total** |" + "|".join(f" **{c[3]}** " for c in cols) + "|"
+        lines.append(header)
+        lines.append(sep)
+        lines.append(script_row)
+        lines.append(route_row)
+        lines.append(total_row)
 
     # --- Used Scripts Summary ---
     if data["used_scripts"]:
