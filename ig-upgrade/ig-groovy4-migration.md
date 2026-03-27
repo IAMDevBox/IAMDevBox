@@ -30,20 +30,36 @@
 
 ## PingGateway Script Deprecations
 
-| Rule | Deprecated | Since | Replacement |
-|---|---|---|---|
-| IG-001 | `Promise.get()` | — | `thenOnResult()` or `thenAsync()` (causes deadlocks) |
-| IG-002 | `Promise.getOrThrow()` | — | `thenOnResult()` or `thenAsync()` |
-| IG-003 | `Promise.getOrThrowUninterruptibly()` | — | `thenOnResult()` or `thenAsync()` |
-| IG-101 | `request.form` | IG 7.x | `Request.getQueryParams()`, `Entity.getForm()`, `Entity.setForm()` |
-| IG-102 | `matches()` in route conditions | — | `find()` or `matchesWithRegex()` (removed in 2025.x) |
-| IG-103 | `ldap` binding / `LdapClient` | IG 7.1 | Removed |
-| IG-104 | `JwtSession` object | 2024.11 | `JwtSessionManager` |
-| IG-105 | `"Session"` config key (uppercase) | 2024.11 | Lowercase `"session"` property |
-| IG-106 | `TokenResolver` / `_token()` / `_t()` | 2024.6 | Expression `&{...}` |
-| IG-107 | `request.uri` in OAuth2 filter | 2023.9 | `IdpSelectionLoginContext` |
-| IG-108 | `matches()` in Groovy scripts | — | `find()` or `matchesWithRegex()` (removed in 2025.x) |
-| IG-201 | `org.forgerock.util.time.Duration` | 2025.6 | `java.time.Duration` |
+| Rule | Deprecated | Replacement |
+|---|---|---|
+| IG-001 | `Promise.get()` | `thenOnResult()` or `thenAsync()` (causes deadlocks) |
+| IG-002 | `Promise.getOrThrow()` | `thenOnResult()` or `thenAsync()` |
+| IG-003 | `Promise.getOrThrowUninterruptibly()` | `thenOnResult()` or `thenAsync()` |
+| IG-101 | `request.form` | `Request.getQueryParams()`, `Entity.getForm()`, `Entity.setForm()` |
+| IG-102 | `matches()` in route conditions | `find()` or `matchesWithRegex()` (removed in 2025.x) |
+| IG-103 | `ldap` binding / `LdapClient` | Removed |
+| IG-104 | `JwtSession` object | `JwtSessionManager` |
+| IG-105 | `"Session"` config key (uppercase) | Lowercase `"session"` property |
+| IG-106 | `TokenResolver` / `_token()` / `_t()` | Expression `&{...}` |
+| IG-107 | `request.uri` in OAuth2 filter | `IdpSelectionLoginContext` |
+| IG-108 | `matches()` in Groovy scripts | `find()` or `matchesWithRegex()` (removed in 2025.x) |
+| IG-201 | `org.forgerock.util.time.Duration` | `java.time.Duration` |
+
+## Security Checks
+
+| Rule | Issue | Fix |
+|---|---|---|
+| SEC-001 | Hardcoded password in config | Move to secret store or use `&{password}` expression |
+| SEC-002 | Hardcoded secret/key in config | Move to secret store or use `&{...}` expression |
+| SEC-101 | Possible hardcoded credential in script | Use environment variable or secret store |
+| SEC-102 | Base64 encoded credential | Use proper secret management |
+
+## Path Checks
+
+| Rule | Issue | Fix |
+|---|---|---|
+| PATH-101 | Reference to Tomcat/old environment path | Update to new PingGateway standalone path |
+| PATH-102 | Reference to temporary directory | Use a stable path |
 
 ## Route Config Checks
 
@@ -131,6 +147,16 @@
 - [ ] RT-101: Check duplicate route names/IDs
 - [ ] RT-102: Check deprecated `matches()` in conditions
 - [ ] RT-103: Check deprecated expressions in `${...}`
+
+### Security
+- [ ] SEC-001: Check hardcoded passwords in configs
+- [ ] SEC-002: Check hardcoded secrets/keys in configs
+- [ ] SEC-101: Check hardcoded credentials in scripts
+- [ ] SEC-102: Check Base64 encoded credentials
+
+### Path References
+- [ ] PATH-101: Check Tomcat/old environment path references
+- [ ] PATH-102: Check temporary directory references
 
 ## References
 

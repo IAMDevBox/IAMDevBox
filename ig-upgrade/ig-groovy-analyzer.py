@@ -130,6 +130,43 @@ RULES = [
     ("IG-201", "INFO", r"org\.forgerock\.util\.time\.Duration",
      "org.forgerock.util.time.Duration deprecated (2025.6)",
      "Use java.time.Duration instead"),
+
+    # --- Security checks (SEC-0xx errors, SEC-1xx warnings) ---
+    ("SEC-001", "ERROR",
+     r"[\"'](?:password|passwd|pass[Ww]ord|pwd|passphrase)[\"']\s*:\s*[\"'][^\"'$&{]{3,}[\"']",
+     "Hardcoded password detected in config",
+     "Move to secret store or use &{...} expression"),
+
+    ("SEC-002", "ERROR",
+     r"[\"'](?:secret|secretKey|secret[_-]?[Kk]ey|apiKey|api[_-]?[Kk]ey|api[_-]?[Ss]ecret|token|access[_-]?[Tt]oken|refresh[_-]?[Tt]oken|auth[_-]?[Tt]oken|credential|private[_-]?[Kk]ey|client[_-]?[Ss]ecret|shared[_-]?[Ss]ecret|encryption[_-]?[Kk]ey|signing[_-]?[Kk]ey|keystore[_-]?[Pp]ass|truststore[_-]?[Pp]ass|storepass|keypass)[\"']\s*:\s*[\"'][^\"'$&{]{3,}[\"']",
+     "Hardcoded secret/key detected in config",
+     "Move to secret store or use &{...} expression"),
+
+    ("SEC-101", "WARN",
+     r"(?:password|passwd|pwd|passphrase|secret|apikey|api_key|credential|private_key|client_secret|storepass|keypass)\s*=\s*[\"'][^\"'$&{]{3,}[\"']",
+     "Possible hardcoded credential in script",
+     "Use environment variable or secret store"),
+
+    ("SEC-102", "WARN",
+     r"[Bb]ase64\.(?:encode|decode).*(?:password|passwd|secret|key|credential|token)",
+     "Base64 encoded credential detected",
+     "Use proper secret management instead of Base64 encoding"),
+
+    # --- Path checks (PATH-1xx warnings) ---
+    ("PATH-101", "WARN",
+     r"catalina\.base|catalina\.home|/webapps/ROOT/|/tomcat\d*/|servlet[_-]?api",
+     "Reference to Tomcat environment path",
+     "Update to new PingGateway standalone path"),
+
+    ("PATH-102", "INFO",
+     r"[\"']/(?:opt|home|etc|var|usr|tmp|srv|root|mnt|media|boot|run)/[a-zA-Z0-9._/-]+[\"']",
+     "Absolute filesystem path — may not be valid after migration",
+     "Verify path exists in new environment"),
+
+    ("PATH-103", "INFO",
+     r"[\"'](?:\.\./)+(.*?)[\"']",
+     "Relative path referencing outside project directory",
+     "Verify the referenced file is accessible from new IG location"),
 ]
 
 
@@ -146,24 +183,41 @@ REQUIRED_FIELDS = {
 
 
 # ---------------------------------------------------------------------------
+# Directories to skip during scanning
+# ---------------------------------------------------------------------------
+SKIP_DIRS = {"tmp", "temp", ".tmp", "__pycache__", "node_modules", "backup", ".git"}
+
+
+def _skip_path(path, base_dir):
+    """Return True if path is inside a directory (relative to base_dir) that should be skipped."""
+    try:
+        rel = path.relative_to(base_dir)
+    except ValueError:
+        return False
+    for part in rel.parts:
+        if part.lower() in SKIP_DIRS:
+            return True
+    return False
+
+
+# ---------------------------------------------------------------------------
 # File discovery
 # ---------------------------------------------------------------------------
 def find_groovy_files(base_dir):
-    return sorted(base_dir.rglob("*.groovy"))
+    return sorted(f for f in base_dir.rglob("*.groovy") if not _skip_path(f, base_dir))
 
 
 def find_config_files(base_dir):
     files = []
-    files.extend(sorted(base_dir.rglob("*.json")))
-    files.extend(sorted(base_dir.rglob("*.groovy")))
-    files.extend(sorted(base_dir.rglob("*.properties")))
-    return files
+    for ext in ("*.json", "*.groovy", "*.properties"):
+        files.extend(f for f in base_dir.rglob(ext) if not _skip_path(f, base_dir))
+    return sorted(files)
 
 
 def find_route_files(base_dir):
     routes = []
     for d in base_dir.rglob("routes"):
-        if d.is_dir():
+        if d.is_dir() and not _skip_path(d, base_dir):
             routes.extend(sorted(d.glob("*.json")))
     return routes
 
@@ -478,6 +532,21 @@ def analyze_route(route_path, all_route_names, min_severity=0):
             "description": "Uppercase 'Session' config key deprecated in 2024.11",
             "fix": "Use lowercase 'session' property instead",
         })
+
+    # --- SEC/PATH: Apply regex rules to raw JSON text ---
+    SEC_PATH_RULES = [r for r in RULES if r[0].startswith(("SEC-", "PATH-"))]
+    if SEC_PATH_RULES:
+        for line_num, line in enumerate(raw_lines, 1):
+            for rule_id, severity, pattern, desc, fix in SEC_PATH_RULES:
+                if SEVERITY_ORDER.get(severity, 0) < min_severity:
+                    continue
+                if re.search(pattern, line):
+                    findings.append({
+                        "rule": rule_id, "severity": severity,
+                        "line": line_num,
+                        "text": line.strip(),
+                        "description": desc, "fix": fix,
+                    })
 
     return findings
 
