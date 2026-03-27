@@ -806,6 +806,14 @@ def format_markdown(data):
                 ln = f['line'] if f['line'] else "-"
                 lines.append(f"| {ln} | **{f['severity']}** | {f['rule']} | {f['description']} | {f['fix']} |")
             lines.append("")
+            affected = [f for f in findings if f.get('text')]
+            if affected:
+                lines.append("<details><summary>Affected lines</summary>\n")
+                lines.append("```json")
+                for f in affected:
+                    lines.append("// Line %s: [%s] %s" % (f['line'], f['severity'], f['rule']))
+                    lines.append(f['text'])
+                lines.append("```\n</details>\n")
 
     # --- Clean scripts ---
     used_clean = [gf for gf in data["used_scripts"] if gf not in data["script_findings"]]
