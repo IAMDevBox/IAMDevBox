@@ -53,6 +53,7 @@ RULES = [
      "groovy.util.* wildcard import may pull in removed classes (XmlSlurper, XmlParser, etc.)",
      "Replace with specific imports from groovy.xml, groovy.test, groovy.ant"),
 
+
     # --- Groovy 4 semantic changes ---
     ("G4-005", "INFO",
      r"\b(?!isActive|isEmpty|isNull|isEnabled|isValid|isOpen|isConnected|isDirectory|isFile|isAbsolute|isBlank|isSecure|isConfidential|isRooted|isClosed|isHttp|isHttps|isTrue|isFalse|isSet|isPresent|isAvailable|isRunning|isAlive|isReady|isComplete|isFinished|isDone|isLoaded|isLocked|isWritable|isReadable|isHidden|isRelative|isAuthent)is[A-Z]\w+\(\)",
@@ -259,6 +260,30 @@ def analyze_script(script_path, min_severity=0):
                     "description": desc,
                     "fix": fix,
                 })
+
+    # --- File-level checks: wildcard import + removed class usage ---
+    all_code = " ".join(code for _, code in code_lines)
+    if re.search(r'import\s+groovy\.util\.\*', all_code):
+        REMOVED_CLASSES = [
+            ("XmlSlurper", "groovy.xml.XmlSlurper"),
+            ("XmlParser", "groovy.xml.XmlParser"),
+            ("AntBuilder", "groovy.ant.AntBuilder"),
+            ("GroovyTestCase", "groovy.test.GroovyTestCase"),
+        ]
+        for line_num, code in code_lines:
+            if not code.strip() or 'import' in code:
+                continue
+            for cls, replacement in REMOVED_CLASSES:
+                if re.search(r'\b' + cls + r'\b', code):
+                    if SEVERITY_ORDER["ERROR"] >= min_severity:
+                        findings.append({
+                            "rule": "G4-013", "severity": "ERROR",
+                            "line": line_num,
+                            "text": raw_lines[line_num - 1].rstrip(),
+                            "description": "{} used with groovy.util.* import — class removed in Groovy 4".format(cls),
+                            "fix": "Change import to: import {}".format(replacement),
+                        })
+
     return findings
 
 

@@ -13,7 +13,6 @@
 | G4-003 | Old package: GroovyTestCase | `groovy.util.GroovyTestCase` removed | Change to `groovy.test.GroovyTestCase` |
 | G4-004 | Old package: AntBuilder | `groovy.util.AntBuilder` removed | Change to `groovy.ant.AntBuilder` |
 | G4-005 | Boolean property access | `isFoo()` only works for primitive `boolean`, not `Boolean` wrapper | Use `getFoo()` for `Boolean` wrapper types |
-| G4-012 | Wildcard import | `import groovy.util.*` may pull in removed classes | Replace with specific imports from `groovy.xml`, `groovy.test`, `groovy.ant` |
 | G4-010 | Private field access | Closure accessing private fields of subclasses/inner classes may fail | Use `@CompileStatic` or change to `protected` |
 | G4-009 | SQL exception type | `Sql#call` variants now throw `SQLException` instead of `Exception` | Change catch blocks to `catch (SQLException e)` |
 
@@ -24,6 +23,7 @@
 | G4-006 | `intersect()` method | Draws elements from 2nd collection | Draws from 1st collection | Verify result is still correct |
 | G4-011 | Array addition `b + c` | Returns `Object[]` | Returns same type as `b` | Use explicit cast or `.union()` |
 | G4-007 | Floating-point zero | `0.0f` and `-0.0f` treated as equal | Correctly distinguished | Use `equalsIgnoreZeroSign` if needed |
+| G4-012 | Wildcard import | `import groovy.util.*` may pull in removed classes | Check if code uses removed classes | Replace with specific imports |
 | G4-008 | `getProperties()` | Returns properties only | Also returns public fields | Verify property iteration |
 
 ## PingGateway Script Deprecations
