@@ -152,6 +152,7 @@ RULES = [
      "Base64 encoded credential detected",
      "Use proper secret management instead of Base64 encoding"),
 
+
     # --- Path checks (PATH-1xx warnings) ---
     ("PATH-101", "WARN",
      r"catalina\.base|catalina\.home|/webapps/ROOT|/tomcat\d+/|servlet[_-]?api",
