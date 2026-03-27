@@ -620,11 +620,11 @@ def format_markdown(data):
         cols.append(('Info', si, ri, si + ri))
     if cols:
         lines.append("")
-        header = "| |" + "|".join(f" {c[0]} " for c in cols) + "|"
-        sep = "|---|" + "|".join("---|" for _ in cols)
-        script_row = "| **Groovy scripts** |" + "|".join(f" {c[1]} " for c in cols) + "|"
-        route_row = "| **Route configs** |" + "|".join(f" {c[2]} " for c in cols) + "|"
-        total_row = "| **Total** |" + "|".join(f" **{c[3]}** " for c in cols) + "|"
+        header = "| | " + " | ".join(c[0] for c in cols) + " |"
+        sep = "|---|" + "|".join("---" for _ in cols) + "|"
+        script_row = "| **Groovy scripts** | " + " | ".join(str(c[1]) for c in cols) + " |"
+        route_row = "| **Route configs** | " + " | ".join(str(c[2]) for c in cols) + " |"
+        total_row = "| **Total** | " + " | ".join("**%d**" % c[3] for c in cols) + " |"
         lines.append(header)
         lines.append(sep)
         lines.append(script_row)
@@ -634,7 +634,7 @@ def format_markdown(data):
     # --- Used Scripts Summary ---
     if data["used_scripts"]:
         lines.append("\n---\n")
-        lines.append("## Used Scripts Summary\n")
+        lines.append("## Used Scripts Summary (%d scripts)\n" % len(data["used_scripts"]))
         lines.append("| Script | Referenced By | Errors | Warnings | Info |")
         lines.append("|---|---|---|---|---|")
         for gf, sources in data["used_scripts"].items():
@@ -648,7 +648,7 @@ def format_markdown(data):
     # --- Unused Scripts Summary ---
     if data["unused_scripts"]:
         lines.append("\n---\n")
-        lines.append("## Unused Scripts\n")
+        lines.append("## Unused Scripts (%d scripts)\n" % len(data["unused_scripts"]))
         lines.append("Not referenced in any config file (may be indirectly used).\n")
         lines.append("| Script | Path | Errors | Warnings | Info |")
         lines.append("|---|---|---|---|---|")
@@ -671,8 +671,9 @@ def format_markdown(data):
     ]:
         if not findings_dict:
             continue
+        total_f = sum(len(fl) for fl in findings_dict.values())
         lines.append("\n---\n")
-        lines.append(f"## {section_title}\n")
+        lines.append("## %s (%d files, %d findings)\n" % (section_title, len(findings_dict), total_f))
         for gf, findings in findings_dict.items():
             name = Path(gf).name
             lines.append(f"### `{name}`")
@@ -695,8 +696,9 @@ def format_markdown(data):
 
     # --- Route Config Issues ---
     if data["route_findings"]:
+        total_rf = sum(len(fl) for fl in data["route_findings"].values())
         lines.append("\n---\n")
-        lines.append("## Route Config Issues\n")
+        lines.append("## Route Config Issues (%d routes, %d findings)\n" % (len(data["route_findings"]), total_rf))
         for rf, findings in data["route_findings"].items():
             name = Path(rf).name
             lines.append(f"### `{name}`")
@@ -711,7 +713,7 @@ def format_markdown(data):
     used_clean = [gf for gf in data["used_scripts"] if gf not in data["script_findings"]]
     if used_clean:
         lines.append("\n---\n")
-        lines.append("## Used Scripts — No Issues Found\n")
+        lines.append("## Used Scripts — No Issues Found (%d scripts)\n" % len(used_clean))
         for gf in used_clean:
             refs = data["used_scripts"].get(gf, [])
             lines.append(f"- `{Path(gf).name}` ({', '.join(refs)})")
@@ -719,7 +721,7 @@ def format_markdown(data):
     # --- Statistics ---
     if data["rule_counts"]:
         lines.append("\n---\n")
-        lines.append("## Statistics\n")
+        lines.append("## Statistics (%d rules triggered)\n" % len(data["rule_counts"]))
         lines.append("| Rule | Count | Description |")
         lines.append("|---|---|---|")
         rule_descs = {r[0]: r[3] for r in RULES}
