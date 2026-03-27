@@ -699,10 +699,11 @@ def format_markdown(data):
             name = Path(rf).name
             lines.append(f"### `{name}`")
             lines.append(f"- **Path:** `{rf}`\n")
-            lines.append("| Severity | Rule | Issue | Fix |")
-            lines.append("|---|---|---|---|")
+            lines.append("| Line | Severity | Rule | Issue | Fix |")
+            lines.append("|---|---|---|---|---|")
             for f in findings:
-                lines.append(f"| **{f['severity']}** | {f['rule']} | {f['description']} | {f['fix']} |")
+                ln = f['line'] if f['line'] else "-"
+                lines.append(f"| {ln} | **{f['severity']}** | {f['rule']} | {f['description']} | {f['fix']} |")
             lines.append("")
 
     # --- Clean scripts ---
