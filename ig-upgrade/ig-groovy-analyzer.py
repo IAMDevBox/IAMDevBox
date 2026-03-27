@@ -32,7 +32,7 @@ SEVERITY_ORDER = {"ERROR": 3, "WARN": 2, "INFO": 1}
 # Groovy script rules (regex-based, applied to .groovy files)
 # ---------------------------------------------------------------------------
 RULES = [
-    # --- Groovy 4 compilation errors ---
+    # --- Groovy 4 errors (0xx) ---
     ("G4-001", "ERROR", r"import\s+groovy\.util\.XmlSlurper",
      "groovy.util.XmlSlurper removed in Groovy 4",
      "Change to: import groovy.xml.XmlSlurper"),
@@ -49,89 +49,91 @@ RULES = [
      "groovy.util.AntBuilder removed in Groovy 4",
      "Change to: import groovy.ant.AntBuilder"),
 
-    ("G4-012", "WARN", r"import\s+groovy\.util\.\*",
-     "groovy.util.* wildcard import may pull in removed classes (XmlSlurper, XmlParser, etc.)",
+    # --- Groovy 4 warnings (1xx) ---
+    ("G4-101", "WARN", r"\.intersect\(",
+     "intersect() now draws elements from 1st collection (was 2nd in Groovy 3)",
+     "Verify the result is still correct with the new semantics"),
+
+    ("G4-102", "WARN", r"(?:Object\s*\[\s*\]\s+\w+|def\s+\w+)\s*=\s*\w+\s*\+\s*\w+",
+     "Array addition (b + c) now returns same type as b, was Object[] in Groovy 3",
+     "Verify array concatenation results; use explicit typing or .union()"),
+
+    ("G4-103", "WARN", r"catch\s*\(\s*Exception\s+\w+\s*\).*[Ss]ql|Sql\..*\.call\(",
+     "Sql#call variants now throw SQLException instead of Exception",
+     "Change catch blocks to catch (SQLException e)"),
+
+    ("G4-104", "WARN", r"@\s*Field\s+private|private\s+\w+\s+\w+.*=.*\{",
+     "Private field access in closures may break in Groovy 4",
+     "Use @CompileStatic or change to protected"),
+
+    ("G4-105", "WARN", r"import\s+groovy\.util\.\*",
+     "groovy.util.* wildcard import may pull in removed classes",
      "Replace with specific imports from groovy.xml, groovy.test, groovy.ant"),
 
+    # --- Groovy 4 info (2xx) ---
+    ("G4-201", "INFO", r"[=!]=\s*0\.0[fd]?\b|0\.0[fd]?\s*[=!]=",
+     "Groovy 4 now distinguishes 0.0f and -0.0f",
+     "Use equalsIgnoreZeroSign or NumberAwareComparator if old behavior needed"),
 
-    # --- Groovy 4 semantic changes ---
-    ("G4-005", "INFO",
+    ("G4-202", "INFO", r"\.getProperties\(\)",
+     "getProperties() now also returns public fields in Groovy 4",
+     "Verify property iteration doesn't expose unintended fields"),
+
+    ("G4-203", "INFO",
      r"\b(?!isActive|isEmpty|isNull|isEnabled|isValid|isOpen|isConnected|isDirectory|isFile|isAbsolute|isBlank|isSecure|isConfidential|isRooted|isClosed|isHttp|isHttps|isTrue|isFalse|isSet|isPresent|isAvailable|isRunning|isAlive|isReady|isComplete|isFinished|isDone|isLoaded|isLocked|isWritable|isReadable|isHidden|isRelative|isAuthent)is[A-Z]\w+\(\)",
      "isFoo() accessor only works for primitive boolean in Groovy 4, not Boolean wrapper",
      "Review: if property is Boolean (wrapper), use getFoo() instead"),
 
-    ("G4-006", "WARN", r"\.intersect\(",
-     "intersect() now draws elements from 1st collection (was 2nd in Groovy 3)",
-     "Verify the result is still correct with the new semantics"),
-
-    ("G4-007", "INFO", r"[=!]=\s*0\.0[fd]?\b|0\.0[fd]?\s*[=!]=",
-     "Groovy 4 now distinguishes 0.0f and -0.0f",
-     "Use equalsIgnoreZeroSign or NumberAwareComparator if old behavior needed"),
-
-    ("G4-008", "INFO", r"\.getProperties\(\)",
-     "getProperties() now also returns public fields in Groovy 4",
-     "Verify property iteration doesn't expose unintended fields"),
-
-    ("G4-009", "WARN", r"catch\s*\(\s*Exception\s+\w+\s*\).*[Ss]ql|Sql\..*\.call\(",
-     "Sql#call variants now throw SQLException instead of Exception",
-     "Change catch blocks to catch (SQLException e)"),
-
-    ("G4-010", "WARN", r"@\s*Field\s+private|private\s+\w+\s+\w+.*=.*\{",
-     "Private field access in closures may break in Groovy 4",
-     "Use @CompileStatic or change to protected"),
-
-    ("G4-011", "WARN", r"(?:Object\s*\[\s*\]\s+\w+|def\s+\w+)\s*=\s*\w+\s*\+\s*\w+",
-     "Array addition (b + c) now returns same type as b, was Object[] in Groovy 3",
-     "Verify array concatenation results; use explicit typing or .union()"),
-
-    # --- PingGateway script deprecations ---
-    ("IG-001", "WARN", r"request\.form\b",
-     "request.form is deprecated in PingGateway",
-     "Use Request.getQueryParams() and Entity.getForm() / Entity.setForm()"),
-
-    ("IG-002", "ERROR", r"(?:promise|Promise|future|Future)\w*\.get\(\s*\)",
+    # --- PingGateway errors (0xx) ---
+    ("IG-001", "ERROR", r"(?:promise|Promise|future|Future)\w*\.get\(\s*\)",
      "Blocking Promise.get() can cause deadlocks in PingGateway",
      "Use .thenOnResult() or .thenAsync() instead"),
 
-    ("IG-003", "ERROR", r"\.getOrThrow\(",
+    ("IG-002", "ERROR", r"\.getOrThrow\(",
      "Blocking Promise.getOrThrow() can cause deadlocks",
      "Use .thenOnResult() or .thenAsync() instead"),
 
-    ("IG-004", "ERROR", r"\.getOrThrowUninterruptibly\(",
+    ("IG-003", "ERROR", r"\.getOrThrowUninterruptibly\(",
      "Blocking Promise.getOrThrowUninterruptibly() can cause deadlocks",
      "Use .thenOnResult() or .thenAsync() instead"),
 
-    ("IG-005", "WARN", r"\"matches\"\s*:|'matches'\s*:",
+    # --- PingGateway warnings (1xx) ---
+    ("IG-101", "WARN", r"request\.form\b",
+     "request.form is deprecated in PingGateway",
+     "Use Request.getQueryParams() and Entity.getForm() / Entity.setForm()"),
+
+    ("IG-102", "WARN", r"\"matches\"\s*:|'matches'\s*:",
      "matches() deprecated in 2024.11, removed in 2025.x",
      "Replace with find() or matchesWithRegex()"),
 
-    ("IG-006", "WARN", r"\bldap\b\s*\.|LdapClient",
+    ("IG-103", "WARN", r"\bldap\b\s*\.|LdapClient",
      "ldap script binding and LdapClient deprecated since IG 7.1",
      "Remove or replace with alternative LDAP access method"),
 
-    ("IG-007", "WARN", r"JwtSession\b",
+    ("IG-104", "WARN", r"JwtSession\b",
      "JwtSession object deprecated in PingGateway 2024.11",
      "Use JwtSessionManager for the 'session' property instead"),
 
-    ("IG-008", "WARN", r'"Session"\s*:',
+    ("IG-105", "WARN", r'"Session"\s*:',
      "Using 'Session' key (uppercase) deprecated in 2024.11",
      "Use lowercase 'session' property instead"),
 
-    ("IG-009", "WARN", r"\b_token\s*\(|_t\s*\(|TokenResolver\b",
+    ("IG-106", "WARN", r"\b_token\s*\(|_t\s*\(|TokenResolver\b",
      "TokenResolver and _token()/_t() deprecated in PingGateway 2024.6",
      "Use expression format &{...} instead"),
 
-    ("IG-010", "INFO", r"org\.forgerock\.util\.time\.Duration",
-     "org.forgerock.util.time.Duration deprecated (2025.6)",
-     "Use java.time.Duration instead"),
-
-    ("IG-011", "WARN", r"request\.uri\b.*(?:OAuth|oauth|token)",
+    ("IG-107", "WARN", r"request\.uri\b.*(?:OAuth|oauth|token)",
      "request.uri in OAuth2 filter context deprecated in 2023.9",
      "Use IdpSelectionLoginContext instead"),
 
-    ("IG-012", "WARN", r"\bmatches\s*\(\s*request\.",
+    ("IG-108", "WARN", r"\bmatches\s*\(\s*request\.",
      "matches() deprecated in 2024.11, removed in 2025.x",
      "Replace with find() or matchesWithRegex()"),
+
+    # --- PingGateway info (2xx) ---
+    ("IG-201", "INFO", r"org\.forgerock\.util\.time\.Duration",
+     "org.forgerock.util.time.Duration deprecated (2025.6)",
+     "Use java.time.Duration instead"),
 ]
 
 
@@ -275,7 +277,7 @@ def analyze_script(script_path, min_severity=0):
             if re.search(r'\b' + cls + r'\b', code):
                 if SEVERITY_ORDER["WARN"] >= min_severity:
                     findings.append({
-                        "rule": "G4-013", "severity": "WARN",
+                        "rule": "G4-106", "severity": "WARN",
                         "line": line_num,
                         "text": raw_lines[line_num - 1].rstrip(),
                         "description": "{} usage — verify import is from correct package".format(cls),
@@ -423,7 +425,7 @@ def analyze_route(route_path, all_route_names, min_severity=0):
         if route_name in all_route_names and all_route_names[route_name] != str(route_path):
             line_num = _find_line(raw_text, '"name"')
             findings.append({
-                "rule": "RT-003", "severity": "WARN",
+                "rule": "RT-101", "severity": "WARN",
                 "line": line_num,
                 "text": raw_lines[line_num - 1].strip() if line_num else "",
                 "description": "Duplicate route name '{}' (also in {})".format(
@@ -438,7 +440,7 @@ def analyze_route(route_path, all_route_names, min_severity=0):
             if "matches(" in cond_val:
                 line_num = _find_line(raw_text, cond_val[:40])
                 findings.append({
-                    "rule": "RT-005", "severity": "WARN",
+                    "rule": "RT-102", "severity": "WARN",
                     "line": line_num,
                     "text": raw_lines[line_num - 1].strip() if line_num else "",
                     "description": "matches() deprecated in 2024.11, removed in 2025.x",
@@ -447,7 +449,7 @@ def analyze_route(route_path, all_route_names, min_severity=0):
 
     # --- RT-006: Deprecated expressions in ${...} (skip if already caught by RT-005) ---
     if SEVERITY_ORDER["WARN"] >= min_severity:
-        rt005_lines = set(f["line"] for f in findings if f["rule"] == "RT-005")
+        rt005_lines = set(f["line"] for f in findings if f["rule"] == "RT-102")
         for m in re.finditer(r'\$\{([^}]+)\}', raw_text):
             expr = m.group(1)
             pos = raw_text[:m.start()].count('\n') + 1
@@ -455,7 +457,7 @@ def analyze_route(route_path, all_route_names, min_severity=0):
                 continue
             if 'matches(' in expr:
                 findings.append({
-                    "rule": "RT-006", "severity": "WARN",
+                    "rule": "RT-103", "severity": "WARN",
                     "line": pos,
                     "text": raw_lines[pos - 1].strip() if pos <= len(raw_lines) else "",
                     "description": "matches() deprecated in 2024.11, removed in 2025.x (inline expression)",
@@ -463,7 +465,7 @@ def analyze_route(route_path, all_route_names, min_severity=0):
                 })
             if '.get()' in expr:
                 findings.append({
-                    "rule": "RT-006", "severity": "INFO",
+                    "rule": "RT-103", "severity": "INFO",
                     "line": pos,
                     "text": raw_lines[pos - 1].strip() if pos <= len(raw_lines) else "",
                     "description": "Potential blocking .get() in inline expression",
@@ -474,7 +476,7 @@ def analyze_route(route_path, all_route_names, min_severity=0):
     if '"Session"' in raw_text and SEVERITY_ORDER["WARN"] >= min_severity:
         line_num = _find_line(raw_text, '"Session"')
         findings.append({
-            "rule": "IG-008", "severity": "WARN",
+            "rule": "IG-105", "severity": "WARN",
             "line": line_num,
             "text": raw_lines[line_num - 1].strip() if line_num else "",
             "description": "Uppercase 'Session' config key deprecated in 2024.11",
@@ -724,9 +726,10 @@ def format_markdown(data):
         # RT rules
         rule_descs["RT-001"] = "Duplicate handler declarations"
         rule_descs["RT-002"] = "Missing required config fields"
-        rule_descs["RT-003"] = "Duplicate route name/ID"
-        rule_descs["RT-005"] = "Deprecated matches() in condition"
-        rule_descs["RT-006"] = "Deprecated expression in ${...}"
+        rule_descs["RT-101"] = "Duplicate route name/ID"
+        rule_descs["RT-102"] = "Deprecated matches() in condition"
+        rule_descs["RT-103"] = "Deprecated expression in ${...}"
+        rule_descs["G4-106"] = "Removed class usage (XmlSlurper, XmlParser, etc.)"
         for rule, count in sorted(data["rule_counts"].items()):
             desc = rule_descs.get(rule, "")
             lines.append(f"| {rule} | {count} | {desc} |")
