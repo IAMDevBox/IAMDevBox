@@ -261,28 +261,26 @@ def analyze_script(script_path, min_severity=0):
                     "fix": fix,
                 })
 
-    # --- File-level checks: wildcard import + removed class usage ---
-    all_code = " ".join(code for _, code in code_lines)
-    if re.search(r'import\s+groovy\.util\.\*', all_code):
-        REMOVED_CLASSES = [
-            ("XmlSlurper", "groovy.xml.XmlSlurper"),
-            ("XmlParser", "groovy.xml.XmlParser"),
-            ("AntBuilder", "groovy.ant.AntBuilder"),
-            ("GroovyTestCase", "groovy.test.GroovyTestCase"),
-        ]
-        for line_num, code in code_lines:
-            if not code.strip() or 'import' in code:
-                continue
-            for cls, replacement in REMOVED_CLASSES:
-                if re.search(r'\b' + cls + r'\b', code):
-                    if SEVERITY_ORDER["ERROR"] >= min_severity:
-                        findings.append({
-                            "rule": "G4-013", "severity": "ERROR",
-                            "line": line_num,
-                            "text": raw_lines[line_num - 1].rstrip(),
-                            "description": "{} used with groovy.util.* import — class removed in Groovy 4".format(cls),
-                            "fix": "Change import to: import {}".format(replacement),
-                        })
+    # --- File-level checks: removed class usage (not on import lines) ---
+    REMOVED_CLASSES = [
+        ("XmlSlurper", "groovy.xml.XmlSlurper"),
+        ("XmlParser", "groovy.xml.XmlParser"),
+        ("AntBuilder", "groovy.ant.AntBuilder"),
+        ("GroovyTestCase", "groovy.test.GroovyTestCase"),
+    ]
+    for line_num, code in code_lines:
+        if not code.strip() or re.match(r'\s*import\s', code):
+            continue
+        for cls, replacement in REMOVED_CLASSES:
+            if re.search(r'\b' + cls + r'\b', code):
+                if SEVERITY_ORDER["WARN"] >= min_severity:
+                    findings.append({
+                        "rule": "G4-013", "severity": "WARN",
+                        "line": line_num,
+                        "text": raw_lines[line_num - 1].rstrip(),
+                        "description": "{} usage — verify import is from correct package".format(cls),
+                        "fix": "Ensure import is: import {}".format(replacement),
+                    })
 
     return findings
 
