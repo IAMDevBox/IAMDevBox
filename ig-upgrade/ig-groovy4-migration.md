@@ -27,7 +27,6 @@
 | G4-106 | Removed class usage | `XmlSlurper` etc. in `groovy.util` | Removed from `groovy.util` | Verify import is from correct package |
 | G4-201 | Floating-point zero | `0.0f` and `-0.0f` treated as equal | Correctly distinguished | Use `equalsIgnoreZeroSign` if needed |
 | G4-202 | `getProperties()` | Returns properties only | Also returns public fields | Verify property iteration |
-| G4-203 | Boolean property access | `isFoo()` works for all types | Only works for primitive `boolean` | Use `getFoo()` for `Boolean` wrapper types |
 
 ## PingGateway Script Deprecations
 
@@ -108,7 +107,6 @@
 ### Groovy 4 — Info (2xx)
 - [ ] G4-201: Check floating-point zero comparisons
 - [ ] G4-202: Check `getProperties()` usage
-- [ ] G4-203: Check `isFoo()` on `Boolean` wrapper types
 
 ### PingGateway — Errors (0xx)
 - [ ] IG-001~003: Check blocking Promise calls

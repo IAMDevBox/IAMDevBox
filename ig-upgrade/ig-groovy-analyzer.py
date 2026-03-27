@@ -79,10 +79,6 @@ RULES = [
      "getProperties() now also returns public fields in Groovy 4",
      "Verify property iteration doesn't expose unintended fields"),
 
-    ("G4-203", "INFO",
-     r"\b(?!isActive|isEmpty|isNull|isEnabled|isValid|isOpen|isConnected|isDirectory|isFile|isAbsolute|isBlank|isSecure|isConfidential|isRooted|isClosed|isHttp|isHttps|isTrue|isFalse|isSet|isPresent|isAvailable|isRunning|isAlive|isReady|isComplete|isFinished|isDone|isLoaded|isLocked|isWritable|isReadable|isHidden|isRelative|isAuthent)is[A-Z]\w+\(\)",
-     "isFoo() accessor only works for primitive boolean in Groovy 4, not Boolean wrapper",
-     "Review: if property is Boolean (wrapper), use getFoo() instead"),
 
     # --- PingGateway errors (0xx) ---
     ("IG-001", "ERROR", r"(?:promise|Promise|future|Future)\w*\.get\(\s*\)",
