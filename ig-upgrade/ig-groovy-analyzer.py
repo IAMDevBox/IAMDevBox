@@ -138,7 +138,7 @@ RULES = [
      "Move to secret store or use &{...} expression"),
 
     ("SEC-002", "ERROR",
-     r"[\"'](?:secret|secretKey|secret[_-]?[Kk]ey|apiKey|api[_-]?[Kk]ey|api[_-]?[Ss]ecret|token|access[_-]?[Tt]oken|refresh[_-]?[Tt]oken|auth[_-]?[Tt]oken|credential|private[_-]?[Kk]ey|client[_-]?[Ss]ecret|shared[_-]?[Ss]ecret|encryption[_-]?[Kk]ey|signing[_-]?[Kk]ey|keystore[_-]?[Pp]ass|truststore[_-]?[Pp]ass|storepass|keypass)[\"']\s*:\s*[\"'][^\"'$&{]{3,}[\"']",
+     r"[\"'][^\"']*(?:secret|apiKey|api[_-]?[Kk]ey|api[_-]?[Ss]ecret|token|access[_-]?[Tt]oken|refresh[_-]?[Tt]oken|auth[_-]?[Tt]oken|credential|private[_-]?[Kk]ey|client[_-]?[Ss]ecret|shared[_-]?[Ss]ecret|encryption[_-]?[Kk]ey|signing[_-]?[Kk]ey|keystore[_-]?[Pp]ass|truststore[_-]?[Pp]ass|storepass|keypass)[^\"']*[\"']\s*:\s*[\"'][^\"'$&{]{3,}[\"']",
      "Hardcoded secret/key detected in config",
      "Move to secret store or use &{...} expression"),
 
@@ -154,12 +154,12 @@ RULES = [
 
     # --- Path checks (PATH-1xx warnings) ---
     ("PATH-101", "WARN",
-     r"catalina\.base|catalina\.home|/webapps/ROOT/|/tomcat\d*/|servlet[_-]?api",
+     r"catalina\.base|catalina\.home|/webapps/ROOT|/tomcat\d+/|servlet[_-]?api",
      "Reference to Tomcat environment path",
      "Update to new PingGateway standalone path"),
 
     ("PATH-102", "INFO",
-     r"[\"']/(?:opt|home|etc|var|usr|tmp|srv|root|mnt|media|boot|run)/[a-zA-Z0-9._/-]+[\"']",
+     r"[\"'(/]/(?:opt|home|etc|var|usr|tmp|srv|root|mnt|media|boot|run)/[a-zA-Z0-9._/-]+",
      "Absolute filesystem path — may not be valid after migration",
      "Verify path exists in new environment"),
 
