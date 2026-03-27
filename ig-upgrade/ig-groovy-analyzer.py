@@ -303,13 +303,18 @@ def analyze_script(script_path, min_severity=0):
         for rule_id, severity, pattern, desc, fix in RULES:
             if SEVERITY_ORDER.get(severity, 0) < min_severity:
                 continue
-            if re.search(pattern, code):
+            m = re.search(pattern, code)
+            if m:
+                detail = desc
+                matched = m.group(0).strip()
+                if matched and len(matched) < 80:
+                    detail = "{}: `{}`".format(desc, matched)
                 findings.append({
                     "rule": rule_id,
                     "severity": severity,
                     "line": line_num,
                     "text": raw_lines[line_num - 1].rstrip(),
-                    "description": desc,
+                    "description": detail,
                     "fix": fix,
                 })
 
@@ -540,12 +545,17 @@ def analyze_route(route_path, all_route_names, min_severity=0):
             for rule_id, severity, pattern, desc, fix in SEC_PATH_RULES:
                 if SEVERITY_ORDER.get(severity, 0) < min_severity:
                     continue
-                if re.search(pattern, line):
+                m = re.search(pattern, line)
+                if m:
+                    detail = desc
+                    matched = m.group(0).strip()
+                    if matched and len(matched) < 80:
+                        detail = "{}: `{}`".format(desc, matched)
                     findings.append({
                         "rule": rule_id, "severity": severity,
                         "line": line_num,
                         "text": line.strip(),
-                        "description": desc, "fix": fix,
+                        "description": detail, "fix": fix,
                     })
 
     return findings
@@ -636,6 +646,27 @@ def collect_analysis(base_dir, min_severity=0):
     _sort_findings(unused_findings)
     _sort_findings(route_findings)
 
+    # Collect all absolute path references across all findings
+    path_refs = {}  # path -> [{"file": ..., "line": ...}]
+    _path_re = re.compile(r'["\'](/(?:opt|home|etc|var|usr|tmp|srv|root|mnt|media|boot|run)/[a-zA-Z0-9._/-]+)["\']')
+    all_files_to_scan = []
+    for gf_str in list(used_scripts.keys()) + unused_scripts:
+        all_files_to_scan.append(gf_str)
+    for rf in route_files:
+        all_files_to_scan.append(str(rf))
+    for fpath in all_files_to_scan:
+        try:
+            with open(fpath, "r", encoding="utf-8", errors="replace") as f:
+                for line_num, line in enumerate(f, 1):
+                    for m in _path_re.finditer(line):
+                        p = m.group(1)
+                        path_refs.setdefault(p, []).append({
+                            "file": Path(fpath).name,
+                            "line": line_num,
+                        })
+        except OSError:
+            pass
+
     return {
         "directory": str(base_dir),
         "groovy_count": len(groovy_files),
@@ -653,6 +684,7 @@ def collect_analysis(base_dir, min_severity=0):
         "route_warnings": _count(route_all, "WARN"),
         "route_info": _count(route_all, "INFO"),
         "rule_counts": dict(rule_counts),
+        "path_refs": path_refs,
         "_severity_filter": min_severity > 0,
     }
 
@@ -801,6 +833,19 @@ def format_markdown(data):
         for rule, count in sorted(data["rule_counts"].items()):
             desc = rule_descs.get(rule, "")
             lines.append(f"| {rule} | {count} | {desc} |")
+
+    # --- Path References ---
+    if data.get("path_refs"):
+        lines.append("\n---\n")
+        lines.append("## Path References (%d unique paths)\n" % len(data["path_refs"]))
+        lines.append("| Path | Count | Referenced In |")
+        lines.append("|---|---|---|")
+        for path, refs in sorted(data["path_refs"].items(), key=lambda x: -len(x[1])):
+            files = sorted(set(r["file"] for r in refs))
+            files_str = ", ".join(files[:5])
+            if len(files) > 5:
+                files_str += "..."
+            lines.append("| `%s` | %d | %s |" % (path, len(refs), files_str))
 
     return "\n".join(lines)
 
