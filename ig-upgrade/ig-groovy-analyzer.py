@@ -132,22 +132,22 @@ RULES = [
      "Use java.time.Duration instead"),
 
     # --- Security checks (SEC-0xx errors, SEC-1xx warnings) ---
-    ("SEC-001", "ERROR",
+    ("SEC-101", "WARN",
      r"[\"'](?:password|passwd|pass[Ww]ord|pwd|passphrase)[\"']\s*:\s*[\"'][^\"'$&{]{3,}[\"']",
      "Hardcoded password detected in config",
      "Move to secret store or use &{...} expression"),
 
-    ("SEC-002", "ERROR",
+    ("SEC-102", "WARN",
      r"[\"'][^\"']*(?:secret|apiKey|api[_-]?[Kk]ey|api[_-]?[Ss]ecret|token|access[_-]?[Tt]oken|refresh[_-]?[Tt]oken|auth[_-]?[Tt]oken|credential|private[_-]?[Kk]ey|client[_-]?[Ss]ecret|shared[_-]?[Ss]ecret|encryption[_-]?[Kk]ey|signing[_-]?[Kk]ey|keystore[_-]?[Pp]ass|truststore[_-]?[Pp]ass|storepass|keypass)[^\"']*[\"']\s*:\s*[\"'][^\"'$&{]{3,}[\"']",
      "Hardcoded secret/key detected in config",
      "Move to secret store or use &{...} expression"),
 
-    ("SEC-101", "WARN",
+    ("SEC-103", "WARN",
      r"(?:password|passwd|pwd|passphrase|secret|apikey|api_key|credential|private_key|client_secret|storepass|keypass)\s*=\s*[\"'][^\"'$&{]{3,}[\"']",
      "Possible hardcoded credential in script",
      "Use environment variable or secret store"),
 
-    ("SEC-102", "WARN",
+    ("SEC-104", "WARN",
      r"[Bb]ase64\.(?:encode|decode).*(?:password|passwd|secret|key|credential|token)",
      "Base64 encoded credential detected",
      "Use proper secret management instead of Base64 encoding"),
