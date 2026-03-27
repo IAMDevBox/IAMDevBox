@@ -623,6 +623,42 @@ def collect_analysis(base_dir, min_severity=0):
         if findings:
             route_findings[str(rf)] = findings
 
+    # Analyze non-route config files (config.json, admin.json, frprops.json, etc.)
+    route_file_set = set(str(rf) for rf in route_files)
+    config_other_files = [f for f in config_files
+                          if str(f) not in route_file_set
+                          and f.suffix in ('.json', '.properties')
+                          and not f.suffix == '.groovy'
+                          and not _skip_path(f, base_dir)]
+    for cf in config_other_files:
+        if cf.suffix == '.json':
+            findings = analyze_route(cf, {}, min_severity)
+        else:
+            # .properties: apply SEC/PATH rules line by line
+            findings = []
+            SEC_PATH_RULES = [r for r in RULES if r[0].startswith(("SEC-", "PATH-"))]
+            try:
+                with open(cf, "r", encoding="utf-8", errors="replace") as fh:
+                    for line_num, line in enumerate(fh, 1):
+                        for rule_id, severity, pattern, desc, fix in SEC_PATH_RULES:
+                            if SEVERITY_ORDER.get(severity, 0) < min_severity:
+                                continue
+                            m = re.search(pattern, line)
+                            if m:
+                                detail = desc
+                                matched = m.group(0).strip()
+                                if matched and len(matched) < 80:
+                                    detail = "{}: `{}`".format(desc, matched)
+                                findings.append({
+                                    "rule": rule_id, "severity": severity,
+                                    "line": line_num, "text": line.strip(),
+                                    "description": detail, "fix": fix,
+                                })
+            except OSError:
+                pass
+        if findings:
+            route_findings[str(cf)] = findings
+
     # Aggregate counts — separate script vs route
     script_all = list(script_findings.values()) + list(unused_findings.values())
     route_all = list(route_findings.values())
