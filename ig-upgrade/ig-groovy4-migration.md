@@ -13,6 +13,7 @@
 | G4-003 | Old package: GroovyTestCase | `groovy.util.GroovyTestCase` removed | Change to `groovy.test.GroovyTestCase` |
 | G4-004 | Old package: AntBuilder | `groovy.util.AntBuilder` removed | Change to `groovy.ant.AntBuilder` |
 | G4-005 | Boolean property access | `isFoo()` only works for primitive `boolean`, not `Boolean` wrapper | Use `getFoo()` for `Boolean` wrapper types |
+| G4-012 | Wildcard import | `import groovy.util.*` may pull in removed classes | Replace with specific imports from `groovy.xml`, `groovy.test`, `groovy.ant` |
 | G4-010 | Private field access | Closure accessing private fields of subclasses/inner classes may fail | Use `@CompileStatic` or change to `protected` |
 | G4-009 | SQL exception type | `Sql#call` variants now throw `SQLException` instead of `Exception` | Change catch blocks to `catch (SQLException e)` |
 

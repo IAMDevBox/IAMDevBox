@@ -49,6 +49,10 @@ RULES = [
      "groovy.util.AntBuilder removed in Groovy 4",
      "Change to: import groovy.ant.AntBuilder"),
 
+    ("G4-012", "WARN", r"import\s+groovy\.util\.\*",
+     "groovy.util.* wildcard import may pull in removed classes (XmlSlurper, XmlParser, etc.)",
+     "Replace with specific imports from groovy.xml, groovy.test, groovy.ant"),
+
     # --- Groovy 4 semantic changes ---
     ("G4-005", "INFO",
      r"\b(?!isActive|isEmpty|isNull|isEnabled|isValid|isOpen|isConnected|isDirectory|isFile|isAbsolute|isBlank|isSecure|isConfidential|isRooted|isClosed|isHttp|isHttps|isTrue|isFalse|isSet|isPresent|isAvailable|isRunning|isAlive|isReady|isComplete|isFinished|isDone|isLoaded|isLocked|isWritable|isReadable|isHidden|isRelative|isAuthent)is[A-Z]\w+\(\)",
