@@ -828,12 +828,44 @@ def format_markdown(data):
                 lines.append(f"{f['text']}")
             lines.append("```\n</details>\n")
 
-    # --- Route Config Issues ---
-    if data["route_findings"]:
-        total_rf = sum(len(fl) for fl in data["route_findings"].values())
+    # --- Config & Route Issues (split into two sections) ---
+    route_file_set = set()
+    for d in Path(data["directory"]).rglob("routes"):
+        if d.is_dir():
+            for f in d.glob("*.json"):
+                route_file_set.add(str(f))
+
+    route_items = {k: v for k, v in data["route_findings"].items() if k in route_file_set}
+    config_items = {k: v for k, v in data["route_findings"].items() if k not in route_file_set}
+
+    if config_items:
+        total_cf = sum(len(fl) for fl in config_items.values())
         lines.append("\n---\n")
-        lines.append("## Route Config Issues (%d routes, %d findings)\n" % (len(data["route_findings"]), total_rf))
-        for rf, findings in data["route_findings"].items():
+        lines.append("## Config File Issues (%d files, %d findings)\n" % (len(config_items), total_cf))
+        for rf, findings in config_items.items():
+            name = Path(rf).name
+            lines.append(f"### `{name}`")
+            lines.append(f"- **Path:** `{rf}`\n")
+            lines.append("| Line | Severity | Rule | Issue | Fix |")
+            lines.append("|---|---|---|---|---|")
+            for f in findings:
+                ln = f['line'] if f['line'] else "-"
+                lines.append(f"| {ln} | **{f['severity']}** | {f['rule']} | {f['description']} | {f['fix']} |")
+            lines.append("")
+            affected = [f for f in findings if f.get('text')]
+            if affected:
+                lines.append("<details><summary>Affected lines</summary>\n")
+                lines.append("```json")
+                for f in affected:
+                    lines.append("// Line %s: [%s] %s" % (f['line'], f['severity'], f['rule']))
+                    lines.append(f['text'])
+                lines.append("```\n</details>\n")
+
+    if route_items:
+        total_rf = sum(len(fl) for fl in route_items.values())
+        lines.append("\n---\n")
+        lines.append("## Route Issues (%d routes, %d findings)\n" % (len(route_items), total_rf))
+        for rf, findings in route_items.items():
             name = Path(rf).name
             lines.append(f"### `{name}`")
             lines.append(f"- **Path:** `{rf}`\n")

@@ -47,19 +47,20 @@
 
 ## Security Checks
 
-| Rule | Issue | Fix |
-|---|---|---|
-| SEC-001 | Hardcoded password in config | Move to secret store or use `&{password}` expression |
-| SEC-002 | Hardcoded secret/key in config | Move to secret store or use `&{...}` expression |
-| SEC-101 | Possible hardcoded credential in script | Use environment variable or secret store |
-| SEC-102 | Base64 encoded credential | Use proper secret management |
+| Rule | Issue | Scope | Fix |
+|---|---|---|---|
+| SEC-101 | Hardcoded password in config | JSON configs (config.json, admin.json, frprops.json, routes) | Move to secret store or use `&{...}` expression |
+| SEC-102 | Hardcoded secret/key in config (supports dotted names like `agent.secret.id`) | JSON configs | Move to secret store or use `&{...}` expression |
+| SEC-103 | Possible hardcoded credential in script | Groovy scripts | Use environment variable or secret store |
+| SEC-104 | Base64 encoded credential | Groovy scripts | Use proper secret management |
 
 ## Path Checks
 
-| Rule | Issue | Fix |
-|---|---|---|
-| PATH-101 | Reference to Tomcat/old environment path | Update to new PingGateway standalone path |
-| PATH-102 | Reference to temporary directory | Use a stable path |
+| Rule | Issue | Scope | Fix |
+|---|---|---|---|
+| PATH-101 | Reference to Tomcat path (`catalina.base`, `/webapps/ROOT`, `/tomcatN/`) | All files | Update to new PingGateway standalone path |
+| PATH-102 | Absolute filesystem path (`/opt/`, `/home/`, `/etc/`, `/var/`, etc.) | All files | Verify path exists in new environment |
+| PATH-103 | Relative path referencing outside project (`../../`) | Groovy scripts | Verify file accessible from new IG location |
 
 ## Route Config Checks
 
@@ -149,14 +150,15 @@
 - [ ] RT-103: Check deprecated expressions in `${...}`
 
 ### Security
-- [ ] SEC-001: Check hardcoded passwords in configs
-- [ ] SEC-002: Check hardcoded secrets/keys in configs
-- [ ] SEC-101: Check hardcoded credentials in scripts
-- [ ] SEC-102: Check Base64 encoded credentials
+- [ ] SEC-101: Check hardcoded passwords in JSON configs
+- [ ] SEC-102: Check hardcoded secrets/keys in JSON configs
+- [ ] SEC-103: Check hardcoded credentials in Groovy scripts
+- [ ] SEC-104: Check Base64 encoded credentials in scripts
 
 ### Path References
 - [ ] PATH-101: Check Tomcat/old environment path references
-- [ ] PATH-102: Check temporary directory references
+- [ ] PATH-102: Check absolute filesystem paths
+- [ ] PATH-103: Check relative paths referencing outside project
 
 ## References
 
